@@ -21,7 +21,7 @@ class TestdataResetListener() {
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val fnr = cr.value()
+        // val fnr = cr.value()
 
         log.info("Mottatt reset melding. Gjør per nå ingenting")
         acknowledgment.acknowledge()
