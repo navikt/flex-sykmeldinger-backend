@@ -1,5 +1,5 @@
 # flex-sykmeldinger-backend
-
+Backend for innsending av sykmeldinger for sykmeldt.
 
 # Henvendelser
 
