@@ -31,3 +31,15 @@ no.nav.security.jwt:
     tokenx:
       discoveryurl: http://localhost:${mock-oauth2-server.port}/tokenx/.well-known/openid-configuration
       accepted_audience: flex-sykmeldinger-backend-client-id
+  client:
+    registration:
+      pdl-api-client-credentials:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
+        grant-type: client_credentials
+        scope: pdl-api
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
+
+pdl.api.url: "http://pdl-api.pdl"

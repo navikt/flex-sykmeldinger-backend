@@ -6,6 +6,7 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import okhttp3.mockwebserver.MockWebServer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
@@ -57,6 +58,12 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.password", password)
             }
         }
+
+        val pdlMockWebserver =
+            MockWebServer().apply {
+                System.setProperty("pdl.api.url", "http://localhost:$port")
+                dispatcher = PdlMockDispatcher
+            }
     }
 
     @AfterAll

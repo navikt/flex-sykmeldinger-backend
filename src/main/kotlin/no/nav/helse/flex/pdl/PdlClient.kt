@@ -8,7 +8,7 @@ import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.util.*
+import java.util.Collections
 
 private const val TEMA = "Tema"
 private const val TEMA_SYK = "SYK"
