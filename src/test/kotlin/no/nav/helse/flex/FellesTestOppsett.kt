@@ -1,8 +1,13 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
+import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
+import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.apache.kafka.clients.producer.Producer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
+import java.util.UUID
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -29,6 +34,12 @@ abstract class FellesTestOppsett {
 
     @Autowired
     lateinit var server: MockOAuth2Server
+
+    @Autowired
+    lateinit var kafkaProducer: Producer<String, String>
+
+    @Autowired
+    lateinit var narmesteLederRepository: NarmesteLederRepository
 
     companion object {
         init {
@@ -77,5 +88,16 @@ abstract class FellesTestOppsett {
                 expiry = 3600,
             ),
         ).serialize()
+    }
+
+    fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
+        kafkaProducer.send(
+            ProducerRecord(
+                NARMESTELEDER_LEESAH_TOPIC,
+                null,
+                nl.narmesteLederId.toString(),
+                nl.serialisertTilString(),
+            ),
+        ).get()
     }
 }
