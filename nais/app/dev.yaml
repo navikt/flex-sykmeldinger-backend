@@ -8,8 +8,12 @@ memory: 400Mi
 db_tier: db-f1-micro
 db_highAvailability: false
 db_pointInTimeRecovery: false
+external-host:
+  - pdl-api.dev-fss-pub.nais.io
 flex-openapi-docs-ui: true
 env:
   SPRING_PROFILES_ACTIVE: default,testdatareset
+  PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
+  PDL_API_AAD_CLIENT_ID: dev-fss.pdl.pdl-api
   DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
