@@ -30,6 +30,11 @@ spec:
     requests:
       cpu: {{cpu}}
       memory: {{memory}}
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: false
+      tenant: {{azureTenant}}
   kafka:
     pool: {{kafkaPool}}
   tokenx:

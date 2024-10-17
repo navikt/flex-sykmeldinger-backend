@@ -1,3 +1,4 @@
+azureTenant: nav.no
 kafkaPool: nav-prod
 environment: prod
 replicas_min: 2
