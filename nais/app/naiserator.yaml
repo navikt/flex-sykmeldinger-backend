@@ -42,7 +42,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-    {{ #each external-host}}
+    {{#each external-host}}
         - host: {{this}}
     {{/each}}
     inbound:
