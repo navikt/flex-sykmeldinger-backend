@@ -40,6 +40,11 @@ spec:
   tokenx:
     enabled: true
   accessPolicy:
+    outbound:
+      external:
+    {{ #each external-host}}
+        - host: {{this}}
+    {{/each}}
     inbound:
       rules:
         - application: ditt-sykefravaer
