@@ -76,6 +76,11 @@ spec:
         flags:
           - name: cloudsql.logical_decoding
             value: "on"
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      tenant: {{azureTenant}}
   env:
   {{#each env}}
      - name: {{@key}}
