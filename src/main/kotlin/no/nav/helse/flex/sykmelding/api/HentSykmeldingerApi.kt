@@ -41,7 +41,6 @@ class HentSykmeldingerApi(
     ): ResponseEntity<Any> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
 
-        logger.info("Henter ut tidligere arbeidsgivere for sykmeldingUuid: $sykmeldingUuid")
         val tidligereArbeidsgivere = sykmeldingHenter.finnTidligereArbeidsgivere(fnr, sykmeldingUuid)
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
@@ -61,7 +60,6 @@ class HentSykmeldingerApi(
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
             return ResponseEntity.notFound().build()
         } else {
-            logger.info("Henter ut sykmelding for sykmeldingUuid: $sykmeldingUuid")
             val sykmelding = sykmeldingHenter.getSykmelding(fnr, sykmeldingUuid)
 
             return if (sykmelding == null) {
