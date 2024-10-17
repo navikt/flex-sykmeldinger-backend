@@ -1,3 +1,4 @@
+azureTenant: trygdeetaten.no
 kafkaPool: nav-dev
 environment: dev
 replicas_min: 1
