@@ -56,7 +56,7 @@ query(${"$"}ident: ID!){
             throw RuntimeException("PDL svarer med status ${responseEntity.statusCode} - ${responseEntity.body}")
         }
 
-        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
+        val parsedResponse: HentNavnResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
 
         parsedResponse?.data?.let {
             return it.hentPerson?.navn?.firstOrNull()?.format()
@@ -86,7 +86,7 @@ query(${"$"}ident: ID!){
         }
     }
 
-    private fun GetPersonResponse?.hentErrors(): String? {
+    private fun HentNavnResponse?.hentErrors(): String? {
         return this?.errors?.map { it.message }?.joinToString(" - ")
     }
 
