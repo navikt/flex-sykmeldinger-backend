@@ -1,6 +1,7 @@
 package no.nav.helse.flex.pdl
 
 import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -13,38 +14,41 @@ import java.util.Collections
 private const val TEMA = "Tema"
 private const val TEMA_SYK = "SYK"
 private const val IDENT = "ident"
+private const val BEHANDLINGSNUMMER_KEY = "Behandlingsnummer"
+private const val BEHANDLINGSNUMMER_VALUE = "B128"
 
 @Component
 class PdlClient(
-    @Value("\${pdl.api.url}")
+    @Value("\${PDL_BASE_URL}")
     private val pdlApiUrl: String,
     private val pdlRestTemplate: RestTemplate,
 ) {
-    private val hentIdenterMedHistorikkQuery =
+    private val hentNavnQuery =
         """
 query(${"$"}ident: ID!){
-  hentIdenter(ident: ${"$"}ident, historikk: true) {
-    identer {
-      ident,
-      gruppe
+  hentPerson(ident: ${"$"}ident) {
+  	navn(historikk: false) {
+  	  fornavn
+  	  mellomnavn
+  	  etternavn
     }
   }
 }
 """
 
     @Retryable(exclude = [FunctionalPdlError::class])
-    fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
+    fun hentFormattertNavn(fnr: String): String {
         val graphQLRequest =
             GraphQLRequest(
-                query = hentIdenterMedHistorikkQuery,
-                variables = Collections.singletonMap(IDENT, ident),
+                query = hentNavnQuery,
+                variables = Collections.singletonMap(IDENT, fnr),
             )
 
         val responseEntity =
             pdlRestTemplate.exchange(
                 "$pdlApiUrl/graphql",
                 HttpMethod.POST,
-                HttpEntity(requestToJson(graphQLRequest), createHeaderWithTema()),
+                HttpEntity(requestToJson(graphQLRequest), createHeaderWithTemaAndBehandlingsnummer()),
                 String::class.java,
             )
 
@@ -52,17 +56,19 @@ query(${"$"}ident: ID!){
             throw RuntimeException("PDL svarer med status ${responseEntity.statusCode} - ${responseEntity.body}")
         }
 
-        val parsedResponse: GetPersonResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
+        val parsedResponse: HentNavnResponse? = responseEntity.body?.let { objectMapper.readValue(it) }
 
         parsedResponse?.data?.let {
-            return it.hentIdenter?.identer ?: emptyList()
+            return it.hentPerson?.navn?.firstOrNull()?.format()
+                ?: throw FunctionalPdlError("Fant navn i pdl response. ${parsedResponse.hentErrors()}")
         }
         throw FunctionalPdlError("Fant ikke person, ingen body eller data. ${parsedResponse.hentErrors()}")
     }
 
-    private fun createHeaderWithTema(): HttpHeaders {
+    private fun createHeaderWithTemaAndBehandlingsnummer(): HttpHeaders {
         val headers = createHeader()
         headers[TEMA] = TEMA_SYK
+        headers[BEHANDLINGSNUMMER_KEY] = BEHANDLINGSNUMMER_VALUE
         return headers
     }
 
@@ -72,15 +78,15 @@ query(${"$"}ident: ID!){
         return headers
     }
 
-    private fun requestToJson(graphQLRequest: Any): String {
+    private fun requestToJson(graphQLRequest: GraphQLRequest): String {
         return try {
-            objectMapper.writeValueAsString(graphQLRequest)
+            ObjectMapper().writeValueAsString(graphQLRequest)
         } catch (e: JsonProcessingException) {
             throw RuntimeException(e)
         }
     }
 
-    private fun GetPersonResponse?.hentErrors(): String? {
+    private fun HentNavnResponse?.hentErrors(): String? {
         return this?.errors?.map { it.message }?.joinToString(" - ")
     }
 

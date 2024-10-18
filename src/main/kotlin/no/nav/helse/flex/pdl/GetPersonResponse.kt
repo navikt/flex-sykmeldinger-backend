@@ -1,12 +1,6 @@
 package no.nav.helse.flex.pdl
 
-const val AKTORID = "AKTORID"
-const val FOLKEREGISTERIDENT = "FOLKEREGISTERIDENT"
-
-data class GetPersonResponse(
-    val data: ResponseData,
-    val errors: List<ResponseError>?,
-)
+import org.apache.commons.text.WordUtils
 
 data class ResponseError(
     val message: String?,
@@ -15,15 +9,35 @@ data class ResponseError(
     val extensions: ErrorExtension?,
 )
 
-data class ResponseData(
-    val hentIdenter: HentIdenter? = null,
+data class HentNavnResponse(
+    val data: HentNavnResponseData,
+    val errors: List<ResponseError>?,
 )
 
-data class HentIdenter(
-    val identer: List<PdlIdent>,
+data class HentNavnResponseData(
+    val hentPerson: HentNavn? = null,
 )
 
-data class PdlIdent(val gruppe: String, val ident: String)
+data class HentNavn(
+    val navn: List<Navn>? = null,
+)
+
+data class Navn(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+)
+
+fun Navn.format(): String {
+    val navn =
+        if (mellomnavn != null) {
+            "$fornavn $mellomnavn $etternavn"
+        } else {
+            "$fornavn $etternavn"
+        }
+
+    return WordUtils.capitalizeFully(navn, ' ', '-')
+}
 
 data class ErrorLocation(
     val line: String?,

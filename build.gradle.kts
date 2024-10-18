@@ -29,6 +29,7 @@ val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
 val inntektsmeldingKontraktVersion = "2024.05.21-09-56-5528e"
 val sykepengesoknadKafkaVersion = "2024.09.30-15.52-54e2f03d"
+val commonsTextVersion = "1.12.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -37,6 +38,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.hibernate.validator:hibernate-validator")
     implementation("org.springframework.kafka:spring-kafka")
