@@ -2,6 +2,11 @@ package no.nav.helse.flex.pdl
 
 import org.apache.commons.text.WordUtils
 
+data class GetPersonResponse(
+    val data: ResponseData,
+    val errors: List<ResponseError>?,
+)
+
 data class ResponseError(
     val message: String?,
     val locations: List<ErrorLocation>?,
@@ -9,16 +14,21 @@ data class ResponseError(
     val extensions: ErrorExtension?,
 )
 
-data class HentNavnResponse(
-    val data: HentNavnResponseData,
-    val errors: List<ResponseError>?,
+data class ResponseData(
+    val hentPerson: HentPerson? = null,
 )
 
-data class HentNavnResponseData(
-    val hentPerson: HentNavn? = null,
+data class ErrorLocation(
+    val line: String?,
+    val column: String?,
 )
 
-data class HentNavn(
+data class ErrorExtension(
+    val code: String?,
+    val classification: String?,
+)
+
+data class HentPerson(
     val navn: List<Navn>? = null,
 )
 
@@ -38,13 +48,3 @@ fun Navn.format(): String {
 
     return WordUtils.capitalizeFully(navn, ' ', '-')
 }
-
-data class ErrorLocation(
-    val line: String?,
-    val column: String?,
-)
-
-data class ErrorExtension(
-    val code: String?,
-    val classification: String?,
-)

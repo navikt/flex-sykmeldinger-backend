@@ -66,12 +66,6 @@ abstract class FellesTestOppsett {
                         System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
                     }
         }
-
-        val pdlMockWebserver =
-            MockWebServer().apply {
-                System.setProperty("pdl.api.url", "http://localhost:$port")
-                dispatcher = PdlMockDispatcher
-            }
     }
 
     @AfterAll
