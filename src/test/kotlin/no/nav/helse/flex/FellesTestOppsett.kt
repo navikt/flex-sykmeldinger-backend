@@ -43,6 +43,8 @@ abstract class FellesTestOppsett {
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
     companion object {
+        var pdlMockWebserver: MockWebServer
+
         init {
 
             KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1")).apply {
@@ -57,13 +59,13 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
             }
-        }
 
-        val pdlMockWebserver =
-            MockWebServer().apply {
-                System.setProperty("pdl.api.url", "http://localhost:$port")
-                dispatcher = PdlMockDispatcher
-            }
+            pdlMockWebserver =
+                MockWebServer()
+                    .also {
+                        System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
+                    }
+        }
     }
 
     @AfterAll
