@@ -6,6 +6,7 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import okhttp3.mockwebserver.MockWebServer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
@@ -42,6 +43,8 @@ abstract class FellesTestOppsett {
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
     companion object {
+        var pdlMockWebserver: MockWebServer
+
         init {
 
             KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1")).apply {
@@ -56,6 +59,12 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
             }
+
+            pdlMockWebserver =
+                MockWebServer()
+                    .also {
+                        System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
+                    }
         }
     }
 

@@ -7,7 +7,11 @@ cpu: 500m
 memory: 700Mi
 db_tier: db-custom-1-3840
 db_highAvailability: true
+external-host:
+  - pdl-api.prod-fss-pub.nais.io
 db_pointInTimeRecovery: true
 env:
   SPRING_PROFILES_ACTIVE: default
+  PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
+  PDL_API_AAD_CLIENT_ID: prod-fss.pdl.pdl-api
   DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: prod-gcp:flex:ditt-sykefravaer
