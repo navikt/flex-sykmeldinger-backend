@@ -27,7 +27,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
         narmesteLeder.shouldNotBeNull()
-        narmesteLeder.narmesteLederEpost `should be equal to` narmesteLederLeesah.narmesteLederEpost
+        narmesteLeder.orgnummer `should be equal to` narmesteLederLeesah.orgnummer
     }
 
     @Test
@@ -55,24 +55,19 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
         }
 
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
-        narmesteLeder.narmesteLederTelefonnummer `should be equal to` "90909090"
-        narmesteLeder.narmesteLederEpost `should be equal to` "test@nav.no"
+        narmesteLeder.orgnummer `should be equal to` "999999"
 
         sendNarmesteLederLeesah(
             getNarmesteLederLeesah(
                 narmesteLederId,
-                telefonnummer = "98989898",
-                epost = "mail@banken.no",
             ),
         )
 
         await().atMost(10, TimeUnit.SECONDS).until {
-            narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!.narmesteLederEpost == "mail@banken.no"
+            narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!.orgnummer == "999999"
         }
 
         val oppdaterNl = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
-        oppdaterNl.narmesteLederTelefonnummer `should be equal to` "98989898"
-        oppdaterNl.narmesteLederEpost `should be equal to` "mail@banken.no"
     }
 
     @Test
@@ -103,8 +98,6 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
 fun getNarmesteLederLeesah(
     narmesteLederId: UUID,
-    telefonnummer: String = "90909090",
-    epost: String = "test@nav.no",
     aktivTom: LocalDate? = null,
 ): NarmesteLederLeesah =
     NarmesteLederLeesah(
@@ -112,10 +105,7 @@ fun getNarmesteLederLeesah(
         fnr = "12345678910",
         orgnummer = "999999",
         narmesteLederFnr = "01987654321",
-        narmesteLederTelefonnummer = telefonnummer,
-        narmesteLederEpost = epost,
         aktivFom = LocalDate.now(),
         aktivTom = aktivTom,
-        arbeidsgiverForskutterer = true,
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
     )
