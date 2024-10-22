@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
 class OppdaterNarmesteLederTest : FellesTestOppsett() {
     @Test
     fun `Oppretter ny nærmeste leder hvis den ikke finnes fra før og er aktiv`() {
+        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
 
@@ -27,11 +28,12 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
         narmesteLeder.shouldNotBeNull()
-        narmesteLeder.narmesteLederEpost `should be equal to` narmesteLederLeesah.narmesteLederEpost
+        narmesteLeder.orgnummer `should be equal to` narmesteLederLeesah.orgnummer
     }
 
     @Test
     fun `Ignorerer melding om ny nærmeste leder hvis den ikke finnes fra før og er inaktiv`() {
+        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId, aktivTom = LocalDate.now())
 
@@ -46,6 +48,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
     @Test
     fun `Oppdaterer nærmeste leder hvis den finnes fra før og er aktiv`() {
+        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
 
@@ -54,29 +57,28 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
+        mockPdlResponse()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
-        narmesteLeder.narmesteLederTelefonnummer `should be equal to` "90909090"
-        narmesteLeder.narmesteLederEpost `should be equal to` "test@nav.no"
+        narmesteLeder.orgnummer `should be equal to` "999999"
 
         sendNarmesteLederLeesah(
             getNarmesteLederLeesah(
                 narmesteLederId,
-                telefonnummer = "98989898",
-                epost = "mail@banken.no",
+                orgnummer = "888888",
             ),
         )
 
         await().atMost(10, TimeUnit.SECONDS).until {
-            narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!.narmesteLederEpost == "mail@banken.no"
+            narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!.orgnummer == "888888"
         }
 
-        val oppdaterNl = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
-        oppdaterNl.narmesteLederTelefonnummer `should be equal to` "98989898"
-        oppdaterNl.narmesteLederEpost `should be equal to` "mail@banken.no"
+        val oppdatertNl = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
+        oppdatertNl.orgnummer `should be equal to` "888888"
     }
 
     @Test
     fun `Sletter nærmeste leder hvis den finnes fra før og er inaktiv`() {
+        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
         sendNarmesteLederLeesah(narmesteLederLeesah)
@@ -85,6 +87,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
+        mockPdlResponse()
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldNotBeNull()
 
         sendNarmesteLederLeesah(
@@ -103,19 +106,15 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
 fun getNarmesteLederLeesah(
     narmesteLederId: UUID,
-    telefonnummer: String = "90909090",
-    epost: String = "test@nav.no",
+    orgnummer: String = "999999",
     aktivTom: LocalDate? = null,
 ): NarmesteLederLeesah =
     NarmesteLederLeesah(
         narmesteLederId = narmesteLederId,
         fnr = "12345678910",
-        orgnummer = "999999",
+        orgnummer = orgnummer,
         narmesteLederFnr = "01987654321",
-        narmesteLederTelefonnummer = telefonnummer,
-        narmesteLederEpost = epost,
         aktivFom = LocalDate.now(),
         aktivTom = aktivTom,
-        arbeidsgiverForskutterer = true,
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
     )

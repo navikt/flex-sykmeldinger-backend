@@ -14,8 +14,6 @@ data class NarmesteLeder(
     val orgnummer: String,
     val brukerFnr: String,
     val narmesteLederFnr: String,
-    val narmesteLederTelefonnummer: String,
-    val narmesteLederEpost: String,
     val aktivFom: LocalDate,
-    val arbeidsgiverForskutterer: Boolean?,
+    val narmesteLederNavn: String,
 )
