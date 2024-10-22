@@ -10,7 +10,7 @@ class PdlClientTest : FellesTestOppsett() {
     @Autowired
     private lateinit var pdlClient: PdlClient
 
-    final val fnr = "12345678901"
+    final val fnr = "12345678910"
 
     @Test
     fun `Vi tester happycase`() {
@@ -27,7 +27,7 @@ class PdlClientTest : FellesTestOppsett() {
             "{\\n  hentPerson(ident: \$ident) " +
             "{\\n  \\tnavn(historikk: false) " +
             "{\\n  \\t  fornavn\\n  \\t  mellomnavn\\n  \\t  etternavn\\n    }" +
-            "\\n  }\\n}\\n\",\"variables\":{\"ident\":\"12345678901\"}}"
+            "\\n  }\\n}\\n\",\"variables\":{\"ident\":\"12345678910\"}}"
 
         request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
     }
