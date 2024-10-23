@@ -22,16 +22,17 @@ class OppdateringAvNarmesteLeder(
         val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
 
-        val narmestelederNavn = if (environmentToggles.isDevelopment()) {
-            try {
+        val narmestelederNavn =
+            if (environmentToggles.isDevelopment()) {
+                try {
+                    pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+                } catch (e: PdlClient.FunctionalPdlError) {
+                    log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.fnr} i PDL. Bruker 'Navn Navnesen'.")
+                    "Navn Navnesen"
+                }
+            } else {
                 pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
-            } catch (e: PdlClient.FunctionalPdlError) {
-                log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.fnr} i PDL. Bruker 'Navn Navnesen'.")
-                "Navn Navnesen"
             }
-        } else {
-            pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
-        }
 
         if (narmesteLeder != null) {
             if (narmesteLederLeesah.aktivTom == null) {
