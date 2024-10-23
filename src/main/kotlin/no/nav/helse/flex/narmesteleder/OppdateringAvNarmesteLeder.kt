@@ -1,6 +1,7 @@
 package no.nav.helse.flex.narmesteleder
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.EnvironmentToggles
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
@@ -13,6 +14,7 @@ import java.time.Instant
 class OppdateringAvNarmesteLeder(
     val narmesteLederRepository: NarmesteLederRepository,
     val pdlClient: PdlClient,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -20,7 +22,17 @@ class OppdateringAvNarmesteLeder(
         val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
 
-        val narmestelederNavn = pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+        val narmestelederNavn =
+            if (environmentToggles.isDevelopment()) {
+                try {
+                    pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+                } catch (e: PdlClient.FunctionalPdlError) {
+                    log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.fnr} i PDL. Bruker 'Navn Navnesen'.")
+                    "Navn Navnesen"
+                }
+            } else {
+                pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+            }
 
         if (narmesteLeder != null) {
             if (narmesteLederLeesah.aktivTom == null) {
