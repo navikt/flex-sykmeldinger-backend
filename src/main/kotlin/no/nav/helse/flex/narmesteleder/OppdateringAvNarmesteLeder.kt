@@ -31,7 +31,12 @@ class OppdateringAvNarmesteLeder(
                     "Navn Navnesen"
                 }
             } else {
-                pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+                try {
+                    pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
+                } catch (e: PdlClient.PdlManglerNavnError) {
+                    log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL'.")
+                    null
+                }
             }
 
         if (narmesteLeder != null) {
@@ -57,7 +62,7 @@ class OppdateringAvNarmesteLeder(
 
 private fun NarmesteLederLeesah.tilNarmesteLeder(
     id: String?,
-    navn: String,
+    navn: String?,
 ): NarmesteLeder =
     NarmesteLeder(
         id = id,
