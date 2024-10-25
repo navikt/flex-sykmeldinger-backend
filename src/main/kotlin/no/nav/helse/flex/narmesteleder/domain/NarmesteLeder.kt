@@ -15,5 +15,5 @@ data class NarmesteLeder(
     val brukerFnr: String,
     val narmesteLederFnr: String,
     val aktivFom: LocalDate,
-    val narmesteLederNavn: String,
+    val narmesteLederNavn: String?,
 )

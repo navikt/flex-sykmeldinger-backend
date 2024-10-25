@@ -60,7 +60,7 @@ query(${"$"}ident: ID!){
 
         parsedResponse?.data?.let {
             return it.hentPerson?.navn?.firstOrNull()?.format()
-                ?: throw FunctionalPdlError("Fant navn i pdl response. ${parsedResponse.hentErrors()}")
+                ?: throw PdlManglerNavnError("Fant ikke navn i pdl response. ${parsedResponse.hentErrors()}")
         }
         throw FunctionalPdlError("Fant ikke person, ingen body eller data. ${parsedResponse.hentErrors()}")
     }
@@ -92,5 +92,7 @@ query(${"$"}ident: ID!){
 
     data class GraphQLRequest(val query: String, val variables: Map<String, String>)
 
-    class FunctionalPdlError(message: String) : RuntimeException(message)
+    open class FunctionalPdlError(message: String) : RuntimeException(message)
+
+    class PdlManglerNavnError(message: String) : FunctionalPdlError(message)
 }
