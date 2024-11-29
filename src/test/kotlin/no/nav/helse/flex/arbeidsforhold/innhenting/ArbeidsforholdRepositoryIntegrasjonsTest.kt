@@ -29,26 +29,4 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : FellesTestOppsett() {
         val lagretArbeidsforhold = alleLagredeArbeidsforhold.first()
         opprettetArbeidsforhold `should be equal to` lagretArbeidsforhold
     }
-
-    private fun lagArbeidsforhold(
-        id: String? = null,
-        fnr: String = "00000000001",
-        orgnummer: String = "org",
-        juridiskOrgnummer: String = "org",
-        orgnavn: String = "Org",
-        fom: LocalDate = LocalDate.parse("2020-01-01"),
-        tom: LocalDate? = null,
-        arbeidsforholdType: ArbeidsforholdType? = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-    ): Arbeidsforhold {
-        return Arbeidsforhold(
-            id = id,
-            fnr = fnr,
-            orgnummer = orgnummer,
-            juridiskOrgnummer = juridiskOrgnummer,
-            orgnavn = orgnavn,
-            fom = fom,
-            tom = tom,
-            arbeidsforholdType = arbeidsforholdType,
-        )
-    }
 }

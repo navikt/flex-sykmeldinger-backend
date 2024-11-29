@@ -1,7 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 data class EksterntArbeidsforhold(
-    val id: String? = null,
+    val arbeidsforholdId: String? = null,
 )
 
 class EksternArbeidsforholdHenter {

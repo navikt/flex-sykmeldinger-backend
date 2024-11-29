@@ -17,8 +17,11 @@ class ArebeidsforholdInnhentingService(
     }
 
     fun synkroniserArbeidsforhold(arbeidsforholdId: String) {
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterntArbeidsforhold(arbeidsforholdId)
+        val interntArbeidsforhold = arbeidsforholdRepository.findByArbeidsforholdId(arbeidsforholdId)
         arbeidsforholdRepository.save(
             Arbeidsforhold(
+                arbeidsforholdId = arbeidsforholdId,
                 fnr = "00000001",
                 orgnummer = "org",
                 juridiskOrgnummer = "org",

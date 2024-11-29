@@ -4,4 +4,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface ArbeidsforholdRepository : CrudRepository<Arbeidsforhold, String> {
     fun getAllByFnr(fnr: String): List<Arbeidsforhold>
+
+    fun findByArbeidsforholdId(arbeidsforholdId: String): Arbeidsforhold
 }
