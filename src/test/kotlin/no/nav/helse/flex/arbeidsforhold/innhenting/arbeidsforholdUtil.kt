@@ -2,7 +2,9 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun lagArbeidsforhold(
     id: String? = null,
@@ -14,6 +16,7 @@ fun lagArbeidsforhold(
     fom: LocalDate = LocalDate.parse("2020-01-01"),
     tom: LocalDate? = null,
     arbeidsforholdType: ArbeidsforholdType? = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+    opprettet: Instant = Instant.parse("2020-01-01T00:00:00Z"),
 ): Arbeidsforhold {
     return Arbeidsforhold(
         id = id,
@@ -25,5 +28,6 @@ fun lagArbeidsforhold(
         fom = fom,
         tom = tom,
         arbeidsforholdType = arbeidsforholdType,
+        opprettet = opprettet,
     )
 }

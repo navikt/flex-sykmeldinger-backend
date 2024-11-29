@@ -13,7 +13,7 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `oppretter arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn EksterntArbeidsforhold()
+                on { hentEksterntArbeidsforhold(any()) } doReturn EksterntArbeidsforhold("arbeidsforhold")
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =

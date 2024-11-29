@@ -19,17 +19,25 @@ class ArebeidsforholdInnhentingService(
     fun synkroniserArbeidsforhold(arbeidsforholdId: String) {
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterntArbeidsforhold(arbeidsforholdId)
         val interntArbeidsforhold = arbeidsforholdRepository.findByArbeidsforholdId(arbeidsforholdId)
-        arbeidsforholdRepository.save(
-            Arbeidsforhold(
-                arbeidsforholdId = arbeidsforholdId,
-                fnr = "00000001",
-                orgnummer = "org",
-                juridiskOrgnummer = "org",
-                orgnavn = "orgnavn",
-                fom = LocalDate.now(),
-                arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-            ),
-        )
+        if (interntArbeidsforhold == null) {
+            arbeidsforholdRepository.save(
+                Arbeidsforhold(
+                    arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                    fnr = "00000001",
+                    orgnummer = "org",
+                    juridiskOrgnummer = "org",
+                    orgnavn = "orgnavn",
+                    fom = LocalDate.now(),
+                    arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                ),
+            )
+        } else {
+            val oppdatertArbeidsforhold = interntArbeidsforhold.copy()
+            arbeidsforholdRepository.save(
+                oppdatertArbeidsforhold
+            )
+        }
+
     }
 
 //    fun updateArbeidsforhold(fnr: String) {
