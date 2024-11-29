@@ -5,15 +5,19 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.LocalDate
 
 class ArbeidsforholdInnhentingServiceTest {
     @Test
     fun `oppretter arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn EksterntArbeidsforhold("arbeidsforhold")
+                on { hentEksterntArbeidsforhold(any()) } doReturn lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =
@@ -30,9 +34,7 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `synkroniserer arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn EksterntArbeidsforhold(
-                    arbeidsforholdId = "arbeidsforholdId",
-                )
+                on { hentEksterntArbeidsforhold(any()) } doReturn lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository> {
             on { findByArbeidsforholdId(any()) } doReturn lagArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
@@ -45,5 +47,44 @@ class ArbeidsforholdInnhentingServiceTest {
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
         verify(arbeidsforholdRepository).save(eq(lagArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")))
+    }
+
+    @Test
+    fun `oppretter arbeidsforhold fra eksternt arbeidsforhold med riktig data`() {
+        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
+            mock {
+                on { hentEksterntArbeidsforhold(any()) } doReturn EksterntArbeidsforhold(
+                    arbeidsforholdId = "arbeidsforhold",
+                    fnr = "fnr",
+                    orgnummer = "orgnummer",
+                    juridiskOrgnummer = "jorgnummer",
+                    orgnavn = "Orgnavn",
+                    fom = LocalDate.parse("2020-01-01"),
+                    tom = null,
+                    arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                )
+            }
+        val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
+        val arbeidsforholdInnhentingService =
+            ArebeidsforholdInnhentingService(
+                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
+                arbeidsforholdRepository = arbeidsforholdRepository,
+                nowFectory = { Instant.parse("2020-01-01T00:00:00Z") }
+            )
+
+        arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforhold")
+
+        val forventetArbeidsforhold = lagArbeidsforhold(
+            arbeidsforholdId = "arbeidsforhold",
+            fnr = "fnr",
+            orgnummer = "orgnummer",
+            juridiskOrgnummer = "jorgnummer",
+            orgnavn = "Orgnavn",
+            fom = LocalDate.parse("2020-01-01"),
+            tom = null,
+            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+            opprettet = Instant.parse("2020-01-01T00:00:00Z")
+        )
+        verify(arbeidsforholdRepository).save(forventetArbeidsforhold)
     }
 }

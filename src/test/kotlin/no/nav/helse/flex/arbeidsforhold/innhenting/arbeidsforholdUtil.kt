@@ -1,5 +1,6 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import net.bytebuddy.asm.Advice.Local
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import java.time.Instant
@@ -29,5 +30,27 @@ fun lagArbeidsforhold(
         tom = tom,
         arbeidsforholdType = arbeidsforholdType,
         opprettet = opprettet,
+    )
+}
+
+fun lagEksterntArbeidsforhold(
+    arbeidsforholdId: String = "arbeidsforholdId",
+    fnr: String = "fnr",
+    orgnummer: String = "orgnummer",
+    juridiskOrgnummer: String = "jorgnummer",
+    orgnavn: String = "Orgnavn",
+    fom: LocalDate = LocalDate.parse("2020-01-01"),
+    tom: LocalDate? = null,
+    arbeidsforholdType: ArbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+): EksterntArbeidsforhold {
+    return EksterntArbeidsforhold(
+        arbeidsforholdId = arbeidsforholdId,
+        fnr = fnr,
+        orgnummer = orgnummer,
+        juridiskOrgnummer = juridiskOrgnummer,
+        orgnavn = orgnavn,
+        fom = fom,
+        tom = tom,
+        arbeidsforholdType = arbeidsforholdType,
     )
 }

@@ -4,11 +4,13 @@ import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.logger
+import java.time.Instant
 import java.time.LocalDate
 
 class ArebeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val nowFectory: () -> Instant = Instant::now
 ) {
     val log = logger()
 
@@ -23,12 +25,14 @@ class ArebeidsforholdInnhentingService(
             arbeidsforholdRepository.save(
                 Arbeidsforhold(
                     arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
-                    fnr = "00000001",
-                    orgnummer = "org",
-                    juridiskOrgnummer = "org",
-                    orgnavn = "orgnavn",
-                    fom = LocalDate.now(),
-                    arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                    fnr = eksterntArbeidsforhold.fnr,
+                    orgnummer = eksterntArbeidsforhold.orgnummer,
+                    juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
+                    orgnavn = eksterntArbeidsforhold.orgnavn,
+                    fom = eksterntArbeidsforhold.fom,
+                    tom = eksterntArbeidsforhold.tom,
+                    arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
+                    opprettet = nowFectory()
                 ),
             )
         } else {
