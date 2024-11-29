@@ -1,42 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold
 
 import org.springframework.data.repository.CrudRepository
-import java.time.LocalDate
 
 interface ArbeidsforholdRepository: CrudRepository<Arbeidsforhold, String> {
-    fun getByFnr(fnr: String): List<Arbeidsforhold>
+    fun getAllByFnr(fnr: String): List<Arbeidsforhold>
 }
 
-enum class ArbeidsforholdType {
-    FORENKLET_OPPGJOERSORDNING,
-    FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM,
-    MARITIMT_ARBEIDSFORHOLD,
-    ORDINAERT_ARBEIDSFORHOLD,
-    PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD;
-
-    companion object {
-        fun parse(kode: String): ArbeidsforholdType {
-            return when (kode) {
-                "forenkletOppgjoersordning" -> FORENKLET_OPPGJOERSORDNING
-                "frilanserOppdragstakerHonorarPersonerMm" ->
-                    FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
-                "maritimtArbeidsforhold" -> MARITIMT_ARBEIDSFORHOLD
-                "ordinaertArbeidsforhold" -> ORDINAERT_ARBEIDSFORHOLD
-                "pensjonOgAndreTyperYtelserUtenAnsettelsesforhold" ->
-                    PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD
-                else -> throw IllegalArgumentException("Incorrect arbeidsforhold type $kode")
-            }
-        }
-    }
-}
-
-data class Arbeidsforhold(
-    val id: Int,
-    val fnr: String,
-    val orgnummer: String,
-    val juridiskOrgnummer: String,
-    val orgNavn: String,
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val type: ArbeidsforholdType?,
-)

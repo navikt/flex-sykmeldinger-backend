@@ -7,7 +7,7 @@ import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-@Component
+//@Component
 class AaregClient(
     @Value("\${AAREG_URL}")
     private val url: String,

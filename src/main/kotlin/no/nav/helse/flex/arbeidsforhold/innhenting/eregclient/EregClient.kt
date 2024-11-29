@@ -13,7 +13,7 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 
-@Component
+//@Component
 class EregClient(
     private val plainRestTemplate: RestTemplate,
     private val environmentToggles: EnvironmentToggles,
