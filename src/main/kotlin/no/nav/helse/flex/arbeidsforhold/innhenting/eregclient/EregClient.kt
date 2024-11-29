@@ -1,4 +1,4 @@
-package no.nav.helse.flex.client.ereg
+package no.nav.helse.flex.arbeidsforhold.innhenting.eregclient
 
 import no.nav.helse.flex.EnvironmentToggles
 import no.nav.helse.flex.logger

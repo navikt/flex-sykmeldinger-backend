@@ -1,4 +1,4 @@
-package no.nav.helse.flex.client.ereg
+package no.nav.helse.flex.arbeidsforhold.innhenting.eregclient
 
 data class Nokkelinfo(
     val navn: Navn,
