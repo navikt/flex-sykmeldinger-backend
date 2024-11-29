@@ -2,21 +2,15 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.logger
 import java.time.Instant
-import java.time.LocalDate
 
 class ArebeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
-    private val nowFectory: () -> Instant = Instant::now
+    private val nowFactory: () -> Instant = Instant::now
 ) {
     val log = logger()
-
-    fun insertOrUpdate(arbeidsforhold: Arbeidsforhold) {
-        arbeidsforholdRepository.save(arbeidsforhold)
-    }
 
     fun synkroniserArbeidsforhold(arbeidsforholdId: String) {
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterntArbeidsforhold(arbeidsforholdId)
@@ -32,11 +26,20 @@ class ArebeidsforholdInnhentingService(
                     fom = eksterntArbeidsforhold.fom,
                     tom = eksterntArbeidsforhold.tom,
                     arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-                    opprettet = nowFectory()
+                    opprettet = nowFactory()
                 ),
             )
         } else {
-            val oppdatertArbeidsforhold = interntArbeidsforhold.copy()
+            val oppdatertArbeidsforhold = interntArbeidsforhold.copy(
+                    arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                    fnr = eksterntArbeidsforhold.fnr,
+                    orgnummer = eksterntArbeidsforhold.orgnummer,
+                    juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
+                    orgnavn = eksterntArbeidsforhold.orgnavn,
+                    fom = eksterntArbeidsforhold.fom,
+                    tom = eksterntArbeidsforhold.tom,
+                    arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
+            )
             arbeidsforholdRepository.save(
                 oppdatertArbeidsforhold
             )
