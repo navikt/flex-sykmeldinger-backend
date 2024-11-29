@@ -16,7 +16,7 @@ class AaregClient(
 
     private val arbeidsforholdPath = "$url/api/v2/arbeidstaker/arbeidsforhold"
 
-    fun hentArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
+    fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 

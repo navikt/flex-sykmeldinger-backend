@@ -1,8 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import org.springframework.data.annotation.Id
-import java.time.Instant
+import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -16,7 +15,9 @@ data class EksterntArbeidsforhold(
     val arbeidsforholdType: ArbeidsforholdType?,
 )
 
-class EksternArbeidsforholdHenter {
+class EksternArbeidsforholdHenter(
+    private val aaregClient: AaregClient,
+) {
     fun hentEksterntArbeidsforhold(arbeidsforholdId: String): EksterntArbeidsforhold {
         return EksterntArbeidsforhold(
             arbeidsforholdId = arbeidsforholdId,
@@ -26,7 +27,7 @@ class EksternArbeidsforholdHenter {
             orgnavn = "",
             fom = LocalDate.now(),
             tom = null,
-            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
         )
     }
 }

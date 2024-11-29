@@ -8,7 +8,7 @@ import java.time.Instant
 class ArebeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
-    private val nowFactory: () -> Instant = Instant::now
+    private val nowFactory: () -> Instant = Instant::now,
 ) {
     val log = logger()
 
@@ -26,11 +26,12 @@ class ArebeidsforholdInnhentingService(
                     fom = eksterntArbeidsforhold.fom,
                     tom = eksterntArbeidsforhold.tom,
                     arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-                    opprettet = nowFactory()
+                    opprettet = nowFactory(),
                 ),
             )
         } else {
-            val oppdatertArbeidsforhold = interntArbeidsforhold.copy(
+            val oppdatertArbeidsforhold =
+                interntArbeidsforhold.copy(
                     arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
                     fnr = eksterntArbeidsforhold.fnr,
                     orgnummer = eksterntArbeidsforhold.orgnummer,
@@ -39,12 +40,11 @@ class ArebeidsforholdInnhentingService(
                     fom = eksterntArbeidsforhold.fom,
                     tom = eksterntArbeidsforhold.tom,
                     arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-            )
+                )
             arbeidsforholdRepository.save(
-                oppdatertArbeidsforhold
+                oppdatertArbeidsforhold,
             )
         }
-
     }
 
 //    fun updateArbeidsforhold(fnr: String) {
