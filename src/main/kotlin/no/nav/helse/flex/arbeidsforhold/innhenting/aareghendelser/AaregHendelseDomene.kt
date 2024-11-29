@@ -19,7 +19,7 @@ enum class Entitetsendring {
 enum class Endringstype {
     Opprettelse,
     Endring,
-    Sletting
+    Sletting,
 }
 
 data class ArbeidsforholdKafka(

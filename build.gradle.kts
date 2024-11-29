@@ -30,6 +30,7 @@ val kluentVersion = "1.73"
 val inntektsmeldingKontraktVersion = "2024.05.21-09-56-5528e"
 val sykepengesoknadKafkaVersion = "2024.10.21-14.49-932f4f94"
 val commonsTextVersion = "1.12.0"
+val mockitoKotlinVersion = "2.2.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -51,6 +52,7 @@ dependencies {
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
     implementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:$inntektsmeldingKontraktVersion")
 
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql")

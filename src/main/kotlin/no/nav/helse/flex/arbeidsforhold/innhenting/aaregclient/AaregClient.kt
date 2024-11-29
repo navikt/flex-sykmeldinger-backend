@@ -4,10 +4,9 @@ import no.nav.helse.flex.logger
 import no.nav.helse.flex.serialisertTilString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
-import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-//@Component
+// @Component
 class AaregClient(
     @Value("\${AAREG_URL}")
     private val url: String,

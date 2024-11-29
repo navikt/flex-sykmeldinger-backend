@@ -12,7 +12,7 @@ data class Arbeidsforhold(
     val juridiskOrgnummer: String,
     val orgnavn: String,
     val fom: LocalDate,
-    val tom: LocalDate?,
+    val tom: LocalDate? = null,
     val arbeidsforholdType: ArbeidsforholdType?,
     val opprettet: Instant = Instant.now(),
 )
@@ -22,5 +22,5 @@ enum class ArbeidsforholdType {
     FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM,
     MARITIMT_ARBEIDSFORHOLD,
     ORDINAERT_ARBEIDSFORHOLD,
-    PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD;
+    PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD,
 }

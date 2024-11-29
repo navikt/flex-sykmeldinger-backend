@@ -4,9 +4,7 @@ import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,9 +16,12 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : FellesTestOppsett() {
 
     @Test
     fun `burde hente arbeidsforhold ved fnr`() {
-        val opprettetArbeidsforhold = arbeidsforholdRepository.save(lagArbeidsforhold(
-            fnr = "1"
-        ))
+        val opprettetArbeidsforhold =
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "1",
+                ),
+            )
 
         val alleLagredeArbeidsforhold = arbeidsforholdRepository.getAllByFnr("1")
         alleLagredeArbeidsforhold shouldHaveSize 1
@@ -49,6 +50,5 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : FellesTestOppsett() {
             tom = tom,
             arbeidsforholdType = arbeidsforholdType,
         )
-
     }
 }

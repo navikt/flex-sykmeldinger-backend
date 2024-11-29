@@ -1,15 +1,15 @@
-//package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
+package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 //
-//import com.fasterxml.jackson.module.kotlin.readValue
-//import no.nav.helse.flex.objectMapper
-//import org.apache.kafka.clients.consumer.ConsumerRecord
-//import org.apache.kafka.clients.consumer.ConsumerRecords
-//import org.springframework.kafka.annotation.KafkaListener
-//import org.springframework.kafka.support.Acknowledgment
-//import kotlin.collections.chunked
-//import kotlin.collections.set
+// import com.fasterxml.jackson.module.kotlin.readValue
+// import no.nav.helse.flex.objectMapper
+// import org.apache.kafka.clients.consumer.ConsumerRecord
+// import org.apache.kafka.clients.consumer.ConsumerRecords
+// import org.springframework.kafka.annotation.KafkaListener
+// import org.springframework.kafka.support.Acknowledgment
+// import kotlin.collections.chunked
+// import kotlin.collections.set
 //
-//class AaregHendelserListener {
+// class AaregHendelserListener {
 //
 //    @KafkaListener(
 //        topics = [ARBEIDSFORHOLD_TOPIC],
@@ -55,6 +55,8 @@
 //        newhendelserByFnr.map { arbeidsforholdService.updateArbeidsforhold(it) }
 //    }
 //
-//}
+// }
 //
-//const val ARBEIDSFORHOLD_TOPIC = "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
+// const val ARBEIDSFORHOLD_TOPIC = "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
+
+class AaregHendelserListener()

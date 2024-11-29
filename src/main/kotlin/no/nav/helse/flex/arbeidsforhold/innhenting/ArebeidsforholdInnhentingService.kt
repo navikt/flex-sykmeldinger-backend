@@ -1,23 +1,34 @@
-//package no.nav.helse.flex.arbeidsforhold.innhenting
-//
-//import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
-//import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-//import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
-//import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
-//import no.nav.helse.flex.logger
-//import java.time.LocalDate
-//
-//class ArebeidsforholdInnhentingService (
-//    private val aaregClient: AaregClient,
-//    private val eregClient: EregClient,
-//    private val arbeidsforholdRepository: ArbeidsforholdRepository,
-//) {
-//    val log = logger()
-//
-//    fun insertOrUpdate(arbeidsforhold: Arbeidsforhold) {
-//        arbeidsforholdRepository.save(arbeidsforhold)
-//    }
-//
+package no.nav.helse.flex.arbeidsforhold.innhenting
+
+import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.logger
+import java.time.LocalDate
+
+class ArebeidsforholdInnhentingService(
+    private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
+    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+) {
+    val log = logger()
+
+    fun insertOrUpdate(arbeidsforhold: Arbeidsforhold) {
+        arbeidsforholdRepository.save(arbeidsforhold)
+    }
+
+    fun synkroniserArbeidsforhold(arbeidsforholdId: String) {
+        arbeidsforholdRepository.save(
+            Arbeidsforhold(
+                fnr = "00000001",
+                orgnummer = "org",
+                juridiskOrgnummer = "org",
+                orgnavn = "orgnavn",
+                fom = LocalDate.now(),
+                arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+            ),
+        )
+    }
+
 //    fun updateArbeidsforhold(fnr: String) {
 //        val arbeidsforhold = getAlleArbeidsforhold(fnr)
 //        val arbeidsforholdFraDb = arbeidsforholdRepository.getByFnr(fnr)
@@ -80,4 +91,4 @@
 //        return ansettelsesperiode.sluttdato == null ||
 //            ansettelsesperiode.sluttdato.isAfter(ansettelsesperiodeFom)
 //    }
-//}
+}
