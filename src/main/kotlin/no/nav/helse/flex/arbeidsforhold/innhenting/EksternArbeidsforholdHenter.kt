@@ -2,6 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
+import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -17,7 +18,7 @@ data class EksterntArbeidsforhold(
 
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
-
+    private val eregClient: EregClient,
 ) {
     fun hentEksterneArbeidsforholdForPerson(fnr: String): List<EksterntArbeidsforhold> {
         val result = aaregClient.getArbeidsforholdoversikt(fnr)
@@ -25,12 +26,15 @@ class EksternArbeidsforholdHenter(
         return result.arbeidsforholdoversikter
             .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
             .map { arbeidsforholdOversikt ->
+                val orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted)
+                val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
+                val orgnavn = orgNokkelinfo.navn.sammensattnavn
                 EksterntArbeidsforhold(
                     arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
                     fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
-                    orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted),
+                    orgnummer = orgnummer,
                     juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
-                    orgnavn = "",
+                    orgnavn = orgnavn,
                     fom = arbeidsforholdOversikt.startdato,
                     tom = arbeidsforholdOversikt.sluttdato,
                     arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),

@@ -20,10 +20,10 @@ class EregClient(
 ) {
     val log = logger()
 
-    fun hentNokkelinfo(virksomhetsnummer: String): Nokkelinfo {
+    fun hentNokkelinfo(orgnummer: String): Nokkelinfo {
         try {
             val uriBuilder =
-                UriComponentsBuilder.fromHttpUrl("$eregUrl/v1/organisasjon/$virksomhetsnummer/noekkelinfo")
+                UriComponentsBuilder.fromHttpUrl("$eregUrl/v2/organisasjon/$orgnummer/noekkelinfo")
 
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
@@ -50,7 +50,7 @@ class EregClient(
             throw RuntimeException(message)
         } catch (e: HttpClientErrorException.NotFound) {
             if (environmentToggles.isDevelopment()) {
-                return Nokkelinfo(Navn("$virksomhetsnummer sitt orgnavn (dev testdata)"))
+                return Nokkelinfo(Navn("$orgnummer sitt orgnavn (dev testdata)"))
             }
             throw e
         }

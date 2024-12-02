@@ -5,6 +5,9 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
+import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
+import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.Navn
+import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.Nokkelinfo
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
@@ -16,6 +19,14 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 class EksternArbeidsforholdHenterTest {
+    fun eregClientMock(): EregClient = mock {
+        on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("_"))
+    }
+
+    fun aaregClientMock(): AaregClient = mock {
+        on { getArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
+    }
+
     @Test
     fun `burde bruke arbeidsforholdInfo fra Aareg`() {
         val aaregClient: AaregClient =
@@ -50,7 +61,7 @@ class EksternArbeidsforholdHenterTest {
                         ),
                     )
             }
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr").first()
         eksterntArbeidsforhold.arbeidsforholdId `should be equal to` "arbeidsforholdId"
         eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
@@ -59,6 +70,20 @@ class EksternArbeidsforholdHenterTest {
         eksterntArbeidsforhold.fnr `should be equal to` "00000000001"
         eksterntArbeidsforhold.fom `should be equal to` LocalDate.parse("2020-01-01")
         eksterntArbeidsforhold.tom `should be equal to` LocalDate.parse("2020-01-02")
+    }
+
+    @Test
+    fun `burde hente org navn fra ereg`() {
+        val eregClient: EregClient = mock {
+            on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("Org Navn"))
+        }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(
+            aaregClient = aaregClientMock(),
+            eregClient = eregClient,
+        )
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        eksterntArbeidsforhold.orgnavn `should be equal to` "Org Navn"
     }
 
     @ParameterizedTest
@@ -83,7 +108,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         resultat.fnr `should be equal to` "00000000001"
     }
@@ -109,7 +134,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         invoking {
             eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         } `should throw` Exception::class
@@ -141,7 +166,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         resultat.fnr `should be equal to` "gjeldende-fnr"
@@ -165,7 +190,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         eksterntArbeidsforhold.orgnummer `should be equal to` "orgnummer"
     }
@@ -188,7 +213,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         eksterntArbeidsforhold.juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
     }
@@ -207,7 +232,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
     }
@@ -226,7 +251,7 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_") shouldHaveSize 0
     }
 
