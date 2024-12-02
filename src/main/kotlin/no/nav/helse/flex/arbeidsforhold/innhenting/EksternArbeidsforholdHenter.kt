@@ -17,6 +17,7 @@ data class EksterntArbeidsforhold(
 
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
+
 ) {
     fun hentEksterneArbeidsforholdForPerson(fnr: String): List<EksterntArbeidsforhold> {
         val result = aaregClient.getArbeidsforholdoversikt(fnr)

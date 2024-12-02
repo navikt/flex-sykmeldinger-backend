@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
-class HentEksterntArbeidsforholdTest {
+class EksternArbeidsforholdHenterTest {
     @Test
     fun `burde bruke arbeidsforholdInfo fra Aareg`() {
         val aaregClient: AaregClient =
