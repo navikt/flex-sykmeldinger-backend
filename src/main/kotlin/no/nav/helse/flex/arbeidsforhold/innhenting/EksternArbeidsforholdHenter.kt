@@ -1,9 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.Arbeidssted
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.Opplysningspliktig
+import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -26,7 +24,7 @@ class EksternArbeidsforholdHenter(
         return result.arbeidsforholdoversikter.map { arbeidsforholdOversikt ->
             EksterntArbeidsforhold(
                 arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
-                fnr = arbeidsforholdOversikt.arbeidstaker.identer.first().ident,
+                fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
                 orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted),
                 juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
                 orgnavn = "",
@@ -38,12 +36,22 @@ class EksternArbeidsforholdHenter(
     }
 }
 
+fun getFnrFraArbeidstaker(arbeidstaker: Arbeidstaker): String {
+    val gjeldendePersonIdenter =
+        arbeidstaker.identer
+            .filter { it.type in setOf(IdentType.AKTORID, IdentType.FOLKEREGISTERIDENT) }
+            .filter { it.gjeldende == true }
+    require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
+
+    return gjeldendePersonIdenter.first().ident
+}
+
 fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String {
-    return arbeidssted.identer.first { it.type == "ORGANISASJONSNUMMER" }.ident
+    return arbeidssted.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
 }
 
 fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String {
-    return opplysningspliktig.identer.first { it.type == "ORGANISASJONSNUMMER" }.ident
+    return opplysningspliktig.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
 }
 
 fun parseArbeidsforholdType(kode: String): ArbeidsforholdType {

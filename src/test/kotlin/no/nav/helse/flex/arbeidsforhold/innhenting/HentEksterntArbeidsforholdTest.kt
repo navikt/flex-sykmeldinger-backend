@@ -7,8 +7,12 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should throw`
 import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 class HentEksterntArbeidsforholdTest {
@@ -22,20 +26,22 @@ class HentEksterntArbeidsforholdTest {
                             lagArbeidsforholdOversikt(
                                 navArbeidsforholdId = "arbeidsforholdId",
                                 typeKode = "ordinaertArbeidsforhold",
-                                arbeidstakerIdent =
-                                    Ident(
-                                        type = "AKTORID",
-                                        ident = "00000000001",
-                                        gjeldende = true,
+                                arbeidstakerIdenter =
+                                    listOf(
+                                        Ident(
+                                            type = IdentType.AKTORID,
+                                            ident = "00000000001",
+                                            gjeldende = true,
+                                        ),
                                     ),
                                 arbeidsstedIdent =
                                     Ident(
-                                        type = "ORGANISASJONSNUMMER",
+                                        type = IdentType.ORGANISASJONSNUMMER,
                                         ident = "orgnummer",
                                     ),
                                 opplysningspliktig =
                                     Ident(
-                                        type = "ORGANISASJONSNUMMER",
+                                        type = IdentType.ORGANISASJONSNUMMER,
                                         ident = "juridisk-orgnummer",
                                     ),
                                 startdato = LocalDate.parse("2020-01-01"),
@@ -55,19 +61,22 @@ class HentEksterntArbeidsforholdTest {
         eksterntArbeidsforhold.tom `should be equal to` LocalDate.parse("2020-01-02")
     }
 
-    @Test
-    fun `burde returnere riktig fnr`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["AKTORID", "FOLKEREGISTERIDENT"])
+    fun `burde godta riktige ident typer for fnr`(identType: String) {
         val aaregClient: AaregClient =
             mock {
                 on { getArbeidsforholdoversikt(any()) } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
-                                arbeidstakerIdent =
-                                    Ident(
-                                        type = "AKTORID",
-                                        ident = "00000000001",
-                                        gjeldende = true,
+                                arbeidstakerIdenter =
+                                    listOf(
+                                        Ident(
+                                            type = IdentType.valueOf(identType),
+                                            ident = "00000000001",
+                                            gjeldende = true,
+                                        ),
                                     ),
                             ),
                         ),
@@ -75,8 +84,67 @@ class HentEksterntArbeidsforholdTest {
             }
 
         val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
-        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
-        eksterntArbeidsforhold.fnr `should be equal to` "00000000001"
+        val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        resultat.fnr `should be equal to` "00000000001"
+    }
+
+    @Test
+    fun `burde feile ved feil fnr ident type`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidstakerIdenter =
+                                    listOf(
+                                        Ident(
+                                            type = IdentType.ORGANISASJONSNUMMER,
+                                            ident = "00000000001",
+                                            gjeldende = true,
+                                        ),
+                                    ),
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        invoking {
+            eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        } `should throw` Exception::class
+    }
+
+    @Test
+    fun `bruker gjeldende fnr ident for arbeidstaker`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidstakerIdenter =
+                                    listOf(
+                                        Ident(
+                                            type = IdentType.AKTORID,
+                                            ident = "gjeldende-fnr",
+                                            gjeldende = true,
+                                        ),
+                                        Ident(
+                                            type = IdentType.AKTORID,
+                                            ident = "ikke-gjeldende-fnr",
+                                            gjeldende = false,
+                                        ),
+                                    ),
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+
+        val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        resultat.fnr `should be equal to` "gjeldende-fnr"
     }
 
     @Test
@@ -89,7 +157,7 @@ class HentEksterntArbeidsforholdTest {
                             lagArbeidsforholdOversikt(
                                 arbeidsstedIdent =
                                     Ident(
-                                        type = "ORGANISASJONSNUMMER",
+                                        type = IdentType.ORGANISASJONSNUMMER,
                                         ident = "orgnummer",
                                     ),
                             ),
@@ -112,7 +180,7 @@ class HentEksterntArbeidsforholdTest {
                             lagArbeidsforholdOversikt(
                                 opplysningspliktig =
                                     Ident(
-                                        type = "ORGANISASJONSNUMMER",
+                                        type = IdentType.ORGANISASJONSNUMMER,
                                         ident = "juridisk-orgnummer",
                                     ),
                             ),
@@ -152,7 +220,7 @@ class HentEksterntArbeidsforholdTest {
                 identer =
                     listOf(
                         Ident(
-                            type = "ORGANISASJONSNUMMER",
+                            type = IdentType.ORGANISASJONSNUMMER,
                             ident = "orgnummer",
                         ),
                     ),
@@ -168,7 +236,7 @@ class HentEksterntArbeidsforholdTest {
                 identer =
                     listOf(
                         Ident(
-                            type = "_",
+                            type = IdentType.AKTORID,
                             ident = "orgnummer",
                         ),
                     ),
@@ -181,20 +249,22 @@ class HentEksterntArbeidsforholdTest {
     private fun lagArbeidsforholdOversikt(
         navArbeidsforholdId: String = "arbeidsforholdId",
         typeKode: String = "ordinaertArbeidsforhold",
-        arbeidstakerIdent: Ident =
-            Ident(
-                type = "AKTORID",
-                ident = "2175141353812",
-                gjeldende = true,
+        arbeidstakerIdenter: List<Ident> =
+            listOf(
+                Ident(
+                    type = IdentType.AKTORID,
+                    ident = "2175141353812",
+                    gjeldende = true,
+                ),
             ),
         arbeidsstedIdent: Ident =
             Ident(
-                type = "ORGANISASJONSNUMMER",
+                type = IdentType.ORGANISASJONSNUMMER,
                 ident = "910825518",
             ),
         opplysningspliktig: Ident =
             Ident(
-                type = "ORGANISASJONSNUMMER",
+                type = IdentType.ORGANISASJONSNUMMER,
                 ident = "810825472",
             ),
         startdato: LocalDate = LocalDate.parse("2020-01-01"),
@@ -209,10 +279,7 @@ class HentEksterntArbeidsforholdTest {
                 ),
             arbeidstaker =
                 Arbeidstaker(
-                    identer =
-                        listOf(
-                            arbeidstakerIdent,
-                        ),
+                    identer = arbeidstakerIdenter,
                 ),
             arbeidssted =
                 Arbeidssted(

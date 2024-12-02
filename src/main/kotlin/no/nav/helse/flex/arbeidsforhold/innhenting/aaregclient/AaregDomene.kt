@@ -51,7 +51,13 @@ data class Opplysningspliktig(
 )
 
 data class Ident(
-    val type: String,
+    val type: IdentType,
     val ident: String,
     val gjeldende: Boolean? = null,
 )
+
+enum class IdentType {
+    AKTORID,
+    FOLKEREGISTERIDENT,
+    ORGANISASJONSNUMMER,
+}
