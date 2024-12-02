@@ -6,13 +6,14 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 
 class ArbeidsforholdInnhentingServiceTest {
     @Test
-    fun `oppretter arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
+    fun `lagrer arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
@@ -32,7 +33,7 @@ class ArbeidsforholdInnhentingServiceTest {
     }
 
     @Test
-    fun `synkroniserer arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
+    fun `lagrer oppdatert arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
@@ -55,7 +56,7 @@ class ArbeidsforholdInnhentingServiceTest {
     }
 
     @Test
-    fun `oppretter arbeidsforhold fra eksternt arbeidsforhold med riktig data`() {
+    fun `lagrer riktig data for nytt arbeidsforhold`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
@@ -98,7 +99,7 @@ class ArbeidsforholdInnhentingServiceTest {
     }
 
     @Test
-    fun `endrer eksisterende arbeidsforhold fra eksternt arbeidsforhold med riktig data`() {
+    fun `lagrer riktig data for oppdatert arbeidsforhold`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
@@ -152,5 +153,25 @@ class ArbeidsforholdInnhentingServiceTest {
                 opprettet = Instant.parse("2020-01-01T00:00:00Z"),
             )
         verify(arbeidsforholdRepository).save(forventetArbeidsforhold)
+    }
+
+    @Test
+    fun `burde ignorere arbeidsforhold der man ikke har vært ansatt siste 4 mnd`() {
+        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
+            mock {
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
+                    listOf(
+                        lagEksterntArbeidsforhold(tom = LocalDate.parse("2020-01-01")),
+                    )
+            }
+        val arbeidsforholdInnhentingService =
+            ArebeidsforholdInnhentingService(
+                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
+                arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
+                nowFactory = { Instant.parse("2020-05-01T00:00:00Z") },
+            )
+
+        val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforhold("_")
+        resultat.antallIgnorerte `should be equal to` 1
     }
 }

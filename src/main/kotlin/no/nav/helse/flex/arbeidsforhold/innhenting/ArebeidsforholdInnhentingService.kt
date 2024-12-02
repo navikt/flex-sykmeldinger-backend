@@ -4,6 +4,20 @@ import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.logger
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset.UTC
+
+data class ArbeidsforholdResultat(
+    val antallNye: Int = 0,
+    val antallOppdaterte: Int = 0,
+    val antallIgnorerte: Int = 0,
+)
+
+enum class ArbeidsforholdStatus {
+    NY,
+    OPPDATERT,
+    IGNORERT,
+}
 
 class ArebeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
@@ -12,16 +26,33 @@ class ArebeidsforholdInnhentingService(
 ) {
     val log = logger()
 
-    fun synkroniserArbeidsforhold(fnr: String) {
+    fun synkroniserArbeidsforhold(fnr: String): ArbeidsforholdResultat {
+        var antallNye = 0
+        var antallOppdaterte = 0
+        var antallIgnorerte = 0
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
         eksterntArbeidsforhold.forEach {
-            oppdaterArbeidsforhold(it)
+            when (oppdaterArbeidsforhold(it)) {
+                ArbeidsforholdStatus.NY -> antallNye++
+                ArbeidsforholdStatus.OPPDATERT -> antallOppdaterte++
+                ArbeidsforholdStatus.IGNORERT -> antallIgnorerte++
+            }
         }
+        return ArbeidsforholdResultat(
+            antallNye = antallNye,
+            antallOppdaterte = antallOppdaterte,
+            antallIgnorerte = antallIgnorerte,
+        )
     }
 
-    private fun oppdaterArbeidsforhold(eksterntArbeidsforhold: EksterntArbeidsforhold) {
+    private fun oppdaterArbeidsforhold(eksterntArbeidsforhold: EksterntArbeidsforhold): ArbeidsforholdStatus {
+        if (!harVaertAnsattSiste4Mnd(eksterntArbeidsforhold.tom)) {
+            return ArbeidsforholdStatus.IGNORERT
+        }
+
         val interntArbeidsforhold =
             arbeidsforholdRepository.findByArbeidsforholdId(eksterntArbeidsforhold.arbeidsforholdId)
+
         if (interntArbeidsforhold == null) {
             arbeidsforholdRepository.save(
                 Arbeidsforhold(
@@ -36,6 +67,7 @@ class ArebeidsforholdInnhentingService(
                     opprettet = nowFactory(),
                 ),
             )
+            return ArbeidsforholdStatus.NY
         } else {
             val oppdatertArbeidsforhold =
                 interntArbeidsforhold.copy(
@@ -51,7 +83,14 @@ class ArebeidsforholdInnhentingService(
             arbeidsforholdRepository.save(
                 oppdatertArbeidsforhold,
             )
+            return ArbeidsforholdStatus.OPPDATERT
         }
+    }
+
+    // TODO sjekk logikk for dette
+    private fun harVaertAnsattSiste4Mnd(sluttDato: LocalDate?): Boolean {
+        val ansettelsesperiodeFom = LocalDate.ofInstant(nowFactory(), UTC).minusMonths(4)
+        return sluttDato == null || sluttDato.isAfter(ansettelsesperiodeFom)
     }
 
 //    fun updateArbeidsforhold(fnr: String) {

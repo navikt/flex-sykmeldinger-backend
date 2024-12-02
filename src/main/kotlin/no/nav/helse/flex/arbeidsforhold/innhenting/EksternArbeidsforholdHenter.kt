@@ -21,18 +21,20 @@ class EksternArbeidsforholdHenter(
     fun hentEksterneArbeidsforholdForPerson(fnr: String): List<EksterntArbeidsforhold> {
         val result = aaregClient.getArbeidsforholdoversikt(fnr)
 
-        return result.arbeidsforholdoversikter.map { arbeidsforholdOversikt ->
-            EksterntArbeidsforhold(
-                arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
-                fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
-                orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted),
-                juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
-                orgnavn = "",
-                fom = arbeidsforholdOversikt.startdato,
-                tom = arbeidsforholdOversikt.sluttdato,
-                arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
-            )
-        }
+        return result.arbeidsforholdoversikter
+            .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
+            .map { arbeidsforholdOversikt ->
+                EksterntArbeidsforhold(
+                    arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
+                    fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
+                    orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted),
+                    juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
+                    orgnavn = "",
+                    fom = arbeidsforholdOversikt.startdato,
+                    tom = arbeidsforholdOversikt.sluttdato,
+                    arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
+                )
+            }
     }
 }
 

@@ -8,10 +8,10 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
+import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
@@ -213,6 +213,24 @@ class HentEksterntArbeidsforholdTest {
     }
 
     @Test
+    fun `burde filtrere vekk arbeidsstedType som ikke er Underenhet`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidsstedType = ArbeidsstedType.Person,
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_") shouldHaveSize 0
+    }
+
+    @Test
     fun `getOrgnummerFraArbeidssted finner orgnummer i arbeidssted med én ident`() {
         val arbeidssted =
             Arbeidssted(
@@ -262,6 +280,7 @@ class HentEksterntArbeidsforholdTest {
                 type = IdentType.ORGANISASJONSNUMMER,
                 ident = "910825518",
             ),
+        arbeidsstedType: ArbeidsstedType = ArbeidsstedType.Underenhet,
         opplysningspliktig: Ident =
             Ident(
                 type = IdentType.ORGANISASJONSNUMMER,
@@ -283,7 +302,7 @@ class HentEksterntArbeidsforholdTest {
                 ),
             arbeidssted =
                 Arbeidssted(
-                    type = ArbeidsstedType.Underenhet,
+                    type = arbeidsstedType,
                     identer =
                         listOf(
                             arbeidsstedIdent,
