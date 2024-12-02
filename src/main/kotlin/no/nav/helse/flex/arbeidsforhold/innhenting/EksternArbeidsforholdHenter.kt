@@ -2,6 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
+import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.Arbeidssted
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -18,16 +19,25 @@ data class EksterntArbeidsforhold(
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
 ) {
-    fun hentEksterntArbeidsforhold(arbeidsforholdId: String): EksterntArbeidsforhold {
-        return EksterntArbeidsforhold(
-            arbeidsforholdId = arbeidsforholdId,
-            fnr = "",
-            orgnummer = "",
-            juridiskOrgnummer = "",
-            orgnavn = "",
-            fom = LocalDate.now(),
-            tom = null,
-            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-        )
+    fun hentEksterneArbeidsforholdForPerson(fnr: String): List<EksterntArbeidsforhold> {
+        val result = aaregClient.getArbeidsforholdoversikt(fnr)
+
+
+        return result.arbeidsforholdoversikter.map { arbeidsforholdOversikt ->
+            EksterntArbeidsforhold(
+                arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
+                fnr = arbeidsforholdOversikt.arbeidstaker.identer.first().ident,
+                orgnummer = arbeidsforholdOversikt.arbeidssted.identer.first().ident,
+                juridiskOrgnummer = arbeidsforholdOversikt.opplysningspliktig.identer.first().ident,
+                orgnavn = "",
+                fom = arbeidsforholdOversikt.startdato,
+                tom = arbeidsforholdOversikt.sluttdato,
+                arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+            )
+        }
     }
+}
+
+fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String {
+    return arbeidssted.identer.first { it.type == "ORGANISASJONSNUMMER" }.ident
 }

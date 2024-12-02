@@ -36,9 +36,14 @@ data class Arbeidstaker(
 )
 
 data class Arbeidssted(
-    val type: String,
+    val type: ArbeidsstedType,
     val identer: List<Ident>,
 )
+
+enum class ArbeidsstedType {
+    Underenhet,
+    Person
+}
 
 data class Opplysningspliktig(
     val type: String,

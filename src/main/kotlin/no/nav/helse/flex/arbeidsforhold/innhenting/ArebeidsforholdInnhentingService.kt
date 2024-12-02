@@ -13,7 +13,7 @@ class ArebeidsforholdInnhentingService(
     val log = logger()
 
     fun synkroniserArbeidsforhold(arbeidsforholdId: String) {
-        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterntArbeidsforhold(arbeidsforholdId)
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(arbeidsforholdId).first()
         val interntArbeidsforhold = arbeidsforholdRepository.findByArbeidsforholdId(arbeidsforholdId)
         if (interntArbeidsforhold == null) {
             arbeidsforholdRepository.save(

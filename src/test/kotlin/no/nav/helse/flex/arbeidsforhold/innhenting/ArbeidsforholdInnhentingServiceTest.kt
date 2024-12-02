@@ -16,7 +16,9 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `oppretter arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn listOf(
+                    lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
+                )
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =
@@ -33,7 +35,9 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `synkroniserer arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn listOf(
+                    lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
+                )
             }
         val arbeidsforholdRepository =
             mock<ArbeidsforholdRepository> {
@@ -53,8 +57,8 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `oppretter arbeidsforhold fra eksternt arbeidsforhold med riktig data`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn
-                    EksterntArbeidsforhold(
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
+                    listOf(EksterntArbeidsforhold(
                         arbeidsforholdId = "arbeidsforhold",
                         fnr = "fnr",
                         orgnummer = "orgnummer",
@@ -63,6 +67,7 @@ class ArbeidsforholdInnhentingServiceTest {
                         fom = LocalDate.parse("2020-01-01"),
                         tom = null,
                         arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                    )
                     )
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
@@ -94,8 +99,9 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `endrer eksisterende arbeidsforhold fra eksternt arbeidsforhold med riktig data`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterntArbeidsforhold(any()) } doReturn
-                    EksterntArbeidsforhold(
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
+                    listOf(
+                        EksterntArbeidsforhold(
                         arbeidsforholdId = "arbeidsforhold",
                         fnr = "nytt_fnr",
                         orgnummer = "nytt_orgnummer",
@@ -104,6 +110,7 @@ class ArbeidsforholdInnhentingServiceTest {
                         fom = LocalDate.parse("2020-01-01"),
                         tom = null,
                         arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                    )
                     )
             }
         val arbeidsforholdRepository =
