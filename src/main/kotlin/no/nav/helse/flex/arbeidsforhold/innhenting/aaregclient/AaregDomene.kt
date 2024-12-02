@@ -13,6 +13,7 @@ data class ArbeidsforholdoversiktResponse(
 )
 
 data class ArbeidsforholdOversikt(
+    val navArbeidsforholdId: String,
     val type: Kodeverksentitet,
     val arbeidstaker: Arbeidstaker,
     val arbeidssted: Arbeidssted,
