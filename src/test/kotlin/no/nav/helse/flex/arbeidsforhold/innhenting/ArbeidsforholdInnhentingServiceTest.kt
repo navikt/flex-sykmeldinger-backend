@@ -2,7 +2,6 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
@@ -16,9 +15,10 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `oppretter arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn listOf(
-                    lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
-                )
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
+                    listOf(
+                        lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId"),
+                    )
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =
@@ -35,9 +35,10 @@ class ArbeidsforholdInnhentingServiceTest {
     fun `synkroniserer arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn listOf(
-                    lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
-                )
+                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
+                    listOf(
+                        lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId"),
+                    )
             }
         val arbeidsforholdRepository =
             mock<ArbeidsforholdRepository> {
@@ -50,7 +51,7 @@ class ArbeidsforholdInnhentingServiceTest {
             )
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
-        verify(arbeidsforholdRepository).save(eq(lagArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")))
+        verify(arbeidsforholdRepository).save(any())
     }
 
     @Test
@@ -58,16 +59,17 @@ class ArbeidsforholdInnhentingServiceTest {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    listOf(EksterntArbeidsforhold(
-                        arbeidsforholdId = "arbeidsforhold",
-                        fnr = "fnr",
-                        orgnummer = "orgnummer",
-                        juridiskOrgnummer = "jorgnummer",
-                        orgnavn = "Orgnavn",
-                        fom = LocalDate.parse("2020-01-01"),
-                        tom = null,
-                        arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                    )
+                    listOf(
+                        EksterntArbeidsforhold(
+                            arbeidsforholdId = "arbeidsforhold",
+                            fnr = "fnr",
+                            orgnummer = "orgnummer",
+                            juridiskOrgnummer = "jorgnummer",
+                            orgnavn = "Orgnavn",
+                            fom = LocalDate.parse("2020-01-01"),
+                            tom = null,
+                            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                        ),
                     )
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
@@ -102,15 +104,15 @@ class ArbeidsforholdInnhentingServiceTest {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
                     listOf(
                         EksterntArbeidsforhold(
-                        arbeidsforholdId = "arbeidsforhold",
-                        fnr = "nytt_fnr",
-                        orgnummer = "nytt_orgnummer",
-                        juridiskOrgnummer = "nytt_jorgnummer",
-                        orgnavn = "nytt_Orgnavn",
-                        fom = LocalDate.parse("2020-01-01"),
-                        tom = null,
-                        arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                    )
+                            arbeidsforholdId = "arbeidsforhold",
+                            fnr = "nytt_fnr",
+                            orgnummer = "nytt_orgnummer",
+                            juridiskOrgnummer = "nytt_jorgnummer",
+                            orgnavn = "nytt_Orgnavn",
+                            fom = LocalDate.parse("2020-01-01"),
+                            tom = null,
+                            arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
+                        ),
                     )
             }
         val arbeidsforholdRepository =

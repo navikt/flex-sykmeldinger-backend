@@ -42,7 +42,7 @@ data class Arbeidssted(
 
 enum class ArbeidsstedType {
     Underenhet,
-    Person
+    Person,
 }
 
 data class Opplysningspliktig(

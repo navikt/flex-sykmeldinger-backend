@@ -1,5 +1,6 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
@@ -55,30 +56,123 @@ class HentEksterntArbeidsforholdTest {
     }
 
     @Test
-    fun `finner orgnummer i arbeidssted med én ident`() {
-        val arbeidssted = Arbeidssted(
-            type=ArbeidsstedType.Underenhet,
-            identer = listOf(
-                Ident(
-                    type="ORGANISASJONSNUMMER",
-                    ident = "orgnummer",
-                )
+    fun `burde returnere riktig fnr`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidstakerIdent =
+                                    Ident(
+                                        type = "AKTORID",
+                                        ident = "00000000001",
+                                        gjeldende = true,
+                                    ),
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        eksterntArbeidsforhold.fnr `should be equal to` "00000000001"
+    }
+
+    @Test
+    fun `burde returnere riktig orgnummer`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidsstedIdent =
+                                    Ident(
+                                        type = "ORGANISASJONSNUMMER",
+                                        ident = "orgnummer",
+                                    ),
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        eksterntArbeidsforhold.orgnummer `should be equal to` "orgnummer"
+    }
+
+    @Test
+    fun `burde returnere riktig juridisk orgnummer`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                opplysningspliktig =
+                                    Ident(
+                                        type = "ORGANISASJONSNUMMER",
+                                        ident = "juridisk-orgnummer",
+                                    ),
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        eksterntArbeidsforhold.juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
+    }
+
+    @Test
+    fun `burde returnere riktig arbeidsforholdType`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt(any()) } doReturn
+                    ArbeidsforholdoversiktResponse(
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                typeKode = "frilanserOppdragstakerHonorarPersonerMm",
+                            ),
+                        ),
+                    )
+            }
+
+        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient)
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
+        eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
+    }
+
+    @Test
+    fun `getOrgnummerFraArbeidssted finner orgnummer i arbeidssted med én ident`() {
+        val arbeidssted =
+            Arbeidssted(
+                type = ArbeidsstedType.Underenhet,
+                identer =
+                    listOf(
+                        Ident(
+                            type = "ORGANISASJONSNUMMER",
+                            ident = "orgnummer",
+                        ),
+                    ),
             )
-        )
         getOrgnummerFraArbeidssted(arbeidssted) `should be equal to` "orgnummer"
     }
 
     @Test
-    fun `finner ikke orgnummer i arbeidssted dersom feil ident type`() {
-        val arbeidssted = Arbeidssted(
-            type=ArbeidsstedType.Underenhet,
-            identer = listOf(
-                Ident(
-                    type="_",
-                    ident = "orgnummer",
-                )
+    fun `getOrgnummerFraArbeidssted finner ikke orgnummer i arbeidssted dersom feil ident type`() {
+        val arbeidssted =
+            Arbeidssted(
+                type = ArbeidsstedType.Underenhet,
+                identer =
+                    listOf(
+                        Ident(
+                            type = "_",
+                            ident = "orgnummer",
+                        ),
+                    ),
             )
-        )
         invoking {
             getOrgnummerFraArbeidssted(arbeidssted) `should be equal to` "orgnummer"
         } shouldThrow(Exception::class)
