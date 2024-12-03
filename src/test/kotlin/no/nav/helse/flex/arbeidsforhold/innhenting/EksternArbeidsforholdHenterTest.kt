@@ -86,16 +86,6 @@ class EksternArbeidsforholdHenterTest {
         eksterntArbeidsforhold.orgnavn `should be equal to` "Org Navn"
     }
 
-    @Test
-    fun `burde håndtere at ereg er nede`() {
-        throw Exception()
-    }
-
-    @Test
-    fun `burde håndtere at aareg er nede`() {
-        throw Exception()
-    }
-
     @ParameterizedTest
     @ValueSource(strings = ["AKTORID", "FOLKEREGISTERIDENT"])
     fun `burde godta riktige ident typer for fnr`(identType: String) {
