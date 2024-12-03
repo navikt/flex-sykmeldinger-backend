@@ -5,7 +5,6 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdRequest
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.toJsonNode
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.QueueDispatcher
@@ -13,7 +12,6 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should throw`
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,8 +52,7 @@ class AaregClientTest {
     }
 }
 
-
-object AaregMockDispatcher : QueueDispatcher() {
+private object AaregMockDispatcher : QueueDispatcher() {
     override fun dispatch(request: RecordedRequest): MockResponse {
         val req: ArbeidsforholdRequest = objectMapper.readValue(request.body.readUtf8())
         return when (req.arbeidstakerId) {
@@ -78,15 +75,20 @@ object AaregMockDispatcher : QueueDispatcher() {
     }
 }
 
-val EKSEMPEL_ERROR_RESPONSE_FRA_AAREG = objectMapper.readTree("""
+private val EKSEMPEL_ERROR_RESPONSE_FRA_AAREG =
+    objectMapper.readTree(
+        """
     {
   "meldinger": [
     "Det oppsto en feil!"
   ]
 }
-""")
+""",
+    )
 
-val EKSEMPEL_RESPONSE_FRA_AAREG = objectMapper.readTree("""
+private val EKSEMPEL_RESPONSE_FRA_AAREG =
+    objectMapper.readTree(
+        """
     {
   "arbeidsforholdoversikter": [
     {
@@ -366,4 +368,5 @@ val EKSEMPEL_RESPONSE_FRA_AAREG = objectMapper.readTree("""
   ],
   "totalAntall": 5
 }
-""")
+""",
+    )

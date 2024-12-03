@@ -5,5 +5,5 @@ data class Nokkelinfo(
 )
 
 data class Navn(
-    val sammensattnavn: String
+    val sammensattnavn: String,
 )

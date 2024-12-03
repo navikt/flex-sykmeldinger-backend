@@ -19,13 +19,15 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 class EksternArbeidsforholdHenterTest {
-    fun eregClientMock(): EregClient = mock {
-        on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("_"))
-    }
+    fun eregClientMock(): EregClient =
+        mock {
+            on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("_"))
+        }
 
-    fun aaregClientMock(): AaregClient = mock {
-        on { getArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
-    }
+    fun aaregClientMock(): AaregClient =
+        mock {
+            on { getArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
+        }
 
     @Test
     fun `burde bruke arbeidsforholdInfo fra Aareg`() {
@@ -74,14 +76,16 @@ class EksternArbeidsforholdHenterTest {
 
     @Test
     fun `burde hente org navn fra ereg`() {
-        val eregClient: EregClient = mock {
-            on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("Org Navn"))
-        }
+        val eregClient: EregClient =
+            mock {
+                on { hentNokkelinfo(any()) } doReturn Nokkelinfo(Navn("Org Navn"))
+            }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(
-            aaregClient = aaregClientMock(),
-            eregClient = eregClient,
-        )
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClientMock(),
+                eregClient = eregClient,
+            )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").first()
         eksterntArbeidsforhold.orgnavn `should be equal to` "Org Navn"
     }
