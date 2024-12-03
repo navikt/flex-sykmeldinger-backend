@@ -10,9 +10,9 @@ import org.springframework.web.client.RestTemplate
 
  @Component
 class AaregClient(
-    @Value("\${AAREG_URL}")
+     @Value("\${AAREG_URL}")
     private val url: String,
-    private val aaregRestTemplate: RestTemplate,
+     private val restTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -21,8 +21,8 @@ class AaregClient(
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
-        val result =
-            aaregRestTemplate
+        val result: ResponseEntity<ArbeidsforholdoversiktResponse> = try {
+            restTemplate
                 .exchange(
                     "$url/api/v2/arbeidstaker/arbeidsforholdoversikt",
                     HttpMethod.POST,
@@ -36,17 +36,11 @@ class AaregClient(
                     ),
                     ArbeidsforholdoversiktResponse::class.java,
                 )
-
-        if (result.statusCode != HttpStatus.OK) {
-            val message = "Kall mot aareg feiler med HTTP-" + result.statusCode
-            log.error(message)
-            throw RuntimeException(message)
+        } catch (e: Exception) {
+            log.error("getArbeidsforholdoversikt kall mot aareg feilet $e")
+            throw e
         }
-
-        result.body?.let { return it }
-
-        val message = "Kall mot aareg returnerer ikke data"
-        log.error(message)
-        throw RuntimeException(message)
+        return result.body
+            ?: throw RuntimeException("getArbeidsforholdoversikt response inneholdt ikke data")
     }
 }

@@ -10,12 +10,15 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.QueueDispatcher
 import okhttp3.mockwebserver.RecordedRequest
+import org.amshove.kluent.invoking
 import org.amshove.kluent.`should not be`
+import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,13 +35,22 @@ class AaregClientTest {
     }
 
     @Test
-    fun `burde returnere data fra aareg`() {
+    fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
         aaregClient.getArbeidsforholdoversikt("_") `should not be` null
     }
 
     @Test
-    fun `burde returnere feilmelding`() {
-        aaregClient.getArbeidsforholdoversikt("feilmeldig_fnr") `should not be` null
+    fun `burde kaste feil ved error response`() {
+        invoking {
+            aaregClient.getArbeidsforholdoversikt("feilmeldig_fnr")
+        } `should throw` RestClientException::class
+    }
+
+    @Test
+    fun `burde kaste RuntimeException ved tom respons body`() {
+        invoking {
+            aaregClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
+        } `should throw` RuntimeException::class
     }
 }
 
@@ -52,6 +64,10 @@ object AaregMockDispatcher : QueueDispatcher() {
                     .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
                     .setResponseCode(404)
+            }
+            "suksess_uten_body_fnr" -> {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
             }
 
             else -> {
