@@ -4,9 +4,11 @@ import no.nav.helse.flex.logger
 import no.nav.helse.flex.serialisertTilString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
+import org.springframework.retry.annotation.Retryable
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-// @Component
+ @Component
 class AaregClient(
     @Value("\${AAREG_URL}")
     private val url: String,
@@ -14,8 +16,7 @@ class AaregClient(
 ) {
     val log = logger()
 
-    private val arbeidsforholdPath = "$url/api/v2/arbeidstaker/arbeidsforhold"
-
+    @Retryable
     fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
