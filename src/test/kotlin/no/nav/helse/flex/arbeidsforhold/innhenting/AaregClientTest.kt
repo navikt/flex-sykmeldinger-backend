@@ -14,10 +14,13 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should throw`
+import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
@@ -27,9 +30,6 @@ import org.springframework.web.client.RestTemplate
 class AaregClientTest {
     @Autowired
     private lateinit var aaregClient: AaregClient
-
-    @Autowired
-    lateinit var server: MockOAuth2Server
 
     init {
         MockWebServer().apply {
@@ -56,6 +56,13 @@ class AaregClientTest {
             aaregClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
         } `should throw` RuntimeException::class
     }
+
+    @Test
+    fun `burde kaste unauthorized exception dersom vi ikke sender med auth token`() {
+        invoking {
+            aaregClient.getArbeidsforholdoversikt("ingen_auth_token_fnr")
+        } shouldThrow HttpClientErrorException::class
+    }
 }
 
 private object AaregMockDispatcher : QueueDispatcher() {
@@ -66,11 +73,21 @@ private object AaregMockDispatcher : QueueDispatcher() {
                 MockResponse()
                     .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
-                    .setResponseCode(404)
+                    .setResponseCode(HttpStatus.NOT_FOUND.value())
             }
+
             "suksess_uten_body_fnr" -> {
                 MockResponse()
                     .addHeader("Content-Type", "application/json")
+            }
+
+            "ingen_auth_token_fnr" -> {
+                val token = request.headers["Authorization"]
+                if (token == null) {
+                    MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value())
+                } else {
+                    MockResponse()
+                }
             }
 
             else -> {

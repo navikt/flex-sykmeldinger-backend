@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import com.nimbusds.jose.JWSObject
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import java.util.*

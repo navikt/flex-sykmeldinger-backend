@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate
 class AaregClient(
     @Value("\${AAREG_URL}")
     private val url: String,
-    private val restTemplate: RestTemplate,
+    private val aaregRestTemplate: RestTemplate,
 ) {
     val log = logger()
 
@@ -23,7 +23,7 @@ class AaregClient(
 
         val result: ResponseEntity<ArbeidsforholdoversiktResponse> =
             try {
-                restTemplate
+                aaregRestTemplate
                     .exchange(
                         "$url/api/v2/arbeidstaker/arbeidsforholdoversikt",
                         HttpMethod.POST,

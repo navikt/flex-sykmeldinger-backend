@@ -42,6 +42,11 @@ class AadRestTemplateConfiguration {
             oAuth2AccessTokenService = oAuth2AccessTokenService,
         )
 
+    @Bean
+    fun plainRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate =
+        restTemplateBuilder
+            .setConnectTimeout(Duration.ofSeconds(5L))
+            .setReadTimeout(Duration.ofSeconds(10L)).build()
 
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
