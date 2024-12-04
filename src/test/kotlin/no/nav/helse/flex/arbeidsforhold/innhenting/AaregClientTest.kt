@@ -5,6 +5,8 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdRequest
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.serialisertTilString
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.QueueDispatcher
@@ -20,10 +22,14 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnableMockOAuth2Server
 @SpringBootTest(classes = [AaregClient::class, RestTemplate::class])
 class AaregClientTest {
     @Autowired
     private lateinit var aaregClient: AaregClient
+
+    @Autowired
+    lateinit var server: MockOAuth2Server
 
     init {
         MockWebServer().apply {
