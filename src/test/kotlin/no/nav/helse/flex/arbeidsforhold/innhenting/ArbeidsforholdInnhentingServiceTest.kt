@@ -4,9 +4,11 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -23,13 +25,13 @@ class ArbeidsforholdInnhentingServiceTest {
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =
-            ArebeidsforholdInnhentingService(
+            ArbeidsforholdInnhentingService(
                 eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
-        verify(arbeidsforholdRepository).save(any())
+        verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
     @Test
@@ -46,13 +48,13 @@ class ArbeidsforholdInnhentingServiceTest {
                 on { findByArbeidsforholdId(any()) } doReturn lagArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
             }
         val arbeidsforholdInnhentingService =
-            ArebeidsforholdInnhentingService(
+            ArbeidsforholdInnhentingService(
                 eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
-        verify(arbeidsforholdRepository).save(any())
+        verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
     @Test
@@ -75,7 +77,7 @@ class ArbeidsforholdInnhentingServiceTest {
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
         val arbeidsforholdInnhentingService =
-            ArebeidsforholdInnhentingService(
+            ArbeidsforholdInnhentingService(
                 eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
                 arbeidsforholdRepository = arbeidsforholdRepository,
                 nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
@@ -95,7 +97,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
                 opprettet = Instant.parse("2020-01-01T00:00:00Z"),
             )
-        verify(arbeidsforholdRepository).save(forventetArbeidsforhold)
+        verify(arbeidsforholdRepository).saveAll(listOf(forventetArbeidsforhold))
     }
 
     @Test
@@ -132,7 +134,7 @@ class ArbeidsforholdInnhentingServiceTest {
                     )
             }
         val arbeidsforholdInnhentingService =
-            ArebeidsforholdInnhentingService(
+            ArbeidsforholdInnhentingService(
                 eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
                 arbeidsforholdRepository = arbeidsforholdRepository,
                 nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
@@ -152,26 +154,75 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
                 opprettet = Instant.parse("2020-01-01T00:00:00Z"),
             )
-        verify(arbeidsforholdRepository).save(forventetArbeidsforhold)
+        verify(arbeidsforholdRepository).saveAll(listOf(forventetArbeidsforhold))
     }
 
     @Test
-    fun `burde ignorere arbeidsforhold der man ikke har vært ansatt siste 4 mnd`() {
-        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-            mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    listOf(
-                        lagEksterntArbeidsforhold(tom = LocalDate.parse("2020-01-01")),
-                    )
-            }
-        val arbeidsforholdInnhentingService =
-            ArebeidsforholdInnhentingService(
-                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-                arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
-                nowFactory = { Instant.parse("2020-05-01T00:00:00Z") },
-            )
+    fun `burde opprette nye arbeidsforhold i aareg`() {
+        val service = ArbeidsforholdInnhentingService(
+            eksternArbeidsforholdHenter = mock<EksternArbeidsforholdHenter>(),
+            arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
+        )
 
-        val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforhold("_")
-        resultat.antallIgnorerte `should be equal to` 1
+        val resultat = service.synkroniserArbeidsforholdBusiness(
+            interneArbeidsforhold = emptyList(),
+            eksterneArbeidsforhold = listOf(
+                lagEksterntArbeidsforhold()
+            )
+        )
+        resultat.skalOpprettes shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde oppdatere eksisterende arbeidsforhold i aareg`() {
+        val service = ArbeidsforholdInnhentingService(
+            eksternArbeidsforholdHenter = mock<EksternArbeidsforholdHenter>(),
+            arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
+        )
+
+        val resultat = service.synkroniserArbeidsforholdBusiness(
+            interneArbeidsforhold = listOf(
+                lagArbeidsforhold(arbeidsforholdId = "1")
+            ),
+            eksterneArbeidsforhold = listOf(
+                lagEksterntArbeidsforhold(arbeidsforholdId = "1")
+            )
+        )
+        resultat.skalOppdateres shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde slette arbeidsforhold som ikke finnes i aareg lengre`() {
+        val service = ArbeidsforholdInnhentingService(
+            eksternArbeidsforholdHenter = mock<EksternArbeidsforholdHenter>(),
+            arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
+        )
+
+        val resultat = service.synkroniserArbeidsforholdBusiness(
+            interneArbeidsforhold = listOf(
+                lagArbeidsforhold(id="")
+            ),
+            eksterneArbeidsforhold = emptyList()
+        )
+        resultat.skalSlettes shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde ikke opprette arbeidsforhold der man ikke har vært ansatt de siste 4 mnd`() {
+        val service = ArbeidsforholdInnhentingService(
+            eksternArbeidsforholdHenter = mock<EksternArbeidsforholdHenter>(),
+            arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
+            nowFactory = { Instant.parse("2020-05-01T00:00:00Z") }
+        )
+
+        val resultat = service.synkroniserArbeidsforholdBusiness(
+            interneArbeidsforhold = emptyList(),
+            eksterneArbeidsforhold = listOf(
+                lagEksterntArbeidsforhold(
+                    tom = LocalDate.parse("2020-01-01"),
+                )
+            )
+        )
+        resultat.skalOpprettes shouldHaveSize 0
     }
 }
