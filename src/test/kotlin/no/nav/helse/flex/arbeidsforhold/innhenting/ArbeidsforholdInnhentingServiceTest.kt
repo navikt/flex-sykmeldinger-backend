@@ -7,7 +7,6 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -30,7 +29,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforholdId")
         verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
@@ -53,7 +52,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforholdId")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforholdId")
         verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
@@ -83,7 +82,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforhold")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforhold")
 
         val forventetArbeidsforhold =
             lagArbeidsforhold(
@@ -140,7 +139,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforhold("arbeidsforhold")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforhold")
 
         val forventetArbeidsforhold =
             lagArbeidsforhold(
@@ -164,7 +163,7 @@ class ArbeidsforholdInnhentingServiceTest {
             arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
         )
 
-        val resultat = service.synkroniserArbeidsforholdBusiness(
+        val resultat = service.synkroniserArbeidsforhold(
             interneArbeidsforhold = emptyList(),
             eksterneArbeidsforhold = listOf(
                 lagEksterntArbeidsforhold()
@@ -180,7 +179,7 @@ class ArbeidsforholdInnhentingServiceTest {
             arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
         )
 
-        val resultat = service.synkroniserArbeidsforholdBusiness(
+        val resultat = service.synkroniserArbeidsforhold(
             interneArbeidsforhold = listOf(
                 lagArbeidsforhold(arbeidsforholdId = "1")
             ),
@@ -198,7 +197,7 @@ class ArbeidsforholdInnhentingServiceTest {
             arbeidsforholdRepository = mock<ArbeidsforholdRepository>(),
         )
 
-        val resultat = service.synkroniserArbeidsforholdBusiness(
+        val resultat = service.synkroniserArbeidsforhold(
             interneArbeidsforhold = listOf(
                 lagArbeidsforhold(id="")
             ),
@@ -215,7 +214,7 @@ class ArbeidsforholdInnhentingServiceTest {
             nowFactory = { Instant.parse("2020-05-01T00:00:00Z") }
         )
 
-        val resultat = service.synkroniserArbeidsforholdBusiness(
+        val resultat = service.synkroniserArbeidsforhold(
             interneArbeidsforhold = emptyList(),
             eksterneArbeidsforhold = listOf(
                 lagEksterntArbeidsforhold(

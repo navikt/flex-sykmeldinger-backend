@@ -20,15 +20,15 @@ class ArbeidsforholdInnhentingService(
 ) {
     val log = logger()
 
-    fun synkroniserArbeidsforhold(fnr: String): SynkroniserteArbeidsforhold {
+    fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
         val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
-        val synkroniserteArbeidsforhold = synkroniserArbeidsforholdBusiness(interneArbeidsforhold, eksterntArbeidsforhold)
+        val synkroniserteArbeidsforhold = synkroniserArbeidsforhold(interneArbeidsforhold, eksterntArbeidsforhold)
         lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
         return synkroniserteArbeidsforhold
     }
 
-    internal fun synkroniserArbeidsforholdBusiness(
+    internal fun synkroniserArbeidsforhold(
         interneArbeidsforhold: List<Arbeidsforhold>,
         eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
     ): SynkroniserteArbeidsforhold {
