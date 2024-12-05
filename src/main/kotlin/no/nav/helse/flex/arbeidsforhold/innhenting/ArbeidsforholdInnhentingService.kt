@@ -3,9 +3,11 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.logger
+import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
+import java.util.function.Supplier
 
 data class SynkroniserteArbeidsforhold(
     val skalOpprettes: List<Arbeidsforhold> = emptyList(),
@@ -13,10 +15,11 @@ data class SynkroniserteArbeidsforhold(
     val skalSlettes: List<Arbeidsforhold> = emptyList(),
 )
 
+@Service
 class ArbeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
-    private val nowFactory: () -> Instant = Instant::now,
+    private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
     val log = logger()
 
@@ -51,7 +54,7 @@ class ArbeidsforholdInnhentingService(
                     fom = eksterntArbeidsforhold.fom,
                     tom = eksterntArbeidsforhold.tom,
                     arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-                    opprettet = nowFactory(),
+                    opprettet = nowFactory.get(),
                 )
             }
 
@@ -99,7 +102,7 @@ class ArbeidsforholdInnhentingService(
 
     // TODO sjekk logikk for dette
     private fun harVaertAnsattSiste4Mnd(sluttDato: LocalDate?): Boolean {
-        val ansettelsesperiodeFom = LocalDate.ofInstant(nowFactory(), UTC).minusMonths(4)
+        val ansettelsesperiodeFom = LocalDate.ofInstant(nowFactory.get(), UTC).minusMonths(4)
         return sluttDato == null || sluttDato.isAfter(ansettelsesperiodeFom)
     }
 
