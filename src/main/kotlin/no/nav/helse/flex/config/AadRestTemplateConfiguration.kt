@@ -41,8 +41,8 @@ class AadRestTemplateConfiguration {
             clientConfigurationProperties.registration[registrationName]
                 ?: throw RuntimeException("Fant ikke config for $registrationName.")
         return restTemplateBuilder
-            .setConnectTimeout(connectTimeout)
-            .setReadTimeout(readTimeout)
+            .connectTimeout(connectTimeout)
+            .connectTimeout(readTimeout)
             .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
             .build()
     }
