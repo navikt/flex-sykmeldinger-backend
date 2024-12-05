@@ -3,6 +3,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
 import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -16,6 +17,7 @@ data class EksterntArbeidsforhold(
     val arbeidsforholdType: ArbeidsforholdType?,
 )
 
+@Component
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
     private val eregClient: EregClient,
