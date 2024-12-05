@@ -24,7 +24,7 @@ class AaregHendelserListenerTest {
             mock {
                 on { getAllByFnr("fnr_med_sykmelding") } doReturn listOf(lagArbeidsforhold(fnr = "fnr_med_sykmelding"))
             }
-        val listener = AaregHendelserListener(arbeidsforholdRepository, mock(), "")
+        val listener = AaregHendelserConsumer(arbeidsforholdRepository, mock())
         listener.skalSynkroniseres("fnr_med_sykmelding") `should be` true
     }
 
@@ -34,14 +34,14 @@ class AaregHendelserListenerTest {
             mock {
                 on { getAllByFnr("fnr_uten_sykmelding") } doReturn emptyList()
             }
-        val listener = AaregHendelserListener(arbeidsforholdRepository, mock(), "")
+        val listener = AaregHendelserConsumer(arbeidsforholdRepository, mock())
         listener.skalSynkroniseres("fnr_uten_sykmelding") `should be` false
     }
 
     @Test
     fun `tar imot aaregHendelse og kaster feil når hendelse har feil format`() {
         val acknowledgment = mock<Acknowledgment> {}
-        val listener = AaregHendelserListener(mock(), mock(), "")
+        val listener = AaregHendelserConsumer(mock(), mock())
         val record: ConsumerRecord<String, String> =
             ConsumerRecord(
                 "topic",
@@ -58,7 +58,7 @@ class AaregHendelserListenerTest {
     @Test
     fun `tar imot aaregHendelse og acker når det er riktig format`() {
         val acknowledgment = mock<Acknowledgment> {}
-        val listener = AaregHendelserListener(mock(), mock(), "")
+        val listener = AaregHendelserConsumer(mock(), mock())
         val record: ConsumerRecord<String, String> =
             ConsumerRecord(
                 "topic",
@@ -81,33 +81,33 @@ class AaregHendelserListenerTest {
             mock {
                 on { getAllByFnr("fnr_med_sykmelding") } doReturn listOf(lagArbeidsforhold(fnr = "fnr_med_sykmelding"))
             }
-        val listener = AaregHendelserListener(arbeidsforholdRepository, arbeidsforholdInnhentingService, "")
+        val listener = AaregHendelserConsumer(arbeidsforholdRepository, arbeidsforholdInnhentingService)
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterHendelse(hendelse)
         verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
     }
+}
 
-    private fun lagArbeidsforholdHendelse(): ArbeidsforholdHendelse {
-        return ArbeidsforholdHendelse(
-            id = 1L,
-            endringstype = Endringstype.Endring,
-            arbeidsforhold =
-                ArbeidsforholdKafka(
-                    navArbeidsforholdId = 1,
-                    arbeidstaker =
-                        Arbeidstaker(
-                            identer =
-                                listOf(
-                                    Ident(
-                                        type = IdentType.FOLKEREGISTERIDENT,
-                                        ident = "fnr_med_sykmelding",
-                                        gjeldende = true,
-                                    ),
+fun lagArbeidsforholdHendelse(fnr: String = "fnr_med_sykmelding"): ArbeidsforholdHendelse {
+    return ArbeidsforholdHendelse(
+        id = 1L,
+        endringstype = Endringstype.Endring,
+        arbeidsforhold =
+            ArbeidsforholdKafka(
+                navArbeidsforholdId = 1,
+                arbeidstaker =
+                    Arbeidstaker(
+                        identer =
+                            listOf(
+                                Ident(
+                                    type = IdentType.FOLKEREGISTERIDENT,
+                                    ident = fnr,
+                                    gjeldende = true,
                                 ),
-                        ),
-                ),
-            entitetsendringer = listOf(Entitetsendring.Ansettelsesdetaljer),
-        )
-    }
+                            ),
+                    ),
+            ),
+        entitetsendringer = listOf(Entitetsendring.Ansettelsesdetaljer),
+    )
 }

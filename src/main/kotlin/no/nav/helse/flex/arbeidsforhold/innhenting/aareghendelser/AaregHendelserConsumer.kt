@@ -6,9 +6,9 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingServi
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
+import org.springframework.stereotype.Component
 
 //
 // import com.fasterxml.jackson.module.kotlin.readValue
@@ -69,15 +69,15 @@ import org.springframework.kafka.support.Acknowledgment
 // }
 //
 
-class AaregHendelserListener(
+@Component
+class AaregHendelserConsumer(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
-    @Value("\${AAREG_HENDELSE_TOPIC}") private val aaregHendelseTopic: String,
 ) {
     val log = logger()
 
     @KafkaListener(
-        topics = ["\$aaregHendelseTopic"],
+        topics = ["\${AAREG_HENDELSE_TOPIC}"],
         containerFactory = "aivenKafkaListenerContainerFactory",
         properties = ["auto.offset.reset = earliest"],
     )
