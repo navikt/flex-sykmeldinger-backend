@@ -1,4 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
+
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+
 //
 // import com.fasterxml.jackson.module.kotlin.readValue
 // import no.nav.helse.flex.objectMapper
@@ -59,4 +62,10 @@ package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 //
 // const val ARBEIDSFORHOLD_TOPIC = "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
 
-class AaregHendelserListener()
+class AaregHendelserListener(
+    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+) {
+    fun skalSynkroniseres(fnr: String): Boolean {
+        return arbeidsforholdRepository.getAllByFnr(fnr).isNotEmpty()
+    }
+}
