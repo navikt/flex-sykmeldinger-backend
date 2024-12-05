@@ -17,8 +17,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
-import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.UUID
 
@@ -47,7 +47,7 @@ abstract class FellesTestOppsett {
 
         init {
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.1")).apply {
+            KafkaContainer(DockerImageName.parse("apache/kafka-native")).apply {
                 start()
                 System.setProperty("KAFKA_BROKERS", bootstrapServers)
             }
