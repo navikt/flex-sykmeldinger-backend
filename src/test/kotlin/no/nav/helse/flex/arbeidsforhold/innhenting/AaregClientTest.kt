@@ -5,7 +5,6 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdRequest
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.serialisertTilString
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

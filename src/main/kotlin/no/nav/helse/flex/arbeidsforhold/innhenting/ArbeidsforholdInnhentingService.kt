@@ -39,39 +39,42 @@ class ArbeidsforholdInnhentingService(
         val oppdaterArbeidsforholdId = interneArbeidsforholdVedId.keys.intersect(eksterneArbeidsforholdVedId.keys)
         val slettArbeidsforholdId = interneArbeidsforholdVedId.keys - eksterneArbeidsforholdVedId.keys
 
-        val opprettArbeidsforhold = opprettArbeidsforholdId.map { arbeidsforholdId ->
-            val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
-            Arbeidsforhold(
-                arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
-                fnr = eksterntArbeidsforhold.fnr,
-                orgnummer = eksterntArbeidsforhold.orgnummer,
-                juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
-                orgnavn = eksterntArbeidsforhold.orgnavn,
-                fom = eksterntArbeidsforhold.fom,
-                tom = eksterntArbeidsforhold.tom,
-                arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-                opprettet = nowFactory(),
-            )
-        }
+        val opprettArbeidsforhold =
+            opprettArbeidsforholdId.map { arbeidsforholdId ->
+                val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
+                Arbeidsforhold(
+                    arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                    fnr = eksterntArbeidsforhold.fnr,
+                    orgnummer = eksterntArbeidsforhold.orgnummer,
+                    juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
+                    orgnavn = eksterntArbeidsforhold.orgnavn,
+                    fom = eksterntArbeidsforhold.fom,
+                    tom = eksterntArbeidsforhold.tom,
+                    arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
+                    opprettet = nowFactory(),
+                )
+            }
 
-        val oppdaterteArbeidsforhold = oppdaterArbeidsforholdId.map { arbeidsforholdId ->
-            val interntArbeidsforhold = interneArbeidsforholdVedId[arbeidsforholdId]!!
-            val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
-            interntArbeidsforhold.copy(
-                arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
-                fnr = eksterntArbeidsforhold.fnr,
-                orgnummer = eksterntArbeidsforhold.orgnummer,
-                juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
-                orgnavn = eksterntArbeidsforhold.orgnavn,
-                fom = eksterntArbeidsforhold.fom,
-                tom = eksterntArbeidsforhold.tom,
-                arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
-            )
-        }
+        val oppdaterteArbeidsforhold =
+            oppdaterArbeidsforholdId.map { arbeidsforholdId ->
+                val interntArbeidsforhold = interneArbeidsforholdVedId[arbeidsforholdId]!!
+                val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
+                interntArbeidsforhold.copy(
+                    arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                    fnr = eksterntArbeidsforhold.fnr,
+                    orgnummer = eksterntArbeidsforhold.orgnummer,
+                    juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
+                    orgnavn = eksterntArbeidsforhold.orgnavn,
+                    fom = eksterntArbeidsforhold.fom,
+                    tom = eksterntArbeidsforhold.tom,
+                    arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
+                )
+            }
 
-        val slettedeArbeidsforhold = slettArbeidsforholdId.map { arbeidsforholdId ->
-            interneArbeidsforholdVedId[arbeidsforholdId]!!
-        }
+        val slettedeArbeidsforhold =
+            slettArbeidsforholdId.map { arbeidsforholdId ->
+                interneArbeidsforholdVedId[arbeidsforholdId]!!
+            }
 
         val opprettArbeidsforholdNyeNok = opprettArbeidsforhold.filter { harVaertAnsattSiste4Mnd(it.tom) }
 
