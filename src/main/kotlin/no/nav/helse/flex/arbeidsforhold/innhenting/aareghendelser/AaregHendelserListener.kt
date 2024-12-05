@@ -1,12 +1,13 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 
 //
@@ -67,30 +68,26 @@ import org.springframework.kafka.support.Acknowledgment
 //
 // }
 //
-// const val ARBEIDSFORHOLD_TOPIC = "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
 
 class AaregHendelserListener(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
+    @Value("\${AAREG_HENDELSE_TOPIC}") private val aaregHendelseTopic: String,
 ) {
     val log = logger()
 
-    //        @KafkaListener(
-//        topics = [ARBEIDSFORHOLD_TOPIC],
-//        containerFactory = "aivenKafkaListenerContainerFactory",
-//        properties = ["auto.offset.reset = earliest"],
-//    )
+    @KafkaListener(
+        topics = ["\$aaregHendelseTopic"],
+        containerFactory = "aivenKafkaListenerContainerFactory",
+        properties = ["auto.offset.reset = earliest"],
+    )
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
         val record = cr.value()
-        try {
-            val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
-            handterHendelse(hendelse)
-        } catch (e: MismatchedInputException) {
-            log.warn("ArbeidsforholdHendelse har feil format", e)
-        }
+        val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
+        handterHendelse(hendelse)
         acknowledgment.acknowledge()
     }
 
