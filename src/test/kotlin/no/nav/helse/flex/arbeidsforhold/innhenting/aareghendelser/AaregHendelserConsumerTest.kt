@@ -12,9 +12,12 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
 import no.nav.helse.flex.serialisertTilString
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
+import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.kafka.support.Acknowledgment
 
 class AaregHendelserListenerTest {
@@ -77,7 +80,7 @@ class AaregHendelserListenerTest {
     }
 
     @Test
-    fun `håndterer aaregHendelse som skal synkroniseres`() {
+    fun `håndterer aaregHendelse dersom person er registert`() {
         val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
             mock {
                 on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
@@ -90,50 +93,62 @@ class AaregHendelserListenerTest {
         verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
     }
 
-    @Test
-    fun `burde behandle aaregHendelse med gyldig endringstype`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["Ansettelsesdetaljer", "Ansettelsesperiode"])
+    fun `burde behandle aaregHendelse som er opprettet`(entitetsendringString: String) {
+        val entitetsendringer = listOf(Entitetsendring.valueOf(entitetsendringString))
         val hendelse =
             lagArbeidsforholdHendelse(
-                fnr = "fnr_med_ugyldig_endringstype",
-                entitetsendringer = listOf(Entitetsendring.Permittering),
+                endringstype = Endringstype.Endring,
+                entitetsendringer = entitetsendringer,
             )
-        val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
-        val listener = AaregHendelserConsumer(mock(), arbeidsforholdInnhentingService)
+        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
+    }
 
-        listener.handterHendelse(hendelse)
-        verify(
-            arbeidsforholdInnhentingService,
-            never(),
-        ).synkroniserArbeidsforholdForPerson("fnr_med_ugyldig_endringstype")
+    @ParameterizedTest
+    @ValueSource(strings = ["Ansettelsesdetaljer", "Ansettelsesperiode"])
+    fun `burde behandle aaregHendelse som er endret`(entitetsendringString: String) {
+        val entitetsendringer = listOf(Entitetsendring.valueOf(entitetsendringString))
+        val hendelse =
+            lagArbeidsforholdHendelse(
+                endringstype = Endringstype.Endring,
+                entitetsendringer = entitetsendringer,
+            )
+        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
     @Test
-    fun `burde ikke behandle aaregHendelse med gyldig endringstype`() {
+    fun `burde behandle aaregHendelse som er slettet`() {
         val hendelse =
             lagArbeidsforholdHendelse(
-                fnr = "fnr_med_gyldig_endringstype",
-                entitetsendringer = listOf(Entitetsendring.Ansettelsesdetaljer),
+                endringstype = Endringstype.Sletting,
             )
-        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
-            mock {
-                on { erPersonRegistrert("fnr_med_gyldig_endringstype") } doReturn true
-            }
-        val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
+        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.SLETT
+    }
 
-        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
-
-        listener.handterHendelse(hendelse)
-        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_gyldig_endringstype")
+    @Test
+    fun `burde ikke behandle aaregHendelse som er endret med uviktig entitetsendring`() {
+        val hendelse =
+            lagArbeidsforholdHendelse(
+                endringstype = Endringstype.Endring,
+                entitetsendringer = listOf(Entitetsendring.Permittering),
+            )
+        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.IGNORER
     }
 }
 
 fun lagArbeidsforholdHendelse(
     fnr: String = "fnr_med_sykmelding",
+    endringstype: Endringstype = Endringstype.Opprettelse,
     entitetsendringer: List<Entitetsendring> = listOf(Entitetsendring.Ansettelsesdetaljer),
 ): ArbeidsforholdHendelse {
     return ArbeidsforholdHendelse(
         id = 1L,
-        endringstype = Endringstype.Endring,
+        endringstype = endringstype,
         arbeidsforhold =
             ArbeidsforholdKafka(
                 navArbeidsforholdId = 1,
@@ -149,6 +164,6 @@ fun lagArbeidsforholdHendelse(
                             ),
                     ),
             ),
-        entitetsendringer = listOf(Entitetsendring.Ansettelsesdetaljer),
+        entitetsendringer = entitetsendringer,
     )
 }

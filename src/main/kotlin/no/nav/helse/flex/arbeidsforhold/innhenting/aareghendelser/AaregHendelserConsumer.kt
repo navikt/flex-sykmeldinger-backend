@@ -56,18 +56,14 @@ import org.springframework.stereotype.Component
 //        }
 //    }
 //
-//    private fun hasValidEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse) =
-//        arbeidsforholdHendelse.entitetsendringer.any { endring ->
-//            endring == Entitetsendring.Ansettelsesdetaljer ||
-//                endring == Entitetsendring.Ansettelsesperiode
-//        }
-//
-//    private fun updateArbeidsforholdFor(newhendelserByFnr: List<String>) {
-//        newhendelserByFnr.map { arbeidsforholdService.updateArbeidsforhold(it) }
-//    }
-//
 // }
 //
+
+enum class AaregHendelseHandtering {
+    OPPRETT_OPPDATER,
+    SLETT,
+    IGNORER,
+}
 
 @Component
 class AaregHendelserConsumer(
@@ -91,19 +87,36 @@ class AaregHendelserConsumer(
         acknowledgment.acknowledge()
     }
 
+
+
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
-        if (!harGyldigEndringstype(hendelse)) {
+        val fnr = hendelse.arbeidsforhold.arbeidstaker.getFnr()
+
+        if (!skalSynkroniseres(fnr)) {
             return
         }
-        val fnr = hendelse.arbeidsforhold.arbeidstaker.getFnr()
-        if (skalSynkroniseres(fnr)) {
-            val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
-            log.info(
-                "Arbeidsforhold endret: Opprettet ${resultat.skalOpprettes.count()}. " +
-                    "Oppdaterte ${resultat.skalOppdateres.count()}. " +
-                    "Slettet ${resultat.skalSlettes.count()}.",
-            )
+
+        val hendelseHandtering = avgjorHendelseshandtering(hendelse)
+
+        when (hendelseHandtering) {
+            AaregHendelseHandtering.OPPRETT_OPPDATER -> {
+                opprettEllerEndreArbeidsforhold(fnr)
+            }
+            AaregHendelseHandtering.SLETT -> {
+                val arbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
+                //arbeidsforholdInnhentingService.slettArbeidsforhold(arbeidsforholdId)
+            }
+            else -> {}
         }
+    }
+
+    private fun opprettEllerEndreArbeidsforhold(fnr: String) {
+        val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
+        log.info(
+            "Arbeidsforhold endret: Opprettet ${resultat.skalOpprettes.count()}. " +
+                "Oppdaterte ${resultat.skalOppdateres.count()}. " +
+                "Slettet ${resultat.skalSlettes.count()}.",
+        )
     }
 
     fun skalSynkroniseres(fnr: String): Boolean {
@@ -111,6 +124,22 @@ class AaregHendelserConsumer(
     }
 
     companion object {
+        internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering {
+            return when (hendelse.endringstype) {
+                Endringstype.Opprettelse, Endringstype.Endring -> {
+                    return if (harGyldigEndringstype(hendelse)) {
+                        AaregHendelseHandtering.OPPRETT_OPPDATER
+                    }
+                    else {
+                        AaregHendelseHandtering.IGNORER
+                    }
+                }
+                Endringstype.Sletting -> {
+                    return AaregHendelseHandtering.SLETT
+                }
+            }
+        }
+
         private fun harGyldigEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse): Boolean {
             return arbeidsforholdHendelse.entitetsendringer.any { endring ->
                 endring == Entitetsendring.Ansettelsesdetaljer ||
