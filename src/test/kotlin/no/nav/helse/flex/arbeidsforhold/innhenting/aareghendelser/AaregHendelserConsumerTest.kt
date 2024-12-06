@@ -93,6 +93,11 @@ class AaregHendelserListenerTest {
         verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
     }
 
+    @Test
+    fun `burde kalle slett ved aaregHendelse av type sletting`() {
+        throw Exception()
+    }
+
     @ParameterizedTest
     @ValueSource(strings = ["Ansettelsesdetaljer", "Ansettelsesperiode"])
     fun `burde behandle aaregHendelse som er opprettet`(entitetsendringString: String) {
