@@ -92,6 +92,9 @@ class AaregHendelserConsumer(
     }
 
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
+        if (!harGyldigEndringstype(hendelse)) {
+            return
+        }
         val fnr = hendelse.arbeidsforhold.arbeidstaker.getFnr()
         if (skalSynkroniseres(fnr)) {
             val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
@@ -105,5 +108,14 @@ class AaregHendelserConsumer(
 
     fun skalSynkroniseres(fnr: String): Boolean {
         return registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
+    }
+
+    companion object {
+        private fun harGyldigEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse): Boolean {
+            return arbeidsforholdHendelse.entitetsendringer.any { endring ->
+                endring == Entitetsendring.Ansettelsesdetaljer ||
+                    endring == Entitetsendring.Ansettelsesperiode
+            }
+        }
     }
 }

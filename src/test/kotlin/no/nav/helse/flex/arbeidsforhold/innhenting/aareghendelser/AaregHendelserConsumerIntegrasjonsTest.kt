@@ -5,12 +5,11 @@ import no.nav.helse.flex.serialisertTilString
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import java.time.Duration
 
-class AaregHendelserListenerIntegrasjonsTest : FellesTestOppsett() {
+class AaregHendelserConsumerIntegrasjonsTest : FellesTestOppsett() {
     @Value("\${AAREG_HENDELSE_TOPIC}")
     lateinit var aaregTopic: String
 

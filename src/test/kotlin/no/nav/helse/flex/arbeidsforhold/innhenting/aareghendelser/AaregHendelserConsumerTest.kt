@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
@@ -17,6 +18,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.kafka.support.Acknowledgment
 
 class AaregHendelserListenerTest {
+    fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
+        mock {
+            on { synkroniserArbeidsforholdForPerson(any()) } doReturn SynkroniserteArbeidsforhold()
+        }
+
     @Test
     fun `burde synkronisere eksisterende persons arbeidsforhold`() {
         val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
@@ -76,19 +82,55 @@ class AaregHendelserListenerTest {
             mock {
                 on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
             }
-        val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService =
-            mock {
-                on { synkroniserArbeidsforholdForPerson(any()) } doReturn SynkroniserteArbeidsforhold()
-            }
+        val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
         val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterHendelse(hendelse)
         verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
     }
+
+    @Test
+    fun `burde behandle aaregHendelse med gyldig endringstype`() {
+        val hendelse =
+            lagArbeidsforholdHendelse(
+                fnr = "fnr_med_ugyldig_endringstype",
+                entitetsendringer = listOf(Entitetsendring.Permittering),
+            )
+        val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
+        val listener = AaregHendelserConsumer(mock(), arbeidsforholdInnhentingService)
+
+        listener.handterHendelse(hendelse)
+        verify(
+            arbeidsforholdInnhentingService,
+            never(),
+        ).synkroniserArbeidsforholdForPerson("fnr_med_ugyldig_endringstype")
+    }
+
+    @Test
+    fun `burde ikke behandle aaregHendelse med gyldig endringstype`() {
+        val hendelse =
+            lagArbeidsforholdHendelse(
+                fnr = "fnr_med_gyldig_endringstype",
+                entitetsendringer = listOf(Entitetsendring.Ansettelsesdetaljer),
+            )
+        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
+            mock {
+                on { erPersonRegistrert("fnr_med_gyldig_endringstype") } doReturn true
+            }
+        val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
+
+        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
+
+        listener.handterHendelse(hendelse)
+        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_gyldig_endringstype")
+    }
 }
 
-fun lagArbeidsforholdHendelse(fnr: String = "fnr_med_sykmelding"): ArbeidsforholdHendelse {
+fun lagArbeidsforholdHendelse(
+    fnr: String = "fnr_med_sykmelding",
+    entitetsendringer: List<Entitetsendring> = listOf(Entitetsendring.Ansettelsesdetaljer),
+): ArbeidsforholdHendelse {
     return ArbeidsforholdHendelse(
         id = 1L,
         endringstype = Endringstype.Endring,
