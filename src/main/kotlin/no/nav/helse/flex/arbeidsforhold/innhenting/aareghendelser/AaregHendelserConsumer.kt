@@ -1,8 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -71,7 +71,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class AaregHendelserConsumer(
-    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
 ) {
     val log = logger()
@@ -96,7 +96,7 @@ class AaregHendelserConsumer(
         if (skalSynkroniseres(fnr)) {
             val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
             log.info(
-                "Opprettet ${resultat.skalOpprettes.count()}. " +
+                "Arbeidsforhold endret: Opprettet ${resultat.skalOpprettes.count()}. " +
                     "Oppdaterte ${resultat.skalOppdateres.count()}. " +
                     "Slettet ${resultat.skalSlettes.count()}.",
             )
@@ -104,6 +104,6 @@ class AaregHendelserConsumer(
     }
 
     fun skalSynkroniseres(fnr: String): Boolean {
-        return arbeidsforholdRepository.getAllByFnr(fnr).isNotEmpty()
+        return registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
     }
 }

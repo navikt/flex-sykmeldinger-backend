@@ -5,10 +5,9 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
-import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforhold
 import no.nav.helse.flex.serialisertTilString
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
@@ -20,21 +19,21 @@ import org.springframework.kafka.support.Acknowledgment
 class AaregHendelserListenerTest {
     @Test
     fun `burde synkronisere eksisterende persons arbeidsforhold`() {
-        val arbeidsforholdRepository: ArbeidsforholdRepository =
+        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
             mock {
-                on { getAllByFnr("fnr_med_sykmelding") } doReturn listOf(lagArbeidsforhold(fnr = "fnr_med_sykmelding"))
+                on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
             }
-        val listener = AaregHendelserConsumer(arbeidsforholdRepository, mock())
+        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, mock())
         listener.skalSynkroniseres("fnr_med_sykmelding") `should be` true
     }
 
     @Test
     fun `burde ikke synkronisere ny persons arbeidsforhold`() {
-        val arbeidsforholdRepository: ArbeidsforholdRepository =
+        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
             mock {
-                on { getAllByFnr("fnr_uten_sykmelding") } doReturn emptyList()
+                on { erPersonRegistrert("fnr_uten_sykmelding") } doReturn false
             }
-        val listener = AaregHendelserConsumer(arbeidsforholdRepository, mock())
+        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, mock())
         listener.skalSynkroniseres("fnr_uten_sykmelding") `should be` false
     }
 
@@ -73,15 +72,15 @@ class AaregHendelserListenerTest {
 
     @Test
     fun `håndterer aaregHendelse som skal synkroniseres`() {
+        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
+            mock {
+                on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
+            }
         val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService =
             mock {
                 on { synkroniserArbeidsforholdForPerson(any()) } doReturn SynkroniserteArbeidsforhold()
             }
-        val arbeidsforholdRepository: ArbeidsforholdRepository =
-            mock {
-                on { getAllByFnr("fnr_med_sykmelding") } doReturn listOf(lagArbeidsforhold(fnr = "fnr_med_sykmelding"))
-            }
-        val listener = AaregHendelserConsumer(arbeidsforholdRepository, arbeidsforholdInnhentingService)
+        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterHendelse(hendelse)

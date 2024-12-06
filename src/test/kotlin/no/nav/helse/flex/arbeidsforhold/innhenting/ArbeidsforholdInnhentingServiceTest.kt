@@ -209,7 +209,7 @@ class ArbeidsforholdInnhentingServiceTest {
                             tom = LocalDate.parse("2020-01-01"),
                         ),
                     ),
-                now = Instant.parse("2020-05-01T00:00:00Z")
+                now = Instant.parse("2020-05-01T00:00:00Z"),
             )
         resultat.skalOpprettes shouldHaveSize 0
     }

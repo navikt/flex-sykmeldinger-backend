@@ -27,7 +27,7 @@ class ArbeidsforholdInnhentingService(
         internal fun synkroniserArbeidsforhold(
             interneArbeidsforhold: List<Arbeidsforhold>,
             eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
-            now: Instant = Instant.now()
+            now: Instant = Instant.now(),
         ): SynkroniserteArbeidsforhold {
             val eksterneArbeidsforholdVedId = eksterneArbeidsforhold.associateBy { it.arbeidsforholdId }
             val interneArbeidsforholdVedId = interneArbeidsforhold.associateBy { it.arbeidsforholdId }
@@ -83,7 +83,10 @@ class ArbeidsforholdInnhentingService(
         }
 
         // TODO sjekk logikk for dette
-        private fun harVaertAnsattSiste4Mnd(sluttDato: LocalDate?, now: Instant): Boolean {
+        private fun harVaertAnsattSiste4Mnd(
+            sluttDato: LocalDate?,
+            now: Instant,
+        ): Boolean {
             val ansettelsesperiodeFom = LocalDate.ofInstant(now, UTC).minusMonths(4)
             return sluttDato == null || sluttDato.isAfter(ansettelsesperiodeFom)
         }
@@ -108,8 +111,6 @@ class ArbeidsforholdInnhentingService(
             arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
         }
     }
-
-
 
 //    fun updateArbeidsforhold(fnr: String) {
 //        val arbeidsforhold = getAlleArbeidsforhold(fnr)
