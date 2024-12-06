@@ -87,8 +87,6 @@ class AaregHendelserConsumer(
         acknowledgment.acknowledge()
     }
 
-
-
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
         val fnr = hendelse.arbeidsforhold.arbeidstaker.getFnr()
 

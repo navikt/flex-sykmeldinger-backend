@@ -21,7 +21,25 @@ class ArbeidsforholdInnhentingService(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
-    val log = logger()
+    fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
+        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
+        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
+        val synkroniserteArbeidsforhold = synkroniserArbeidsforhold(interneArbeidsforhold, eksterntArbeidsforhold, now = nowFactory.get())
+        lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
+        return synkroniserteArbeidsforhold
+    }
+
+    internal fun lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold: SynkroniserteArbeidsforhold) {
+        if (synkroniserteArbeidsforhold.skalOpprettes.isNotEmpty()) {
+            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOpprettes)
+        }
+        if (synkroniserteArbeidsforhold.skalOppdateres.isNotEmpty()) {
+            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOppdateres)
+        }
+        if (synkroniserteArbeidsforhold.skalSlettes.isNotEmpty()) {
+            arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
+        }
+    }
 
     companion object {
         internal fun synkroniserArbeidsforhold(
@@ -91,87 +109,4 @@ class ArbeidsforholdInnhentingService(
             return sluttDato == null || sluttDato.isAfter(ansettelsesperiodeFom)
         }
     }
-
-    fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
-        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
-        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
-        val synkroniserteArbeidsforhold = synkroniserArbeidsforhold(interneArbeidsforhold, eksterntArbeidsforhold, now = nowFactory.get())
-        lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
-        return synkroniserteArbeidsforhold
-    }
-
-    internal fun lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold: SynkroniserteArbeidsforhold) {
-        if (synkroniserteArbeidsforhold.skalOpprettes.isNotEmpty()) {
-            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOpprettes)
-        }
-        if (synkroniserteArbeidsforhold.skalOppdateres.isNotEmpty()) {
-            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOppdateres)
-        }
-        if (synkroniserteArbeidsforhold.skalSlettes.isNotEmpty()) {
-            arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
-        }
-    }
-
-//    fun updateArbeidsforhold(fnr: String) {
-//        val arbeidsforhold = getAlleArbeidsforhold(fnr)
-//        val arbeidsforholdFraDb = arbeidsforholdRepository.getByFnr(fnr)
-//
-//        val slettesfraDb =
-//            getArbeidsforholdSomSkalSlettes(
-//                arbeidsforholdRepository = arbeidsforholdFraDb,
-//                arbeidsforholdAareg = arbeidsforhold,
-//            )
-//
-//        if (slettesfraDb.isNotEmpty()) {
-//            slettesfraDb.forEach {
-//                log.info(
-//                    "Sletter utdatert arbeidsforhold med id $it",
-//                )
-//                arbeidsforholdRepository.delete(it)
-//            }
-//        }
-//        arbeidsforhold.forEach { insertOrUpdate(it) }
-//    }
-//
-//    private fun getAlleArbeidsforhold(fnr: String): List<Arbeidsforhold> {
-//        val arbeidsgivere = aaregClient.hentArbeidsforholdoversikt(fnr = fnr).arbeidsforholdoversikter
-//
-//        if (arbeidsgivere.isEmpty()) {
-//            return emptyList()
-//        }
-//
-//        val arbeidsgiverList =
-//            arbeidsgivere
-//                .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
-//                .filter { arbeidsforholdErGyldig(it.ansettelsesperiode) }
-//                .sortedWith(
-//                    compareByDescending(nullsLast()) { it.ansettelsesperiode.sluttdato },
-//                )
-//                .map { aaregArbeidsforhold ->
-//                    val organisasjonsinfo =
-//                        eregClient.getOrganisasjonsnavn(
-//                            aaregArbeidsforhold.arbeidssted.getOrgnummer()
-//                        )
-//                    val arbeidsforholdType = ArbeidsforholdType.parse(aaregArbeidsforhold.type.kode)
-//                    Arbeidsforhold(
-//                        id = aaregArbeidsforhold.navArbeidsforholdId,
-//                        fnr = fnr,
-//                        orgnummer = aaregArbeidsforhold.arbeidssted.getOrgnummer(),
-//                        juridiskOrgnummer =
-//                        aaregArbeidsforhold.opplysningspliktig.getJuridiskOrgnummer(),
-//                        orgNavn = organisasjonsinfo.navn.getNameAsString(),
-//                        fom = aaregArbeidsforhold.ansettelsesperiode.startdato,
-//                        tom = aaregArbeidsforhold.ansettelsesperiode.sluttdato,
-//                        type = arbeidsforholdType,
-//                    )
-//                }
-//        return arbeidsgiverList
-//    }
-//
-//
-//    private fun arbeidsforholdErGyldig(ansettelsesperiode: Ansettelsesperiode): Boolean {
-//        val ansettelsesperiodeFom = LocalDate.now().minusMonths(4)
-//        return ansettelsesperiode.sluttdato == null ||
-//            ansettelsesperiode.sluttdato.isAfter(ansettelsesperiodeFom)
-//    }
 }
