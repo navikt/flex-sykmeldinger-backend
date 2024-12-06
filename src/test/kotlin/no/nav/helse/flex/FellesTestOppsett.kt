@@ -69,11 +69,19 @@ abstract class FellesTestOppsett {
                     .also {
                         System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
                     }
+
+            startMockWebServere()
         }
     }
 
     @AfterAll
     fun `Vi resetter databasen`() {
+        slettDatabase()
+    }
+
+    fun slettDatabase() {
+        narmesteLederRepository.deleteAll()
+        arbeidsforholdRepository.deleteAll()
     }
 
     fun tokenxToken(
