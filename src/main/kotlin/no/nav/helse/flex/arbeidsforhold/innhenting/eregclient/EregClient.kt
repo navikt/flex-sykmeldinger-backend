@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
@@ -17,6 +18,7 @@ class EregClient(
 ) {
     val log = logger()
 
+    @Retryable
     fun hentNokkelinfo(orgnummer: String): Nokkelinfo {
         val uriBuilder =
             UriComponentsBuilder.fromHttpUrl("$eregUrl/v2/organisasjon/$orgnummer/noekkelinfo")
