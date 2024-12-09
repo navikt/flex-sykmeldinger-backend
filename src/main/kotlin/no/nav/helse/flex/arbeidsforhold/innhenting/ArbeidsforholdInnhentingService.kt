@@ -3,6 +3,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
@@ -15,6 +16,7 @@ data class SynkroniserteArbeidsforhold(
 )
 
 @Service
+@Transactional
 class ArbeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
