@@ -19,7 +19,7 @@ class AaregHendelserConsumerIntegrasjonsTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `burde lese arbeidsforhold hendelse, og lagre endret arbeidsforhold fra aareg + erege`() {
+    fun `burde lese arbeidsforhold hendelse, og lagre endret arbeidsforhold fra aareg + ereg`() {
         val record: ProducerRecord<String, String> =
             ProducerRecord(
                 aaregTopic,
