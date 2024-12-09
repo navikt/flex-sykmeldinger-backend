@@ -102,7 +102,7 @@ class AaregHendelserConsumer(
             }
             AaregHendelseHandtering.SLETT -> {
                 val arbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
-                //arbeidsforholdInnhentingService.slettArbeidsforhold(arbeidsforholdId)
+                arbeidsforholdInnhentingService.slettArbeidsforhold(arbeidsforholdId.toString())
             }
             else -> {}
         }
@@ -127,8 +127,7 @@ class AaregHendelserConsumer(
                 Endringstype.Opprettelse, Endringstype.Endring -> {
                     return if (harGyldigEndringstype(hendelse)) {
                         AaregHendelseHandtering.OPPRETT_OPPDATER
-                    }
-                    else {
+                    } else {
                         AaregHendelseHandtering.IGNORER
                     }
                 }

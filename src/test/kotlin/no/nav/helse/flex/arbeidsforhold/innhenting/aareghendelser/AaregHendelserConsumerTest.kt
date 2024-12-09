@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
@@ -95,7 +94,13 @@ class AaregHendelserListenerTest {
 
     @Test
     fun `burde kalle slett ved aaregHendelse av type sletting`() {
-        throw Exception()
+        val hendelse =
+            lagArbeidsforholdHendelse(
+                endringstype = Endringstype.Sletting,
+                entitetsendringer = listOf(Entitetsendring.Permittering),
+            )
+        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.SLETT
     }
 
     @ParameterizedTest

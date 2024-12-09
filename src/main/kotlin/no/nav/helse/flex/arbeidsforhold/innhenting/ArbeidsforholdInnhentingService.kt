@@ -2,7 +2,6 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.logger
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
@@ -39,6 +38,10 @@ class ArbeidsforholdInnhentingService(
         if (synkroniserteArbeidsforhold.skalSlettes.isNotEmpty()) {
             arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
         }
+    }
+
+    fun slettArbeidsforhold(arbeidsforholdId: String) {
+        arbeidsforholdRepository.deleteByArbeidsforholdId(arbeidsforholdId)
     }
 
     companion object {
