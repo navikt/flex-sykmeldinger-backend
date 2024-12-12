@@ -48,7 +48,14 @@ class EksternArbeidsforholdHenter(
 fun getFnrFraArbeidstaker(arbeidstaker: Arbeidstaker): String {
     val gjeldendePersonIdenter =
         arbeidstaker.identer
-            .filter { it.type in setOf(IdentType.AKTORID, IdentType.FOLKEREGISTERIDENT) }
+            .filter {
+                it.type in
+                    setOf(
+                        // TODO: skal vi sjekke aktorId også?
+                        //  IdentType.AKTORID,
+                        IdentType.FOLKEREGISTERIDENT,
+                    )
+            }
             .filter { it.gjeldende == true }
     require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
 

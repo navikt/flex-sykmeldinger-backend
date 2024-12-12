@@ -42,7 +42,7 @@ class EksternArbeidsforholdHenterTest {
                                 arbeidstakerIdenter =
                                     listOf(
                                         Ident(
-                                            type = IdentType.AKTORID,
+                                            type = IdentType.FOLKEREGISTERIDENT,
                                             ident = "00000000001",
                                             gjeldende = true,
                                         ),
@@ -91,7 +91,7 @@ class EksternArbeidsforholdHenterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["AKTORID", "FOLKEREGISTERIDENT"])
+    @ValueSource(strings = ["FOLKEREGISTERIDENT"])
     fun `burde godta riktige ident typer for fnr`(identType: String) {
         val aaregClient: AaregClient =
             mock {
@@ -117,8 +117,9 @@ class EksternArbeidsforholdHenterTest {
         resultat.fnr `should be equal to` "00000000001"
     }
 
-    @Test
-    fun `burde feile ved feil fnr ident type`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["AKTORID", "ORGANISASJONSNUMMER"])
+    fun `burde feile ved feil fnr ident type`(identType: String) {
         val aaregClient: AaregClient =
             mock {
                 on { getArbeidsforholdoversikt(any()) } doReturn
@@ -128,7 +129,7 @@ class EksternArbeidsforholdHenterTest {
                                 arbeidstakerIdenter =
                                     listOf(
                                         Ident(
-                                            type = IdentType.ORGANISASJONSNUMMER,
+                                            type = IdentType.valueOf(identType),
                                             ident = "00000000001",
                                             gjeldende = true,
                                         ),
@@ -155,12 +156,12 @@ class EksternArbeidsforholdHenterTest {
                                 arbeidstakerIdenter =
                                     listOf(
                                         Ident(
-                                            type = IdentType.AKTORID,
+                                            type = IdentType.FOLKEREGISTERIDENT,
                                             ident = "gjeldende-fnr",
                                             gjeldende = true,
                                         ),
                                         Ident(
-                                            type = IdentType.AKTORID,
+                                            type = IdentType.FOLKEREGISTERIDENT,
                                             ident = "ikke-gjeldende-fnr",
                                             gjeldende = false,
                                         ),
@@ -283,7 +284,7 @@ class EksternArbeidsforholdHenterTest {
                 identer =
                     listOf(
                         Ident(
-                            type = IdentType.AKTORID,
+                            type = IdentType.FOLKEREGISTERIDENT,
                             ident = "orgnummer",
                         ),
                     ),
@@ -299,7 +300,7 @@ class EksternArbeidsforholdHenterTest {
         arbeidstakerIdenter: List<Ident> =
             listOf(
                 Ident(
-                    type = IdentType.AKTORID,
+                    type = IdentType.FOLKEREGISTERIDENT,
                     ident = "2175141353812",
                     gjeldende = true,
                 ),
