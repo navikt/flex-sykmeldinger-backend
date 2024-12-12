@@ -96,10 +96,10 @@ class ArbeidsforholdInnhentingService(
                     interneArbeidsforholdVedId[arbeidsforholdId]!!
                 }
 
-            val opprettArbeidsforholdNyeNok = opprettArbeidsforhold.filter { harVaertAnsattSiste4Mnd(it.tom, now = now) }
+            val opprettNyligeArbeidsforhold = opprettArbeidsforhold.filter { harVaertAnsattSiste4Mnd(it.tom, now = now) }
 
             return SynkroniserteArbeidsforhold(
-                skalOpprettes = opprettArbeidsforholdNyeNok,
+                skalOpprettes = opprettNyligeArbeidsforhold,
                 skalOppdateres = oppdaterteArbeidsforhold,
                 skalSlettes = slettedeArbeidsforhold,
             )
@@ -110,8 +110,8 @@ class ArbeidsforholdInnhentingService(
             sluttDato: LocalDate?,
             now: Instant,
         ): Boolean {
-            val ansettelsesperiodeFom = LocalDate.ofInstant(now, UTC).minusMonths(4)
-            return sluttDato == null || sluttDato.isAfter(ansettelsesperiodeFom)
+            val fireMndSiden = LocalDate.ofInstant(now, UTC).minusMonths(4)
+            return sluttDato == null || sluttDato.isAfter(fireMndSiden)
         }
     }
 }
