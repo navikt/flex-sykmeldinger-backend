@@ -23,7 +23,7 @@ enum class Endringstype {
 }
 
 data class ArbeidsforholdKafka(
-    val navArbeidsforholdId: Int,
+    val navArbeidsforholdId: String,
     val arbeidstaker: Arbeidstaker,
 )
 

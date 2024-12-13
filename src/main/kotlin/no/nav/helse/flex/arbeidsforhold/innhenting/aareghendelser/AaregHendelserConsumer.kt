@@ -41,7 +41,7 @@ class AaregHendelserConsumer(
                         val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
                         handterHendelse(hendelse)
                     } catch (e: Exception) {
-                        log.error("Klarte ikke prosessere record med key: ${consumerRecord.key()}")
+                        log.error("Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.")
                         throw e
                     }
                 }
@@ -65,8 +65,8 @@ class AaregHendelserConsumer(
             }
 
             AaregHendelseHandtering.SLETT -> {
-                val arbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
-                arbeidsforholdInnhentingService.slettArbeidsforhold(arbeidsforholdId.toString())
+                val navArbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
+                arbeidsforholdInnhentingService.slettArbeidsforhold(navArbeidsforholdId)
             }
 
             else -> {}

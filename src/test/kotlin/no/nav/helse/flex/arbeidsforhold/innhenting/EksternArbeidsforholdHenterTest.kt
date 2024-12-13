@@ -37,7 +37,7 @@ class EksternArbeidsforholdHenterTest {
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
-                                navArbeidsforholdId = "arbeidsforholdId",
+                                navArbeidsforholdId = "navArbeidsforholdId",
                                 typeKode = "ordinaertArbeidsforhold",
                                 arbeidstakerIdenter =
                                     listOf(
@@ -65,7 +65,7 @@ class EksternArbeidsforholdHenterTest {
             }
         val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr").first()
-        eksterntArbeidsforhold.arbeidsforholdId `should be equal to` "arbeidsforholdId"
+        eksterntArbeidsforhold.navArbeidsforholdId `should be equal to` "navArbeidsforholdId"
         eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
         eksterntArbeidsforhold.orgnummer `should be equal to` "orgnummer"
         eksterntArbeidsforhold.juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
@@ -295,7 +295,7 @@ class EksternArbeidsforholdHenterTest {
     }
 
     private fun lagArbeidsforholdOversikt(
-        navArbeidsforholdId: String = "arbeidsforholdId",
+        navArbeidsforholdId: String = "navArbeidsforholdId",
         typeKode: String = "ordinaertArbeidsforhold",
         arbeidstakerIdenter: List<Ident> =
             listOf(

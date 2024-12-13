@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
-    val arbeidsforholdId: String,
+    val navArbeidsforholdId: String,
     val fnr: String,
     val orgnummer: String,
     val juridiskOrgnummer: String,
@@ -32,7 +32,7 @@ class EksternArbeidsforholdHenter(
                 val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
                 val orgnavn = orgNokkelinfo.navn.sammensattnavn
                 EksterntArbeidsforhold(
-                    arbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
+                    navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
                     fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
                     orgnummer = orgnummer,
                     juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),

@@ -19,7 +19,7 @@ class ArbeidsforholdInnhentingServiceTest {
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
                     listOf(
-                        lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId"),
+                        lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId"),
                     )
             }
         val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
@@ -29,7 +29,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforholdId")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("navArbeidsforholdId")
         verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
@@ -39,12 +39,12 @@ class ArbeidsforholdInnhentingServiceTest {
             mock {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
                     listOf(
-                        lagEksterntArbeidsforhold(arbeidsforholdId = "arbeidsforholdId"),
+                        lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId"),
                     )
             }
         val arbeidsforholdRepository =
             mock<ArbeidsforholdRepository> {
-                on { findByArbeidsforholdId(any()) } doReturn lagArbeidsforhold(arbeidsforholdId = "arbeidsforholdId")
+                on { findByNavArbeidsforholdId(any()) } doReturn lagArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId")
             }
         val arbeidsforholdInnhentingService =
             ArbeidsforholdInnhentingService(
@@ -52,7 +52,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 arbeidsforholdRepository = arbeidsforholdRepository,
             )
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("arbeidsforholdId")
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("navArbeidsforholdId")
         verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
@@ -63,7 +63,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
                     listOf(
                         EksterntArbeidsforhold(
-                            arbeidsforholdId = "arbeidsforhold",
+                            navArbeidsforholdId = "arbeidsforhold",
                             fnr = "fnr",
                             orgnummer = "orgnummer",
                             juridiskOrgnummer = "jorgnummer",
@@ -86,7 +86,7 @@ class ArbeidsforholdInnhentingServiceTest {
 
         val forventetArbeidsforhold =
             lagArbeidsforhold(
-                arbeidsforholdId = "arbeidsforhold",
+                navArbeidsforholdId = "arbeidsforhold",
                 fnr = "fnr",
                 orgnummer = "orgnummer",
                 juridiskOrgnummer = "jorgnummer",
@@ -106,7 +106,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
                     listOf(
                         EksterntArbeidsforhold(
-                            arbeidsforholdId = "arbeidsforhold",
+                            navArbeidsforholdId = "arbeidsforhold",
                             fnr = "nytt_fnr",
                             orgnummer = "nytt_orgnummer",
                             juridiskOrgnummer = "nytt_jorgnummer",
@@ -119,9 +119,9 @@ class ArbeidsforholdInnhentingServiceTest {
             }
         val arbeidsforholdRepository =
             mock<ArbeidsforholdRepository> {
-                on { findByArbeidsforholdId(any()) } doReturn
+                on { findByNavArbeidsforholdId(any()) } doReturn
                     lagArbeidsforhold(
-                        arbeidsforholdId = "arbeidsforhold",
+                        navArbeidsforholdId = "arbeidsforhold",
                         fnr = "fnr",
                         orgnummer = "orgnummer",
                         juridiskOrgnummer = "jorgnummer",
@@ -143,7 +143,7 @@ class ArbeidsforholdInnhentingServiceTest {
 
         val forventetArbeidsforhold =
             lagArbeidsforhold(
-                arbeidsforholdId = "arbeidsforhold",
+                navArbeidsforholdId = "arbeidsforhold",
                 fnr = "nytt_fnr",
                 orgnummer = "nytt_orgnummer",
                 juridiskOrgnummer = "nytt_jorgnummer",
@@ -175,11 +175,11 @@ class ArbeidsforholdInnhentingServiceTest {
             ArbeidsforholdInnhentingService.synkroniserArbeidsforhold(
                 interneArbeidsforhold =
                     listOf(
-                        lagArbeidsforhold(arbeidsforholdId = "1"),
+                        lagArbeidsforhold(navArbeidsforholdId = "1"),
                     ),
                 eksterneArbeidsforhold =
                     listOf(
-                        lagEksterntArbeidsforhold(arbeidsforholdId = "1"),
+                        lagEksterntArbeidsforhold(navArbeidsforholdId = "1"),
                     ),
             )
         resultat.skalOppdateres shouldHaveSize 1

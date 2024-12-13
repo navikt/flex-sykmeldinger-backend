@@ -150,7 +150,7 @@ fun lagArbeidsforholdHendelse(
         endringstype = endringstype,
         arbeidsforhold =
             ArbeidsforholdKafka(
-                navArbeidsforholdId = 1,
+                navArbeidsforholdId = "id",
                 arbeidstaker =
                     Arbeidstaker(
                         identer =

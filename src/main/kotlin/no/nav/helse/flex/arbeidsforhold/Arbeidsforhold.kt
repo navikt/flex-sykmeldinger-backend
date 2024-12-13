@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class Arbeidsforhold(
     @Id
     val id: String? = null,
-    val arbeidsforholdId: String,
+    val navArbeidsforholdId: String,
     val fnr: String,
     val orgnummer: String,
     val juridiskOrgnummer: String,

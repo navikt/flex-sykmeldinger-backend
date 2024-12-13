@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 fun lagArbeidsforhold(
     id: String? = null,
-    arbeidsforholdId: String = "arbeidsforholdId",
+    navArbeidsforholdId: String = "navArbeidsforholdId",
     fnr: String = "00000000001",
     orgnummer: String = "org",
     juridiskOrgnummer: String = "org",
@@ -19,7 +19,7 @@ fun lagArbeidsforhold(
 ): Arbeidsforhold {
     return Arbeidsforhold(
         id = id,
-        arbeidsforholdId = arbeidsforholdId,
+        navArbeidsforholdId = navArbeidsforholdId,
         fnr = fnr,
         orgnummer = orgnummer,
         juridiskOrgnummer = juridiskOrgnummer,
@@ -32,7 +32,7 @@ fun lagArbeidsforhold(
 }
 
 fun lagEksterntArbeidsforhold(
-    arbeidsforholdId: String = "arbeidsforholdId",
+    navArbeidsforholdId: String = "navArbeidsforholdId",
     fnr: String = "fnr",
     orgnummer: String = "orgnummer",
     juridiskOrgnummer: String = "jorgnummer",
@@ -42,7 +42,7 @@ fun lagEksterntArbeidsforhold(
     arbeidsforholdType: ArbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
 ): EksterntArbeidsforhold {
     return EksterntArbeidsforhold(
-        arbeidsforholdId = arbeidsforholdId,
+        navArbeidsforholdId = navArbeidsforholdId,
         fnr = fnr,
         orgnummer = orgnummer,
         juridiskOrgnummer = juridiskOrgnummer,

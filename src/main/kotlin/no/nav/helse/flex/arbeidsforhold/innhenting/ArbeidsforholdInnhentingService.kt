@@ -42,8 +42,8 @@ class ArbeidsforholdInnhentingService(
         }
     }
 
-    fun slettArbeidsforhold(arbeidsforholdId: String) {
-        arbeidsforholdRepository.deleteByArbeidsforholdId(arbeidsforholdId)
+    fun slettArbeidsforhold(navArbeidsforholdId: String) {
+        arbeidsforholdRepository.deleteByNavArbeidsforholdId(navArbeidsforholdId)
     }
 
     companion object {
@@ -52,18 +52,18 @@ class ArbeidsforholdInnhentingService(
             eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
             now: Instant = Instant.now(),
         ): SynkroniserteArbeidsforhold {
-            val eksterneArbeidsforholdVedId = eksterneArbeidsforhold.associateBy { it.arbeidsforholdId }
-            val interneArbeidsforholdVedId = interneArbeidsforhold.associateBy { it.arbeidsforholdId }
+            val eksterneArbeidsforholdVedId = eksterneArbeidsforhold.associateBy { it.navArbeidsforholdId }
+            val interneArbeidsforholdVedId = interneArbeidsforhold.associateBy { it.navArbeidsforholdId }
 
             val opprettArbeidsforholdId = eksterneArbeidsforholdVedId.keys - interneArbeidsforholdVedId.keys
             val oppdaterArbeidsforholdId = interneArbeidsforholdVedId.keys.intersect(eksterneArbeidsforholdVedId.keys)
             val slettArbeidsforholdId = interneArbeidsforholdVedId.keys - eksterneArbeidsforholdVedId.keys
 
             val opprettArbeidsforhold =
-                opprettArbeidsforholdId.map { arbeidsforholdId ->
-                    val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
+                opprettArbeidsforholdId.map { navArbeidsforholdId ->
+                    val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[navArbeidsforholdId]!!
                     Arbeidsforhold(
-                        arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                        navArbeidsforholdId = eksterntArbeidsforhold.navArbeidsforholdId,
                         fnr = eksterntArbeidsforhold.fnr,
                         orgnummer = eksterntArbeidsforhold.orgnummer,
                         juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
@@ -76,11 +76,11 @@ class ArbeidsforholdInnhentingService(
                 }
 
             val oppdaterteArbeidsforhold =
-                oppdaterArbeidsforholdId.map { arbeidsforholdId ->
-                    val interntArbeidsforhold = interneArbeidsforholdVedId[arbeidsforholdId]!!
-                    val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[arbeidsforholdId]!!
+                oppdaterArbeidsforholdId.map { navArbeidsforholdId ->
+                    val interntArbeidsforhold = interneArbeidsforholdVedId[navArbeidsforholdId]!!
+                    val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[navArbeidsforholdId]!!
                     interntArbeidsforhold.copy(
-                        arbeidsforholdId = eksterntArbeidsforhold.arbeidsforholdId,
+                        navArbeidsforholdId = eksterntArbeidsforhold.navArbeidsforholdId,
                         fnr = eksterntArbeidsforhold.fnr,
                         orgnummer = eksterntArbeidsforhold.orgnummer,
                         juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
@@ -92,8 +92,8 @@ class ArbeidsforholdInnhentingService(
                 }
 
             val slettedeArbeidsforhold =
-                slettArbeidsforholdId.map { arbeidsforholdId ->
-                    interneArbeidsforholdVedId[arbeidsforholdId]!!
+                slettArbeidsforholdId.map { navArbeidsforholdId ->
+                    interneArbeidsforholdVedId[navArbeidsforholdId]!!
                 }
 
             val opprettNyligeArbeidsforhold = opprettArbeidsforhold.filter { harVaertAnsattSiste4Mnd(it.tom, now = now) }
@@ -105,7 +105,6 @@ class ArbeidsforholdInnhentingService(
             )
         }
 
-        // TODO sjekk logikk for dette
         private fun harVaertAnsattSiste4Mnd(
             sluttDato: LocalDate?,
             now: Instant,

@@ -13,7 +13,7 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : FellesTestOppsett() {
             arbeidsforholdRepository.save(
                 lagArbeidsforhold(
                     fnr = "1",
-                    arbeidsforholdId = UUID.randomUUID().toString(),
+                    navArbeidsforholdId = UUID.randomUUID().toString(),
                 ),
             )
 
