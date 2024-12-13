@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsforhold.innhenting.EksternArbeidsforholdHenter.Companion.getOrgnummerFraArbeidssted
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
 import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
 import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.Navn

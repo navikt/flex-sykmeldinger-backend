@@ -43,44 +43,46 @@ class EksternArbeidsforholdHenter(
                 )
             }
     }
-}
 
-fun getFnrFraArbeidstaker(arbeidstaker: Arbeidstaker): String {
-    val gjeldendePersonIdenter =
-        arbeidstaker.identer
-            .filter {
-                it.type in
-                    setOf(
-                        // TODO: skal vi sjekke aktorId også?
-                        //  IdentType.AKTORID,
-                        IdentType.FOLKEREGISTERIDENT,
-                    )
+    companion object {
+        fun getFnrFraArbeidstaker(arbeidstaker: Arbeidstaker): String {
+            val gjeldendePersonIdenter =
+                arbeidstaker.identer
+                    .filter {
+                        it.type in
+                            setOf(
+                                // TODO: skal vi sjekke aktorId også?
+                                //  IdentType.AKTORID,
+                                IdentType.FOLKEREGISTERIDENT,
+                            )
+                    }
+                    .filter { it.gjeldende == true }
+            require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
+
+            return gjeldendePersonIdenter.first().ident
+        }
+
+        fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String {
+            return arbeidssted.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
+        }
+
+        fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String {
+            return opplysningspliktig.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
+        }
+
+        fun parseArbeidsforholdType(kode: String): ArbeidsforholdType {
+            return when (kode) {
+                "forenkletOppgjoersordning" -> ArbeidsforholdType.FORENKLET_OPPGJOERSORDNING
+                "frilanserOppdragstakerHonorarPersonerMm" ->
+                    ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
+
+                "maritimtArbeidsforhold" -> ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
+                "ordinaertArbeidsforhold" -> ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+                "pensjonOgAndreTyperYtelserUtenAnsettelsesforhold" ->
+                    ArbeidsforholdType.PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD
+
+                else -> throw IllegalArgumentException("Ugyldig arbeidsforhold type $kode")
             }
-            .filter { it.gjeldende == true }
-    require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
-
-    return gjeldendePersonIdenter.first().ident
-}
-
-fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String {
-    return arbeidssted.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
-}
-
-fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String {
-    return opplysningspliktig.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
-}
-
-fun parseArbeidsforholdType(kode: String): ArbeidsforholdType {
-    return when (kode) {
-        "forenkletOppgjoersordning" -> ArbeidsforholdType.FORENKLET_OPPGJOERSORDNING
-        "frilanserOppdragstakerHonorarPersonerMm" ->
-            ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
-
-        "maritimtArbeidsforhold" -> ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
-        "ordinaertArbeidsforhold" -> ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
-        "pensjonOgAndreTyperYtelserUtenAnsettelsesforhold" ->
-            ArbeidsforholdType.PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD
-
-        else -> throw IllegalArgumentException("Ugyldig arbeidsforhold type $kode")
+        }
     }
 }
