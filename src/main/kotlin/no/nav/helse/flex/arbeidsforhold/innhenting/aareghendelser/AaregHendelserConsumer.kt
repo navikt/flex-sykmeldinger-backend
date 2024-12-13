@@ -26,7 +26,7 @@ class AaregHendelserConsumer(
     @KafkaListener(
         topics = ["\${AAREG_HENDELSE_TOPIC}"],
         containerFactory = "aivenKafkaBatchListenerContainerFactory",
-        properties = ["auto.offset.reset = earliest"],
+        properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
         log.info("Mottok ${consumerRecords.count()} aareg hendelse records")
