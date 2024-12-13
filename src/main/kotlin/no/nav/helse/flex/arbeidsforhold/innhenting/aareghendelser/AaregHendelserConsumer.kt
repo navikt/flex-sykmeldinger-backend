@@ -5,10 +5,10 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingServi
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import kotlin.system.measureTimeMillis
 
 enum class AaregHendelseHandtering {
     OPPRETT_OPPDATER,
@@ -25,17 +25,29 @@ class AaregHendelserConsumer(
 
     @KafkaListener(
         topics = ["\${AAREG_HENDELSE_TOPIC}"],
-        containerFactory = "aivenKafkaListenerContainerFactory",
+        containerFactory = "aivenKafkaBatchListenerContainerFactory",
         properties = ["auto.offset.reset = earliest"],
     )
-    fun listen(
-        cr: ConsumerRecord<String, String>,
-        acknowledgment: Acknowledgment,
-    ) {
-        val record = cr.value()
-        val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
-        handterHendelse(hendelse)
-        acknowledgment.acknowledge()
+    fun listen(consumerRecords: ConsumerRecords<String, String>) {
+        log.info("Mottok ${consumerRecords.count()} aareg hendelse records")
+
+        var totalByteSize = 0
+        val time =
+            measureTimeMillis {
+                consumerRecords.forEach { consumerRecord ->
+                    try {
+                        totalByteSize += consumerRecord.serializedValueSize()
+                        val record = consumerRecord.value()
+                        val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
+                        handterHendelse(hendelse)
+                    } catch (e: Exception) {
+                        log.error("Klarte ikke prosessere record med key: ${consumerRecord.key()}")
+                        throw e
+                    }
+                }
+            }
+
+        log.info("Prossesserte ${consumerRecords.count()} records, med størrelse $totalByteSize bytes, iløpet av $time millisekunder")
     }
 
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
@@ -51,10 +63,12 @@ class AaregHendelserConsumer(
             AaregHendelseHandtering.OPPRETT_OPPDATER -> {
                 opprettEllerEndreArbeidsforhold(fnr)
             }
+
             AaregHendelseHandtering.SLETT -> {
                 val arbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
                 arbeidsforholdInnhentingService.slettArbeidsforhold(arbeidsforholdId.toString())
             }
+
             else -> {}
         }
     }
@@ -82,6 +96,7 @@ class AaregHendelserConsumer(
                         AaregHendelseHandtering.IGNORER
                     }
                 }
+
                 Endringstype.Sletting -> {
                     return AaregHendelseHandtering.SLETT
                 }

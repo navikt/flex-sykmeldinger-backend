@@ -8,16 +8,16 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
-import no.nav.helse.flex.serialisertTilString
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.kafka.support.Acknowledgment
 
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
@@ -47,7 +47,6 @@ class AaregHendelserListenerTest {
 
     @Test
     fun `tar imot aaregHendelse og kaster feil når hendelse har feil format`() {
-        val acknowledgment = mock<Acknowledgment> {}
         val listener = AaregHendelserConsumer(mock(), mock())
         val record: ConsumerRecord<String, String> =
             ConsumerRecord(
@@ -57,25 +56,15 @@ class AaregHendelserListenerTest {
                 "key",
                 "{}",
             )
-        invoking {
-            listener.listen(record, acknowledgment)
-        } `should throw` MismatchedInputException::class
-    }
-
-    @Test
-    fun `tar imot aaregHendelse og acker når det er riktig format`() {
-        val acknowledgment = mock<Acknowledgment> {}
-        val listener = AaregHendelserConsumer(mock(), mock())
-        val record: ConsumerRecord<String, String> =
-            ConsumerRecord(
-                "topic",
-                1,
-                1L,
-                "key",
-                lagArbeidsforholdHendelse().serialisertTilString(),
+        val records: ConsumerRecords<String, String> =
+            ConsumerRecords(
+                mapOf(
+                    TopicPartition("topic", 1) to listOf(record),
+                ),
             )
-        listener.listen(record, acknowledgment)
-        verify(acknowledgment).acknowledge()
+        invoking {
+            listener.listen(records)
+        } `should throw` MismatchedInputException::class
     }
 
     @Test

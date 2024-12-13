@@ -85,6 +85,30 @@ class AivenKafkaConfig(
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory
     }
+
+    @Bean
+    fun aivenKafkaBatchListenerContainerFactory(
+        aivenKafkaErrorHandler: AivenKafkaErrorHandler,
+    ): ConcurrentKafkaListenerContainerFactory<String, String> {
+        val config =
+            mapOf(
+                ConsumerConfig.GROUP_ID_CONFIG to "flex-sykmeldinger-backend-consumer",
+                ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to kafkaAutoOffsetReset,
+                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
+                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "10",
+                ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
+            ) + commonConfig()
+        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
+
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = consumerFactory
+        factory.setCommonErrorHandler(aivenKafkaErrorHandler)
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.BATCH
+        factory.isBatchListener = true
+        return factory
+    }
 }
 
 const val DITT_SYKEFRAVAER_MELDING_TOPIC = "flex." + "ditt-sykefravaer-melding"
