@@ -1,6 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -8,9 +9,11 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
+import no.nav.helse.flex.objectMapper
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -135,7 +138,19 @@ class AaregHendelserListenerTest {
                 endringstype = Endringstype.Endring,
                 entitetsendringer = listOf(Entitetsendring.Permittering),
             )
-        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        handtering `should be equal to` AaregHendelseHandtering.IGNORER
+    }
+
+    @Test
+    fun `burde tolerere ukjent entitetsendring`() {
+        val hendelseMedUgyldigeVerdier =
+            """
+            {"id":1,"endringstype":"UKJENT","arbeidsforhold":{"navArbeidsforholdId":"id","arbeidstaker":{"identer":[{"type":"UKJENT","ident":"fnr_med_sykmelding","gjeldende":true}],"fnr":"fnr_med_sykmelding"}},"entitetsendringer":["UKJENT"]}
+            """.trimIndent()
+        val deserialisertUgyldigeVerdier: ArbeidsforholdHendelse = objectMapper.readValue(hendelseMedUgyldigeVerdier)
+
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(deserialisertUgyldigeVerdier)
         handtering `should be equal to` AaregHendelseHandtering.IGNORER
     }
 }

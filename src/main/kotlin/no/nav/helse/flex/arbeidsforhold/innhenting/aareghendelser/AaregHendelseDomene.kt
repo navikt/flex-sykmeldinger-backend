@@ -1,5 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+
 data class ArbeidsforholdHendelse(
     val id: Long,
     val endringstype: Endringstype,
@@ -14,12 +16,18 @@ enum class Entitetsendring {
     Permittering,
     TimerMedTimeloenn,
     Utenlandsopphold,
+
+    @JsonEnumDefaultValue
+    UKJENT,
 }
 
 enum class Endringstype {
     Opprettelse,
     Endring,
     Sletting,
+
+    @JsonEnumDefaultValue
+    UKJENT,
 }
 
 data class ArbeidsforholdKafka(
@@ -45,4 +53,7 @@ enum class IdentType {
     FOLKEREGISTERIDENT,
     ORGANISASJONSNUMMER,
     AKTORID,
+
+    @JsonEnumDefaultValue
+    UKJENT,
 }

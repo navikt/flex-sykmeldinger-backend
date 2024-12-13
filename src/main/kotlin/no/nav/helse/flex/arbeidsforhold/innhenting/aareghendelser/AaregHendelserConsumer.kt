@@ -100,6 +100,10 @@ class AaregHendelserConsumer(
                 Endringstype.Sletting -> {
                     return AaregHendelseHandtering.SLETT
                 }
+
+                Endringstype.UKJENT -> {
+                    AaregHendelseHandtering.IGNORER
+                }
             }
         }
 
