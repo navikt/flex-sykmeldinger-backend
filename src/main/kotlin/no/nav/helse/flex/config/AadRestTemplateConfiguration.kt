@@ -45,8 +45,8 @@ class AadRestTemplateConfiguration {
     @Bean
     fun plainRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate =
         restTemplateBuilder
-            .setConnectTimeout(Duration.ofSeconds(5L))
-            .setReadTimeout(Duration.ofSeconds(10L)).build()
+            .connectTimeout(Duration.ofSeconds(5L))
+            .readTimeout(Duration.ofSeconds(10L)).build()
 
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
