@@ -30,6 +30,10 @@ class ArbeidsforholdInnhentingService(
         return synkroniserteArbeidsforhold
     }
 
+    fun slettArbeidsforhold(navArbeidsforholdId: String) {
+        arbeidsforholdRepository.deleteByNavArbeidsforholdId(navArbeidsforholdId)
+    }
+
     internal fun lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold: SynkroniserteArbeidsforhold) {
         if (synkroniserteArbeidsforhold.skalOpprettes.isNotEmpty()) {
             arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOpprettes)
@@ -40,10 +44,6 @@ class ArbeidsforholdInnhentingService(
         if (synkroniserteArbeidsforhold.skalSlettes.isNotEmpty()) {
             arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
         }
-    }
-
-    fun slettArbeidsforhold(navArbeidsforholdId: String) {
-        arbeidsforholdRepository.deleteByNavArbeidsforholdId(navArbeidsforholdId)
     }
 
     companion object {
