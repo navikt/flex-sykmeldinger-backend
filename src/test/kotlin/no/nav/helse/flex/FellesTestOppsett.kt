@@ -1,5 +1,6 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
@@ -42,6 +43,9 @@ abstract class FellesTestOppsett {
     @Autowired
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
+    @Autowired
+    lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
+
     companion object {
         var pdlMockWebserver: MockWebServer
 
@@ -65,11 +69,19 @@ abstract class FellesTestOppsett {
                     .also {
                         System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
                     }
+
+            startMockWebServere()
         }
     }
 
     @AfterAll
     fun `Vi resetter databasen`() {
+        slettDatabase()
+    }
+
+    fun slettDatabase() {
+        narmesteLederRepository.deleteAll()
+        arbeidsforholdRepository.deleteAll()
     }
 
     fun tokenxToken(
