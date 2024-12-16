@@ -19,3 +19,5 @@ env:
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
   AAREG_HENDELSE_TOPIC: arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1
   REGISTRERT_FOR_ARBEIDSFORHOLD: true
+  EREG_URL: https://ereg-services-q1.dev-fss-pub.nais.io
+  AAREG_URL: https://aareg-services-q1.dev-fss-pub.nais.io
