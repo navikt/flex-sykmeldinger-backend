@@ -7,7 +7,7 @@ import java.time.OffsetDateTime
 
 enum class SykmeldingType {
     SYKMELDING,
-    UTENLANDSK_SYKMELDING
+    UTENLANDSK_SYKMELDING,
 }
 
 @JsonSubTypes(
@@ -30,11 +30,10 @@ data class UtenlandskSykmelding(
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
-    val utenlandskInfo: UtenlandskInfo
+    val utenlandskInfo: UtenlandskInfo,
 ) : ISykmelding {
     override val type = SykmeldingType.UTENLANDSK_SYKMELDING
 }
-
 
 data class Sykmelding(
     override val id: String,
@@ -93,10 +92,13 @@ data class UtenlandskInfo(
 )
 
 data class SporsmalSvar(
-    val sporsmal: String?, val svar: String, val restriksjoner: List<SvarRestriksjon>
+    val sporsmal: String?,
+    val svar: String,
+    val restriksjoner: List<SvarRestriksjon>,
 )
 
-enum class SvarRestriksjon(
-) {
-    SKJERMET_FOR_ARBEIDSGIVER, SKJERMET_FOR_PASIENT, SKJERMET_FOR_NAV,
+enum class SvarRestriksjon() {
+    SKJERMET_FOR_ARBEIDSGIVER,
+    SKJERMET_FOR_PASIENT,
+    SKJERMET_FOR_NAV,
 }

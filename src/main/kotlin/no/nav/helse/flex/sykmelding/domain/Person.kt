@@ -28,11 +28,12 @@ data class PersonId(
 data class Navn(
     val fornavn: String,
     val mellomnavn: String?,
-    val etternavn: String
+    val etternavn: String,
 )
 
 data class Kontaktinfo(
-    val type: KontaktinfoType, val value: String
+    val type: KontaktinfoType,
+    val value: String,
 )
 
 data class Adresse(
@@ -59,8 +60,7 @@ enum class PersonIdType {
     XXX,
     DUF,
     IKKE_OPPGITT,
-    UGYLDIG;
-
+    UGYLDIG,
 }
 
 enum class HelsepersonellKategori {
@@ -82,7 +82,7 @@ enum class HelsepersonellKategori {
     PSYKOLOG,
     FOTTERAPEUT,
     TANNHELSESEKRETAR,
-    IKKE_OPPGITT;
+    IKKE_OPPGITT,
 }
 
 enum class KontaktinfoType {
@@ -99,7 +99,7 @@ enum class KontaktinfoType {
     ARBEIDSPLASS,
     TLF,
     IKKE_OPPGITT,
-    UGYLDIG;
+    UGYLDIG,
 }
 
 enum class AdresseType {
@@ -113,5 +113,5 @@ enum class AdresseType {
     ARBEIDSADRESSE,
     UBRUKELIG_ADRESSE,
     UKJENT,
-    UGYLDIG;
+    UGYLDIG,
 }

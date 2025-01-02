@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.time.LocalDate
 
 enum class ArbeidsgiverType {
-    EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE, INGEN_ARBEIDSGIVER,
+    EN_ARBEIDSGIVER,
+    FLERE_ARBEIDSGIVERE,
+    INGEN_ARBEIDSGIVER,
 }
 
 @JsonSubTypes(
@@ -17,7 +19,7 @@ enum class ArbeidsgiverType {
     Type(IngenArbeidsgiver::class, name = "INGEN_ARBEIDSGIVER"),
 )
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
-sealed interface ArbeidsgiverInfo{
+sealed interface ArbeidsgiverInfo {
     val type: ArbeidsgiverType
 }
 
@@ -33,27 +35,30 @@ data class FlereArbeidsgivere(
     val yrkesbetegnelse: String?,
     val stillingsprosent: Int?,
     val meldingTilArbeidsgiver: String?,
-    val tiltakArbeidsplassen: String?
+    val tiltakArbeidsplassen: String?,
 ) : ArbeidsgiverInfo {
     override val type: ArbeidsgiverType = ArbeidsgiverType.FLERE_ARBEIDSGIVERE
 }
 
 class IngenArbeidsgiver() : ArbeidsgiverInfo {
     override val type: ArbeidsgiverType = ArbeidsgiverType.INGEN_ARBEIDSGIVER
+
     override fun equals(other: Any?) = other is IngenArbeidsgiver
+
     override fun hashCode() = type.hashCode()
+
     override fun toString() = "IngenArbeidsgiver(type=$type)"
 }
 
 enum class IArbeidType {
-    ER_I_ARBEID, ER_IKKE_I_ARBEID,
+    ER_I_ARBEID,
+    ER_IKKE_I_ARBEID,
 }
-
 
 @JsonSubTypes(
     Type(ErIArbeid::class, name = "ER_I_ARBEID"),
     Type(ErIkkeIArbeid::class, name = "ER_IKKE_I_ARBEID"),
-    )
+)
 @JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface IArbeid {
     val type: IArbeidType
