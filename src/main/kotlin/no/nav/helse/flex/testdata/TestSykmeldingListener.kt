@@ -1,9 +1,8 @@
 package no.nav.helse.flex.testdata
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfall
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
@@ -27,14 +26,19 @@ class TestSykmeldingListener() {
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfall = try {
-            objectMapper.readValue(cr.value())
-        } catch (e: Exception) {
-            log.error("Feil sykmelding data: ${cr.value()}")
-            throw e
-        }
+        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfall =
+            try {
+                objectMapper.readValue(cr.value())
+            } catch (e: Exception) {
+                log.error("Feil sykmelding data: ${cr.value()}")
+                throw e
+            }
         this.sisteSykmeldingMedBehandlingsutfall = sykmeldingMedBehandlingsutfall
-        log.info("Motatt sykmelding med behandlingsutfall: \n${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sykmeldingMedBehandlingsutfall)}")
+        log.info(
+            "Motatt sykmelding med behandlingsutfall: \n${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                sykmeldingMedBehandlingsutfall,
+            )}",
+        )
         acknowledgment.acknowledge()
     }
 }

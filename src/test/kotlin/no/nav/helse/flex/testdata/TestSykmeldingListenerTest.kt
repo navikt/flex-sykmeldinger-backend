@@ -16,28 +16,29 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 class TestSykmeldingListenerTest : FellesTestOppsett() {
-
     @Autowired
     lateinit var testSykmeldingListener: TestSykmeldingListener
 
     @Test
     fun `burde ikke feil ved riktig kafka melding format`() {
         val sykmelding = lagSykmelding()
-        val sykmeldingMedBehandlingsutfall = SykmeldingMedBehandlingsutfall(
-            sykmelding = sykmelding,
-            validation = ValidationResult(
-                status = RuleType.OK,
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                rules = listOf()
+        val sykmeldingMedBehandlingsutfall =
+            SykmeldingMedBehandlingsutfall(
+                sykmelding = sykmelding,
+                validation =
+                    ValidationResult(
+                        status = RuleType.OK,
+                        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                        rules = listOf(),
+                    ),
             )
-        )
         kafkaProducer.send(
             ProducerRecord(
                 TEST_SYKMELDING_TOPIC,
                 null,
                 "key",
                 sykmeldingMedBehandlingsutfall.serialisertTilString(),
-            )
+            ),
         ).get()
 
         await().atMost(1, TimeUnit.SECONDS).untilAsserted {
