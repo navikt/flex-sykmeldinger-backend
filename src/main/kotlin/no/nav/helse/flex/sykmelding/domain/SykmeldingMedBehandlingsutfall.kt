@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-class SykmeldingMedBehandlingsutfall(
-    sykmelding: ISykmelding,
-    validation: ValidationResult,
+data class SykmeldingMedBehandlingsutfall(
+    val sykmelding: ISykmelding,
+    val validation: ValidationResult,
 )
