@@ -31,6 +31,7 @@ class TestSykmeldingListener() {
                 objectMapper.readValue(cr.value())
             } catch (e: Exception) {
                 log.error("Feil sykmelding data: ${cr.value()}")
+                log.error("Exception ved feil sykmelding konvertering", e)
                 throw e
             }
         this.sisteSykmeldingMedBehandlingsutfall = sykmeldingMedBehandlingsutfall
