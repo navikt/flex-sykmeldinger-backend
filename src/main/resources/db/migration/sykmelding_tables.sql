@@ -1,40 +1,32 @@
--- Drop existing tables if they exist (they were created in V3 but we want to modify them)
-DROP TABLE IF EXISTS SYKMELDING CASCADE;
-DROP TABLE IF EXISTS SYKMELDINGSTATUS CASCADE;
-
--- Create table for sykmeldingstatus
-CREATE TABLE SYKMELDINGSTATUS
+CREATE TABLE sykmelding
 (
-    ID                     VARCHAR(36) DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    SYKMELDING_ID         VARCHAR(64)                NOT NULL,
-    TIMESTAMP             TIMESTAMP WITH TIME ZONE   NOT NULL,
-    STATUS                VARCHAR(50)                NOT NULL,
-    ARBEIDSGIVER          JSONB                     NULL,
-    SPORSMAL              JSONB                     NULL,
-    OPPRETTET             TIMESTAMP WITH TIME ZONE   NOT NULL
+    id                            VARCHAR DEFAULT uuid_generate_v4() PRIMARY KEY,
+    sykmelding_id                 VARCHAR                  NOT NULL UNIQUE,
+    fnr                           VARCHAR(11)              NOT NULL,
+    sendt_dato                    TIMESTAMP WITH TIME ZONE,
+    bekreftet_dato               TIMESTAMP WITH TIME ZONE,
+    behandlingsutfall            JSONB                    NOT NULL,
+    sykmelding                   JSONB                    NOT NULL,
+    opprettet                    TIMESTAMP WITH TIME ZONE NOT NULL,
+    utgatt                       TIMESTAMP WITH TIME ZONE,
+    avbrutt                      TIMESTAMP WITH TIME ZONE
 );
 
-CREATE INDEX SYKMELDINGSTATUS_SYKMELDING_ID_IDX ON SYKMELDINGSTATUS (SYKMELDING_ID);
-
--- Create table for sykmeldinger
-CREATE TABLE SYKMELDING
+CREATE TABLE sykmeldingstatus
 (
-    ID                            VARCHAR(36) DEFAULT UUID_GENERATE_V4() PRIMARY KEY,
-    SYKMELDING_ID                 VARCHAR(64)                NOT NULL UNIQUE,
-    FNR                           VARCHAR(11)                NOT NULL,
-    BEHANDLINGSUTFALL            JSONB                      NOT NULL,
-    SYKMELDING                   JSONB                      NOT NULL,
-    LATEST_STATUS_ID             VARCHAR(36) REFERENCES SYKMELDINGSTATUS (ID),
-    OPPRETTET                    TIMESTAMP WITH TIME ZONE   NOT NULL,
-    SENDT                        TIMESTAMP WITH TIME ZONE   NULL,
-    BEKREFTET                    TIMESTAMP WITH TIME ZONE   NULL,
-    UTGATT                       TIMESTAMP WITH TIME ZONE   NULL,
-    AVBRUTT                      TIMESTAMP WITH TIME ZONE   NULL
+    id                     VARCHAR DEFAULT uuid_generate_v4() PRIMARY KEY,
+    sykmelding_id         VARCHAR                  NOT NULL,
+    timestamp             TIMESTAMP WITH TIME ZONE NOT NULL,
+    status                VARCHAR                  NOT NULL,
+    arbeidsgiver          JSONB,
+    sporsmal              JSONB,
+    opprettet             TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-CREATE INDEX SYKMELDING_FNR_IDX ON SYKMELDING (FNR);
-CREATE INDEX SYKMELDING_SYKMELDING_ID_IDX ON SYKMELDING (SYKMELDING_ID);
+CREATE INDEX sykmelding_fnr_idx ON sykmelding (fnr);
+CREATE INDEX sykmelding_id_idx ON sykmelding (sykmelding_id);
+CREATE INDEX sykmeldingstatus_sykmelding_id_idx ON sykmeldingstatus (sykmelding_id);
 
 -- Grant required permissions
-GRANT SELECT, INSERT, UPDATE, DELETE ON SYKMELDING TO cloudsqliamuser;
-GRANT SELECT, INSERT, UPDATE, DELETE ON SYKMELDINGSTATUS TO cloudsqliamuser;
+GRANT SELECT, INSERT, UPDATE, DELETE ON sykmelding TO cloudsqliamuser;
+GRANT SELECT, INSERT, UPDATE, DELETE ON sykmeldingstatus TO cloudsqliamuser;
