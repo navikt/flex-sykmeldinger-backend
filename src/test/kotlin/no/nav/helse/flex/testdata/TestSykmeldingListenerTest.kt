@@ -44,6 +44,5 @@ class TestSykmeldingListenerTest : FellesTestOppsett() {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted {
             testSykmeldingListener.sisteSykmeldingMedBehandlingsutfall.`should not be null`()
         }
-
     }
 }
