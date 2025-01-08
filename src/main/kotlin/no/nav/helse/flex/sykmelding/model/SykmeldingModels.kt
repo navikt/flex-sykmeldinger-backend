@@ -15,13 +15,3 @@ data class SendSykmeldingValues(
 data class ChangeStatusRequest(
     val status: String,
 )
-
-// Response models
-data class BrukerinfoResponse(
-    val arbeidsgivere: List<String>,
-    val erUtenlandsk: Boolean,
-)
-
-data class StatusResponse(
-    val status: String,
-)

@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.logikk
+package no.nav.helse.flex.sykmelding.service
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.objectMapper
@@ -15,7 +15,7 @@ import java.util.UUID
 import java.util.function.Supplier
 
 @Service
-class SykmeldingHenter(
+class SykmeldingService(
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingStatusRepository: SykmeldingStatusRepository,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
