@@ -9,6 +9,8 @@ db_tier: db-custom-1-3840
 db_highAvailability: true
 external-host:
   - pdl-api.prod-fss-pub.nais.io
+  - aareg-services.prod-fss-pub.nais.io
+  - ereg-services.prod-fss-pub.nais.io
 db_pointInTimeRecovery: true
 env:
   SPRING_PROFILES_ACTIVE: default
@@ -19,3 +21,4 @@ env:
   REGISTRERT_FOR_ARBEIDSFORHOLD: false
   EREG_URL: https://ereg-services.prod-fss-pub.nais.io
   AAREG_URL: https://aareg-services.prod-fss-pub.nais.io
+  AAREG_AAD_CLIENT_ID: prod-fss.arbeidsforhold.aareg-services-nais
