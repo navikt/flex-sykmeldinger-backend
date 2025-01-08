@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.sykmelding.model.ChangeStatusRequest
 import no.nav.helse.flex.sykmelding.model.SendSykmeldingValues
 import no.nav.helse.flex.sykmelding.service.SykmeldingService
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*
 
 @Controller
 class HentSykmeldingerApi(
-    private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
     private val sykmeldingService: SykmeldingService,
 ) {
@@ -28,7 +26,7 @@ class HentSykmeldingerApi(
     )
     fun getSykmeldinger(): ResponseEntity<Any> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
-        val sykmeldinger = sykmeldingHenter.getSykmeldinger(fnr = fnr)
+        val sykmeldinger = sykmeldingService.getSykmeldinger(fnr)
         return ResponseEntity.ok(sykmeldinger)
     }
 
@@ -42,8 +40,7 @@ class HentSykmeldingerApi(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
     ): ResponseEntity<Any> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
-
-        val tidligereArbeidsgivere = sykmeldingHenter.finnTidligereArbeidsgivere(fnr, sykmeldingUuid)
+        val tidligereArbeidsgivere = sykmeldingService.finnTidligereArbeidsgivere(fnr, sykmeldingUuid)
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
 
@@ -119,14 +116,13 @@ class HentSykmeldingerApi(
         if (sykmeldingUuid == "null") {
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
             return ResponseEntity.notFound().build()
-        } else {
-            val sykmelding = sykmeldingHenter.getSykmelding(fnr, sykmeldingUuid)
+        }
 
-            return if (sykmelding == null) {
-                ResponseEntity.notFound().build()
-            } else {
-                ResponseEntity.ok(sykmelding)
-            }
+        val sykmelding = sykmeldingService.getSykmelding(fnr, sykmeldingUuid)
+        return if (sykmelding == null) {
+            ResponseEntity.notFound().build()
+        } else {
+            ResponseEntity.ok(sykmelding)
         }
     }
 }
