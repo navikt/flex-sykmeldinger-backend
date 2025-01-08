@@ -1,10 +1,9 @@
 package no.nav.helse.flex.sykmelding.api
 
-import SykmeldingService
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.sykmelding.model.ChangeStatusRequest
 import no.nav.helse.flex.sykmelding.model.SendSykmeldingValues
+import no.nav.helse.flex.sykmelding.service.SykmeldingService
 import no.nav.helse.flex.tokenx.TOKENX
 import no.nav.helse.flex.tokenx.TokenxValidering
 import no.nav.security.token.support.core.api.ProtectedWithClaims

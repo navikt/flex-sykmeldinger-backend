@@ -15,6 +15,7 @@ interface SykmeldingRepository : CrudRepository<SykmeldingDbRecord, String> {
 @Repository
 interface SykmeldingStatusRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
     fun findBySykmeldingId(sykmeldingId: String): List<SykmeldingStatusDbRecord>
+
     fun findFirstBySykmeldingIdOrderByTimestampDesc(sykmeldingId: String): SykmeldingStatusDbRecord?
 }
 
