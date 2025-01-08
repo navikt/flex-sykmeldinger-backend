@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class RegistrertePersonerForArbeidsforhold(
-    @Value("\${REGISTRERT_FOR_ARBEIDSFORHOLD}") private val registrertFOrArbeidsforhold: Boolean,
+    @Value("\${REGISTRERT_FOR_ARBEIDSFORHOLD}") private val registrertForArbeidsforhold: Boolean,
 ) {
     fun erPersonRegistrert(fnr: String): Boolean {
         // TODO: Hent info fra registrerte sykmeldinger (SykmeldingRepository)
         // Feks.: return sykmeldingRepository.getAllByFnr(fnr).isNotEmpty()
-        return registrertFOrArbeidsforhold
+        return registrertForArbeidsforhold
     }
 }
