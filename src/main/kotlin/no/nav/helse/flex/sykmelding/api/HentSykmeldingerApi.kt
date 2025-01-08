@@ -117,5 +117,4 @@ class HentSykmeldingerApi(
     ): ResponseEntity<Any> {
         TODO("Ikke implementert")
     }
-
 }
