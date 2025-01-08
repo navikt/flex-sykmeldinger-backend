@@ -8,6 +8,7 @@ import java.time.Instant
 @Repository
 interface SykmeldingStatusRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
     fun findBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingStatusDbRecord>
+
     fun findFirstBySykmeldingUuidOrderByTimestampDesc(sykmeldingUuid: String): SykmeldingStatusDbRecord?
 }
 
@@ -19,5 +20,5 @@ data class SykmeldingStatusDbRecord(
     val status: String,
     val tidligereArbeidsgiver: String?,
     val sporsmal: String?,
-    val opprettet: Instant
+    val opprettet: Instant,
 )
