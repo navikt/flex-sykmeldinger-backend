@@ -21,19 +21,21 @@ class SykmeldingService(
     private val nowProvider: Supplier<Instant> = Supplier { Instant.now() },
 ) {
     fun getSykmeldinger(fnr: String): List<SykmeldingMedBehandlingsutfall> {
-        return sykmeldingRepository.findByFnr(fnr).map { it.tilSykmeldingMedBehandlingsutfall() }
+        // return sykmeldingRepository.findByFnr(fnr).map { it.tilSykmeldingMedBehandlingsutfall() }
+        TODO("ikke implementert")
     }
 
     fun getSykmelding(
         fnr: String,
         sykmeldingId: String,
     ): SykmeldingMedBehandlingsutfall? {
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        return if (sykmelding?.fnr == fnr) {
-            sykmelding.tilSykmeldingMedBehandlingsutfall()
-        } else {
-            null
-        }
+//        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+//        return if (sykmelding?.fnr == fnr) {
+//            sykmelding.tilSykmeldingMedBehandlingsutfall()
+//        } else {
+//            null
+//        }
+        TODO("ikke implementert")
     }
 
     fun finnTidligereArbeidsgivere(
@@ -81,36 +83,7 @@ class SykmeldingService(
         sykmeldingId: String,
         values: SendSykmeldingValues,
     ): Map<String, String> {
-        val sykmelding =
-            sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-                ?: throw RuntimeException("Fant ikke sykmelding")
-
-        if (sykmelding.fnr != fnr) {
-            throw RuntimeException("Feil fnr")
-        }
-
-        val now = nowProvider.get()
-
-        val statusDbRecord =
-            SykmeldingStatusDbRecord(
-                sykmeldingId = sykmeldingId,
-                timestamp = now,
-                status = "SENDT",
-                arbeidsgiver = objectMapper.writeValueAsString(values),
-                sporsmal = null,
-                opprettet = now,
-            )
-
-        val lagretStatus = sykmeldingStatusRepository.save(statusDbRecord)
-
-        sykmeldingRepository.save(
-            sykmelding.copy(
-                sendt = now,
-                latestStatusId = lagretStatus.id,
-            ),
-        )
-
-        return mapOf("status" to "SENDT")
+       TODO("ikke implementert")
     }
 
     fun changeStatus(
@@ -118,44 +91,13 @@ class SykmeldingService(
         sykmeldingId: String,
         status: String,
     ): Map<String, String> {
-        val sykmelding =
-            sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-                ?: throw RuntimeException("Fant ikke sykmelding")
-
-        if (sykmelding.fnr != fnr) {
-            throw RuntimeException("Feil fnr")
-        }
-
-        val now = nowProvider.get()
-
-        val statusDbRecord =
-            SykmeldingStatusDbRecord(
-                sykmeldingId = sykmeldingId,
-                timestamp = now,
-                status = status,
-                arbeidsgiver = null,
-                sporsmal = null,
-                opprettet = now,
-            )
-
-        val lagretStatus = sykmeldingStatusRepository.save(statusDbRecord)
-
-        val oppdatertSykmelding =
-            sykmelding.copy(
-                latestStatusId = lagretStatus.id,
-                avbrutt = if (status == "AVBRUTT") now else sykmelding.avbrutt,
-                bekreftet = if (status == "BEKREFTET") now else sykmelding.bekreftet,
-            )
-
-        sykmeldingRepository.save(oppdatertSykmelding)
-
-        return mapOf("status" to status)
+        TODO("ikke implementert")
     }
 
-    private fun SykmeldingDbRecord.tilSykmeldingMedBehandlingsutfall(): SykmeldingMedBehandlingsutfall {
-        return SykmeldingMedBehandlingsutfall(
-            sykmelding = objectMapper.readValue(this.sykmelding, Sykmelding::class.java),
-            behandlingsutfall = objectMapper.readValue(this.behandlingsutfall, Behandlingsutfall::class.java),
-        )
-    }
+//    private fun SykmeldingDbRecord.tilSykmeldingMedBehandlingsutfall(): SykmeldingMedBehandlingsutfall {
+//        return SykmeldingMedBehandlingsutfall(
+//            sykmelding = objectMapper.readValue(this.sykmelding, Sykmelding::class.java),
+//            behandlingsutfall = objectMapper.readValue(this.behandlingsutfall, Behandlingsutfall::class.java),
+//        )
+//    }
 }
