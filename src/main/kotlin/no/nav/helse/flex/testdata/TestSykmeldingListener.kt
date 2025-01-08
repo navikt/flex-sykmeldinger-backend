@@ -32,6 +32,7 @@ class TestSykmeldingListener() {
             } catch (e: Exception) {
                 log.error("Feil sykmelding data: ${cr.value()}")
                 log.error("Exception ved feil sykmelding konvertering", e)
+                acknowledgment.acknowledge()
                 throw e
             }
         this.sisteSykmeldingMedBehandlingsutfall = sykmeldingMedBehandlingsutfall
