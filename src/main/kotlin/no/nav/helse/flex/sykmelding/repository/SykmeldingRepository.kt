@@ -5,10 +5,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
-
 @Repository
 interface SykmeldingRepository : CrudRepository<SykmeldingDbRecord, String> {
     fun findBySykmeldingId(sykmeldingId: String): SykmeldingDbRecord?
+
     fun findByFnr(fnr: String): List<SykmeldingDbRecord>
 }
 
@@ -23,8 +23,8 @@ data class SykmeldingDbRecord(
     val id: String? = null,
     val sykmeldingId: String,
     val fnr: String,
-    val behandlingsutfall: String, // JSONB
-    val sykmelding: String, // JSONB
+    val behandlingsutfall: String,
+    val sykmelding: String,
     val latestStatusId: String?,
     val opprettet: Instant,
     val sendt: Instant? = null,
@@ -39,7 +39,7 @@ data class SykmeldingStatusDbRecord(
     val sykmeldingId: String,
     val timestamp: Instant,
     val status: String,
-    val arbeidsgiver: String?, // JSONB
-    val sporsmal: String?, // JSONB
+    val arbeidsgiver: String?,
+    val sporsmal: String?,
     val opprettet: Instant,
 )
