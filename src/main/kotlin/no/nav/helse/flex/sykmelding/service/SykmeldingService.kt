@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.service
+package no.nav.helse.flex.sykmelding.logikk
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.objectMapper
@@ -11,10 +11,11 @@ import no.nav.helse.flex.sykmelding.repository.SykmeldingStatusRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
+import java.util.UUID
 import java.util.function.Supplier
 
 @Service
-class SykmeldingService(
+class SykmeldingHenter(
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingStatusRepository: SykmeldingStatusRepository,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
@@ -91,22 +92,25 @@ class SykmeldingService(
 
         val now = nowProvider.get()
 
+        // Opprett ny status med korrekte felter
         val statusDbRecord =
             SykmeldingStatusDbRecord(
-                sykmeldingId = sykmeldingId,
+                id = UUID.randomUUID().toString(),
+                sykmeldingUuid = sykmeldingId,
                 timestamp = now,
                 status = "SENDT",
-                arbeidsgiver = objectMapper.writeValueAsString(values),
+                tidligereArbeidsgiver = values.arbeidsgiverNavn,
                 sporsmal = null,
                 opprettet = now,
             )
 
         val lagretStatus = sykmeldingStatusRepository.save(statusDbRecord)
 
+        // Oppdater sykmelding med ny status
         sykmeldingRepository.save(
             sykmelding.copy(
-                sendt = now,
-                latestStatusId = lagretStatus.id,
+                sisteSykmeldingstatusId = lagretStatus.id,
+                oppdatert = now,
             ),
         )
 
@@ -128,34 +132,32 @@ class SykmeldingService(
 
         val now = nowProvider.get()
 
+        // Opprett ny status med korrekte felter
         val statusDbRecord =
             SykmeldingStatusDbRecord(
-                sykmeldingId = sykmeldingId,
+                id = UUID.randomUUID().toString(),
+                sykmeldingUuid = sykmeldingId,
                 timestamp = now,
                 status = status,
-                arbeidsgiver = null,
+                tidligereArbeidsgiver = null,
                 sporsmal = null,
                 opprettet = now,
             )
 
         val lagretStatus = sykmeldingStatusRepository.save(statusDbRecord)
 
-        val oppdatertSykmelding =
+        // Oppdater sykmelding med ny status
+        sykmeldingRepository.save(
             sykmelding.copy(
-                latestStatusId = lagretStatus.id,
-                avbrutt = if (status == "AVBRUTT") now else sykmelding.avbrutt,
-                bekreftet = if (status == "BEKREFTET") now else sykmelding.bekreftet,
-            )
-
-        sykmeldingRepository.save(oppdatertSykmelding)
+                sisteSykmeldingstatusId = lagretStatus.id,
+                oppdatert = now,
+            ),
+        )
 
         return mapOf("status" to status)
     }
 
     private fun SykmeldingDbRecord.tilSykmeldingMedBehandlingsutfall(): SykmeldingMedBehandlingsutfall {
-        return SykmeldingMedBehandlingsutfall(
-            sykmelding = objectMapper.readValue(this.sykmelding, Sykmelding::class.java),
-            behandlingsutfall = objectMapper.readValue(this.behandlingsutfall, Behandlingsutfall::class.java),
-        )
+        TODO("ikke implementert")
     }
 }
