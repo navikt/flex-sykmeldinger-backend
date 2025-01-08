@@ -7,9 +7,7 @@ import no.nav.helse.flex.tokenx.TokenxValidering
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 
 @Controller
 class HentSykmeldingerApi(
@@ -69,4 +67,55 @@ class HentSykmeldingerApi(
             }
         }
     }
+
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/brukerinformasjon")
+    @ResponseBody
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        claimMap = ["acr=idporten-loa-high"],
+    )
+    fun getBrukerinformasjon(
+        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
+    ): ResponseEntity<Any> {
+        TODO("Ikke implementert")
+    }
+
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/er-utenfor-ventetid")
+    @ResponseBody
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        claimMap = ["acr=idporten-loa-high"],
+    )
+    fun getErUtenforVentetid(
+        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
+    ): ResponseEntity<Any> {
+        TODO("Ikke implementert")
+    }
+
+    @PostMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/send")
+    @ResponseBody
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        claimMap = ["acr=idporten-loa-high"],
+    )
+    fun sendSykmelding(
+        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
+        @RequestBody sendSykmeldingValues: Any,
+    ): ResponseEntity<Any> {
+        TODO("Ikke implementert")
+    }
+
+    @PostMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/change-status")
+    @ResponseBody
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        claimMap = ["acr=idporten-loa-high"],
+    )
+    fun changeSykmeldingStatus(
+        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
+        @RequestBody changeStatus: Any,
+    ): ResponseEntity<Any> {
+        TODO("Ikke implementert")
+    }
+
 }
