@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component
 class NarmestelederListener(
     private val oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder,
 ) {
-
     @KafkaListener(
         topics = [NARMESTELEDER_LEESAH_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
