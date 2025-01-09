@@ -25,14 +25,14 @@ class OppdateringAvNarmesteLeder(
         val narmestelederNavn =
             if (environmentToggles.isDevelopment()) {
                 try {
-                    pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
+                    pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
                 } catch (e: PdlClient.FunctionalPdlError) {
-                    log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.narmesteLederFnr} i PDL. Bruker 'Navn Navnesen'.")
+                    log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.fnr} i PDL. Bruker 'Navn Navnesen'.")
                     "Navn Navnesen"
                 }
             } else {
                 try {
-                    pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
+                    pdlClient.hentFormattertNavn(narmesteLederLeesah.fnr)
                 } catch (e: PdlClient.PdlManglerNavnError) {
                     log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL'.")
                     null
