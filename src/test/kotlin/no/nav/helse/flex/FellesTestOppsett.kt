@@ -47,7 +47,7 @@ abstract class FellesTestOppsett {
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     companion object {
-        var pdlMockWebserver: MockWebServer
+
 
         init {
 
@@ -64,11 +64,6 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.password", password)
             }
 
-            pdlMockWebserver =
-                MockWebServer()
-                    .also {
-                        System.setProperty("PDL_BASE_URL", "http://localhost:${it.port}")
-                    }
 
             startMockWebServere()
         }

@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit
 class OppdaterNarmesteLederTest : FellesTestOppsett() {
     @Test
     fun `Oppretter ny nærmeste leder hvis den ikke finnes fra før og er aktiv`() {
-        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
 
@@ -29,11 +28,11 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
         narmesteLeder.shouldNotBeNull()
         narmesteLeder.orgnummer `should be equal to` narmesteLederLeesah.orgnummer
+        narmesteLeder.narmesteLederNavn `should be equal to` "Supreme Leader"
     }
 
     @Test
     fun `Ignorerer melding om ny nærmeste leder hvis den ikke finnes fra før og er inaktiv`() {
-        mockPdlResponse()
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId, aktivTom = LocalDate.now())
 
@@ -48,7 +47,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
     @Test
     fun `Oppdaterer nærmeste leder hvis den finnes fra før og er aktiv`() {
-        mockPdlResponse()
+
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
 
@@ -57,7 +56,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
-        mockPdlResponse()
+        
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
         narmesteLeder.orgnummer `should be equal to` "999999"
 
@@ -78,7 +77,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
     @Test
     fun `Sletter nærmeste leder hvis den finnes fra før og er inaktiv`() {
-        mockPdlResponse()
+        
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
         sendNarmesteLederLeesah(narmesteLederLeesah)
@@ -87,7 +86,7 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
-        mockPdlResponse()
+        
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldNotBeNull()
 
         sendNarmesteLederLeesah(
@@ -113,7 +112,7 @@ fun getNarmesteLederLeesah(
         narmesteLederId = narmesteLederId,
         fnr = "12345678910",
         orgnummer = orgnummer,
-        narmesteLederFnr = "01987654321",
+        narmesteLederFnr = "01985554321",
         aktivFom = LocalDate.now(),
         aktivTom = aktivTom,
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
