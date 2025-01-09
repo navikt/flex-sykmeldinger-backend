@@ -1,0 +1,102 @@
+
+=== Table: arbeidsforhold ===
+
+- id: character varying(36) NOT NULL
+
+- nav_arbeidsforhold_id: text NOT NULL
+
+- fnr: text NOT NULL
+
+- orgnummer: text NOT NULL
+
+- juridisk_orgnummer: text NOT NULL
+
+- orgnavn: text NOT NULL
+
+- fom: date NOT NULL
+
+- tom: date
+
+- opprettet: timestamp with time zone NOT NULL
+
+- arbeidsforhold_type: text
+
+
+=== Table: flyway_schema_history ===
+
+- installed_rank: integer NOT NULL
+
+- version: character varying(50)
+
+- description: character varying(200) NOT NULL
+
+- type: character varying(20) NOT NULL
+
+- script: character varying(1000) NOT NULL
+
+- checksum: integer
+
+- installed_by: character varying(100) NOT NULL
+
+- installed_on: timestamp without time zone NOT NULL
+
+- execution_time: integer NOT NULL
+
+- success: boolean NOT NULL
+
+
+=== Table: narmeste_leder ===
+
+- id: character varying(36) NOT NULL
+
+- oppdatert: timestamp with time zone NOT NULL
+
+- narmeste_leder_id: uuid
+
+- orgnummer: character varying NOT NULL
+
+- bruker_fnr: character varying NOT NULL
+
+- narmeste_leder_fnr: character varying NOT NULL
+
+- narmeste_leder_navn: character varying
+
+- aktiv_fom: date NOT NULL
+
+- timestamp: timestamp with time zone NOT NULL
+
+
+=== Table: sykmelding ===
+
+- id: character varying(36) NOT NULL
+
+- sykmelding_uuid: text NOT NULL
+
+- siste_sykmeldingstatus_id: text NOT NULL
+
+- fnr: text NOT NULL
+
+- sykmelding: jsonb NOT NULL
+
+- person: jsonb NOT NULL
+
+- opprettet: timestamp with time zone NOT NULL
+
+- oppdatert: timestamp with time zone
+
+
+=== Table: sykmeldingstatus ===
+
+- id: character varying(36) NOT NULL
+
+- sykmelding_uuid: text NOT NULL
+
+- timestamp: timestamp with time zone NOT NULL
+
+- status: text NOT NULL
+
+- tidligere_arbeidsgiver: jsonb
+
+- sporsmal: jsonb
+
+- opprettet: timestamp with time zone NOT NULL
