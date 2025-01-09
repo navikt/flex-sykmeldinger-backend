@@ -7,7 +7,6 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import okhttp3.mockwebserver.MockWebServer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
@@ -47,8 +46,6 @@ abstract class FellesTestOppsett {
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     companion object {
-
-
         init {
 
             KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.1")).apply {
@@ -63,7 +60,6 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
             }
-
 
             startMockWebServere()
         }

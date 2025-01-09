@@ -16,20 +16,21 @@ fun startMockWebServere(): MockWebServere {
             dispatcher = EregMockDispatcher
         }
 
-    val pdlMockWebServer = MockWebServer().apply {
-        System.setProperty("PDL_BASE_URL", "http://localhost:$port")
-        dispatcher = PdlMockDispatcher
-    }
+    val pdlMockWebServer =
+        MockWebServer().apply {
+            System.setProperty("PDL_BASE_URL", "http://localhost:$port")
+            dispatcher = PdlMockDispatcher
+        }
 
     return MockWebServere(
         eregMockWebServer = eregMockWebServer,
         aaregMockWebServer = aaregMockWebServer,
-        pdlMockWebServer = pdlMockWebServer
+        pdlMockWebServer = pdlMockWebServer,
     )
 }
 
 data class MockWebServere(
     val eregMockWebServer: MockWebServer,
     val aaregMockWebServer: MockWebServer,
-    val pdlMockWebServer: MockWebServer
+    val pdlMockWebServer: MockWebServer,
 )

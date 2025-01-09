@@ -47,7 +47,6 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
     @Test
     fun `Oppdaterer nærmeste leder hvis den finnes fra før og er aktiv`() {
-
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
 
@@ -56,7 +55,6 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
-        
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
         narmesteLeder.orgnummer `should be equal to` "999999"
 
@@ -77,7 +75,6 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
 
     @Test
     fun `Sletter nærmeste leder hvis den finnes fra før og er inaktiv`() {
-        
         val narmesteLederId = UUID.randomUUID()
         val narmesteLederLeesah = getNarmesteLederLeesah(narmesteLederId)
         sendNarmesteLederLeesah(narmesteLederLeesah)
@@ -86,7 +83,6 @@ class OppdaterNarmesteLederTest : FellesTestOppsett() {
             narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
         }
 
-        
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldNotBeNull()
 
         sendNarmesteLederLeesah(

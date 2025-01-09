@@ -15,8 +15,6 @@ class PdlClientTest : FellesTestOppsett() {
 
     @Test
     fun `Vi tester happycase`() {
-        
-
         val responseData = pdlClient.hentFormattertNavn(fnr)
 
         responseData `should be equal to` "Ole Gunnar"
@@ -36,14 +34,12 @@ class PdlClientTest : FellesTestOppsett() {
 
     @Test
     fun `Tor-Henry blir riktig kapitalisert`() {
-
         val responseData = pdlClient.hentFormattertNavn("00888888821")
         responseData `should be equal to` "Tor-Henry Roarsen"
     }
 
     @Test
     fun `æøå blir riktig`() {
-
         val responseData = pdlClient.hentFormattertNavn("00333888821")
         responseData `should be equal to` "Åge Roger Åæøå"
     }
