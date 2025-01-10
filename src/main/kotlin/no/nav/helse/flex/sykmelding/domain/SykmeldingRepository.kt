@@ -54,7 +54,7 @@ class SykmeldingRepository(
                 sykmelding =
                 PGobject().apply {
                     type = "json"
-                    value = sykmelding.serialisertTilString()
+                    value = sykmeldingGrunnlag.serialisertTilString()
                 },
                 opprettet = Instant.now(),
                 oppdatert = Instant.now(),
