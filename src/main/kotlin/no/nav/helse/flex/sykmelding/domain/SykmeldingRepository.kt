@@ -5,6 +5,7 @@ import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.serialisertTilString
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -13,7 +14,7 @@ import java.time.Instant
 interface ISykmeldingRepository {
     fun save(sykmelding: Sykmelding)
 
-    fun findBySykmeldingUuid(id: String): Sykmelding?
+    fun findBySykmeldingId(id: String): Sykmelding?
 
     fun findByFnr(fnr: String): List<Sykmelding>
 }
@@ -36,7 +37,12 @@ class SykmeldingRepository(
                     status = status.status,
                     timestamp = timestamp,
                     tidligereArbeidsgiver = null,
-                    sporsmal = null,
+                    sporsmal = status.sporsmal?.let { sp ->
+                        PGobject().apply {
+                            type = "json"
+                            value = sp.serialisertTilString()
+                        }
+                    },
                     opprettet = timestamp,
                 )
             }
@@ -44,7 +50,6 @@ class SykmeldingRepository(
         val dbRecord =
             SykmeldingDbRecord(
                 sykmeldingUuid = sykmelding.sykmeldingId,
-                sisteSykmeldingstatusId = "",
                 fnr = sykmeldingGrunnlag.pasient.fnr,
                 sykmelding =
                 PGobject().apply {
@@ -59,7 +64,7 @@ class SykmeldingRepository(
         sykmeldingStatusRepository.saveAll(statusDbRecords)
     }
 
-    override fun findBySykmeldingUuid(id: String): Sykmelding? {
+    override fun findBySykmeldingId(id: String): Sykmelding? {
         val dbRecord = sykmeldingDbRepository.findBySykmeldingUuid(id)
         if (dbRecord == null) {
             return null
@@ -98,7 +103,9 @@ class SykmeldingRepository(
     private fun mapStatusDbRecordTilStatus(statusDbRecord: SykmeldingStatusDbRecord): SykmeldingStatus {
         return SykmeldingStatus(
             status = statusDbRecord.status,
-            sporsmal = statusDbRecord.sporsmal,
+            sporsmal = statusDbRecord.sporsmal?.value?.let {
+                objectMapper.readValue(it)
+            },
             timestamp = statusDbRecord.timestamp,
         )
     }
@@ -111,11 +118,12 @@ interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
     fun findBySykmeldingUuid(sykmeldingUuid: String): SykmeldingDbRecord?
 }
 
+@Table("sykmelding")
 data class SykmeldingDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
-    val sisteSykmeldingstatusId: String,
+    //val sisteSykmeldingstatusId: String,
     val fnr: String,
     val sykmelding: PGobject,
     val opprettet: Instant,
@@ -128,13 +136,14 @@ interface SykmeldingStatusRepository : CrudRepository<SykmeldingStatusDbRecord, 
     fun findAllBySykmeldingUuidIn(sykmeldingUuid: Collection<String>): List<SykmeldingStatusDbRecord>
 }
 
+@Table("sykmeldingstatus")
 data class SykmeldingStatusDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
     val timestamp: Instant,
     val status: String,
-    val tidligereArbeidsgiver: String?,
-    val sporsmal: String?,
+    val tidligereArbeidsgiver: PGobject?,
+    val sporsmal: PGobject?,
     val opprettet: Instant,
 )

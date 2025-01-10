@@ -4,8 +4,12 @@ import java.time.Instant
 
 data class Sykmelding(
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
-    val statuser: List<SykmeldingStatus> = emptyList(),
+    val statuser: List<SykmeldingStatus>,
 ) {
+    init {
+        require(statuser.isNotEmpty()) { "Må ha en status" }
+    }
+
     val sykmeldingId: String
         get() = sykmeldingGrunnlag.id
 
@@ -16,6 +20,6 @@ data class Sykmelding(
 
 data class SykmeldingStatus(
     val status: String,
-    val sporsmal: String?,
-    val timestamp: Instant,
+    val sporsmal: String? = null,
+    val timestamp: Instant = Instant.now(),
 )
