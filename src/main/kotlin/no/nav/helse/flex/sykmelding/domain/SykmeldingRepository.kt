@@ -17,12 +17,16 @@ interface ISykmeldingRepository {
     fun findBySykmeldingId(id: String): Sykmelding?
 
     fun findByFnr(fnr: String): List<Sykmelding>
+
+    fun findAll(): List<Sykmelding>
+
+    fun deleteAll()
 }
 
 @Repository
 class SykmeldingRepository(
     private val sykmeldingDbRepository: SykmeldingDbRepository,
-    private val sykmeldingStatusRepository: SykmeldingStatusRepository,
+    private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
 ) : ISykmeldingRepository {
     @Transactional
     override fun save(sykmelding: Sykmelding) {
@@ -31,12 +35,11 @@ class SykmeldingRepository(
 
         val statusDbRecords =
             statuser.map { status ->
-                val timestamp = Instant.now()
                 SykmeldingStatusDbRecord(
                     id = status.databaseId,
                     sykmeldingUuid = sykmelding.sykmeldingId,
                     status = status.status,
-                    timestamp = timestamp,
+                    timestamp = status.timestamp,
                     tidligereArbeidsgiver = null,
                     sporsmal =
                         status.sporsmal?.let { sp ->
@@ -45,7 +48,7 @@ class SykmeldingRepository(
                                 value = sp.serialisertTilString()
                             }
                         },
-                    opprettet = timestamp,
+                    opprettet = Instant.now(),
                 )
             }
 
@@ -64,7 +67,7 @@ class SykmeldingRepository(
             )
 
         sykmeldingDbRepository.save(dbRecord)
-        sykmeldingStatusRepository.saveAll(statusDbRecords)
+        sykmeldingStatusDbRepository.saveAll(statusDbRecords)
     }
 
     override fun findBySykmeldingId(id: String): Sykmelding? {
@@ -72,17 +75,32 @@ class SykmeldingRepository(
         if (dbRecord == null) {
             return null
         }
-        val statusDbRecords = sykmeldingStatusRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
+        val statusDbRecords = sykmeldingStatusDbRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
         return mapTilFlexSykmelding(dbRecord, statusDbRecords)
     }
 
     override fun findByFnr(fnr: String): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findByFnr(fnr)
-        val statusDbRecords = sykmeldingStatusRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
+        val statusDbRecords =
+            sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
         return dbRecords.map { dbRecord ->
             val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
             mapTilFlexSykmelding(dbRecord, statusDbRecords)
         }
+    }
+
+    override fun findAll(): List<Sykmelding> {
+        val dbRecords = sykmeldingDbRepository.findAll()
+        val statusDbRecords = sykmeldingStatusDbRepository.findAll()
+        return dbRecords.map { dbRecord ->
+            val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
+            mapTilFlexSykmelding(dbRecord, statusDbRecords)
+        }
+    }
+
+    override fun deleteAll() {
+        sykmeldingStatusDbRepository.deleteAll()
+        sykmeldingDbRepository.deleteAll()
     }
 
     private fun mapTilFlexSykmelding(
@@ -135,7 +153,7 @@ data class SykmeldingDbRecord(
     val oppdatert: Instant?,
 )
 
-interface SykmeldingStatusRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
+interface SykmeldingStatusDbRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
     fun findAllBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingStatusDbRecord>
 
     fun findAllBySykmeldingUuidIn(sykmeldingUuid: Collection<String>): List<SykmeldingStatusDbRecord>

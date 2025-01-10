@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import java.time.Instant
+import kotlin.collections.plus
 
 data class Sykmelding(
     internal val databaseId: String? = null,
@@ -17,6 +18,11 @@ data class Sykmelding(
     fun sisteStatus(): SykmeldingStatus {
         return statuser.sortedBy { it.timestamp }.last()
     }
+
+    fun leggTilStatus(sykmeldingStatus: SykmeldingStatus): Sykmelding =
+        this.copy(
+            statuser = this.statuser + sykmeldingStatus,
+        )
 }
 
 data class SykmeldingStatus(

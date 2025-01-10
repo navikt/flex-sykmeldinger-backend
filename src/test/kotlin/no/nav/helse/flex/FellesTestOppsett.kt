@@ -4,6 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
+import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -45,6 +46,9 @@ abstract class FellesTestOppsett {
     @Autowired
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
+    @Autowired
+    lateinit var sykemeldingRepository: SykmeldingRepository
+
     companion object {
         init {
 
@@ -73,6 +77,7 @@ abstract class FellesTestOppsett {
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
+        sykemeldingRepository.deleteAll()
     }
 
     fun tokenxToken(
