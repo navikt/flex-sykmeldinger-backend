@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class SykmeldingTest {
     @Test
     fun `burde deserialisere sykmelding`() {
-        val sykmeldingSerialisert = lagSykmelding().serialisertTilString()
+        val sykmeldingSerialisert = lagSykmeldingGrunnlag().serialisertTilString()
 
         val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
         sykmelding `should be instance of` SykmeldingGrunnlag::class
@@ -17,7 +17,7 @@ class SykmeldingTest {
 
     @Test
     fun `burde serialisere og deserialisere utenlandsk sykmelding`() {
-        val utenlandskSykmeldingSerialisert = lagUtenlandskSykmelding().serialisertTilString()
+        val utenlandskSykmeldingSerialisert = lagUtenlandskSykmeldingGrunnlag().serialisertTilString()
 
         val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
         sykmelding `should be instance of` UtenlandskSykmeldingGrunnlag::class

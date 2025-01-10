@@ -5,7 +5,7 @@ import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.domain.RuleType
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.ValidationResult
-import no.nav.helse.flex.sykmelding.domain.lagSykmelding
+import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should not be null`
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -21,7 +21,7 @@ class TestSykmeldingListenerTest : FellesTestOppsett() {
 
     @Test
     fun `burde ikke feil ved riktig kafka melding format`() {
-        val sykmelding = lagSykmelding()
+        val sykmelding = lagSykmeldingGrunnlag()
         val sykmeldingMedBehandlingsutfall =
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = sykmelding,
