@@ -3,6 +3,7 @@ package no.nav.helse.flex.sykmelding.domain
 import java.time.Instant
 
 data class Sykmelding(
+    internal val databaseId: String? = null,
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
     val statuser: List<SykmeldingStatus>,
 ) {
@@ -19,6 +20,7 @@ data class Sykmelding(
 }
 
 data class SykmeldingStatus(
+    internal val databaseId: String? = null,
     val status: String,
     val sporsmal: String? = null,
     val timestamp: Instant = Instant.now(),

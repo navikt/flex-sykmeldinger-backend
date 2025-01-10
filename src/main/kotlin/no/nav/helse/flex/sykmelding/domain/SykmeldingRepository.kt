@@ -33,29 +33,32 @@ class SykmeldingRepository(
             statuser.map { status ->
                 val timestamp = Instant.now()
                 SykmeldingStatusDbRecord(
+                    id = status.databaseId,
                     sykmeldingUuid = sykmelding.sykmeldingId,
                     status = status.status,
                     timestamp = timestamp,
                     tidligereArbeidsgiver = null,
-                    sporsmal = status.sporsmal?.let { sp ->
-                        PGobject().apply {
-                            type = "json"
-                            value = sp.serialisertTilString()
-                        }
-                    },
+                    sporsmal =
+                        status.sporsmal?.let { sp ->
+                            PGobject().apply {
+                                type = "json"
+                                value = sp.serialisertTilString()
+                            }
+                        },
                     opprettet = timestamp,
                 )
             }
 
         val dbRecord =
             SykmeldingDbRecord(
+                id = sykmelding.databaseId,
                 sykmeldingUuid = sykmelding.sykmeldingId,
                 fnr = sykmeldingGrunnlag.pasient.fnr,
                 sykmelding =
-                PGobject().apply {
-                    type = "json"
-                    value = sykmeldingGrunnlag.serialisertTilString()
-                },
+                    PGobject().apply {
+                        type = "json"
+                        value = sykmeldingGrunnlag.serialisertTilString()
+                    },
                 opprettet = Instant.now(),
                 oppdatert = Instant.now(),
             )
@@ -87,6 +90,7 @@ class SykmeldingRepository(
         statusDbRecords: List<SykmeldingStatusDbRecord>,
     ): Sykmelding {
         return Sykmelding(
+            databaseId = dbRecord.id,
             sykmeldingGrunnlag = mapDbRecordTilSykmelding(dbRecord),
             statuser = statusDbRecords.map(this::mapStatusDbRecordTilStatus),
         )
@@ -102,10 +106,12 @@ class SykmeldingRepository(
 
     private fun mapStatusDbRecordTilStatus(statusDbRecord: SykmeldingStatusDbRecord): SykmeldingStatus {
         return SykmeldingStatus(
+            databaseId = statusDbRecord.id,
             status = statusDbRecord.status,
-            sporsmal = statusDbRecord.sporsmal?.value?.let {
-                objectMapper.readValue(it)
-            },
+            sporsmal =
+                statusDbRecord.sporsmal?.value?.let {
+                    objectMapper.readValue(it)
+                },
             timestamp = statusDbRecord.timestamp,
         )
     }
@@ -123,7 +129,6 @@ data class SykmeldingDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
-    //val sisteSykmeldingstatusId: String,
     val fnr: String,
     val sykmelding: PGobject,
     val opprettet: Instant,

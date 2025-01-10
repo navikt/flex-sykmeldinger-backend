@@ -26,11 +26,11 @@ class TestSykmeldingListenerTest : FellesTestOppsett() {
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = sykmelding,
                 validation =
-                ValidationResult(
-                    status = RuleType.OK,
-                    timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                    rules = listOf(),
-                ),
+                    ValidationResult(
+                        status = RuleType.OK,
+                        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                        rules = listOf(),
+                    ),
             )
         kafkaProducer.send(
             ProducerRecord(
