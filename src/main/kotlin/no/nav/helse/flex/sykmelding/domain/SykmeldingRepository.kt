@@ -33,40 +33,10 @@ class SykmeldingRepository(
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
         val statuser = sykmelding.statuser
 
-        val statusDbRecords =
-            statuser.map { status ->
-                SykmeldingStatusDbRecord(
-                    id = status.databaseId,
-                    sykmeldingUuid = sykmelding.sykmeldingId,
-                    status = status.status,
-                    timestamp = status.timestamp,
-                    tidligereArbeidsgiver = null,
-                    sporsmal =
-                        status.sporsmal?.let { sp ->
-                            PGobject().apply {
-                                type = "json"
-                                value = sp.serialisertTilString()
-                            }
-                        },
-                    opprettet = Instant.now(),
-                )
-            }
+        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
+        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
 
-        val dbRecord =
-            SykmeldingDbRecord(
-                id = sykmelding.databaseId,
-                sykmeldingUuid = sykmelding.sykmeldingId,
-                fnr = sykmeldingGrunnlag.pasient.fnr,
-                sykmelding =
-                    PGobject().apply {
-                        type = "json"
-                        value = sykmeldingGrunnlag.serialisertTilString()
-                    },
-                opprettet = Instant.now(),
-                oppdatert = Instant.now(),
-            )
-
-        sykmeldingDbRepository.save(dbRecord)
+        sykmeldingDbRepository.save(sykmeldingDbRecord)
         sykmeldingStatusDbRepository.saveAll(statusDbRecords)
     }
 
@@ -76,7 +46,7 @@ class SykmeldingRepository(
             return null
         }
         val statusDbRecords = sykmeldingStatusDbRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
-        return mapTilFlexSykmelding(dbRecord, statusDbRecords)
+        return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
     override fun findByFnr(fnr: String): List<Sykmelding> {
@@ -85,7 +55,7 @@ class SykmeldingRepository(
             sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
         return dbRecords.map { dbRecord ->
             val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
-            mapTilFlexSykmelding(dbRecord, statusDbRecords)
+            mapTilSykmelding(dbRecord, statusDbRecords)
         }
     }
 
@@ -94,7 +64,7 @@ class SykmeldingRepository(
         val statusDbRecords = sykmeldingStatusDbRepository.findAll()
         return dbRecords.map { dbRecord ->
             val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
-            mapTilFlexSykmelding(dbRecord, statusDbRecords)
+            mapTilSykmelding(dbRecord, statusDbRecords)
         }
     }
 
@@ -103,34 +73,14 @@ class SykmeldingRepository(
         sykmeldingDbRepository.deleteAll()
     }
 
-    private fun mapTilFlexSykmelding(
+    private fun mapTilSykmelding(
         dbRecord: SykmeldingDbRecord,
         statusDbRecords: List<SykmeldingStatusDbRecord>,
     ): Sykmelding {
         return Sykmelding(
             databaseId = dbRecord.id,
-            sykmeldingGrunnlag = mapDbRecordTilSykmelding(dbRecord),
-            statuser = statusDbRecords.map(this::mapStatusDbRecordTilStatus),
-        )
-    }
-
-    private fun mapDbRecordTilSykmelding(dbRecord: SykmeldingDbRecord): ISykmeldingGrunnlag {
-        val serialisertSykmelding = dbRecord.sykmelding
-        check(serialisertSykmelding.value != null) {
-            "sykmelding kolonne burde ikke være null"
-        }
-        return objectMapper.readValue(serialisertSykmelding.value!!)
-    }
-
-    private fun mapStatusDbRecordTilStatus(statusDbRecord: SykmeldingStatusDbRecord): SykmeldingStatus {
-        return SykmeldingStatus(
-            databaseId = statusDbRecord.id,
-            status = statusDbRecord.status,
-            sporsmal =
-                statusDbRecord.sporsmal?.value?.let {
-                    objectMapper.readValue(it)
-                },
-            timestamp = statusDbRecord.timestamp,
+            sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
+            statuser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
         )
     }
 }
@@ -151,7 +101,35 @@ data class SykmeldingDbRecord(
     val sykmelding: PGobject,
     val opprettet: Instant,
     val oppdatert: Instant?,
-)
+) {
+    fun mapTilSykmelding(): ISykmeldingGrunnlag {
+        val serialisertSykmelding = this.sykmelding
+        check(serialisertSykmelding.value != null) {
+            "sykmelding kolonne burde ikke være null"
+        }
+        return objectMapper.readValue(serialisertSykmelding.value!!)
+    }
+
+    companion object {
+        fun mapFraSykmelding(
+            sykmelding: Sykmelding,
+            sykmeldingGrunnlag: ISykmeldingGrunnlag,
+        ): SykmeldingDbRecord =
+            SykmeldingDbRecord(
+                id = sykmelding.databaseId,
+                sykmeldingUuid = sykmelding.sykmeldingId,
+                fnr = sykmeldingGrunnlag.pasient.fnr,
+                sykmelding =
+                    PGobject().apply {
+                        type = "json"
+                        value = sykmeldingGrunnlag.serialisertTilString()
+                    },
+                // TODO: Ikke sett ved oppdatering
+                opprettet = Instant.now(),
+                oppdatert = Instant.now(),
+            )
+    }
+}
 
 interface SykmeldingStatusDbRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
     fun findAllBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingStatusDbRecord>
@@ -169,4 +147,41 @@ data class SykmeldingStatusDbRecord(
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
     val opprettet: Instant,
-)
+) {
+    fun mapTilStatus(): SykmeldingStatus {
+        return SykmeldingStatus(
+            databaseId = this.id,
+            status = this.status,
+            sporsmal =
+                this.sporsmal?.value?.let {
+                    objectMapper.readValue(it)
+                },
+            timestamp = this.timestamp,
+        )
+    }
+
+    companion object {
+        fun mapFraStatus(
+            statuser: List<SykmeldingStatus>,
+            sykmeldingId: String,
+        ): List<SykmeldingStatusDbRecord> =
+            statuser.map { status ->
+                SykmeldingStatusDbRecord(
+                    id = status.databaseId,
+                    sykmeldingUuid = sykmeldingId,
+                    status = status.status,
+                    timestamp = status.timestamp,
+                    tidligereArbeidsgiver = null,
+                    sporsmal =
+                        status.sporsmal?.let { sp ->
+                            PGobject().apply {
+                                type = "json"
+                                value = sp.serialisertTilString()
+                            }
+                        },
+                    // TODO: Ikke sett ved oppdatering
+                    opprettet = Instant.now(),
+                )
+            }
+    }
+}
