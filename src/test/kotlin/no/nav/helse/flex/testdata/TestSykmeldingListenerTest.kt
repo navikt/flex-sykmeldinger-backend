@@ -3,7 +3,7 @@ package no.nav.helse.flex.testdata
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.domain.RuleType
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfall
+import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.ValidationResult
 import no.nav.helse.flex.sykmelding.domain.lagSykmelding
 import org.amshove.kluent.`should not be null`
@@ -23,14 +23,14 @@ class TestSykmeldingListenerTest : FellesTestOppsett() {
     fun `burde ikke feil ved riktig kafka melding format`() {
         val sykmelding = lagSykmelding()
         val sykmeldingMedBehandlingsutfall =
-            SykmeldingMedBehandlingsutfall(
+            SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = sykmelding,
                 validation =
-                    ValidationResult(
-                        status = RuleType.OK,
-                        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                        rules = listOf(),
-                    ),
+                ValidationResult(
+                    status = RuleType.OK,
+                    timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                    rules = listOf(),
+                ),
             )
         kafkaProducer.send(
             ProducerRecord(

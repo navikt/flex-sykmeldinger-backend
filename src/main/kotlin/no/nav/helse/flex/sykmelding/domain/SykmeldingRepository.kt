@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 data class FlexSykmelding(
-    val sykmelding: ISykmelding,
+    val sykmelding: ISykmeldingGrunnlag,
     val statuser: List<SykmeldingStatus> = emptyList(),
 ) {
     fun sisteStatus(): SykmeldingStatus {
@@ -62,10 +62,10 @@ class SykmeldingRepository(
                 sisteSykmeldingstatusId = "",
                 fnr = sykmelding.pasient.fnr,
                 sykmelding =
-                    PGobject().apply {
-                        type = "json"
-                        value = sykmelding.serialisertTilString()
-                    },
+                PGobject().apply {
+                    type = "json"
+                    value = sykmelding.serialisertTilString()
+                },
                 opprettet = Instant.now(),
                 oppdatert = Instant.now(),
             )
@@ -102,7 +102,7 @@ class SykmeldingRepository(
         )
     }
 
-    private fun mapDbRecordTilSykmelding(dbRecord: SykmeldingDbRecord): ISykmelding {
+    private fun mapDbRecordTilSykmelding(dbRecord: SykmeldingDbRecord): ISykmeldingGrunnlag {
         val serialisertSykmelding = dbRecord.sykmelding
         check(serialisertSykmelding.value != null) {
             "sykmelding kolonne burde ikke være null"

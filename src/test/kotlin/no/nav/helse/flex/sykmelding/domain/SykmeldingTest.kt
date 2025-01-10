@@ -11,15 +11,15 @@ class SykmeldingTest {
     fun `burde deserialisere sykmelding`() {
         val sykmeldingSerialisert = lagSykmelding().serialisertTilString()
 
-        val sykmelding: ISykmelding = objectMapper.readValue(sykmeldingSerialisert)
-        sykmelding `should be instance of` Sykmelding::class
+        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
+        sykmelding `should be instance of` SykmeldingGrunnlag::class
     }
 
     @Test
     fun `burde serialisere og deserialisere utenlandsk sykmelding`() {
         val utenlandskSykmeldingSerialisert = lagUtenlandskSykmelding().serialisertTilString()
 
-        val sykmelding: ISykmelding = objectMapper.readValue(utenlandskSykmeldingSerialisert)
-        sykmelding `should be instance of` UtenlandskSykmelding::class
+        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
+        sykmelding `should be instance of` UtenlandskSykmeldingGrunnlag::class
     }
 }

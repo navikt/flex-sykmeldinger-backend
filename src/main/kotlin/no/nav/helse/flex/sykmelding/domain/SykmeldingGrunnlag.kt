@@ -11,11 +11,11 @@ enum class SykmeldingType {
 }
 
 @JsonSubTypes(
-    JsonSubTypes.Type(Sykmelding::class, name = "SYKMELDING"),
-    JsonSubTypes.Type(UtenlandskSykmelding::class, name = "UTENLANDSK_SYKMELDING"),
+    JsonSubTypes.Type(SykmeldingGrunnlag::class, name = "SYKMELDING"),
+    JsonSubTypes.Type(UtenlandskSykmeldingGrunnlag::class, name = "UTENLANDSK_SYKMELDING"),
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-sealed interface ISykmelding {
+sealed interface ISykmeldingGrunnlag {
     val type: SykmeldingType
     val id: String
     val metadata: SykmeldingMetadata
@@ -24,18 +24,18 @@ sealed interface ISykmelding {
     val aktivitet: List<Aktivitet>
 }
 
-data class UtenlandskSykmelding(
+data class UtenlandskSykmeldingGrunnlag(
     override val id: String,
     override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
     val utenlandskInfo: UtenlandskInfo,
-) : ISykmelding {
+) : ISykmeldingGrunnlag {
     override val type = SykmeldingType.UTENLANDSK_SYKMELDING
 }
 
-data class Sykmelding(
+data class SykmeldingGrunnlag(
     override val id: String,
     override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
@@ -49,7 +49,7 @@ data class Sykmelding(
     val bistandNav: BistandNav?,
     val tilbakedatering: Tilbakedatering?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-) : ISykmelding {
+) : ISykmeldingGrunnlag {
     override val type = SykmeldingType.SYKMELDING
 }
 
