@@ -10,27 +10,12 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
-data class FlexSykmelding(
-    val sykmelding: ISykmeldingGrunnlag,
-    val statuser: List<SykmeldingStatus> = emptyList(),
-) {
-    fun sisteStatus(): SykmeldingStatus {
-        return statuser.sortedBy { it.timestamp }.last()
-    }
-}
-
-data class SykmeldingStatus(
-    val status: String,
-    val sporsmal: String?,
-    val timestamp: Instant,
-)
-
 interface ISykmeldingRepository {
-    fun save(sykmelding: FlexSykmelding)
+    fun save(sykmelding: Sykmelding)
 
-    fun findBySykmeldingUuid(id: String): FlexSykmelding?
+    fun findBySykmeldingUuid(id: String): Sykmelding?
 
-    fun findByFnr(fnr: String): List<FlexSykmelding>
+    fun findByFnr(fnr: String): List<Sykmelding>
 }
 
 @Repository
@@ -39,15 +24,15 @@ class SykmeldingRepository(
     private val sykmeldingStatusRepository: SykmeldingStatusRepository,
 ) : ISykmeldingRepository {
     @Transactional
-    override fun save(flexSykmelding: FlexSykmelding) {
-        val sykmelding = flexSykmelding.sykmelding
-        val statuser = flexSykmelding.statuser
+    override fun save(sykmelding: Sykmelding) {
+        val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
+        val statuser = sykmelding.statuser
 
         val statusDbRecords =
             statuser.map { status ->
                 val timestamp = Instant.now()
                 SykmeldingStatusDbRecord(
-                    sykmeldingUuid = sykmelding.id,
+                    sykmeldingUuid = sykmelding.sykmeldingId,
                     status = status.status,
                     timestamp = timestamp,
                     tidligereArbeidsgiver = null,
@@ -58,9 +43,9 @@ class SykmeldingRepository(
 
         val dbRecord =
             SykmeldingDbRecord(
-                sykmeldingUuid = sykmelding.id,
+                sykmeldingUuid = sykmelding.sykmeldingId,
                 sisteSykmeldingstatusId = "",
-                fnr = sykmelding.pasient.fnr,
+                fnr = sykmeldingGrunnlag.pasient.fnr,
                 sykmelding =
                 PGobject().apply {
                     type = "json"
@@ -74,7 +59,7 @@ class SykmeldingRepository(
         sykmeldingStatusRepository.saveAll(statusDbRecords)
     }
 
-    override fun findBySykmeldingUuid(id: String): FlexSykmelding? {
+    override fun findBySykmeldingUuid(id: String): Sykmelding? {
         val dbRecord = sykmeldingDbRepository.findBySykmeldingUuid(id)
         if (dbRecord == null) {
             return null
@@ -83,7 +68,7 @@ class SykmeldingRepository(
         return mapTilFlexSykmelding(dbRecord, statusDbRecords)
     }
 
-    override fun findByFnr(fnr: String): List<FlexSykmelding> {
+    override fun findByFnr(fnr: String): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findByFnr(fnr)
         val statusDbRecords = sykmeldingStatusRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
         return dbRecords.map { dbRecord ->
@@ -95,9 +80,9 @@ class SykmeldingRepository(
     private fun mapTilFlexSykmelding(
         dbRecord: SykmeldingDbRecord,
         statusDbRecords: List<SykmeldingStatusDbRecord>,
-    ): FlexSykmelding {
-        return FlexSykmelding(
-            sykmelding = mapDbRecordTilSykmelding(dbRecord),
+    ): Sykmelding {
+        return Sykmelding(
+            sykmeldingGrunnlag = mapDbRecordTilSykmelding(dbRecord),
             statuser = statusDbRecords.map(this::mapStatusDbRecordTilStatus),
         )
     }
