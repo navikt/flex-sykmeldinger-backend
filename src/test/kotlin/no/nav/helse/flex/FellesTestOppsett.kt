@@ -1,13 +1,17 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.kafka.SYKMELDING_TOPIC
+import no.nav.helse.flex.kafka.lesFraTopics
 import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
+import no.nav.helse.flex.testdata.TEST_SYKMELDING_TOPIC
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
@@ -21,7 +25,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.UUID
+import java.time.Duration
+import java.util.*
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -31,6 +36,9 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @SpringBootTest(classes = [Application::class])
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FellesTestOppsett {
+    @Autowired
+    private lateinit var kafkaConsumer: KafkaConsumer<String, String>
+
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -78,6 +86,10 @@ abstract class FellesTestOppsett {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykemeldingRepository.deleteAll()
+    }
+
+    fun slettKafka() {
+        kafkaConsumer.lesFraTopics(SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC, ventetid = Duration.ofMillis(500))
     }
 
     fun tokenxToken(
