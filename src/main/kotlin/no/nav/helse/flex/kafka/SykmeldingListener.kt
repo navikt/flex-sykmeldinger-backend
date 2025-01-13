@@ -25,24 +25,16 @@ class SykmeldingListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
-            try {
+        try {
+            val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
                 objectMapper.readValue(cr.value())
-            } catch (e: Exception) {
-                log.error("Feil sykmelding data: ${cr.value()}")
-                log.error("Exception ved feil sykmelding konvertering", e)
-                // TODO: fjern og kast feil
-                acknowledgment.acknowledge()
-                return
-            }
-        log.info(
-            "Motatt sykmelding med behandlingsutfall: \n${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-                sykmeldingMedBehandlingsutfall,
-            )}",
-        )
-
-        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
-        acknowledgment.acknowledge()
+            sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+            acknowledgment.acknowledge()
+        } catch (e: Exception) {
+            log.error("Feil sykmelding data: ${cr.value()}")
+            log.error("Exception ved feil sykmelding konvertering", e)
+            throw e
+        }
     }
 }
 

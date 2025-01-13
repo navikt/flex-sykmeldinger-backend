@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
+import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
@@ -12,10 +13,10 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("testdata")
-class TestSykmeldingListener() {
+class TestSykmeldingListener(
+    private val sykmeldingLagrer: SykmeldingLagrer,
+) {
     val log = logger()
-
-    var sisteSykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding? = null
 
     @KafkaListener(
         topics = [TEST_SYKMELDING_TOPIC],
@@ -26,24 +27,23 @@ class TestSykmeldingListener() {
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
-            try {
+        try {
+            val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
                 objectMapper.readValue(cr.value())
-            } catch (e: Exception) {
-                log.error("Feil sykmelding data: ${cr.value()}")
-                log.error("Exception ved feil sykmelding konvertering", e)
-                acknowledgment.acknowledge()
-                return
-            }
-        this.sisteSykmeldingMedBehandlingsutfall = sykmeldingMedBehandlingsutfall
-        log.info(
-            "Motatt sykmelding med behandlingsutfall: \n${
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-                    sykmeldingMedBehandlingsutfall,
-                )
-            }",
-        )
-        acknowledgment.acknowledge()
+            sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+            log.info(
+                "Motatt sykmelding med behandlingsutfall: \n${
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                        sykmeldingMedBehandlingsutfall,
+                    )
+                }",
+            )
+        } catch (e: Exception) {
+            log.error("Feil sykmelding data, denne blir skippet: ${cr.value()}")
+            log.error("Exception ved feil sykmelding konvertering", e)
+        } finally {
+            acknowledgment.acknowledge()
+        }
     }
 }
 
