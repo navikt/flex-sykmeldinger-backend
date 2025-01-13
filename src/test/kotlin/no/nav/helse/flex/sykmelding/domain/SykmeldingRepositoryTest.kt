@@ -6,6 +6,8 @@ import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class SykmeldingRepositoryTest : FellesTestOppsett() {
     @Autowired
@@ -124,6 +126,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
+                            timestamp = Instant.now().trimToMillisForOperativsystemForskjeller(),
                         ),
                     ),
             )
@@ -137,4 +140,6 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding {
         return this.copy(databaseId = null, statuser = this.statuser.map { it.copy(databaseId = null) })
     }
+
+    fun Instant.trimToMillisForOperativsystemForskjeller(): Instant = truncatedTo(ChronoUnit.MICROS)
 }
