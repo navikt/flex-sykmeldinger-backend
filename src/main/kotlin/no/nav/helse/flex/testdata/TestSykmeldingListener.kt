@@ -3,7 +3,7 @@ package no.nav.helse.flex.testdata
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfall
+import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 class TestSykmeldingListener() {
     val log = logger()
 
-    var sisteSykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfall? = null
+    var sisteSykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding? = null
 
     @KafkaListener(
         topics = [TEST_SYKMELDING_TOPIC],
@@ -26,7 +26,7 @@ class TestSykmeldingListener() {
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfall =
+        val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
             try {
                 objectMapper.readValue(cr.value())
             } catch (e: Exception) {
@@ -37,9 +37,11 @@ class TestSykmeldingListener() {
             }
         this.sisteSykmeldingMedBehandlingsutfall = sykmeldingMedBehandlingsutfall
         log.info(
-            "Motatt sykmelding med behandlingsutfall: \n${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-                sykmeldingMedBehandlingsutfall,
-            )}",
+            "Motatt sykmelding med behandlingsutfall: \n${
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                    sykmeldingMedBehandlingsutfall,
+                )
+            }",
         )
         acknowledgment.acknowledge()
     }
