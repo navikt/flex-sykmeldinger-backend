@@ -16,19 +16,19 @@ class SykmeldingLagrer(
 
     fun lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding) {
         if (sykmeldingRepository.findBySykmeldingId(sykmeldingMedBehandlingsutfall.sykmelding.id) != null) {
-            log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} er allerede lagret")
+            log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} finnes fra før")
         } else {
             sykmeldingRepository.save(
                 Sykmelding(
                     sykmeldingGrunnlag = sykmeldingMedBehandlingsutfall.sykmelding,
                     statuser =
-                        listOf(
-                            SykmeldingStatus(
-                                status = "NY",
-                                sporsmalSvar = null,
-                                timestamp = Instant.now(),
-                            ),
+                    listOf(
+                        SykmeldingStatus(
+                            status = "NY",
+                            sporsmalSvar = null,
+                            timestamp = Instant.now(),
                         ),
+                    ),
                 ),
             )
             log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} lagret")

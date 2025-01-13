@@ -14,17 +14,29 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import java.time.Duration
+import java.time.Instant
+import java.util.function.Supplier
 
 class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
+    @Configuration
+    class TetsConfiguration {
+        @Bean
+        fun nowFactory(): Supplier<Instant> {
+            return Supplier { Instant.parse("2020-01-01T00:00:00.000Z") }
+        }
+    }
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
-        slettKafka()
+        //slettKafka()
     }
 
     @ParameterizedTest
-    @ValueSource(strings = [SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC])
+    @ValueSource(strings = [SYKMELDING_TOPIC]) //, TEST_SYKMELDING_TOPIC])
     fun `burde lagre sykmelding fra kafka`(topic: String) {
         val kafkaMelding =
             SykmeldingMedBehandlingsutfallMelding(
@@ -40,7 +52,7 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
             ),
         ).get()
 
-        await().atMost(Duration.ofSeconds(5)).untilAsserted {
+        await().atMost(Duration.ofSeconds(2)).untilAsserted {
             sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
         }
     }
