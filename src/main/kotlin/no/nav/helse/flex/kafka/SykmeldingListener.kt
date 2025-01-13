@@ -6,13 +6,11 @@ import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("testdata")
 class SykmeldingListener(
     private val sykmeldingLagrer: SykmeldingLagrer,
 ) {
@@ -49,4 +47,4 @@ class SykmeldingListener(
 }
 
 // TODO: endre når tsm har klart topic
-const val SYKMELDING_TOPIC = "flex.test-sykmelding"
+const val SYKMELDING_TOPIC = "flex.sykmelding"
