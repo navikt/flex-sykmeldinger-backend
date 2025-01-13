@@ -1,13 +1,10 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.kafka.SYKMELDING_TOPIC
-import no.nav.helse.flex.kafka.lesFraTopics
 import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
-import no.nav.helse.flex.testdata.TEST_SYKMELDING_TOPIC
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -21,11 +18,12 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry
+import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.time.Duration
 import java.util.*
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
@@ -37,7 +35,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FellesTestOppsett {
     @Autowired
-    private lateinit var kafkaConsumer: KafkaConsumer<String, String>
+    lateinit var kafkaConsumer: KafkaConsumer<String, String>
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -56,6 +54,9 @@ abstract class FellesTestOppsett {
 
     @Autowired
     lateinit var sykemeldingRepository: SykmeldingRepository
+
+    @Autowired
+    lateinit var kafkaListenerRegistry: KafkaListenerEndpointRegistry
 
     companion object {
         init {
@@ -88,8 +89,11 @@ abstract class FellesTestOppsett {
         sykemeldingRepository.deleteAll()
     }
 
-    fun slettKafka() {
-        kafkaConsumer.lesFraTopics(SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC, ventetid = Duration.ofMillis(500))
+    fun ventPaConsumers() {
+        // Burde brukes dersom consumere har offset=latest
+        kafkaListenerRegistry.listenerContainers.forEach { container ->
+            ContainerTestUtils.waitForAssignment(container, 1)
+        }
     }
 
     fun tokenxToken(

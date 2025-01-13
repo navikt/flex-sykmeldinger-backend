@@ -117,7 +117,7 @@ data class SykmeldingDbRecord(
         fun mapFraSykmelding(
             sykmelding: Sykmelding,
             sykmeldingGrunnlag: ISykmeldingGrunnlag,
-            nowFactory: Supplier<Instant> = Supplier { Instant.now() }
+            nowFactory: Supplier<Instant> = Supplier { Instant.now() },
         ): SykmeldingDbRecord =
             SykmeldingDbRecord(
                 id = sykmelding.databaseId,

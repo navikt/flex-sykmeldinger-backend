@@ -30,10 +30,11 @@ class KafkaTestConfig(
 fun <K, V> Consumer<K, V>.lesFraTopics(
     vararg topics: String,
     ventetid: Duration = Duration.ofMillis(100),
-) {
+): List<ConsumerRecord<K, V>> {
     this.subscribeHvisIkkeSubscribed(*topics)
-    this.hentProduserteRecords(ventetid)
+    val meldinger = this.hentProduserteRecords(ventetid)
     this.unsubscribe()
+    return meldinger
 }
 
 fun <K, V> Consumer<K, V>.subscribeHvisIkkeSubscribed(vararg topics: String) {

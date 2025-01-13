@@ -12,6 +12,7 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.context.annotation.Bean
@@ -29,32 +30,40 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
         }
     }
 
+    @BeforeAll
+    fun setup() {
+        super.ventPaConsumers()
+        println("Ferdig venta på consumers")
+    }
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
-        //slettKafka()
     }
 
     @ParameterizedTest
-    @ValueSource(strings = [SYKMELDING_TOPIC]) //, TEST_SYKMELDING_TOPIC])
+    @ValueSource(strings = [SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC])
     fun `burde lagre sykmelding fra kafka`(topic: String) {
         val kafkaMelding =
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
+
         kafkaProducer.send(
             ProducerRecord(
                 topic,
                 null,
-                kafkaMelding.sykmelding.id,
+                "1",
                 kafkaMelding.serialisertTilString(),
             ),
         ).get()
 
-        await().atMost(Duration.ofSeconds(2)).untilAsserted {
-            sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        await().atMost(Duration.ofSeconds(2)).until {
+            sykemeldingRepository.findBySykmeldingId("1") != null
         }
+
+        sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
     }
 
     @ParameterizedTest
@@ -65,6 +74,7 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
+
         repeat(2) {
             kafkaProducer.send(
                 ProducerRecord(
@@ -76,8 +86,11 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
             ).get()
         }
 
-        await().atMost(Duration.ofSeconds(5)).untilAsserted {
-            sykemeldingRepository.findAll().size `should be equal to` 1
-        }
+        // TODO: Test this another way
+        await()
+            .atLeast(Duration.ofSeconds(2))
+            .atMost(Duration.ofSeconds(2))
+            .until { true }
+        sykemeldingRepository.findAll().size `should be equal to` 1
     }
 }
