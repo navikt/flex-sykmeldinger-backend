@@ -16,7 +16,7 @@ interface ISykmeldingRepository {
 
     fun findBySykmeldingId(id: String): Sykmelding?
 
-    fun findByFnr(fnr: String): List<Sykmelding>
+    fun findAllByFnr(fnr: String): List<Sykmelding>
 
     fun findAll(): List<Sykmelding>
 
@@ -49,7 +49,7 @@ class SykmeldingRepository(
         return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
-    override fun findByFnr(fnr: String): List<Sykmelding> {
+    override fun findAllByFnr(fnr: String): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findByFnr(fnr)
         val statusDbRecords =
             sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
@@ -152,7 +152,7 @@ data class SykmeldingStatusDbRecord(
         return SykmeldingStatus(
             databaseId = this.id,
             status = this.status,
-            sporsmal =
+            sporsmalSvar =
                 this.sporsmal?.value?.let {
                     objectMapper.readValue(it)
                 },
@@ -173,7 +173,7 @@ data class SykmeldingStatusDbRecord(
                     timestamp = status.timestamp,
                     tidligereArbeidsgiver = null,
                     sporsmal =
-                        status.sporsmal?.let { sp ->
+                        status.sporsmalSvar?.let { sp ->
                             PGobject().apply {
                                 type = "json"
                                 value = sp.serialisertTilString()

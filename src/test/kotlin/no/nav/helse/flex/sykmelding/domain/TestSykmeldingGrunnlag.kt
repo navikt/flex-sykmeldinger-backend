@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 fun lagSykmeldingGrunnlag(id: String = "1"): SykmeldingGrunnlag {
     return SykmeldingGrunnlag(
@@ -207,4 +208,11 @@ fun lagBehandler() =
                 kommune = "Oslo",
                 land = "Norge",
             ),
+    )
+
+fun lagValidation(): ValidationResult =
+    ValidationResult(
+        status = RuleType.OK,
+        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+        rules = listOf(),
     )

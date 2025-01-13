@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding.logikk
 
-import no.nav.helse.flex.sykmelding.domain.FlexSykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfall
+import no.nav.helse.flex.sykmelding.domain.Sykmelding
+import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import org.springframework.stereotype.Component
@@ -11,11 +11,10 @@ import java.time.Instant
 class SykmeldingLagrer(
     private val sykmeldingRepository: SykmeldingRepository,
 ) {
-    fun lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfall) {
+    fun lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding) {
         sykmeldingRepository.save(
-            FlexSykmelding(
-                sykmelding = sykmeldingMedBehandlingsutfall.sykmelding,
-                validation = sykmeldingMedBehandlingsutfall.validation,
+            Sykmelding(
+                sykmeldingGrunnlag = sykmeldingMedBehandlingsutfall.sykmelding,
                 statuser =
                     listOf(
                         SykmeldingStatus(
