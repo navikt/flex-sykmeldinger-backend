@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testdata
 
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
@@ -38,9 +39,10 @@ class TestSykmeldingListener(
                     )
                 }",
             )
+        } catch (e: JacksonException) {
+            log.error("Feil sykmelding format. Denne blir skippet. Melding key: ${cr.key()}. Value: ${cr.value()}", e)
         } catch (e: Exception) {
-            log.error("Feil sykmelding data, denne blir skippet: ${cr.value()}")
-            log.error("Exception ved feil sykmelding konvertering", e)
+            log.error("Exception ved håndtering av sykmelding", e)
         } finally {
             acknowledgment.acknowledge()
         }
