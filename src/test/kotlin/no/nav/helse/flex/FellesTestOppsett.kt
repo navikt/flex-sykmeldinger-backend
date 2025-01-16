@@ -109,28 +109,29 @@ abstract class FellesTestOppsett {
                 "client_id" to clientId,
                 "pid" to fnr,
             ),
-    ): String {
-        return server.issueToken(
-            issuerId,
-            clientId,
-            DefaultOAuth2TokenCallback(
-                issuerId = issuerId,
-                subject = UUID.randomUUID().toString(),
-                audience = listOf(audience),
-                claims = claims,
-                expiry = 3600,
-            ),
-        ).serialize()
-    }
+    ): String =
+        server
+            .issueToken(
+                issuerId,
+                clientId,
+                DefaultOAuth2TokenCallback(
+                    issuerId = issuerId,
+                    subject = UUID.randomUUID().toString(),
+                    audience = listOf(audience),
+                    claims = claims,
+                    expiry = 3600,
+                ),
+            ).serialize()
 
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
-        kafkaProducer.send(
-            ProducerRecord(
-                NARMESTELEDER_LEESAH_TOPIC,
-                null,
-                nl.narmesteLederId.toString(),
-                nl.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    NARMESTELEDER_LEESAH_TOPIC,
+                    null,
+                    nl.narmesteLederId.toString(),
+                    nl.serialisertTilString(),
+                ),
+            ).get()
     }
 }

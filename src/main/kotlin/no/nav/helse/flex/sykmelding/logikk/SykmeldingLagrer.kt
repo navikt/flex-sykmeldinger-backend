@@ -24,13 +24,13 @@ class SykmeldingLagrer(
                 Sykmelding(
                     sykmeldingGrunnlag = sykmeldingMedBehandlingsutfall.sykmelding,
                     statuser =
-                    listOf(
-                        SykmeldingStatus(
-                            status = "NY",
-                            sporsmalSvar = null,
-                            timestamp = nowFactory.get(),
+                        listOf(
+                            SykmeldingStatus(
+                                status = "NY",
+                                sporsmalSvar = null,
+                                timestamp = nowFactory.get(),
+                            ),
                         ),
-                    ),
                 ),
             )
             log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} lagret")

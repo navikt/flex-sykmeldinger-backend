@@ -8,7 +8,5 @@ import java.util.function.Supplier
 @Configuration
 class TidConfig {
     @Bean
-    fun nowFactory(): Supplier<Instant> {
-        return Supplier { Instant.now() }
-    }
+    fun nowFactory(): Supplier<Instant> = Supplier { Instant.now() }
 }

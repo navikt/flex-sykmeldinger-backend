@@ -14,7 +14,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -27,12 +26,6 @@ private val NOOP_ACK = Acknowledgment {}
 class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
     @Autowired
     lateinit var sykmeldingListener: SykmeldingListener
-
-    @BeforeAll
-    fun setup() {
-        super.ventPaConsumers()
-        println("Ferdig venta på consumers")
-    }
 
     @AfterEach
     fun tearDown() {
@@ -48,14 +41,17 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
                 validation = lagValidation(),
             )
 
-        kafkaProducer.send(
-            ProducerRecord(
-                topic,
-                null,
-                "1",
-                kafkaMelding.serialisertTilString(),
-            ),
-        ).get()
+        super.ventPaConsumers()
+
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    topic,
+                    null,
+                    "1",
+                    kafkaMelding.serialisertTilString(),
+                ),
+            ).get()
 
         await().atMost(Duration.ofSeconds(2)).until {
             sykemeldingRepository.findBySykmeldingId("1") != null

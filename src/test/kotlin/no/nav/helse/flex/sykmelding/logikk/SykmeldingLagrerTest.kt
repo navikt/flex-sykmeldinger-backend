@@ -40,9 +40,7 @@ class SykmeldingLagrerTest {
     @Configuration
     class SykmeldingLagrerConfiguration {
         @Bean
-        fun sykmeldingRepository(): ISykmeldingRepository {
-            return SykmeldingRepositoryFake()
-        }
+        fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
     }
 
     private val noAcknoledgment = Acknowledgment {}
