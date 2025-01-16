@@ -27,8 +27,11 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -44,20 +47,24 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         sykmeldingRepository.save(sykmelding)
 
         val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1")
         val oppdatertSykmelding =
-            hentetSykmelding?.copy(
-                sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(id = "1").copy(
-                        pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
-                    ),
-            ).`should not be null`()
+            hentetSykmelding
+                ?.copy(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(id = "1").copy(
+                            pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
+                        ),
+                ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
 
@@ -76,8 +83,11 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -99,15 +109,21 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         sykmeldingRepository.save(sykmelding)
 
         val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1")
         val oppdatertSykmelding =
-            hentetSykmelding?.leggTilStatus(SykmeldingStatus(status = "LEST")).`should not be null`()
+            hentetSykmelding
+                ?.leggTilStatus(
+                    SykmeldingStatus(status = "LEST", opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
+                ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
 
@@ -126,9 +142,11 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                     listOf(
                         SykmeldingStatus(
                             status = "NY",
-                            timestamp = Instant.now().trimToMillisForOperativsystemForskjeller(),
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z").trimToMillisForOperativsystemForskjeller(),
                         ),
                     ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -137,9 +155,14 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
         hentetSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
     }
 
-    private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding {
-        return this.copy(databaseId = null, statuser = this.statuser.map { it.copy(databaseId = null) })
-    }
+    private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =
+        this.copy(
+            databaseId = null,
+            statuser =
+                this.statuser.map {
+                    it.copy(databaseId = null)
+                },
+        )
 
     fun Instant.trimToMillisForOperativsystemForskjeller(): Instant = truncatedTo(ChronoUnit.MICROS)
 }

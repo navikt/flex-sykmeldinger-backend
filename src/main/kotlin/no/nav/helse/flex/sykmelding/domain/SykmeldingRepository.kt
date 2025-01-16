@@ -10,7 +10,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.util.function.Supplier
 
 interface ISykmeldingRepository {
     fun save(sykmelding: Sykmelding)
@@ -28,15 +27,14 @@ interface ISykmeldingRepository {
 class SykmeldingRepository(
     private val sykmeldingDbRepository: SykmeldingDbRepository,
     private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
-    private val nowFactory: Supplier<Instant>,
 ) : ISykmeldingRepository {
     @Transactional
     override fun save(sykmelding: Sykmelding) {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
         val statuser = sykmelding.statuser
 
-        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId, nowFactory)
-        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag, nowFactory)
+        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
+        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
 
         sykmeldingDbRepository.save(sykmeldingDbRecord)
         sykmeldingStatusDbRepository.saveAll(statusDbRecords)
@@ -78,13 +76,14 @@ class SykmeldingRepository(
     private fun mapTilSykmelding(
         dbRecord: SykmeldingDbRecord,
         statusDbRecords: List<SykmeldingStatusDbRecord>,
-    ): Sykmelding {
-        return Sykmelding(
+    ): Sykmelding =
+        Sykmelding(
             databaseId = dbRecord.id,
             sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
             statuser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
+            opprettet = dbRecord.opprettet,
+            oppdatert = dbRecord.oppdatert,
         )
-    }
 }
 
 @Repository
@@ -102,7 +101,7 @@ data class SykmeldingDbRecord(
     val fnr: String,
     val sykmelding: PGobject,
     val opprettet: Instant,
-    val oppdatert: Instant?,
+    val oppdatert: Instant,
 ) {
     fun mapTilSykmelding(): ISykmeldingGrunnlag {
         val serialisertSykmelding = this.sykmelding
@@ -116,7 +115,6 @@ data class SykmeldingDbRecord(
         fun mapFraSykmelding(
             sykmelding: Sykmelding,
             sykmeldingGrunnlag: ISykmeldingGrunnlag,
-            nowFactory: Supplier<Instant> = Supplier { Instant.now() },
         ): SykmeldingDbRecord =
             SykmeldingDbRecord(
                 id = sykmelding.databaseId,
@@ -127,9 +125,8 @@ data class SykmeldingDbRecord(
                         type = "json"
                         value = sykmeldingGrunnlag.serialisertTilString()
                     },
-                // TODO: Ikke sett ved oppdatering
-                opprettet = nowFactory.get(),
-                oppdatert = nowFactory.get(),
+                opprettet = sykmelding.opprettet,
+                oppdatert = sykmelding.oppdatert,
             )
     }
 }
@@ -145,36 +142,32 @@ data class SykmeldingStatusDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
-    val timestamp: Instant,
     val status: String,
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
     val opprettet: Instant,
 ) {
-    fun mapTilStatus(): SykmeldingStatus {
-        return SykmeldingStatus(
+    fun mapTilStatus(): SykmeldingStatus =
+        SykmeldingStatus(
             databaseId = this.id,
             status = this.status,
             sporsmalSvar =
                 this.sporsmal?.value?.let {
                     objectMapper.readValue(it)
                 },
-            timestamp = this.timestamp,
+            opprettet = opprettet,
         )
-    }
 
     companion object {
         fun mapFraStatus(
             statuser: List<SykmeldingStatus>,
             sykmeldingId: String,
-            nowFactory: Supplier<Instant> = Supplier { Instant.now() },
         ): List<SykmeldingStatusDbRecord> =
             statuser.map { status ->
                 SykmeldingStatusDbRecord(
                     id = status.databaseId,
                     sykmeldingUuid = sykmeldingId,
                     status = status.status,
-                    timestamp = status.timestamp,
                     tidligereArbeidsgiver = null,
                     sporsmal =
                         status.sporsmalSvar?.let { sp ->
@@ -183,8 +176,7 @@ data class SykmeldingStatusDbRecord(
                                 value = sp.serialisertTilString()
                             }
                         },
-                    // TODO: Ikke sett ved oppdatering
-                    opprettet = nowFactory.get(),
+                    opprettet = status.opprettet,
                 )
             }
     }

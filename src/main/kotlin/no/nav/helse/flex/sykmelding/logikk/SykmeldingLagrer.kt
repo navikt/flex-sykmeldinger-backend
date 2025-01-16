@@ -28,9 +28,11 @@ class SykmeldingLagrer(
                             SykmeldingStatus(
                                 status = "NY",
                                 sporsmalSvar = null,
-                                timestamp = nowFactory.get(),
+                                opprettet = nowFactory.get(),
                             ),
                         ),
+                    opprettet = nowFactory.get(),
+                    oppdatert = nowFactory.get(),
                 ),
             )
             log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} lagret")
