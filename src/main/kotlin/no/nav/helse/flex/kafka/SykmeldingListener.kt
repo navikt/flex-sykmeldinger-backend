@@ -1,4 +1,4 @@
-package no.nav.helse.flex.testdata
+package no.nav.helse.flex.kafka
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
@@ -6,20 +6,18 @@ import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("testdata")
-class TestSykmeldingListener(
+class SykmeldingListener(
     private val sykmeldingLagrer: SykmeldingLagrer,
 ) {
     val log = logger()
 
     @KafkaListener(
-        topics = [TEST_SYKMELDING_TOPIC],
+        topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
         properties = ["auto.offset.reset = latest"],
     )
@@ -31,20 +29,14 @@ class TestSykmeldingListener(
             val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
                 objectMapper.readValue(cr.value())
             sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
-            log.info(
-                "Motatt sykmelding med behandlingsutfall: \n${
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-                        sykmeldingMedBehandlingsutfall,
-                    )
-                }",
-            )
-        } catch (e: Exception) {
-            log.error("Feil sykmelding data, denne blir skippet: ${cr.value()}")
-            log.error("Exception ved feil sykmelding konvertering", e)
-        } finally {
             acknowledgment.acknowledge()
+        } catch (e: Exception) {
+            log.error("Feil sykmelding data: ${cr.value()}")
+            log.error("Exception ved feil sykmelding konvertering", e)
+            throw e
         }
     }
 }
 
-const val TEST_SYKMELDING_TOPIC = "flex.test-sykmelding"
+// TODO: endre når tsm har klart topic
+const val SYKMELDING_TOPIC = "flex.sykmelding"

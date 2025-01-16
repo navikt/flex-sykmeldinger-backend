@@ -8,6 +8,7 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
@@ -17,11 +18,13 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry
+import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.UUID
+import java.util.*
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -31,6 +34,9 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @SpringBootTest(classes = [Application::class])
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FellesTestOppsett {
+    @Autowired
+    lateinit var kafkaConsumer: KafkaConsumer<String, String>
+
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -48,6 +54,9 @@ abstract class FellesTestOppsett {
 
     @Autowired
     lateinit var sykemeldingRepository: SykmeldingRepository
+
+    @Autowired
+    lateinit var kafkaListenerRegistry: KafkaListenerEndpointRegistry
 
     companion object {
         init {
@@ -80,6 +89,13 @@ abstract class FellesTestOppsett {
         sykemeldingRepository.deleteAll()
     }
 
+    fun ventPaConsumers() {
+        // Burde brukes dersom consumere har offset=latest
+        kafkaListenerRegistry.listenerContainers.forEach { container ->
+            ContainerTestUtils.waitForAssignment(container, 1)
+        }
+    }
+
     fun tokenxToken(
         fnr: String,
         acrClaim: String = "Level4",
@@ -93,28 +109,29 @@ abstract class FellesTestOppsett {
                 "client_id" to clientId,
                 "pid" to fnr,
             ),
-    ): String {
-        return server.issueToken(
-            issuerId,
-            clientId,
-            DefaultOAuth2TokenCallback(
-                issuerId = issuerId,
-                subject = UUID.randomUUID().toString(),
-                audience = listOf(audience),
-                claims = claims,
-                expiry = 3600,
-            ),
-        ).serialize()
-    }
+    ): String =
+        server
+            .issueToken(
+                issuerId,
+                clientId,
+                DefaultOAuth2TokenCallback(
+                    issuerId = issuerId,
+                    subject = UUID.randomUUID().toString(),
+                    audience = listOf(audience),
+                    claims = claims,
+                    expiry = 3600,
+                ),
+            ).serialize()
 
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
-        kafkaProducer.send(
-            ProducerRecord(
-                NARMESTELEDER_LEESAH_TOPIC,
-                null,
-                nl.narmesteLederId.toString(),
-                nl.serialisertTilString(),
-            ),
-        ).get()
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    NARMESTELEDER_LEESAH_TOPIC,
+                    null,
+                    nl.narmesteLederId.toString(),
+                    nl.serialisertTilString(),
+                ),
+            ).get()
     }
 }

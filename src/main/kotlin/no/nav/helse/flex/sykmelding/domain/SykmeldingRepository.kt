@@ -10,13 +10,14 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.util.function.Supplier
 
 interface ISykmeldingRepository {
     fun save(sykmelding: Sykmelding)
 
     fun findBySykmeldingId(id: String): Sykmelding?
 
-    fun findByFnr(fnr: String): List<Sykmelding>
+    fun findAllByFnr(fnr: String): List<Sykmelding>
 
     fun findAll(): List<Sykmelding>
 
@@ -27,14 +28,15 @@ interface ISykmeldingRepository {
 class SykmeldingRepository(
     private val sykmeldingDbRepository: SykmeldingDbRepository,
     private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
+    private val nowFactory: Supplier<Instant>,
 ) : ISykmeldingRepository {
     @Transactional
     override fun save(sykmelding: Sykmelding) {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
         val statuser = sykmelding.statuser
 
-        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
-        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
+        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId, nowFactory)
+        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag, nowFactory)
 
         sykmeldingDbRepository.save(sykmeldingDbRecord)
         sykmeldingStatusDbRepository.saveAll(statusDbRecords)
@@ -49,7 +51,7 @@ class SykmeldingRepository(
         return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
-    override fun findByFnr(fnr: String): List<Sykmelding> {
+    override fun findAllByFnr(fnr: String): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findByFnr(fnr)
         val statusDbRecords =
             sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
@@ -114,6 +116,7 @@ data class SykmeldingDbRecord(
         fun mapFraSykmelding(
             sykmelding: Sykmelding,
             sykmeldingGrunnlag: ISykmeldingGrunnlag,
+            nowFactory: Supplier<Instant> = Supplier { Instant.now() },
         ): SykmeldingDbRecord =
             SykmeldingDbRecord(
                 id = sykmelding.databaseId,
@@ -125,8 +128,8 @@ data class SykmeldingDbRecord(
                         value = sykmeldingGrunnlag.serialisertTilString()
                     },
                 // TODO: Ikke sett ved oppdatering
-                opprettet = Instant.now(),
-                oppdatert = Instant.now(),
+                opprettet = nowFactory.get(),
+                oppdatert = nowFactory.get(),
             )
     }
 }
@@ -152,7 +155,7 @@ data class SykmeldingStatusDbRecord(
         return SykmeldingStatus(
             databaseId = this.id,
             status = this.status,
-            sporsmal =
+            sporsmalSvar =
                 this.sporsmal?.value?.let {
                     objectMapper.readValue(it)
                 },
@@ -164,6 +167,7 @@ data class SykmeldingStatusDbRecord(
         fun mapFraStatus(
             statuser: List<SykmeldingStatus>,
             sykmeldingId: String,
+            nowFactory: Supplier<Instant> = Supplier { Instant.now() },
         ): List<SykmeldingStatusDbRecord> =
             statuser.map { status ->
                 SykmeldingStatusDbRecord(
@@ -173,14 +177,14 @@ data class SykmeldingStatusDbRecord(
                     timestamp = status.timestamp,
                     tidligereArbeidsgiver = null,
                     sporsmal =
-                        status.sporsmal?.let { sp ->
+                        status.sporsmalSvar?.let { sp ->
                             PGobject().apply {
                                 type = "json"
                                 value = sp.serialisertTilString()
                             }
                         },
                     // TODO: Ikke sett ved oppdatering
-                    opprettet = Instant.now(),
+                    opprettet = nowFactory.get(),
                 )
             }
     }

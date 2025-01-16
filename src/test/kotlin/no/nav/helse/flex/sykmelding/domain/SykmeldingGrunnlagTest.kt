@@ -7,7 +7,7 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.api.Test
 
-class SykmeldingTest {
+class SykmeldingGrunnlagTest {
     @Test
     fun `burde deserialisere sykmelding`() {
         val opprinneligSykmelding = lagSykmeldingGrunnlag()
