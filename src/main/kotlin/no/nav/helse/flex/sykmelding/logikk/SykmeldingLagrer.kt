@@ -20,20 +20,23 @@ class SykmeldingLagrer(
         if (sykmeldingRepository.findBySykmeldingId(sykmeldingMedBehandlingsutfall.sykmelding.id) != null) {
             log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} finnes fra før")
         } else {
-            sykmeldingRepository.save(
-                Sykmelding(
-                    sykmeldingGrunnlag = sykmeldingMedBehandlingsutfall.sykmelding,
-                    statuser =
-                        listOf(
-                            SykmeldingStatus(
-                                status = "NY",
-                                sporsmalSvar = null,
-                                timestamp = nowFactory.get(),
-                            ),
-                        ),
-                ),
-            )
+            sykmeldingRepository.save(sykmeldingFactory(sykmeldingMedBehandlingsutfall))
             log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} lagret")
         }
     }
+
+    private fun sykmeldingFactory(sykmeldingMedBehandlingsutfallMelding: SykmeldingMedBehandlingsutfallMelding): Sykmelding =
+        Sykmelding(
+            sykmeldingGrunnlag = sykmeldingMedBehandlingsutfallMelding.sykmelding,
+            statuser =
+                listOf(
+                    SykmeldingStatus(
+                        status = "NY",
+                        sporsmalSvar = null,
+                        opprettet = nowFactory.get(),
+                    ),
+                ),
+            opprettet = nowFactory.get(),
+            oppdatert = nowFactory.get(),
+        )
 }
