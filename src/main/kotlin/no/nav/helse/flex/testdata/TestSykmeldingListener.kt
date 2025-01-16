@@ -9,8 +9,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
+import org.springframework.stereotype.Component
 
-// @Component
+@Component
 @Profile("testdata")
 class TestSykmeldingListener(
     private val sykmeldingLagrer: SykmeldingLagrer,

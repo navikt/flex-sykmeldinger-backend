@@ -30,7 +30,6 @@ class SykmeldingRepository(
     private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
     private val nowFactory: Supplier<Instant>,
 ) : ISykmeldingRepository {
-
     @Transactional
     override fun save(sykmelding: Sykmelding) {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
@@ -124,10 +123,10 @@ data class SykmeldingDbRecord(
                 sykmeldingUuid = sykmelding.sykmeldingId,
                 fnr = sykmeldingGrunnlag.pasient.fnr,
                 sykmelding =
-                PGobject().apply {
-                    type = "json"
-                    value = sykmeldingGrunnlag.serialisertTilString()
-                },
+                    PGobject().apply {
+                        type = "json"
+                        value = sykmeldingGrunnlag.serialisertTilString()
+                    },
                 // TODO: Ikke sett ved oppdatering
                 opprettet = nowFactory.get(),
                 oppdatert = nowFactory.get(),
@@ -157,9 +156,9 @@ data class SykmeldingStatusDbRecord(
             databaseId = this.id,
             status = this.status,
             sporsmalSvar =
-            this.sporsmal?.value?.let {
-                objectMapper.readValue(it)
-            },
+                this.sporsmal?.value?.let {
+                    objectMapper.readValue(it)
+                },
             timestamp = this.timestamp,
         )
     }
@@ -178,12 +177,12 @@ data class SykmeldingStatusDbRecord(
                     timestamp = status.timestamp,
                     tidligereArbeidsgiver = null,
                     sporsmal =
-                    status.sporsmalSvar?.let { sp ->
-                        PGobject().apply {
-                            type = "json"
-                            value = sp.serialisertTilString()
-                        }
-                    },
+                        status.sporsmalSvar?.let { sp ->
+                            PGobject().apply {
+                                type = "json"
+                                value = sp.serialisertTilString()
+                            }
+                        },
                     // TODO: Ikke sett ved oppdatering
                     opprettet = nowFactory.get(),
                 )

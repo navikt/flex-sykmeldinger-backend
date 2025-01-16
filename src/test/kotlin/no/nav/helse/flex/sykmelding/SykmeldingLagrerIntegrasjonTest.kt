@@ -42,7 +42,7 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = [SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC])
+    @ValueSource(strings = [TEST_SYKMELDING_TOPIC, SYKMELDING_TOPIC])
     fun `burde lagre sykmelding fra kafka`(topic: String) {
         val kafkaMelding =
             SykmeldingMedBehandlingsutfallMelding(
@@ -85,12 +85,22 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
                 ),
             ).get()
         }
+        // for å kontrollere at de forrige to ble lest før vi asserter
+        kafkaProducer.send(
+            ProducerRecord(
+                topic,
+                null,
+                kafkaMelding.sykmelding.id,
+                SykmeldingMedBehandlingsutfallMelding(
+                    sykmelding = lagSykmeldingGrunnlag(id = "2"),
+                    validation = lagValidation(),
+                ).serialisertTilString(),
+            ),
+        ).get()
 
-        // TODO: Test this another way
         await()
-            .atLeast(Duration.ofSeconds(2))
-            .atMost(Duration.ofSeconds(2))
-            .until { true }
-        sykemeldingRepository.findAll().size `should be equal to` 1
+            .atMost(Duration.ofSeconds(10)).untilAsserted {
+                sykemeldingRepository.findAll().size `should be equal to` 2
+            }
     }
 }
