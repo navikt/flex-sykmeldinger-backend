@@ -8,7 +8,6 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
 import no.nav.helse.flex.testdata.TEST_SYKMELDING_TOPIC
-import no.nav.helse.flex.testdata.TestSykmeldingListener
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -20,29 +19,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.support.Acknowledgment
 import java.time.Duration
-import java.time.Instant
-import java.util.function.Supplier
 
 private val NOOP_ACK = Acknowledgment {}
 
 class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
-    @Configuration
-    class TetsConfiguration {
-        @Bean
-        fun nowFactory(): Supplier<Instant> {
-            return Supplier { Instant.parse("2020-01-01T00:00:00.000Z") }
-        }
-    }
-
     @Autowired
     lateinit var sykmeldingListener: SykmeldingListener
-
-    @Autowired
-    lateinit var testSykmeldingListener: TestSykmeldingListener
 
     @BeforeAll
     fun setup() {
@@ -105,26 +89,28 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
     }
 
     @Test
-    fun `burde deduplisere testdata sykmeldinger`() {
+    fun `burde sette status til ny`() {
         val kafkaMelding =
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
 
-        repeat(2) { i ->
-            testSykmeldingListener.listen(
-                ConsumerRecord(
-                    "",
-                    -1,
-                    i.toLong(),
-                    kafkaMelding.sykmelding.id,
-                    kafkaMelding.serialisertTilString(),
-                ),
-                NOOP_ACK,
-            )
-        }
+        sykmeldingListener.listen(
+            ConsumerRecord(
+                "",
+                -1,
+                1L,
+                kafkaMelding.sykmelding.id,
+                kafkaMelding.serialisertTilString(),
+            ),
+            NOOP_ACK,
+        )
 
-        sykemeldingRepository.findAll().size `should be equal to` 1
+        val sykmelding = sykemeldingRepository.findBySykmeldingId("1")
+        sykmelding.shouldNotBeNull()
+        sykmelding.statuser.size `should be equal to` 1
+        val status = sykmelding.statuser[0]
+        status.status `should be equal to` "NY"
     }
 }
