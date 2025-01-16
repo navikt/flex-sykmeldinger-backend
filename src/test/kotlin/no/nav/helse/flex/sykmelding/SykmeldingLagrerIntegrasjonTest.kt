@@ -8,6 +8,7 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
 import no.nav.helse.flex.testdata.TEST_SYKMELDING_TOPIC
+import no.nav.helse.flex.testdata.TestSykmeldingListener
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -15,6 +16,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,6 +40,9 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
 
     @Autowired
     lateinit var sykmeldingListener: SykmeldingListener
+
+    @Autowired
+    lateinit var testSykmeldingListener: TestSykmeldingListener
 
     @BeforeAll
     fun setup() {
@@ -75,9 +80,8 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
         sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = [SYKMELDING_TOPIC, TEST_SYKMELDING_TOPIC])
-    fun `burde ikke lagre sykmelding duplikat`(topic: String) {
+    @Test
+    fun `burde deduplisere sykmeldinger`() {
         val kafkaMelding =
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
@@ -87,7 +91,31 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
         repeat(2) { i ->
             sykmeldingListener.listen(
                 ConsumerRecord(
-                    topic,
+                    "",
+                    -1,
+                    i.toLong(),
+                    kafkaMelding.sykmelding.id,
+                    kafkaMelding.serialisertTilString(),
+                ),
+                NOOP_ACK,
+            )
+        }
+
+        sykemeldingRepository.findAll().size `should be equal to` 1
+    }
+
+    @Test
+    fun `burde deduplisere testdata sykmeldinger`() {
+        val kafkaMelding =
+            SykmeldingMedBehandlingsutfallMelding(
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                validation = lagValidation(),
+            )
+
+        repeat(2) { i ->
+            testSykmeldingListener.listen(
+                ConsumerRecord(
+                    "",
                     -1,
                     i.toLong(),
                     kafkaMelding.sykmelding.id,
