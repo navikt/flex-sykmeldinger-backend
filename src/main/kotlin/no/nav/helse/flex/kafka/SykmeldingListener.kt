@@ -1,5 +1,6 @@
 package no.nav.helse.flex.kafka
 
+import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.objectMapper
@@ -32,9 +33,11 @@ class SykmeldingListener(
                 objectMapper.readValue(cr.value())
             sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
             acknowledgment.acknowledge()
+        } catch (e: JacksonException) {
+            log.error("Feil sykmelding format. Melding key: ${cr.key()}")
+            throw e
         } catch (e: Exception) {
-            log.error("Feil sykmelding data: ${cr.value()}")
-            log.error("Exception ved feil sykmelding konvertering", e)
+            log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}")
             throw e
         }
     }
