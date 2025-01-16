@@ -64,6 +64,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                         lagSykmeldingGrunnlag(id = "1").copy(
                             pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
                         ),
+                    oppdatert = Instant.parse("2022-02-02T00:00:00.00Z"),
                 ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -71,6 +72,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
         sykmeldingRepository.findBySykmeldingId("1").let {
             it.`should not be null`()
             it.sykmeldingGrunnlag.pasient.fnr `should be equal to` "nyttFnr"
+            it.oppdatert `should be equal to` Instant.parse("2022-02-02T00:00:00.00Z")
         }
     }
 
