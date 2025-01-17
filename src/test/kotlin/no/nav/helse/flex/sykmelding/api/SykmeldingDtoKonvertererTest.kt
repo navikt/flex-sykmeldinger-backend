@@ -1,5 +1,8 @@
 package no.nav.helse.flex.sykmelding.api
 
+import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
+import no.nav.helse.flex.sykmelding.domain.Navn
+import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
@@ -26,6 +29,31 @@ class SykmeldingDtoKonvertererTest {
 
         val konverterer = SykmeldingDtoKonverterer()
 
-        konverterer.konverter(sykmelding) `should be equal to` SykmeldingDto(sykmeldingId = "1")
+        val dto = konverterer.konverter(sykmelding)
+        dto.id `should be equal to` "1"
+    }
+
+    @Test
+    fun `burde konvertere pasient`() {
+        val pasient =
+            Pasient(
+                navn = Navn("fornavn", "mellomnavn", "etternavn"),
+                navKontor = null,
+                navnFastlege = null,
+                fnr = "fnr",
+                kontaktinfo = emptyList(),
+            )
+
+        val konverterer = SykmeldingDtoKonverterer()
+
+        val pasientDto = konverterer.konverterPasient(pasient)
+        pasientDto `should be equal to`
+            PasientDTO(
+                fnr = "fnr",
+                fornavn = "fornavn",
+                mellomnavn = "mellomnavn",
+                etternavn = "etternavn",
+                overSyttiAar = null,
+            )
     }
 }
