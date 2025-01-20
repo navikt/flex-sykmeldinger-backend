@@ -25,6 +25,7 @@ import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingsperiodeDTO
+import no.nav.helse.flex.sykmelding.api.dto.UtenlandskSykmelding
 import no.nav.helse.flex.sykmelding.domain.Adresse
 import no.nav.helse.flex.sykmelding.domain.Aktivitet
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
@@ -99,13 +100,19 @@ class SykmeldingDtoKonverterer {
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            // No input data available
             egenmeldt = null, // No input data available
             papirsykmelding = false, // Assuming false unless specified
             harRedusertArbeidsgiverperiode = null, // No input data available
             merknader = null, // No clear mapping provided
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-            utenlandskSykmelding = null, // Not provided in current mappings
+            utenlandskSykmelding =
+                when (sykmelding.sykmeldingGrunnlag) {
+                    is UtenlandskSykmeldingGrunnlag ->
+                        UtenlandskSykmelding(
+                            land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
+                        )
+                    else -> null
+                },
         )
 
     internal fun konverterPasient(pasient: Pasient): PasientDTO =
