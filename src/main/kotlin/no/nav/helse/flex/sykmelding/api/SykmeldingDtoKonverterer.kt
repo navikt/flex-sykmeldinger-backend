@@ -98,7 +98,8 @@ class SykmeldingDtoKonverterer {
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
-            navnFastlege = null, // No input data available
+            navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
+            // No input data available
             egenmeldt = null, // No input data available
             papirsykmelding = false, // Assuming false unless specified
             harRedusertArbeidsgiverperiode = null, // No input data available
@@ -222,7 +223,8 @@ class SykmeldingDtoKonverterer {
                         AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON -> AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON
                         AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> AnnenFraverGrunnDTO.BEHANDLING_FORHINDRER_ARBEID
                         AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> AnnenFraverGrunnDTO.ARBEIDSRETTET_TILTAK
-                        AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND -> AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+                        AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
+                            AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
                         AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE -> AnnenFraverGrunnDTO.NODVENDIG_KONTROLLUNDENRSOKELSE
                         AnnenFravarArsakType.SMITTEFARE -> AnnenFraverGrunnDTO.SMITTEFARE
                         AnnenFravarArsakType.ABORT -> AnnenFraverGrunnDTO.ABORT
