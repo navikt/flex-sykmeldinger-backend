@@ -16,7 +16,9 @@ import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.ShortNameDTO
 import no.nav.helse.flex.sykmelding.api.dto.SporsmalDTO
+import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvarDTO
 import no.nav.helse.flex.sykmelding.api.dto.SvarDTO
+import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
 import no.nav.helse.flex.sykmelding.api.dto.SvartypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingFormResponse
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
@@ -32,6 +34,8 @@ import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
 import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
+import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
+import no.nav.helse.flex.sykmelding.domain.SvarRestriksjon
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
@@ -39,6 +43,7 @@ import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be null`
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PGobject
 import java.time.Instant
@@ -385,5 +390,128 @@ class SykmeldingDtoKonvertererTest {
                 kontaktDato = TODO(),
                 begrunnelseIkkeKontakt = TODO(),
             )
+    }
+
+    @Nested
+    inner class UtdypendeOpplysningerTest {
+        private val konverterer = SykmeldingDtoKonverterer()
+
+        @Test
+        fun `burde håndtere én opplysning`() {
+            konverterer.konverterUtdypendeOpplysninger(
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "b" to
+                                SporsmalSvar(
+                                    sporsmal = "spørsmål",
+                                    svar = "svar",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                ),
+            ) `should be equal to`
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "b" to
+                                SporsmalSvarDTO(
+                                    sporsmal = "spørsmål",
+                                    svar = "svar",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                )
+        }
+
+        @Test
+        fun `burde håndtere restriksjoner`() {
+            konverterer.konverterUtdypendeOpplysninger(
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "b" to
+                                SporsmalSvar(
+                                    sporsmal = "",
+                                    svar = "",
+                                    restriksjoner =
+                                        listOf(
+                                            SvarRestriksjon.SKJERMET_FOR_NAV,
+                                            SvarRestriksjon.SKJERMET_FOR_PASIENT,
+                                            SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER,
+                                        ),
+                                ),
+                        ),
+                ),
+            ) `should be equal to`
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "b" to
+                                SporsmalSvarDTO(
+                                    sporsmal = "",
+                                    svar = "",
+                                    restriksjoner =
+                                        listOf(
+                                            SvarRestriksjonDTO.SKJERMET_FOR_NAV,
+                                            SvarRestriksjonDTO.SKJERMET_FOR_PASIENT,
+                                            SvarRestriksjonDTO.SKJERMET_FOR_ARBEIDSGIVER,
+                                        ),
+                                ),
+                        ),
+                )
+        }
+
+        @Test
+        fun `burde håndtere ingen opplysning`() {
+            konverterer.konverterUtdypendeOpplysninger(null) `should be equal to` emptyMap()
+            konverterer.konverterUtdypendeOpplysninger(emptyMap()) `should be equal to` emptyMap()
+        }
+
+        @Test
+        fun `burde håndtere flere opplysningskategorier`() {
+            konverterer.konverterUtdypendeOpplysninger(
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "a1" to
+                                SporsmalSvar(
+                                    sporsmal = "spørsmål a1",
+                                    svar = "svar a1",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                    "b" to
+                        mapOf(
+                            "b1" to
+                                SporsmalSvar(
+                                    sporsmal = "spørsmål b1",
+                                    svar = "svar b1",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                ),
+            ) `should be equal to`
+                mapOf(
+                    "a" to
+                        mapOf(
+                            "a1" to
+                                SporsmalSvarDTO(
+                                    sporsmal = "spørsmål a1",
+                                    svar = "svar a1",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                    "b" to
+                        mapOf(
+                            "b1" to
+                                SporsmalSvarDTO(
+                                    sporsmal = "spørsmål b1",
+                                    svar = "svar b1",
+                                    restriksjoner = emptyList(),
+                                ),
+                        ),
+                )
+        }
     }
 }
