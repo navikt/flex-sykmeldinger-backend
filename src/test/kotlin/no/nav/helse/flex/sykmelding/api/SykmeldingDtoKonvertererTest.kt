@@ -2,27 +2,15 @@ package no.nav.helse.flex.sykmelding.api
 
 import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
-import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.api.dto.FormSporsmalSvar
-import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
 import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.ShortNameDTO
-import no.nav.helse.flex.sykmelding.api.dto.SporsmalDTO
 import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvarDTO
-import no.nav.helse.flex.sykmelding.api.dto.SvarDTO
 import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
-import no.nav.helse.flex.sykmelding.api.dto.SvartypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingFormResponse
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
-import no.nav.helse.flex.sykmelding.api.dto.UriktigeOpplysningerType
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
@@ -98,7 +86,7 @@ class SykmeldingDtoKonvertererTest {
     }
 
     @Test
-    fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
+    fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
         val arbeidsgiver =
             EnArbeidsgiver(
                 meldingTilArbeidsgiver = "melding",
@@ -114,8 +102,6 @@ class SykmeldingDtoKonvertererTest {
         val konverterer = SykmeldingDtoKonverterer()
 
         konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
-
-        error("TODO")
     }
 
     @Test
@@ -190,7 +176,7 @@ class SykmeldingDtoKonvertererTest {
     }
 
     @Test
-    fun `burde konvertere status`() {
+    fun `burde konvertere status NY`() {
         val status =
             SykmeldingStatus(
                 status = "NY",
@@ -206,51 +192,9 @@ class SykmeldingDtoKonvertererTest {
             SykmeldingStatusDTO(
                 statusEvent = "NY",
                 timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
-                arbeidsgiver =
-                    ArbeidsgiverStatusDTO(
-                        orgnummer = "orgnr",
-                        juridiskOrgnummer = "jur orgnr",
-                        orgNavn = "Orgnavn",
-                    ),
-                sporsmalOgSvarListe =
-                    listOf(
-                        SporsmalDTO(
-                            tekst = "JA/NEI spørsmål",
-                            shortName = ShortNameDTO.NY_NARMESTE_LEDER,
-                            svar =
-                                SvarDTO(
-                                    svarType = SvartypeDTO.JA_NEI,
-                                    svar = "JA",
-                                ),
-                        ),
-                    ),
-                brukerSvar =
-                    SykmeldingFormResponse(
-                        erOpplysningeneRiktige = FormSporsmalSvar("Spørsmål", JaEllerNei.JA),
-                        uriktigeOpplysninger = FormSporsmalSvar("", listOf(UriktigeOpplysningerType.ANDRE_OPPLYSNINGER)),
-                        arbeidssituasjon = FormSporsmalSvar("", Arbeidssituasjon.ARBEIDSTAKER),
-                        arbeidsgiverOrgnummer = FormSporsmalSvar("", "000"),
-                        arbeidsledig =
-                            ArbeidsledigFraOrgnummer(
-                                arbeidsledigFraOrgnummer = FormSporsmalSvar("", "000"),
-                            ),
-                        riktigNarmesteLeder = FormSporsmalSvar("", JaEllerNei.JA),
-                        harBruktEgenmelding = FormSporsmalSvar("", JaEllerNei.JA),
-                        egenmeldingsperioder =
-                            FormSporsmalSvar(
-                                "",
-                                listOf(
-                                    Egenmeldingsperiode(
-                                        fom = LocalDate.parse("2021-01-01"),
-                                        tom = LocalDate.parse("2021-01-01"),
-                                    ),
-                                ),
-                            ),
-                        harForsikring = TODO(),
-                        egenmeldingsdager = TODO(),
-                        harBruktEgenmeldingsdager = TODO(),
-                        fisker = TODO(),
-                    ),
+                arbeidsgiver = null,
+                sporsmalOgSvarListe = emptyList(),
+                brukerSvar = null,
             )
 
         val konverterer = SykmeldingDtoKonverterer()

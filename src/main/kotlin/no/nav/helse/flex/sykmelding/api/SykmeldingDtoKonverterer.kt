@@ -94,6 +94,15 @@ class SykmeldingDtoKonverterer {
         )
     }
 
+    fun konverterSykmeldingStatus(status: SykmeldingStatus): SykmeldingStatusDTO =
+        SykmeldingStatusDTO( // TODO
+            statusEvent = status.status,
+            timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
+            sporsmalOgSvarListe = emptyList(),
+            arbeidsgiver = null,
+            brukerSvar = null,
+        )
+
     internal fun konverterPasient(pasient: Pasient): PasientDTO =
         PasientDTO(
             fnr = pasient.fnr,
@@ -294,15 +303,6 @@ class SykmeldingDtoKonverterer {
             land = adresse.land,
         )
     }
-
-    internal fun konverterSykmeldingStatus(status: SykmeldingStatus): SykmeldingStatusDTO =
-        SykmeldingStatusDTO(
-            statusEvent = status.status,
-            timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
-            sporsmalOgSvarListe = emptyList(), // No mapping provided
-            arbeidsgiver = null, // No mapping provided
-            brukerSvar = null, // No mapping provided
-        )
 
     internal fun konverterArbeidsgiver(arbeidsgiverInfo: ArbeidsgiverInfo): ArbeidsgiverDTO? =
         when (arbeidsgiverInfo) {
