@@ -77,7 +77,22 @@ class SykmeldingDtoKonverterer {
                     begrunnelseIkkeKontakt = null,
                 ),
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-            behandler = TODO(),
+            // TODO
+            behandler =
+                BehandlerDTO(
+                    fornavn = "Fornavn",
+                    mellomnavn = null,
+                    etternavn = "Etternavn",
+                    adresse =
+                        AdresseDTO(
+                            gate = null,
+                            postnummer = null,
+                            kommune = null,
+                            postboks = null,
+                            land = null,
+                        ),
+                    tlf = null,
+                ),
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
