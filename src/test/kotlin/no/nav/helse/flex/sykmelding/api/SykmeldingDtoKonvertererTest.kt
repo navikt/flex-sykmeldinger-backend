@@ -4,11 +4,11 @@ import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
 import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
@@ -21,19 +21,31 @@ import no.nav.helse.flex.sykmelding.api.dto.SykmeldingFormResponse
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
 import no.nav.helse.flex.sykmelding.api.dto.UriktigeOpplysningerType
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
+import no.nav.helse.flex.sykmelding.domain.AnnenFraverArsak
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
+import no.nav.helse.flex.sykmelding.domain.Behandler
+import no.nav.helse.flex.sykmelding.domain.BistandNav
 import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
+import no.nav.helse.flex.sykmelding.domain.ErIArbeid
 import no.nav.helse.flex.sykmelding.domain.FlereArbeidsgivere
 import no.nav.helse.flex.sykmelding.domain.IngenArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.Kontaktinfo
+import no.nav.helse.flex.sykmelding.domain.KontaktinfoType
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
+import no.nav.helse.flex.sykmelding.domain.MedisinskVurdering
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
+import no.nav.helse.flex.sykmelding.domain.PersonId
+import no.nav.helse.flex.sykmelding.domain.PersonIdType
+import no.nav.helse.flex.sykmelding.domain.Prognose
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
+import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be null`
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PGobject
 import java.time.Instant
@@ -246,5 +258,101 @@ class SykmeldingDtoKonvertererTest {
         val konverterer = SykmeldingDtoKonverterer()
 
         konverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
+    }
+
+    @Test
+    fun `burde konvertere medisinsk vurdering`() {
+        val konverterer = SykmeldingDtoKonverterer()
+
+        val medisinskVurdering =
+            MedisinskVurdering(
+                hovedDiagnose = TODO(),
+                biDiagnoser = TODO(),
+                svangerskap = TODO(),
+                yrkesskade = TODO(),
+                skjermetForPasient = TODO(),
+                syketilfelletStartDato = TODO(),
+                annenFraversArsak = TODO(),
+            )
+
+        val konvertertMedisinsk = konverterer.konverterMedisinskVurdering(medisinskVurdering)
+    }
+
+    @Test
+    fun `burde konvertere annen fraværsårsak`() {
+        val konverterer = SykmeldingDtoKonverterer()
+
+        val annenFraverArsak =
+            AnnenFraverArsak(
+                beskrivelse = "",
+                arsak = null,
+            )
+
+        val konvertertArsak = konverterer.konverterAnnenFraversArsak(annenFraverArsak)
+        konvertertArsak?.grunn `should be equal to` emptyList()
+    }
+
+    @Test
+    fun `burde konvertere prognose`() {
+        val konverterer = SykmeldingDtoKonverterer()
+        val prognose =
+            Prognose(
+                arbeidsforEtterPeriode = true,
+                hensynArbeidsplassen = "",
+                arbeid =
+                    ErIArbeid(
+                        egetArbeidPaSikt = true,
+                        annetArbeidPaSikt = false,
+                        arbeidFOM = LocalDate.parse("2021-01-01"),
+                        vurderingsdato = LocalDate.parse("2021-01-01"),
+                    ),
+            )
+        val konverterePrognose = konverterer.konverterPrognose(prognose)
+        konverterePrognose.erIkkeIArbeid.`should be null`()
+        konverterePrognose.erIArbeid?.egetArbeidPaSikt `should be` true
+    }
+
+    @Test
+    fun `burde konvertere bistand Nav til melding til nav`() {
+        val konverterer = SykmeldingDtoKonverterer()
+        val bistandNav =
+            BistandNav(
+                bistandUmiddelbart = true,
+                beskrivBistand = "",
+            )
+        val konvertertTilMelding = konverterer.konverterMeldingTilNAV(bistandNav)
+        konvertertTilMelding.bistandUmiddelbart `should be` true
+    }
+
+    @Test
+    fun `burde konvertere behandler`() {
+        val konverterer = SykmeldingDtoKonverterer()
+        val behandler =
+            Behandler(
+                navn =
+                    Navn(
+                        fornavn = "behandler",
+                        mellomnavn = null,
+                        etternavn = "",
+                    ),
+                adresse = null,
+                ids =
+                    listOf(
+                        PersonId(
+                            id = "",
+                            type = PersonIdType.FNR,
+                        ),
+                    ),
+                kontaktinfo =
+                    listOf(
+                        Kontaktinfo(
+                            type = KontaktinfoType.TLF,
+                            value = "",
+                        ),
+                    ),
+            )
+
+        val konvertereBehandler = konverterer.konverterBehandler(behandler)
+        konvertereBehandler.fornavn `should be equal to` "behandler"
     }
 }
