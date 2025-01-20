@@ -264,16 +264,28 @@ class SykmeldingDtoKonvertererTest {
 
         val medisinskVurdering =
             MedisinskVurdering(
-                hovedDiagnose = TODO(),
-                biDiagnoser = TODO(),
-                svangerskap = TODO(),
-                yrkesskade = TODO(),
-                skjermetForPasient = TODO(),
-                syketilfelletStartDato = TODO(),
-                annenFraversArsak = TODO(),
+                hovedDiagnose =
+                    DiagnoseInfo(
+                        system = DiagnoseSystem.ICD10,
+                        kode = "",
+                    ),
+                biDiagnoser = emptyList(),
+                svangerskap = false,
+                yrkesskade =
+                    Yrkesskade(
+                        yrkesskadeDato = LocalDate.parse("2021-01-01"),
+                    ),
+                skjermetForPasient = false,
+                syketilfelletStartDato = LocalDate.parse("2021-01-01"),
+                annenFraversArsak =
+                    AnnenFraverArsak(
+                        beskrivelse = "",
+                        arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
+                    ),
             )
 
         val konvertertMedisinsk = konverterer.konverterMedisinskVurdering(medisinskVurdering)
+        konvertertMedisinsk.hovedDiagnose?.system `should be equal to` "ICD10"
     }
 
     @Test

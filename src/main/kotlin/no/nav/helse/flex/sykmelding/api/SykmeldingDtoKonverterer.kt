@@ -280,8 +280,8 @@ class SykmeldingDtoKonverterer {
                     navn = arbeidsgiverInfo.navn,
                     stillingsprosent = arbeidsgiverInfo.stillingsprosent,
                 )
-            is EnArbeidsgiver -> null
-            is IngenArbeidsgiver -> null
+            is EnArbeidsgiver -> TODO()
+            is IngenArbeidsgiver -> TODO()
         }
 
     internal fun konverterUtdypendeOpplysninger(
