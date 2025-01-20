@@ -2,11 +2,24 @@ package no.nav.helse.flex.sykmelding.api
 
 import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
+import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
+import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
+import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
+import no.nav.helse.flex.sykmelding.api.dto.ShortNameDTO
+import no.nav.helse.flex.sykmelding.api.dto.SporsmalDTO
+import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvar
+import no.nav.helse.flex.sykmelding.api.dto.SvarDTO
+import no.nav.helse.flex.sykmelding.api.dto.SvartypeDTO
+import no.nav.helse.flex.sykmelding.api.dto.SykmeldingFormResponse
+import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
+import no.nav.helse.flex.sykmelding.api.dto.UriktigeOpplysningerType
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
@@ -22,8 +35,10 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
+import org.postgresql.util.PGobject
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest {
     @Test
@@ -162,5 +177,74 @@ class SykmeldingDtoKonvertererTest {
                     arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
                 )
         }
+    }
+
+    @Test
+    fun `burde konvertere status`() {
+        val status =
+            SykmeldingStatus(
+                status = "NY",
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sporsmalSvar =
+                    PGobject().apply {
+                        type = "json"
+                        value = ""
+                    },
+            )
+
+        val forventetStatus =
+            SykmeldingStatusDTO(
+                statusEvent = "NY",
+                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
+                arbeidsgiver =
+                    ArbeidsgiverStatusDTO(
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jur orgnr",
+                        orgNavn = "Orgnavn",
+                    ),
+                sporsmalOgSvarListe =
+                    listOf(
+                        SporsmalDTO(
+                            tekst = "JA/NEI spørsmål",
+                            shortName = ShortNameDTO.NY_NARMESTE_LEDER,
+                            svar =
+                                SvarDTO(
+                                    svarType = SvartypeDTO.JA_NEI,
+                                    svar = "JA",
+                                ),
+                        ),
+                    ),
+                brukerSvar =
+                    SykmeldingFormResponse(
+                        erOpplysningeneRiktige = SporsmalSvar("Spørsmål", JaEllerNei.JA),
+                        uriktigeOpplysninger = SporsmalSvar("", listOf(UriktigeOpplysningerType.ANDRE_OPPLYSNINGER)),
+                        arbeidssituasjon = SporsmalSvar("", Arbeidssituasjon.ARBEIDSTAKER),
+                        arbeidsgiverOrgnummer = SporsmalSvar("", "000"),
+                        arbeidsledig =
+                            ArbeidsledigFraOrgnummer(
+                                arbeidsledigFraOrgnummer = SporsmalSvar("", "000"),
+                            ),
+                        riktigNarmesteLeder = SporsmalSvar("", JaEllerNei.JA),
+                        harBruktEgenmelding = SporsmalSvar("", JaEllerNei.JA),
+                        egenmeldingsperioder =
+                            SporsmalSvar(
+                                "",
+                                listOf(
+                                    Egenmeldingsperiode(
+                                        fom = LocalDate.parse("2021-01-01"),
+                                        tom = LocalDate.parse("2021-01-01"),
+                                    ),
+                                ),
+                            ),
+                        harForsikring = TODO(),
+                        egenmeldingsdager = TODO(),
+                        harBruktEgenmeldingsdager = TODO(),
+                        fisker = TODO(),
+                    ),
+            )
+
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
     }
 }
