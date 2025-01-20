@@ -5,32 +5,27 @@ import java.time.ZoneOffset
 
 class SykmeldingDtoKonverterer {
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
-        SykmeldingDTO(
+        when (sykmelding.sykmeldingGrunnlag) {
+            is SykmeldingGrunnlag -> konverterSykmelding(sykmelding)
+            is UtenlandskSykmeldingGrunnlag -> konverterUtenlandskSykmelding(sykmelding)
+        }
+
+    internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+        require(sykmelding.sykmeldingGrunnlag is SykmeldingGrunnlag)
+        return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
             pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
-            legekontorOrgnummer = "", // TODO: sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn,
-            arbeidsgiver =
-                when (sykmelding.sykmeldingGrunnlag) {
-                    is SykmeldingGrunnlag -> konverterArbeidsgiver(sykmelding.sykmeldingGrunnlag.arbeidsgiver)
-                    is UtenlandskSykmeldingGrunnlag -> null
-                },
+            legekontorOrgnummer = null, // TODO: sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn,
+            arbeidsgiver = konverterArbeidsgiver(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
             sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            prognose =
-                when (sykmelding.sykmeldingGrunnlag) {
-                    is SykmeldingGrunnlag -> sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) }
-                    is UtenlandskSykmeldingGrunnlag -> TODO()
-                },
+            prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
-            tiltakArbeidsplassen =
-                when (sykmelding.sykmeldingGrunnlag) {
-                    is SykmeldingGrunnlag -> konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver)
-                    is UtenlandskSykmeldingGrunnlag -> null
-                },
+            tiltakArbeidsplassen = konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
             tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNAV,
             andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
             meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
@@ -52,16 +47,52 @@ class SykmeldingDtoKonverterer {
             harRedusertArbeidsgiverperiode = null, // No input data available
             merknader = null, // No clear mapping provided
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-            utenlandskSykmelding =
-                when (sykmelding.sykmeldingGrunnlag) {
-                    is UtenlandskSykmeldingGrunnlag ->
-                        UtenlandskSykmelding(
-                            land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
-                        )
-
-                    else -> null
-                },
+            utenlandskSykmelding = null,
         )
+    }
+
+    internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+        require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
+        return SykmeldingDTO(
+            id = sykmelding.sykmeldingId,
+            pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
+            mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
+            behandlingsutfall = konverterBehandlingsutfall(sykmelding),
+            legekontorOrgnummer = "", // TODO: sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn,
+            arbeidsgiver = null,
+            sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
+            sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
+            medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
+            skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
+            prognose = TODO(),
+            utdypendeOpplysninger = emptyMap(),
+            tiltakArbeidsplassen = null,
+            tiltakNAV = null,
+            andreTiltak = null,
+            meldingTilNAV = null,
+            meldingTilArbeidsgiver = null,
+            kontaktMedPasient =
+                KontaktMedPasientDTO(
+                    kontaktDato = null,
+                    begrunnelseIkkeKontakt = null,
+                ),
+            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
+            behandler = TODO(),
+            syketilfelleStartDato =
+                sykmelding.sykmeldingGrunnlag.metadata.genDate
+                    .toLocalDate(),
+            navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
+            egenmeldt = null, // No input data available
+            papirsykmelding = false, // Assuming false unless specified
+            harRedusertArbeidsgiverperiode = null, // No input data available
+            merknader = null, // No clear mapping provided
+            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            utenlandskSykmelding =
+                UtenlandskSykmelding(
+                    land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
+                ),
+        )
+    }
 
     internal fun konverterPasient(pasient: Pasient): PasientDTO =
         PasientDTO(
