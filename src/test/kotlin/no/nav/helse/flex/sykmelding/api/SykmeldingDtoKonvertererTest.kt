@@ -9,6 +9,7 @@ import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
 import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
+import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
@@ -274,5 +275,16 @@ class SykmeldingDtoKonvertererTest {
         konverterer.konverterTiltakArbeidsplassen(
             IngenArbeidsgiver(),
         ) `should be equal to` null
+    }
+
+    @Test
+    fun `burde konvertere kontakt med pasient`() {
+        error("TODO. Hvor finner vi denne info?")
+
+        val foventetKontaktMedPasient =
+            KontaktMedPasientDTO(
+                kontaktDato = TODO(),
+                begrunnelseIkkeKontakt = TODO(),
+            )
     }
 }
