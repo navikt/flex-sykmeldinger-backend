@@ -83,7 +83,11 @@ class SykmeldingDtoKonverterer {
                     is UtenlandskSykmeldingGrunnlag -> TODO()
                 },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
-            tiltakArbeidsplassen = TODO(),
+            tiltakArbeidsplassen =
+                when (sykmelding.sykmeldingGrunnlag) {
+                    is SykmeldingGrunnlag -> konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver)
+                    is UtenlandskSykmeldingGrunnlag -> null
+                },
             tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNAV,
             andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
             meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
@@ -111,6 +115,7 @@ class SykmeldingDtoKonverterer {
                         UtenlandskSykmelding(
                             land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                         )
+
                     else -> null
                 },
         )
@@ -123,6 +128,13 @@ class SykmeldingDtoKonverterer {
             etternavn = pasient.navn?.etternavn,
             overSyttiAar = null, // TODO: Data not available
         )
+
+    internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
+        when (arbeidsgiver) {
+            is EnArbeidsgiver -> arbeidsgiver.tiltakArbeidsplassen
+            is FlereArbeidsgivere -> arbeidsgiver.tiltakArbeidsplassen
+            is IngenArbeidsgiver -> null
+        }
 
     internal fun konverterBehandlingsutfall(sykmelding: Sykmelding): BehandlingsutfallDTO =
         BehandlingsutfallDTO( // TODO: benytt behandlingsutfall fra tsm kafka melding

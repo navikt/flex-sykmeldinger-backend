@@ -1,51 +1,13 @@
 package no.nav.helse.flex.sykmelding.api
 
 import SykmeldingDtoKonverterer
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
-import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.ShortNameDTO
-import no.nav.helse.flex.sykmelding.api.dto.SporsmalDTO
+import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvar
-import no.nav.helse.flex.sykmelding.api.dto.SvarDTO
-import no.nav.helse.flex.sykmelding.api.dto.SvartypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingFormResponse
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
-import no.nav.helse.flex.sykmelding.api.dto.UriktigeOpplysningerType
-import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
-import no.nav.helse.flex.sykmelding.domain.AnnenFraverArsak
-import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
-import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
-import no.nav.helse.flex.sykmelding.domain.Behandler
-import no.nav.helse.flex.sykmelding.domain.BistandNav
-import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.ErIArbeid
-import no.nav.helse.flex.sykmelding.domain.FlereArbeidsgivere
-import no.nav.helse.flex.sykmelding.domain.IngenArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.Kontaktinfo
-import no.nav.helse.flex.sykmelding.domain.KontaktinfoType
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
-import no.nav.helse.flex.sykmelding.domain.MedisinskVurdering
-import no.nav.helse.flex.sykmelding.domain.Navn
-import no.nav.helse.flex.sykmelding.domain.Pasient
-import no.nav.helse.flex.sykmelding.domain.PersonId
-import no.nav.helse.flex.sykmelding.domain.PersonIdType
-import no.nav.helse.flex.sykmelding.domain.Prognose
-import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
-import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.domain.*
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be null`
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PGobject
 import java.time.Instant
@@ -354,5 +316,43 @@ class SykmeldingDtoKonvertererTest {
 
         val konvertereBehandler = konverterer.konverterBehandler(behandler)
         konvertereBehandler.fornavn `should be equal to` "behandler"
+    }
+
+    @Test
+    fun `burde konvertere tiltak arbeidsplassen`() {
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer
+            .konverterTiltakArbeidsplassen(
+                EnArbeidsgiver(
+                    meldingTilArbeidsgiver = "_",
+                    tiltakArbeidsplassen = "tiltak",
+                ),
+            ).shouldBeEqualTo("tiltak")
+
+        konverterer.konverterTiltakArbeidsplassen(
+            FlereArbeidsgivere(
+                meldingTilArbeidsgiver = "_",
+                tiltakArbeidsplassen = "tiltak",
+                navn = "_",
+                yrkesbetegnelse = "_",
+                stillingsprosent = 0,
+            ),
+        ) `should be equal to` "tiltak"
+
+        konverterer.konverterTiltakArbeidsplassen(
+            IngenArbeidsgiver(),
+        ) `should be equal to` null
+    }
+
+    @Test
+    fun `burde konvertere kontakt med pasient`() {
+        error("TODO. Hvor finner vi denne info?")
+
+        val foventetKontaktMedPasient =
+            KontaktMedPasientDTO(
+                kontaktDato = TODO(),
+                begrunnelseIkkeKontakt = TODO(),
+            )
     }
 }
