@@ -17,6 +17,7 @@ class SykmeldingDtoKonverterer {
             pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
+            // TODO
             legekontorOrgnummer = null,
             arbeidsgiver = konverterArbeidsgiver(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
