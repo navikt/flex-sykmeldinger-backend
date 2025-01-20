@@ -42,10 +42,10 @@ class SykmeldingDtoKonverterer {
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = null, // No input data available
-            papirsykmelding = false, // Assuming false unless specified
-            harRedusertArbeidsgiverperiode = null, // No input data available
-            merknader = null, // No clear mapping provided
+            egenmeldt = null,
+            papirsykmelding = false,
+            harRedusertArbeidsgiverperiode = null,
+            merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding = null,
         )
@@ -58,13 +58,13 @@ class SykmeldingDtoKonverterer {
             pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
-            legekontorOrgnummer = "", // TODO: sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn,
+            legekontorOrgnummer = null,
             arbeidsgiver = null,
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
             sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            prognose = TODO(),
+            prognose = null,
             utdypendeOpplysninger = emptyMap(),
             tiltakArbeidsplassen = null,
             tiltakNAV = null,
@@ -82,10 +82,10 @@ class SykmeldingDtoKonverterer {
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = null, // No input data available
-            papirsykmelding = false, // Assuming false unless specified
-            harRedusertArbeidsgiverperiode = null, // No input data available
-            merknader = null, // No clear mapping provided
+            egenmeldt = null,
+            papirsykmelding = false,
+            harRedusertArbeidsgiverperiode = null,
+            merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding =
                 UtenlandskSykmelding(
@@ -95,7 +95,8 @@ class SykmeldingDtoKonverterer {
     }
 
     fun konverterSykmeldingStatus(status: SykmeldingStatus): SykmeldingStatusDTO =
-        SykmeldingStatusDTO( // TODO
+        SykmeldingStatusDTO(
+            // TODO
             statusEvent = status.status,
             timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
             sporsmalOgSvarListe = emptyList(),
@@ -109,7 +110,8 @@ class SykmeldingDtoKonverterer {
             fornavn = pasient.navn?.fornavn,
             mellomnavn = pasient.navn?.mellomnavn,
             etternavn = pasient.navn?.etternavn,
-            overSyttiAar = null, // TODO: Data not available
+            // TODO
+            overSyttiAar = null,
         )
 
     internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
@@ -120,9 +122,10 @@ class SykmeldingDtoKonverterer {
         }
 
     internal fun konverterBehandlingsutfall(sykmelding: Sykmelding): BehandlingsutfallDTO =
-        BehandlingsutfallDTO( // TODO: benytt behandlingsutfall fra tsm kafka melding
-            status = RegelStatusDTO.OK, // Assuming OK, adjust based on domain logic
-            ruleHits = emptyList(), // No rule hits mapping provided
+        BehandlingsutfallDTO(
+            // TODO: benytt behandlingsutfall fra tsm kafka melding
+            status = RegelStatusDTO.OK,
+            ruleHits = emptyList(),
         )
 
     internal fun konverterSykmeldingsperiode(aktivitet: Aktivitet): SykmeldingsperiodeDTO {
@@ -279,7 +282,8 @@ class SykmeldingDtoKonverterer {
         )
 
     internal fun konverterKontaktMedPasient(): KontaktMedPasientDTO =
-        KontaktMedPasientDTO( // TODO
+        KontaktMedPasientDTO(
+            // TODO
             begrunnelseIkkeKontakt = null,
             kontaktDato = null,
         )

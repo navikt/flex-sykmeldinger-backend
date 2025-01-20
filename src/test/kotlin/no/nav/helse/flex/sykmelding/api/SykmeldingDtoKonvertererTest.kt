@@ -237,14 +237,16 @@ class SykmeldingDtoKonvertererTest {
                         DiagnoseDTO(
                             kode = "kode",
                             system = "ICD10",
-                            tekst = null, // TODO
+                            // TODO
+                            tekst = null,
                         ),
                     biDiagnoser =
                         listOf(
                             DiagnoseDTO(
                                 kode = "bi diagnose",
                                 system = "ICPC2",
-                                tekst = null, // TODO
+                                // TODO
+                                tekst = null,
                             ),
                         ),
                     annenFraversArsak =
