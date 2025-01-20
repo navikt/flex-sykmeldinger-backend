@@ -10,6 +10,7 @@ import no.nav.helse.flex.sykmelding.api.dto.BehandlingsutfallDTO
 import no.nav.helse.flex.sykmelding.api.dto.DiagnoseDTO
 import no.nav.helse.flex.sykmelding.api.dto.ErIArbeidDTO
 import no.nav.helse.flex.sykmelding.api.dto.ErIkkeIArbeidDTO
+import no.nav.helse.flex.sykmelding.api.dto.GradertDTO
 import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
@@ -32,7 +33,9 @@ import no.nav.helse.flex.sykmelding.domain.AnnenFravarArsakType
 import no.nav.helse.flex.sykmelding.domain.AnnenFraverArsak
 import no.nav.helse.flex.sykmelding.domain.ArbeidsgiverInfo
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
+import no.nav.helse.flex.sykmelding.domain.Avventende
 import no.nav.helse.flex.sykmelding.domain.Behandler
+import no.nav.helse.flex.sykmelding.domain.Behandlingsdager
 import no.nav.helse.flex.sykmelding.domain.BistandNav
 import no.nav.helse.flex.sykmelding.domain.DiagnoseInfo
 import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
@@ -46,6 +49,7 @@ import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
 import no.nav.helse.flex.sykmelding.domain.MedisinskVurdering
 import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Prognose
+import no.nav.helse.flex.sykmelding.domain.Reisetilskudd
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
 import no.nav.helse.flex.sykmelding.domain.SvarRestriksjon
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
@@ -148,7 +152,8 @@ class SykmeldingDtoKonverterer {
                             arsak =
                                 listOf(
                                     when (aktivitet.arbeidsrelatertArsak.arsak) {
-                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING
+                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING ->
+                                            ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING
                                         ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakTypeDTO.ANNET
                                     },
                                 ),
@@ -177,12 +182,24 @@ class SykmeldingDtoKonverterer {
             aktivitetIkkeMulig = aktivitetIkkeMuligDto,
             gradert =
                 when (aktivitet) {
-                    is Gradert -> TODO()
+                    is Gradert ->
+                        GradertDTO(
+                            grad = aktivitet.grad,
+                            reisetilskudd = aktivitet.reisetilskudd,
+                        )
+                    else -> null
                 },
-            // Data not available
-            behandlingsdager = null, // Data not available
-            reisetilskudd = false, // Default assumption
-            innspillTilArbeidsgiver = null, // Data not available
+            behandlingsdager =
+                when (aktivitet) {
+                    is Behandlingsdager -> aktivitet.antallBehandlingsdager
+                    else -> null
+                },
+            reisetilskudd = aktivitet is Reisetilskudd,
+            innspillTilArbeidsgiver =
+                when (aktivitet) {
+                    is Avventende -> aktivitet.innspillTilArbeidsgiver
+                    else -> null
+                },
         )
     }
 

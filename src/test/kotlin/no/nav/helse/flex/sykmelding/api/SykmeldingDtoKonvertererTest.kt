@@ -1,8 +1,18 @@
 package no.nav.helse.flex.sykmelding.api
 
+import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
+import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
+import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
+import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
+import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
+import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
 import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
@@ -11,6 +21,7 @@ import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.time.LocalDate
 
 class SykmeldingDtoKonvertererTest {
     @Test
@@ -72,5 +83,42 @@ class SykmeldingDtoKonvertererTest {
                 navn = TODO(),
                 stillingsprosent = TODO(),
             )
+    }
+
+    @Test
+    fun `burde konvertere aktivitet til en periode`() {
+        val konverterer = SykmeldingDtoKonverterer()
+
+        val aktivitet =
+            AktivitetIkkeMulig(
+                medisinskArsak =
+                    MedisinskArsak(
+                        beskrivelse = "",
+                        arsak = MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING,
+                    ),
+                arbeidsrelatertArsak =
+                    ArbeidsrelatertArsak(
+                        beskrivelse = "",
+                        arsak = ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
+                    ),
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-21"),
+            )
+
+        val periode = konverterer.konverterSykmeldingsperiode(aktivitet)
+        periode.fom `should be equal to` LocalDate.parse("2021-01-01")
+        periode.tom `should be equal to` LocalDate.parse("2021-01-21")
+        periode.aktivitetIkkeMulig?.let {
+            it.medisinskArsak `should be equal to`
+                MedisinskArsakDTO(
+                    beskrivelse = "",
+                    arsak = listOf(MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
+                )
+            it.arbeidsrelatertArsak `should be equal to`
+                ArbeidsrelatertArsakDTO(
+                    beskrivelse = "",
+                    arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
+                )
+        }
     }
 }
