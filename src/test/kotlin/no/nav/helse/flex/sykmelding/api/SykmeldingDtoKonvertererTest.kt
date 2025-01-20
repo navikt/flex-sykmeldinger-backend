@@ -4,11 +4,11 @@ import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
 import no.nav.helse.flex.sykmelding.api.dto.JaEllerNei
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
@@ -24,16 +24,17 @@ import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsakType
 import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
-import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
 import no.nav.helse.flex.sykmelding.domain.FlereArbeidsgivere
 import no.nav.helse.flex.sykmelding.domain.IngenArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsak
+import no.nav.helse.flex.sykmelding.domain.MedisinskArsakType
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PGobject
 import java.time.Instant
@@ -246,5 +247,32 @@ class SykmeldingDtoKonvertererTest {
         val konverterer = SykmeldingDtoKonverterer()
 
         konverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
+    }
+
+    @Test
+    fun `burde konvertere tiltak arbeidsplassen`() {
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer
+            .konverterTiltakArbeidsplassen(
+                EnArbeidsgiver(
+                    meldingTilArbeidsgiver = "_",
+                    tiltakArbeidsplassen = "tiltak",
+                ),
+            ).shouldBeEqualTo("tiltak")
+
+        konverterer.konverterTiltakArbeidsplassen(
+            FlereArbeidsgivere(
+                meldingTilArbeidsgiver = "_",
+                tiltakArbeidsplassen = "tiltak",
+                navn = "_",
+                yrkesbetegnelse = "_",
+                stillingsprosent = 0,
+            ),
+        ) `should be equal to` "tiltak"
+
+        konverterer.konverterTiltakArbeidsplassen(
+            IngenArbeidsgiver(),
+        ) `should be equal to` null
     }
 }
