@@ -83,7 +83,11 @@ class SykmeldingDtoKonverterer {
                     is UtenlandskSykmeldingGrunnlag -> TODO()
                 },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
-            tiltakArbeidsplassen = konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
+            tiltakArbeidsplassen =
+                when (sykmelding.sykmeldingGrunnlag) {
+                    is SykmeldingGrunnlag -> konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver)
+                    is UtenlandskSykmeldingGrunnlag -> null
+                },
             tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNAV,
             andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
             meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
@@ -111,6 +115,7 @@ class SykmeldingDtoKonverterer {
                         UtenlandskSykmelding(
                             land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                         )
+
                     else -> null
                 },
         )
