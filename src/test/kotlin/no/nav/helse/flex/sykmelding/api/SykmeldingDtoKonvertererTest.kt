@@ -1,8 +1,11 @@
 package no.nav.helse.flex.sykmelding.api
 
+import SykmeldingDtoKonverterer
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
 import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.FlereArbeidsgivere
+import no.nav.helse.flex.sykmelding.domain.IngenArbeidsgiver
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
@@ -69,8 +72,48 @@ class SykmeldingDtoKonvertererTest {
 
         val forventetArbeidsgiver =
             ArbeidsgiverDTO(
-                navn = TODO(),
-                stillingsprosent = TODO(),
+                navn = null,
+                stillingsprosent = null,
             )
+
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
+
+        error("TODO")
+    }
+
+    @Test
+    fun `burde konvertere arbeidsgiver, flere arbeidsgiver`() {
+        val arbeidsgiver =
+            FlereArbeidsgivere(
+                navn = "Navn",
+                yrkesbetegnelse = "_",
+                stillingsprosent = 50,
+                meldingTilArbeidsgiver = "_",
+                tiltakArbeidsplassen = "_",
+            )
+
+        val forventetArbeidsgiver =
+            ArbeidsgiverDTO(
+                navn = "Navn",
+                stillingsprosent = 50,
+            )
+
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
+    }
+
+    @Test
+    fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
+        val arbeidsgiver =
+            IngenArbeidsgiver()
+
+        val forventetArbeidsgiver = null
+
+        val konverterer = SykmeldingDtoKonverterer()
+
+        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
     }
 }

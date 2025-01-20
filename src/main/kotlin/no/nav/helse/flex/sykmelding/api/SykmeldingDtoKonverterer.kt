@@ -178,6 +178,7 @@ class SykmeldingDtoKonverterer {
             gradert =
                 when (aktivitet) {
                     is Gradert -> TODO()
+                    else -> TODO()
                 },
             // Data not available
             behandlingsdager = null, // Data not available
