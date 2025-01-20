@@ -1,6 +1,8 @@
 package no.nav.helse.flex.sykmelding.api
 
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
+import no.nav.helse.flex.sykmelding.domain.EnArbeidsgiver
 import no.nav.helse.flex.sykmelding.domain.Navn
 import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
@@ -54,6 +56,21 @@ class SykmeldingDtoKonvertererTest {
                 mellomnavn = "mellomnavn",
                 etternavn = "etternavn",
                 overSyttiAar = null,
+            )
+    }
+
+    @Test
+    fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
+        val arbeidsgiver =
+            EnArbeidsgiver(
+                meldingTilArbeidsgiver = "melding",
+                tiltakArbeidsplassen = "tiltak",
+            )
+
+        val forventetArbeidsgiver =
+            ArbeidsgiverDTO(
+                navn = TODO(),
+                stillingsprosent = TODO(),
             )
     }
 }
