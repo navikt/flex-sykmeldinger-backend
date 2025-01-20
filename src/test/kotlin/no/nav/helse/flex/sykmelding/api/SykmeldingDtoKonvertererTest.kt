@@ -1,12 +1,16 @@
 package no.nav.helse.flex.sykmelding.api
 
 import SykmeldingDtoKonverterer
+import no.nav.helse.flex.sykmelding.api.dto.AnnenFraverGrunnDTO
+import no.nav.helse.flex.sykmelding.api.dto.AnnenFraversArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
+import no.nav.helse.flex.sykmelding.api.dto.DiagnoseDTO
 import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
+import no.nav.helse.flex.sykmelding.api.dto.MedisinskVurderingDTO
 import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
 import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvarDTO
 import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
@@ -40,7 +44,7 @@ import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest {
     @Test
-    fun `burde konvertere`() {
+    fun `burde konvertere med riktig id`() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
@@ -87,21 +91,18 @@ class SykmeldingDtoKonvertererTest {
 
     @Test
     fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
-        val arbeidsgiver =
-            EnArbeidsgiver(
-                meldingTilArbeidsgiver = "melding",
-                tiltakArbeidsplassen = "tiltak",
-            )
+        val konverterer = SykmeldingDtoKonverterer()
 
-        val forventetArbeidsgiver =
+        konverterer.konverterArbeidsgiver(
+            EnArbeidsgiver(
+                meldingTilArbeidsgiver = "_",
+                tiltakArbeidsplassen = "_",
+            ),
+        ) `should be equal to`
             ArbeidsgiverDTO(
                 navn = null,
                 stillingsprosent = null,
             )
-
-        val konverterer = SykmeldingDtoKonverterer()
-
-        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
     }
 
     @Test
@@ -128,14 +129,9 @@ class SykmeldingDtoKonvertererTest {
 
     @Test
     fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-        val arbeidsgiver =
-            IngenArbeidsgiver()
-
-        val forventetArbeidsgiver = null
-
         val konverterer = SykmeldingDtoKonverterer()
 
-        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
+        konverterer.konverterArbeidsgiver(IngenArbeidsgiver()) `should be equal to` null
     }
 
     @Test
@@ -211,10 +207,16 @@ class SykmeldingDtoKonvertererTest {
                 hovedDiagnose =
                     DiagnoseInfo(
                         system = DiagnoseSystem.ICD10,
-                        kode = "",
+                        kode = "kode",
                     ),
-                biDiagnoser = emptyList(),
-                svangerskap = false,
+                biDiagnoser =
+                    listOf(
+                        DiagnoseInfo(
+                            system = DiagnoseSystem.ICPC2,
+                            kode = "bi diagnose",
+                        ),
+                    ),
+                svangerskap = true,
                 yrkesskade =
                     Yrkesskade(
                         yrkesskadeDato = LocalDate.parse("2021-01-01"),
@@ -223,13 +225,39 @@ class SykmeldingDtoKonvertererTest {
                 syketilfelletStartDato = LocalDate.parse("2021-01-01"),
                 annenFraversArsak =
                     AnnenFraverArsak(
-                        beskrivelse = "",
+                        beskrivelse = "beskrivelse",
                         arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
                     ),
             )
 
-        val konvertertMedisinsk = konverterer.konverterMedisinskVurdering(medisinskVurdering)
-        konvertertMedisinsk.hovedDiagnose?.system `should be equal to` "ICD10"
+        val konvertertMedisinskVurdering =
+            konverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+                MedisinskVurderingDTO(
+                    hovedDiagnose =
+                        DiagnoseDTO(
+                            kode = "kode",
+                            system = "ICD10",
+                            tekst = null, // TODO
+                        ),
+                    biDiagnoser =
+                        listOf(
+                            DiagnoseDTO(
+                                kode = "bi diagnose",
+                                system = "ICPC2",
+                                tekst = null, // TODO
+                            ),
+                        ),
+                    annenFraversArsak =
+                        AnnenFraversArsakDTO(
+                            beskrivelse = "beskrivelse",
+                            grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
+                        ),
+                    svangerskap = true,
+                    yrkesskade = true,
+                    yrkesskadeDato = LocalDate.parse("2021-01-01"),
+                )
+
+        konverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to` konvertertMedisinskVurdering
     }
 
     @Test
@@ -338,13 +366,12 @@ class SykmeldingDtoKonvertererTest {
     }
 
     @Test
-    fun `burde konvertere kontakt med pasient`() {
-        error("TODO. Hvor finner vi denne info?")
-
-        val foventetKontaktMedPasient =
+    fun `burde konvertere kontakt med pasient, ingen kontakt`() {
+        val konverterer = SykmeldingDtoKonverterer()
+        konverterer.konverterKontaktMedPasient() `should be equal to`
             KontaktMedPasientDTO(
-                kontaktDato = TODO(),
-                begrunnelseIkkeKontakt = TODO(),
+                kontaktDato = null,
+                begrunnelseIkkeKontakt = null,
             )
     }
 

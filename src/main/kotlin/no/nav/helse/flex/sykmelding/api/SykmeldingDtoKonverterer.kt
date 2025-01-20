@@ -17,7 +17,7 @@ class SykmeldingDtoKonverterer {
             pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
-            legekontorOrgnummer = null, // TODO: sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn,
+            legekontorOrgnummer = null,
             arbeidsgiver = konverterArbeidsgiver(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
             sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
@@ -35,7 +35,7 @@ class SykmeldingDtoKonverterer {
                     is FlereArbeidsgivere -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
                     is IngenArbeidsgiver -> null
                 },
-            kontaktMedPasient = konverterKontaktMedPasient(sykmelding.sykmeldingGrunnlag.tilbakedatering),
+            kontaktMedPasient = konverterKontaktMedPasient(),
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
             behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
             syketilfelleStartDato =
@@ -239,7 +239,7 @@ class SykmeldingDtoKonverterer {
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
         DiagnoseDTO(
-            tekst = TODO(),
+            tekst = null,
             system = diagnose.system.name,
             kode = diagnose.kode,
         )
@@ -278,10 +278,10 @@ class SykmeldingDtoKonverterer {
             beskrivBistand = bistandNav.beskrivBistand,
         )
 
-    internal fun konverterKontaktMedPasient(tilbakedatering: Tilbakedatering?): KontaktMedPasientDTO =
-        KontaktMedPasientDTO(
-            begrunnelseIkkeKontakt = tilbakedatering?.begrunnelse,
-            kontaktDato = tilbakedatering?.kontaktDato,
+    internal fun konverterKontaktMedPasient(): KontaktMedPasientDTO =
+        KontaktMedPasientDTO( // TODO
+            begrunnelseIkkeKontakt = null,
+            kontaktDato = null,
         )
 
     internal fun konverterBehandler(behandler: Behandler): BehandlerDTO =
@@ -311,8 +311,12 @@ class SykmeldingDtoKonverterer {
                     navn = arbeidsgiverInfo.navn,
                     stillingsprosent = arbeidsgiverInfo.stillingsprosent,
                 )
-            is EnArbeidsgiver -> TODO()
-            is IngenArbeidsgiver -> TODO()
+            is EnArbeidsgiver ->
+                ArbeidsgiverDTO(
+                    navn = null,
+                    stillingsprosent = null,
+                )
+            is IngenArbeidsgiver -> null
         }
 
     internal fun konverterUtdypendeOpplysninger(
