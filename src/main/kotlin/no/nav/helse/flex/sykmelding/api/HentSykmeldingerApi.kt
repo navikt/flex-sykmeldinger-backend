@@ -26,7 +26,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
@@ -40,7 +41,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -53,7 +55,8 @@ class HentSykmeldingerApi(
 
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
     @ResponseBody
@@ -83,7 +86,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -95,7 +99,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getErUtenforVentetid(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -107,7 +112,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun sendSykmelding(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -120,7 +126,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun changeSykmeldingStatus(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
