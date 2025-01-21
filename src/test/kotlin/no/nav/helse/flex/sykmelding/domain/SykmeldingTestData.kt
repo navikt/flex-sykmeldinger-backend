@@ -1,14 +1,29 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+fun lagSykmelding(sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")): Sykmelding =
+    Sykmelding(
+        sykmeldingGrunnlag = sykmeldingGrunnlag,
+        statuser =
+            listOf(
+                SykmeldingStatus(
+                    status = "NY",
+                    opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                ),
+            ),
+        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+        oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+    )
+
 fun lagSykmeldingGrunnlag(
     id: String = "1",
     pasient: Pasient = lagPasient(),
-): SykmeldingGrunnlag {
-    return SykmeldingGrunnlag(
+): SykmeldingGrunnlag =
+    SykmeldingGrunnlag(
         id = id,
         metadata = lagSykmeldingMetadata(),
         pasient = pasient,
@@ -65,10 +80,9 @@ fun lagSykmeldingGrunnlag(
                     ),
             ),
     )
-}
 
-fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag {
-    return UtenlandskSykmeldingGrunnlag(
+fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
+    UtenlandskSykmeldingGrunnlag(
         id = "1",
         metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
@@ -81,10 +95,9 @@ fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag {
                 erAdresseUtland = false,
             ),
     )
-}
 
-fun lagSykmeldingMetadata(): SykmeldingMetadata {
-    return SykmeldingMetadata(
+fun lagSykmeldingMetadata(): SykmeldingMetadata =
+    SykmeldingMetadata(
         mottattDato = OffsetDateTime.now(),
         genDate = OffsetDateTime.now().minusDays(1),
         behandletTidspunkt = OffsetDateTime.now().minusHours(2),
@@ -96,10 +109,9 @@ fun lagSykmeldingMetadata(): SykmeldingMetadata {
             ),
         strekkode = "ABC12345",
     )
-}
 
-fun lagPasient(fnr: String = "01010112345"): Pasient {
-    return Pasient(
+fun lagPasient(fnr: String = "01010112345"): Pasient =
+    Pasient(
         fnr = fnr,
         navn =
             Navn(
@@ -114,10 +126,9 @@ fun lagPasient(fnr: String = "01010112345"): Pasient {
         navKontor = null,
         navnFastlege = null,
     )
-}
 
-fun lagMedisinskVurdering(): MedisinskVurdering {
-    return MedisinskVurdering(
+fun lagMedisinskVurdering(): MedisinskVurdering =
+    MedisinskVurdering(
         hovedDiagnose =
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
@@ -136,39 +147,34 @@ fun lagMedisinskVurdering(): MedisinskVurdering {
         skjermetForPasient = false,
         syketilfelletStartDato = null,
     )
-}
 
-fun lagAktivitetBehandlingsdager(): Behandlingsdager {
-    return Behandlingsdager(
+fun lagAktivitetBehandlingsdager(): Behandlingsdager =
+    Behandlingsdager(
         antallBehandlingsdager = 1,
         fom = LocalDate.now().minusDays(1),
         tom = LocalDate.now().plusDays(1),
     )
-}
 
-fun lagAktivitetGradert(): Gradert {
-    return Gradert(
+fun lagAktivitetGradert(): Gradert =
+    Gradert(
         grad = 1,
         fom = LocalDate.now().minusDays(1),
         tom = LocalDate.now().plusDays(1),
         reisetilskudd = false,
     )
-}
 
-fun lagAktivitetReisetilskudd(): Reisetilskudd {
-    return Reisetilskudd(
+fun lagAktivitetReisetilskudd(): Reisetilskudd =
+    Reisetilskudd(
         fom = LocalDate.now().minusDays(1),
         tom = LocalDate.now().plusDays(1),
     )
-}
 
-fun lagAktivitetAvventende(): Avventende {
-    return Avventende(
+fun lagAktivitetAvventende(): Avventende =
+    Avventende(
         innspillTilArbeidsgiver = "Ingen",
         fom = LocalDate.now().minusDays(1),
         tom = LocalDate.now().plusDays(1),
     )
-}
 
 fun lagAktivitetIkkeMulig() =
     AktivitetIkkeMulig(

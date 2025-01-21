@@ -6,7 +6,6 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
@@ -24,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -95,33 +93,6 @@ abstract class FellesTestOppsett {
             ContainerTestUtils.waitForAssignment(container, 1)
         }
     }
-
-    fun tokenxToken(
-        fnr: String,
-        acrClaim: String = "Level4",
-        audience: String = "flex-sykmeldinger-backend-client-id",
-        issuerId: String = "tokenx",
-        clientId: String = "frontend-client-id",
-        claims: Map<String, Any> =
-            mapOf(
-                "acr" to acrClaim,
-                "idp" to "idporten",
-                "client_id" to clientId,
-                "pid" to fnr,
-            ),
-    ): String =
-        server
-            .issueToken(
-                issuerId,
-                clientId,
-                DefaultOAuth2TokenCallback(
-                    issuerId = issuerId,
-                    subject = UUID.randomUUID().toString(),
-                    audience = listOf(audience),
-                    claims = claims,
-                    expiry = 3600,
-                ),
-            ).serialize()
 
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
         kafkaProducer
