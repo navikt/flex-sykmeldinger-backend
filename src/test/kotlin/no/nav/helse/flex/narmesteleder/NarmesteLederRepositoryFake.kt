@@ -8,9 +8,6 @@ class NarmesteLederRepositoryFake : NarmesteLederRepository {
 
     private fun lagId(): String = UUID.randomUUID().toString()
 
-    override fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder? =
-        lagretNarmesteLeder.find { it.narmesteLederId == narmesteLederId }
-
     override fun <S : NarmesteLeder?> save(entity: S & Any): S & Any {
         val entityWithId = entity.copy(id = lagId())
         lagretNarmesteLeder.add(entityWithId)
@@ -25,6 +22,11 @@ class NarmesteLederRepositoryFake : NarmesteLederRepository {
         }
         return entities
     }
+
+    override fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder? =
+        lagretNarmesteLeder.find { it.narmesteLederId == narmesteLederId }
+
+    override fun findAllByBrukerFnr(fnr: String): List<NarmesteLeder> = lagretNarmesteLeder.filter { it.brukerFnr == fnr }
 
     override fun findById(id: String): Optional<NarmesteLeder> = Optional.ofNullable(lagretNarmesteLeder.find { it.id == id })
 
