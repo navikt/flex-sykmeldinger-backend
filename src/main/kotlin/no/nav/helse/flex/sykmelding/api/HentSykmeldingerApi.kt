@@ -66,8 +66,7 @@ class HentSykmeldingerApi(
         }
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
-            val sanitizedSykmeldingId = sykmeldingId.replace(Regex("[^a-zA-Z0-9-_]"), "")
-            logger.warn("Fant ikke sykmelding med id $sanitizedSykmeldingId")
+            logger.warn("Fant ikke sykmeldingen")
             return ResponseEntity.notFound().build()
         }
         if (sykmelding.sykmeldingGrunnlag.pasient.fnr != fnr) {
