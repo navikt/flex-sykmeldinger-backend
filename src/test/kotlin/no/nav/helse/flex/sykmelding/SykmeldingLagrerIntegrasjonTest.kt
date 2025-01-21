@@ -107,6 +107,6 @@ class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
         sykmelding.shouldNotBeNull()
         sykmelding.statuser.size `should be equal to` 1
         val status = sykmelding.statuser[0]
-        status.status `should be equal to` "NY"
+        status.status `should be equal to` "APEN"
     }
 }
