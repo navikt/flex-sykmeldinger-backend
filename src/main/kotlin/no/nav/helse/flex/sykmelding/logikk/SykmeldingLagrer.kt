@@ -31,7 +31,7 @@ class SykmeldingLagrer(
             statuser =
                 listOf(
                     SykmeldingStatus(
-                        status = "NY",
+                        status = "APEN",
                         sporsmalSvar = null,
                         opprettet = nowFactory.get(),
                     ),
