@@ -28,10 +28,12 @@ class HentSykmeldingerApi(
         issuer = TOKENX,
         claimMap = ["acr=idporten-loa-high"],
     )
-    fun getSykmeldinger(): ResponseEntity<Any> {
+    fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
-        val sykmeldinger = sykmeldingHenter.getSykmeldinger(fnr = fnr)
-        return ResponseEntity.ok(sykmeldinger)
+
+        val sykmeldinger = sykmeldingRepository.findAllByFnr(fnr)
+        val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
+        return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/tidligere-arbeidsgivere")

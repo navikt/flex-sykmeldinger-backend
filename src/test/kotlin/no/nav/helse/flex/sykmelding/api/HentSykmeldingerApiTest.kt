@@ -129,4 +129,126 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
                 ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
         }
     }
+
+    @Nested
+    inner class HentAlleSykmeldingerEndepunkt {
+        @Test
+        fun `burde hente en sykmelding`() {
+            sykemeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    jwt(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
+            sykmeldinger.size `should be equal to` 1
+            val sykmelding = sykmeldinger[0]
+            sykmelding.id `should be equal to` "1"
+            sykmelding.pasient.fnr `should be equal to` "fnr"
+        }
+
+        @Test
+        fun `burde returnere tom liste om ingen sykmeldinger finnes`() {
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    jwt(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
+            sykmeldinger.size `should be equal to` 0
+        }
+
+        @Test
+        fun `burde ikke returnere søknad med feil fnr`() {
+            sykemeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    jwt(
+                                        fnr = "feil_fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
+            sykmeldinger.size `should be equal to` 0
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi ikke har token`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi har feil claim`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                jwt(
+                                    fnr = "fnr",
+                                    acrClaim = "feil-claim",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+    }
 }
