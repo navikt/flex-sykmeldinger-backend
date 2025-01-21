@@ -13,5 +13,9 @@
         <appender-ref ref="stdout_json"/>
     </logger>
 
+    <logger name="no.nav.security" level="DEBUG" additivity="false">
+        <appender-ref ref="stdout_json"/>
+    </logger>
+
     <logger name="org.springframework" level="INFO"/>
 </configuration>
