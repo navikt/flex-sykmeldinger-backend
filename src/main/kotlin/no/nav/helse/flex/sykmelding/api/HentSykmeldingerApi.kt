@@ -1,10 +1,14 @@
 package no.nav.helse.flex.sykmelding.api
 
+import SykmeldingDtoKonverterer
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
+import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.tokenx.TOKENX
 import no.nav.helse.flex.tokenx.TokenxValidering
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -13,26 +17,32 @@ import org.springframework.web.bind.annotation.*
 class HentSykmeldingerApi(
     private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
+    private val sykmeldingRepository: SykmeldingRepository,
 ) {
+    private val sykmeldingDtoKonverterer = SykmeldingDtoKonverterer()
     private val logger = logger()
 
     @GetMapping("/api/v1/sykmeldinger")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
-    fun getSykmeldinger(): ResponseEntity<Any> {
+    fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
-        val sykmeldinger = sykmeldingHenter.getSykmeldinger(fnr = fnr)
-        return ResponseEntity.ok(sykmeldinger)
+
+        val sykmeldinger = sykmeldingRepository.findAllByFnr(fnr)
+        val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
+        return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/tidligere-arbeidsgivere")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -43,36 +53,41 @@ class HentSykmeldingerApi(
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
 
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
+    @ResponseBody
     fun getSykmelding(
-        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
-    ): ResponseEntity<Any> {
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<SykmeldingDTO> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
 
-        if (sykmeldingUuid == "null") {
+        if (sykmeldingId == "null") {
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
             return ResponseEntity.notFound().build()
-        } else {
-            val sykmelding = sykmeldingHenter.getSykmelding(fnr, sykmeldingUuid)
-
-            return if (sykmelding == null) {
-                ResponseEntity.notFound().build()
-            } else {
-                ResponseEntity.ok(sykmelding)
-            }
         }
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            logger.warn("Fant ikke sykmeldingen")
+            return ResponseEntity.notFound().build()
+        }
+        if (sykmelding.sykmeldingGrunnlag.pasient.fnr != fnr) {
+            logger.warn("Fnr på sykmeldingen er forskjellig fra token")
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        return ResponseEntity.ok(konvertertSykmelding)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/brukerinformasjon")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -84,7 +99,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getErUtenforVentetid(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -96,7 +112,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun sendSykmelding(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
@@ -109,7 +126,8 @@ class HentSykmeldingerApi(
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
-        claimMap = ["acr=idporten-loa-high"],
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun changeSykmeldingStatus(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
