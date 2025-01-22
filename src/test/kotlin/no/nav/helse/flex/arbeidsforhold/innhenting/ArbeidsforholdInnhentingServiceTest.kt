@@ -7,6 +7,8 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
+import no.nav.helse.flex.arbeidsforhold.lagEksterntArbeidsforhold
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.time.Instant

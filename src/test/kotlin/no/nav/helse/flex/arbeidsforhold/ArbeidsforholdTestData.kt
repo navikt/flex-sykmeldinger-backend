@@ -1,7 +1,6 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting
+package no.nav.helse.flex.arbeidsforhold
 
-import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsforhold.innhenting.EksterntArbeidsforhold
 import java.time.Instant
 import java.time.LocalDate
 
@@ -16,8 +15,8 @@ fun lagArbeidsforhold(
     tom: LocalDate? = null,
     arbeidsforholdType: ArbeidsforholdType? = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
     opprettet: Instant = Instant.parse("2020-01-01T00:00:00Z"),
-): Arbeidsforhold {
-    return Arbeidsforhold(
+): Arbeidsforhold =
+    Arbeidsforhold(
         id = id,
         navArbeidsforholdId = navArbeidsforholdId,
         fnr = fnr,
@@ -29,7 +28,6 @@ fun lagArbeidsforhold(
         arbeidsforholdType = arbeidsforholdType,
         opprettet = opprettet,
     )
-}
 
 fun lagEksterntArbeidsforhold(
     navArbeidsforholdId: String = "navArbeidsforholdId",
@@ -40,8 +38,8 @@ fun lagEksterntArbeidsforhold(
     fom: LocalDate = LocalDate.parse("2020-01-01"),
     tom: LocalDate? = null,
     arbeidsforholdType: ArbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-): EksterntArbeidsforhold {
-    return EksterntArbeidsforhold(
+): EksterntArbeidsforhold =
+    EksterntArbeidsforhold(
         navArbeidsforholdId = navArbeidsforholdId,
         fnr = fnr,
         orgnummer = orgnummer,
@@ -51,4 +49,3 @@ fun lagEksterntArbeidsforhold(
         tom = tom,
         arbeidsforholdType = arbeidsforholdType,
     )
-}
