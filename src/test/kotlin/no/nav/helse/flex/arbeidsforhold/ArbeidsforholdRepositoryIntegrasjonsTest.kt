@@ -1,7 +1,6 @@
 package no.nav.helse.flex.arbeidsforhold
 
 import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforhold
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
