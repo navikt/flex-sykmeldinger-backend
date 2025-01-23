@@ -3,7 +3,7 @@ package no.nav.helse.flex.sykmelding.api
 import SykmeldingDtoKonverterer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
-import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.tokenx.TOKENX
 import no.nav.helse.flex.tokenx.TokenxValidering
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 class HentSykmeldingerApi(
     private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
-    private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingRepository: ISykmeldingRepository,
 ) {
     private val sykmeldingDtoKonverterer = SykmeldingDtoKonverterer()
     private val logger = logger()
