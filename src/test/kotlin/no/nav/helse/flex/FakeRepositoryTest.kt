@@ -1,6 +1,6 @@
-package no.nav.helse.flex.sykmelding
+package no.nav.helse.flex
 
-import no.nav.helse.flex.FakesTestOppsett
+import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
