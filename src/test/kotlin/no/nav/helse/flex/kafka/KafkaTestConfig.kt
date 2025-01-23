@@ -6,11 +6,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.awaitility.Awaitility.await
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
-@Configuration
+@TestConfiguration
 class KafkaTestConfig(
     private val aivenKafkaConfig: AivenKafkaConfig,
 ) {
@@ -44,7 +44,12 @@ fun <K, V> Consumer<K, V>.subscribeHvisIkkeSubscribed(vararg topics: String) {
 }
 
 fun <K, V> Consumer<K, V>.hentProduserteRecords(duration: Duration = Duration.ofMillis(100)): List<ConsumerRecord<K, V>> =
-    this.poll(duration).also { this.commitSync() }.iterator().asSequence().toList()
+    this
+        .poll(duration)
+        .also { this.commitSync() }
+        .iterator()
+        .asSequence()
+        .toList()
 
 fun <K, V> Consumer<K, V>.ventPåRecords(
     antall: Int,
