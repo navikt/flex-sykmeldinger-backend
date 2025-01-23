@@ -1,8 +1,10 @@
 package no.nav.helse.flex
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
+import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
@@ -34,7 +36,13 @@ private class PostgreSQLContainer14V2 : PostgreSQLContainer<PostgreSQLContainer1
 @EnableMockOAuth2Server
 @SpringBootTest(
     classes = [Application::class, FakesTestOppsett.TestConfig::class],
-    properties = ["spring.main.allow-bean-definition-overriding=true"],
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+        "spring.data.jdbc.repositories.enabled=false",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
+        // "spring.kafka.listener.auto-startup=false",
+        "spring.flyway.enabled=false",
+    ],
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FakesTestOppsett {
@@ -42,6 +50,12 @@ abstract class FakesTestOppsett {
     class TestConfig {
         @Bean
         fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
+
+        @Bean
+        fun arbeidsforholdRepository(): ArbeidsforholdRepository = ArbeidsforholdRepositoryFake()
+
+        @Bean
+        fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
     }
 
     @Autowired
@@ -74,14 +88,6 @@ abstract class FakesTestOppsett {
             KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.1")).apply {
                 start()
                 System.setProperty("KAFKA_BROKERS", bootstrapServers)
-            }
-
-            PostgreSQLContainer14V2().apply {
-                withCommand("postgres", "-c", "wal_level=logical")
-                start()
-                System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
-                System.setProperty("spring.datasource.username", username)
-                System.setProperty("spring.datasource.password", password)
             }
 
             startMockWebServere()
