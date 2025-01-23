@@ -82,8 +82,8 @@ class VirksomhetHenterService(
         }
 
         fun Iterable<Arbeidsforhold>.filtrerInnenPeriode(periode: Pair<LocalDate, LocalDate>): List<Arbeidsforhold> =
-            this.filter { virksomhet ->
-                (virksomhet.fom to virksomhet.tom).overlapperMed(periode)
+            this.filter { arbeidsforhold ->
+                (arbeidsforhold.fom to arbeidsforhold.tom).overlapperMed(periode)
             }
 
         private fun erGyldigArbeidsforholdType(arbeidsforholdType: ArbeidsforholdType?): Boolean =

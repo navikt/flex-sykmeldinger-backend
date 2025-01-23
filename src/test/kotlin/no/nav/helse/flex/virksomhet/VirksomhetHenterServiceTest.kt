@@ -4,6 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
+import no.nav.helse.flex.virksomhet.VirksomhetHenterService.Companion.filtrerInnenPeriode
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
@@ -311,8 +312,28 @@ class VirksomhetHenterServiceTest {
     @Nested
     inner class ArbeidsforholdFiltrerInnenPeriode {
         @Test
-        fun `todo`() {
-            error("todo")
+        fun `burde returner arbeidsforhold som overlapper med periode`() {
+            val arbeidsforhold =
+                listOf(
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-01"), tom = LocalDate.parse("2020-01-02")),
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-02"), tom = LocalDate.parse("2020-01-03")),
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-03"), tom = LocalDate.parse("2020-01-04")),
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-03"), tom = null),
+                )
+            val periode = LocalDate.parse("2020-01-02") to LocalDate.parse("2020-01-03")
+            arbeidsforhold.filtrerInnenPeriode(periode).size `should be equal to` 4
+        }
+
+        @Test
+        fun `burde filtrere ut arbeidsforhold som ikke overlapper med periode`() {
+            val arbeidsforhold =
+                listOf(
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-01"), tom = LocalDate.parse("2020-01-01")),
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-04"), tom = LocalDate.parse("2020-01-05")),
+                    lagArbeidsforhold(fom = LocalDate.parse("2020-01-05"), tom = null),
+                )
+            val periode = LocalDate.parse("2020-01-02") to LocalDate.parse("2020-01-03")
+            arbeidsforhold.filtrerInnenPeriode(periode).size `should be equal to` 0
         }
     }
 }
