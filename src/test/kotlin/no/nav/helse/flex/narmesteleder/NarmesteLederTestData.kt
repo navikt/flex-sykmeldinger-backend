@@ -1,8 +1,11 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 fun lagNarmesteLeder(
@@ -19,4 +22,19 @@ fun lagNarmesteLeder(
         narmesteLederFnr = "lederFnr",
         aktivFom = aktivFom,
         narmesteLederNavn = "Leder Navn",
+    )
+
+fun lagNarmesteLederLeesah(
+    narmesteLederId: UUID,
+    orgnummer: String = "999999",
+    aktivTom: LocalDate? = null,
+): NarmesteLederLeesah =
+    NarmesteLederLeesah(
+        narmesteLederId = narmesteLederId,
+        fnr = "12345678910",
+        orgnummer = orgnummer,
+        narmesteLederFnr = "01985554321",
+        aktivFom = LocalDate.now(),
+        aktivTom = aktivTom,
+        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
     )

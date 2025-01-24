@@ -4,55 +4,59 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import java.util.*
 
 class NarmesteLederRepositoryFake : NarmesteLederRepository {
-    val lagretNarmesteLeder: MutableList<NarmesteLeder> = mutableListOf()
+    val lagretNarmesteLeder: MutableMap<String, NarmesteLeder> = mutableMapOf()
 
     private fun lagId(): String = UUID.randomUUID().toString()
 
     override fun <S : NarmesteLeder?> save(entity: S & Any): S & Any {
-        val entityWithId = entity.copy(id = lagId())
-        lagretNarmesteLeder.add(entityWithId)
+        val entityWithId =
+            if (entity.id == null) {
+                entity.copy(id = lagId())
+            } else {
+                entity
+            }
+        lagretNarmesteLeder[entityWithId.id!!] = entityWithId
         @Suppress("UNCHECKED_CAST")
         return entityWithId as (S & Any)
     }
 
     override fun <S : NarmesteLeder> saveAll(entities: MutableIterable<S>): MutableIterable<S> {
         entities.forEach {
-            val entityWithId = it.copy(id = lagId())
-            lagretNarmesteLeder.add(entityWithId)
+            save(it)
         }
         return entities
     }
 
     override fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder? =
-        lagretNarmesteLeder.find { it.narmesteLederId == narmesteLederId }
+        lagretNarmesteLeder.values.find { it.narmesteLederId == narmesteLederId }
 
-    override fun findAllByBrukerFnr(fnr: String): List<NarmesteLeder> = lagretNarmesteLeder.filter { it.brukerFnr == fnr }
+    override fun findAllByBrukerFnr(fnr: String): List<NarmesteLeder> = lagretNarmesteLeder.values.filter { it.brukerFnr == fnr }
 
-    override fun findById(id: String): Optional<NarmesteLeder> = Optional.ofNullable(lagretNarmesteLeder.find { it.id == id })
+    override fun findById(id: String): Optional<NarmesteLeder> = Optional.ofNullable(lagretNarmesteLeder.values.find { it.id == id })
 
-    override fun existsById(id: String): Boolean = lagretNarmesteLeder.any { it.id == id }
+    override fun existsById(id: String): Boolean = lagretNarmesteLeder.values.any { it.id == id }
 
-    override fun findAll(): MutableIterable<NarmesteLeder> = lagretNarmesteLeder
+    override fun findAll(): MutableIterable<NarmesteLeder> = lagretNarmesteLeder.values
 
     override fun findAllById(ids: MutableIterable<String>): MutableIterable<NarmesteLeder> =
-        lagretNarmesteLeder.filter { it.id in ids }.toMutableList()
+        lagretNarmesteLeder.values.filter { it.id in ids }.toMutableList()
 
     override fun count(): Long = lagretNarmesteLeder.size.toLong()
 
     override fun deleteById(id: String) {
-        lagretNarmesteLeder.removeIf { it.id == id }
+        lagretNarmesteLeder.remove(id)
     }
 
     override fun delete(entity: NarmesteLeder) {
-        lagretNarmesteLeder.remove(entity)
+        lagretNarmesteLeder.remove(entity.id)
     }
 
     override fun deleteAllById(ids: MutableIterable<String>) {
-        lagretNarmesteLeder.removeIf { it.id in ids }
+        ids.forEach { deleteById(it) }
     }
 
     override fun deleteAll(entities: MutableIterable<NarmesteLeder>) {
-        entities.forEach { lagretNarmesteLeder.remove(it) }
+        entities.forEach { delete(it) }
     }
 
     override fun deleteAll() {
