@@ -1,4 +1,4 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting
+package no.nav.helse.flex.arbeidsforhold
 
 import no.nav.helse.flex.FellesTestOppsett
 import org.amshove.kluent.`should be equal to`

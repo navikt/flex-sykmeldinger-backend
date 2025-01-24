@@ -8,4 +8,6 @@ import java.util.UUID
 @Repository
 interface NarmesteLederRepository : CrudRepository<NarmesteLeder, String> {
     fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder?
+
+    fun findAllByBrukerFnr(fnr: String): List<NarmesteLeder>
 }
