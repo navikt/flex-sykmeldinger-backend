@@ -2,15 +2,12 @@ package no.nav.helse.flex
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.kafka.KafkaTestConfig
-import no.nav.helse.flex.narmesteleder.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
-import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -93,17 +90,5 @@ abstract class FellesTestOppsett {
         kafkaListenerRegistry.listenerContainers.forEach { container ->
             ContainerTestUtils.waitForAssignment(container, 1)
         }
-    }
-
-    fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    NARMESTELEDER_LEESAH_TOPIC,
-                    null,
-                    nl.narmesteLederId.toString(),
-                    nl.serialisertTilString(),
-                ),
-            ).get()
     }
 }
