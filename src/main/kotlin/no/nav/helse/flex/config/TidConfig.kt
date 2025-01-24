@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.function.Supplier
 
 @Configuration
@@ -12,7 +13,6 @@ class TidConfig {
     fun nowFactory(): Supplier<Instant> = Supplier { Instant.now() }
 }
 
-fun Supplier<Instant>.getDagensDatoINorge(): LocalDate {
-    // TODO: Bruk norsk tidssone
-    return LocalDate.ofInstant(this.get(), null)
-}
+val norskTidssone = ZoneId.of("Europe/Oslo")
+
+fun Supplier<Instant>.getDagensDatoINorge(): LocalDate = LocalDate.ofInstant(this.get(), norskTidssone)
