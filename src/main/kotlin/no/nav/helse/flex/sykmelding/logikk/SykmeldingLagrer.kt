@@ -1,9 +1,9 @@
 package no.nav.helse.flex.sykmelding.logikk
 
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -11,7 +11,7 @@ import java.util.function.Supplier
 
 @Component
 class SykmeldingLagrer(
-    private val sykmeldingRepository: SykmeldingRepository,
+    private val sykmeldingRepository: ISykmeldingRepository,
     private val nowFactory: Supplier<Instant>,
 ) {
     val log = logger()

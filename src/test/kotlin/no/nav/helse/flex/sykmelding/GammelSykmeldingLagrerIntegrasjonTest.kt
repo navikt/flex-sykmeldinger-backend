@@ -23,7 +23,7 @@ import java.time.Duration
 
 private val NOOP_ACK = Acknowledgment {}
 
-class SykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
+class GammelSykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
     @Autowired
     lateinit var sykmeldingListener: SykmeldingListener
 
