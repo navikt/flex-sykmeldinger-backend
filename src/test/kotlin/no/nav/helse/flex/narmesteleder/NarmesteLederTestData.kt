@@ -12,6 +12,7 @@ fun lagNarmesteLeder(
     brukerFnr: String = "fnr",
     orgnummer: String = "123456789",
     aktivFom: LocalDate = LocalDate.parse("2022-02-02"),
+    narmesteLederNavn: String = "Leder Navn",
 ): NarmesteLeder =
     NarmesteLeder(
         oppdatert = Instant.parse("2022-02-02T00:00:00.00Z"),
@@ -21,7 +22,7 @@ fun lagNarmesteLeder(
         brukerFnr = brukerFnr,
         narmesteLederFnr = "lederFnr",
         aktivFom = aktivFom,
-        narmesteLederNavn = "Leder Navn",
+        narmesteLederNavn = narmesteLederNavn,
     )
 
 fun lagNarmesteLederLeesah(

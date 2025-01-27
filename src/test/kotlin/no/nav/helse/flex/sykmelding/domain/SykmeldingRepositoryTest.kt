@@ -5,14 +5,10 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class SykmeldingRepositoryTest : FellesTestOppsett() {
-    @Autowired
-    lateinit var sykmeldingRepository: ISykmeldingRepository
-
     @AfterEach
     fun rensDatabase() {
         super.slettDatabase()

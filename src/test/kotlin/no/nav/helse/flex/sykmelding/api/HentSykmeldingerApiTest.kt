@@ -1,13 +1,17 @@
 package no.nav.helse.flex.sykmelding.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.FakesTestOppsett
+import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.jwt
+import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
+import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
-import no.nav.helse.flex.sykmelding.domain.lagPasient
-import no.nav.helse.flex.sykmelding.domain.lagSykmelding
-import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
+import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -15,8 +19,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.LocalDate
 
-class HentSykmeldingerApiTest : FellesTestOppsett() {
+class HentSykmeldingerApiTest : FakesTestOppsett() {
     @AfterEach
     fun ryddOpp() {
         slettDatabase()
@@ -26,7 +31,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
     inner class HentSykmeldingEndepunkt {
         @Test
         fun `burde hente en sykmelding`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -77,7 +82,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke returnere søknad med feil fnr`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -134,7 +139,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
     inner class HentAlleSykmeldingerEndepunkt {
         @Test
         fun `burde hente en sykmelding`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -193,7 +198,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke returnere søknad med feil fnr`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -249,6 +254,226 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
                             }",
                         ).contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+    }
+
+    @Nested
+    inner class HentBrukerInfoEndepunkt {
+        @Test
+        fun `burde hente brukerinfo`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2021-01-01"),
+                                        tom = LocalDate.parse("2021-01-10"),
+                                    ),
+                                ),
+                        ),
+                ),
+            )
+
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "fnr",
+                    fom = LocalDate.parse("2021-01-01"),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    jwt(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
+            brukerinformasjon.arbeidsgivere.size `should be equal to` 1
+        }
+
+        @Test
+        fun `burde ikke hente brukerinfo når perioden ikke overlapper`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2022-01-01"),
+                                        tom = LocalDate.parse("2022-01-10"),
+                                    ),
+                                ),
+                        ),
+                ),
+            )
+
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "fnr",
+                    orgnummer = "orgnummer",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-09"),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    jwt(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
+            brukerinformasjon.arbeidsgivere.size `should be equal to` 0
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() {
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "fnr",
+                    orgnummer = "orgnummer",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-09"),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                jwt(
+                                    fnr = "fnr",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNotFound)
+        }
+
+        @Test
+        fun `burde ikke returnere brukerinfo med feil fnr`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                jwt(
+                                    fnr = "feil_fnr",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isForbidden)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi ikke har token`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi har feil claim`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                jwt(
+                                    fnr = "fnr",
+                                    acrClaim = "feil-claim",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+    }
+
+    @Nested
+    inner class ExtensionFuncs {
+        @Test
+        fun `konverterer virksomhet dto riktig`() {
+            val virksomhet =
+                Virksomhet(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-02"),
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+            val virksomhetDTO = virksomhet.konverterTilDto()
+            virksomhetDTO `should be equal to`
+                VirksomhetDTO(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+        }
+
+        @Test
+        fun `burde konvertere narmeste leder dto riktig`() {
+            val narmesteLeder =
+                lagNarmesteLeder(
+                    narmesteLederNavn = "Navn",
+                    orgnummer = "orgnr",
+                )
+            val narmesteLederDTO = narmesteLeder.konverterTilDto()
+            narmesteLederDTO `should be equal to`
+                NarmesteLederDTO(
+                    navn = "Navn",
+                    orgnummer = "orgnr",
+                )
         }
     }
 }
