@@ -157,23 +157,23 @@ class HentSykmeldingerApi(
     ): ResponseEntity<Any> {
         TODO("Ikke implementert")
     }
-
-    private fun Virksomhet.konverterTilDto(): VirksomhetDTO =
-        VirksomhetDTO(
-            orgnummer = this.orgnummer,
-            juridiskOrgnummer = this.juridiskOrgnummer,
-            navn = this.navn,
-            aktivtArbeidsforhold = this.aktivtArbeidsforhold,
-            naermesteLeder = this.naermesteLeder?.konverterTilDto(),
-        )
-
-    private fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
-        if (this.narmesteLederNavn == null) {
-            null
-        } else {
-            NarmesteLederDTO(
-                navn = this.narmesteLederNavn,
-                orgnummer = this.orgnummer,
-            )
-        }
 }
+
+internal fun Virksomhet.konverterTilDto(): VirksomhetDTO =
+    VirksomhetDTO(
+        orgnummer = this.orgnummer,
+        juridiskOrgnummer = this.juridiskOrgnummer,
+        navn = this.navn,
+        aktivtArbeidsforhold = this.aktivtArbeidsforhold,
+        naermesteLeder = this.naermesteLeder?.konverterTilDto(),
+    )
+
+internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
+    if (this.narmesteLederNavn == null) {
+        null
+    } else {
+        NarmesteLederDTO(
+            navn = this.narmesteLederNavn,
+            orgnummer = this.orgnummer,
+        )
+    }

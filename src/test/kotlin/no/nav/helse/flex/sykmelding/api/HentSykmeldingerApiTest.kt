@@ -4,10 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.jwt
+import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
+import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
+import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -429,6 +433,47 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             }",
                         ).contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+    }
+
+    @Nested
+    inner class ExtensionFuncs {
+        @Test
+        fun `konverterer virksomhet dto riktig`() {
+            val virksomhet =
+                Virksomhet(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-02"),
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+            val virksomhetDTO = virksomhet.konverterTilDto()
+            virksomhetDTO `should be equal to`
+                VirksomhetDTO(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+        }
+
+        @Test
+        fun `burde konvertere narmeste leder dto riktig`() {
+            val narmesteLeder =
+                lagNarmesteLeder(
+                    narmesteLederNavn = "Navn",
+                    orgnummer = "orgnr",
+                )
+            val narmesteLederDTO = narmesteLeder.konverterTilDto()
+            narmesteLederDTO `should be equal to`
+                NarmesteLederDTO(
+                    navn = "Navn",
+                    orgnummer = "orgnr",
+                )
         }
     }
 }
