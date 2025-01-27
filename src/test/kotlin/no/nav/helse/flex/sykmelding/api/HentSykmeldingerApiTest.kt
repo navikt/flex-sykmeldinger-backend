@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmelding.api
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
-import no.nav.helse.flex.jwt
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
@@ -11,11 +10,14 @@ import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
 import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.tokenxToken
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -26,6 +28,9 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
     fun ryddOpp() {
         slettDatabase()
     }
+
+    @Autowired
+    lateinit var oauth2Server: MockOAuth2Server
 
     @Nested
     inner class HentSykmeldingEndepunkt {
@@ -49,7 +54,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "fnr",
                                     )
                                 }",
@@ -72,7 +77,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "fnr",
                                 )
                             }",
@@ -98,7 +103,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "feil_fnr",
                                 )
                             }",
@@ -125,7 +130,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "fnr",
                                     acrClaim = "feil-claim",
                                 )
@@ -157,7 +162,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "fnr",
                                     )
                                 }",
@@ -183,7 +188,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "fnr",
                                     )
                                 }",
@@ -215,7 +220,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "feil_fnr",
                                     )
                                 }",
@@ -247,7 +252,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "fnr",
                                     acrClaim = "feil-claim",
                                 )
@@ -293,7 +298,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "fnr",
                                     )
                                 }",
@@ -342,7 +347,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                             .header(
                                 "Authorization",
                                 "Bearer ${
-                                    jwt(
+                                    oauth2Server.tokenxToken(
                                         fnr = "fnr",
                                     )
                                 }",
@@ -373,7 +378,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "fnr",
                                 )
                             }",
@@ -399,7 +404,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "feil_fnr",
                                 )
                             }",
@@ -426,7 +431,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                         .header(
                             "Authorization",
                             "Bearer ${
-                                jwt(
+                                oauth2Server.tokenxToken(
                                     fnr = "fnr",
                                     acrClaim = "feil-claim",
                                 )

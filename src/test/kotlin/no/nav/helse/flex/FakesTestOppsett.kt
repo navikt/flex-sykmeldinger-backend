@@ -6,7 +6,6 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -52,9 +51,6 @@ abstract class FakesTestOppsett {
 
     @Autowired
     lateinit var mockMvc: MockMvc
-
-    @Autowired
-    lateinit var server: MockOAuth2Server
 
     @Autowired
     lateinit var narmesteLederRepository: NarmesteLederRepository
