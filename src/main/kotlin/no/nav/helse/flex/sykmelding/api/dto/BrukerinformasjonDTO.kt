@@ -15,5 +15,4 @@ data class VirksomhetDTO(
 data class NarmesteLederDTO(
     val navn: String,
     val orgnummer: String,
-    val organisasjonsnavn: String,
 )

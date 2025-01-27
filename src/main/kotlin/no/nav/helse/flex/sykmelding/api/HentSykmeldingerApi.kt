@@ -2,11 +2,17 @@ package no.nav.helse.flex.sykmelding.api
 
 import SykmeldingDtoKonverterer
 import no.nav.helse.flex.logger
+import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
+import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
+import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.tokenx.TOKENX
 import no.nav.helse.flex.tokenx.TokenxValidering
+import no.nav.helse.flex.virksomhet.VirksomhetHenterService
+import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,6 +24,7 @@ class HentSykmeldingerApi(
     private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
     private val sykmeldingRepository: ISykmeldingRepository,
+    private val virksomhetHenterService: VirksomhetHenterService,
 ) {
     private val sykmeldingDtoKonverterer = SykmeldingDtoKonverterer()
     private val logger = logger()
@@ -82,7 +89,7 @@ class HentSykmeldingerApi(
         return ResponseEntity.ok(konvertertSykmelding)
     }
 
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/brukerinformasjon")
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/brukerinformasjon")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -90,9 +97,25 @@ class HentSykmeldingerApi(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getBrukerinformasjon(
-        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
-    ): ResponseEntity<Any> {
-        TODO("Ikke implementert")
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<BrukerinformasjonDTO> {
+        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val sykmlding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmlding == null) {
+            return ResponseEntity.notFound().build()
+        }
+        if (sykmlding.pasientFnr != fnr) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val sykmeldingPeriode = sykmlding.fom to sykmlding.tom
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(fnr, sykmeldingPeriode)
+
+        return ResponseEntity.ok(
+            BrukerinformasjonDTO(
+                arbeidsgivere = virksomheter.map { it.konverterTilDto() },
+            ),
+        )
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/er-utenfor-ventetid")
@@ -135,4 +158,23 @@ class HentSykmeldingerApi(
     ): ResponseEntity<Any> {
         TODO("Ikke implementert")
     }
+
+    private fun Virksomhet.konverterTilDto(): VirksomhetDTO =
+        VirksomhetDTO(
+            orgnummer = this.orgnummer,
+            juridiskOrgnummer = this.juridiskOrgnummer,
+            navn = this.navn,
+            aktivtArbeidsforhold = this.aktivtArbeidsforhold,
+            naermesteLeder = this.naermesteLeder?.konverterTilDto(),
+        )
+
+    private fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
+        if (this.narmesteLederNavn == null) {
+            null
+        } else {
+            NarmesteLederDTO(
+                navn = this.narmesteLederNavn,
+                orgnummer = this.orgnummer,
+            )
+        }
 }
