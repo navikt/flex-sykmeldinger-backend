@@ -100,10 +100,9 @@ class HentSykmeldingerApi(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<BrukerinformasjonDTO> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
-        val sykmlding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmlding == null) {
-            return ResponseEntity.notFound().build()
-        }
+        val sykmlding =
+            sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+                ?: return ResponseEntity.notFound().build()
         if (sykmlding.pasientFnr != fnr) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }

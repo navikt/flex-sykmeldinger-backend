@@ -22,16 +22,20 @@ fun lagSykmelding(sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnla
 fun lagSykmeldingGrunnlag(
     id: String = "1",
     pasient: Pasient = lagPasient(),
+    aktiviteter: List<Aktivitet> =
+        listOf(
+            lagAktivitetIkkeMulig(
+                LocalDate.parse("2021-01-01"),
+                LocalDate.parse("2021-01-10"),
+            ),
+        ),
 ): SykmeldingGrunnlag =
     SykmeldingGrunnlag(
         id = id,
         metadata = lagSykmeldingMetadata(),
         pasient = pasient,
         medisinskVurdering = lagMedisinskVurdering(),
-        aktivitet =
-            listOf(
-                lagAktivitetIkkeMulig(),
-            ),
+        aktivitet = aktiviteter,
         behandler = lagBehandler(),
         arbeidsgiver =
             EnArbeidsgiver(
@@ -87,7 +91,7 @@ fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
         metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
         medisinskVurdering = lagMedisinskVurdering(),
-        aktivitet = listOf(lagAktivitetIkkeMulig()),
+        aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
         utenlandskInfo =
             UtenlandskInfo(
                 land = "Sverige",
@@ -176,17 +180,19 @@ fun lagAktivitetAvventende(): Avventende =
         tom = LocalDate.now().plusDays(1),
     )
 
-fun lagAktivitetIkkeMulig() =
-    AktivitetIkkeMulig(
-        medisinskArsak =
-            MedisinskArsak(
-                arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
-                beskrivelse = "Pasient er syk",
-            ),
-        arbeidsrelatertArsak = null,
-        fom = LocalDate.now().minusDays(1),
-        tom = LocalDate.now().plusDays(1),
-    )
+fun lagAktivitetIkkeMulig(
+    fom: LocalDate = LocalDate.now().minusDays(1),
+    tom: LocalDate = LocalDate.now().plusDays(1),
+) = AktivitetIkkeMulig(
+    medisinskArsak =
+        MedisinskArsak(
+            arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
+            beskrivelse = "Pasient er syk",
+        ),
+    arbeidsrelatertArsak = null,
+    fom = fom,
+    tom = tom,
+)
 
 fun lagBehandler() =
     Behandler(
