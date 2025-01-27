@@ -27,7 +27,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
     inner class HentSykmeldingEndepunkt {
         @Test
         fun `burde hente en sykmelding`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -78,7 +78,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke returnere søknad med feil fnr`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -135,7 +135,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
     inner class HentAlleSykmeldingerEndepunkt {
         @Test
         fun `burde hente en sykmelding`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -194,7 +194,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke returnere søknad med feil fnr`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -257,7 +257,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
     inner class HentBrukerInfoEndepunkt {
         @Test
         fun `burde hente brukerinfo`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -304,7 +304,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke hente brukerinfo når perioden ikke overlapper`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
@@ -379,7 +379,7 @@ class HentSykmeldingerApiTest : FellesTestOppsett() {
 
         @Test
         fun `burde ikke returnere brukerinfo med feil fnr`() {
-            sykemeldingRepository.save(
+            sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(

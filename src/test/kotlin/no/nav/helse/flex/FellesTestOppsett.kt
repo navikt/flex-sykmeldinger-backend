@@ -49,7 +49,7 @@ abstract class FellesTestOppsett {
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     @Autowired
-    lateinit var sykemeldingRepository: SykmeldingRepository
+    lateinit var sykmeldingRepository: SykmeldingRepository
 
     @Autowired
     lateinit var kafkaListenerRegistry: KafkaListenerEndpointRegistry
@@ -82,7 +82,7 @@ abstract class FellesTestOppsett {
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
-        sykemeldingRepository.deleteAll()
+        sykmeldingRepository.deleteAll()
     }
 
     fun ventPaConsumers() {

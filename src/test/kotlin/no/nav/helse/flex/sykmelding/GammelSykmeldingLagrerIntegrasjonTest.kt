@@ -54,10 +54,10 @@ class GammelSykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
             ).get()
 
         await().atMost(Duration.ofSeconds(2)).until {
-            sykemeldingRepository.findBySykmeldingId("1") != null
+            sykmeldingRepository.findBySykmeldingId("1") != null
         }
 
-        sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
     }
 
     @Test
@@ -81,7 +81,7 @@ class GammelSykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
             )
         }
 
-        sykemeldingRepository.findAll().size `should be equal to` 1
+        sykmeldingRepository.findAll().size `should be equal to` 1
     }
 
     @Test
@@ -103,7 +103,7 @@ class GammelSykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
             NOOP_ACK,
         )
 
-        val sykmelding = sykemeldingRepository.findBySykmeldingId("1")
+        val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding.shouldNotBeNull()
         sykmelding.statuser.size `should be equal to` 1
         val status = sykmelding.statuser[0]

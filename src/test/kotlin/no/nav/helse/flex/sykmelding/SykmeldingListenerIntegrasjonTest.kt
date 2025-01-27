@@ -43,9 +43,9 @@ class SykmeldingListenerIntegrasjonTest : FellesTestOppsett() {
             ).get()
 
         await().atMost(Duration.ofSeconds(2)).until {
-            sykemeldingRepository.findBySykmeldingId("1") != null
+            sykmeldingRepository.findBySykmeldingId("1") != null
         }
 
-        sykemeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
     }
 }
