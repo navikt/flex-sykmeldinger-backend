@@ -4,21 +4,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import java.util.*
 
-fun FellesTestOppsett.jwt(
-    fnr: String,
-    acrClaim: String = "idporten-loa-high",
-) = server.tokenxToken(fnr = fnr, acrClaim = acrClaim)
-
-fun FakesTestOppsett.jwt(
-    fnr: String,
-    acrClaim: String = "idporten-loa-high",
-) = server.tokenxToken(fnr = fnr, acrClaim = acrClaim)
-
-fun MockOAuth2Server.jwt(
-    fnr: String,
-    acrClaim: String = "idporten-loa-high",
-) = tokenxToken(fnr = fnr, acrClaim = acrClaim)
-
 fun MockOAuth2Server.tokenxToken(
     fnr: String,
     acrClaim: String = "idporten-loa-high",
