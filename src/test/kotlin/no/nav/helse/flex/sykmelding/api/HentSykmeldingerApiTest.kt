@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.jwt
 import no.nav.helse.flex.objectMapper
@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.time.LocalDate
 
-class HentSykmeldingerApiTest : FellesTestOppsett() {
+class HentSykmeldingerApiTest : FakesTestOppsett() {
     @AfterEach
     fun ryddOpp() {
         slettDatabase()
