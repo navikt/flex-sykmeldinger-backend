@@ -22,12 +22,20 @@ class PdlClientTest : FellesTestOppsett() {
         val request = PdlMockDispatcher.requester.last()
         request.headers["Behandlingsnummer"] `should be equal to` "B128"
         request.headers["Tema"] `should be equal to` "SYK"
-        request.body `should be equal to`
-            "{\"query\":\"\\nquery(\$ident: ID!)" +
-            "{\\n  hentPerson(ident: \$ident) " +
-            "{\\n  \\tnavn(historikk: false) " +
-            "{\\n  \\t  fornavn\\n  \\t  mellomnavn\\n  \\t  etternavn\\n    }" +
-            "\\n  }\\n}\\n\",\"variables\":{\"ident\":\"12345678910\"}}"
+        val parsedBody = GraphQlRequest.fraJson(request.body)
+        parsedBody.query shouldBeGraphQlQueryEqualTo
+            """
+            query(${'$'}ident: ID!) {
+                hentPerson(ident: ${'$'}ident) {
+                    navn(historikk: false) {
+                        fornavn
+                        mellomnavn
+                        etternavn
+                    }
+                }
+            }
+            """
+        parsedBody.variables `should be equal to` mapOf("ident" to "12345678910")
 
         request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
     }
@@ -44,3 +52,14 @@ class PdlClientTest : FellesTestOppsett() {
         responseData `should be equal to` "Åge Roger Åæøå"
     }
 }
+
+private infix fun String.shouldBeGraphQlQueryEqualTo(expected: String) {
+    this.standariserGraphQlQuery() `should be equal to` expected.standariserGraphQlQuery()
+}
+
+private fun String.standariserGraphQlQuery() =
+    this
+        .split("\n")
+        .filter { it.isNotBlank() }
+        .map { it.trim() }
+        .joinToString("\n")
