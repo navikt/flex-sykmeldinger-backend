@@ -41,6 +41,7 @@ class PdlClientTest : FellesTestOppsett() {
 
             recordedRequest.shouldNotBeNull()
             recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
             val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
@@ -109,7 +110,7 @@ class PdlClientTest : FellesTestOppsett() {
             pdlClient.hentFormattertNavn("fnr")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B128"
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
             recordedRequest.headers["Tema"] `should be equal to` "SYK"
             val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
