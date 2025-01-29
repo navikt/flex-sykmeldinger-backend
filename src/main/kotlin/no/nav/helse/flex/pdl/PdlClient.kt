@@ -6,10 +6,12 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.util.Collections
 
-private const val TEMA = "Tema"
+private const val HEADER_TEMA = "Tema"
 private const val TEMA_SYK = "SYK"
-private const val BEHANDLINGSNUMMER_KEY = "Behandlingsnummer"
-private const val BEHANDLINGSNUMMER_VALUE = "B128"
+private const val HEADER_BEHANDLINGSNUMMER = "Behandlingsnummer"
+
+// Se behandlinger: https://behandlingskatalog.ansatt.nav.no/process/purpose/SYKEPENGER
+private const val BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING = "B229"
 
 @Component
 class PdlClient(
@@ -40,8 +42,8 @@ class PdlClient(
                     ),
                 headers =
                     mapOf(
-                        // TODO: Burde vi ha med BEHANDLINGSNUMMER header?
-                        TEMA to TEMA_SYK,
+                        HEADER_TEMA to TEMA_SYK,
+                        HEADER_BEHANDLINGSNUMMER to BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING,
                     ),
             )
 
@@ -75,8 +77,8 @@ class PdlClient(
                     ),
                 headers =
                     mapOf(
-                        TEMA to TEMA_SYK,
-                        BEHANDLINGSNUMMER_KEY to BEHANDLINGSNUMMER_VALUE,
+                        HEADER_TEMA to TEMA_SYK,
+                        HEADER_BEHANDLINGSNUMMER to BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING,
                     ),
             )
 
