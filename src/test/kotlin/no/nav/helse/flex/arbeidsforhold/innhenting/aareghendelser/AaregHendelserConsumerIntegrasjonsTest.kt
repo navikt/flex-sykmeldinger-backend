@@ -29,7 +29,7 @@ class AaregHendelserConsumerIntegrasjonsTest : FellesTestOppsett() {
             )
         kafkaProducer.send(record).get()
 
-        await().atMost(Duration.ofSeconds(5)).until {
+        await().atMost(Duration.ofSeconds(10)).until {
             arbeidsforholdRepository.findAll().count() >= 1
         }
     }

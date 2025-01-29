@@ -17,6 +17,12 @@ val notFoundDispatcher = simpleDispatcher { MockResponse().setResponseCode(404) 
 
 @TestConfiguration
 class MockWebServereConfig {
+    @Bean
+    fun pdlMockWebServer() = pdlMockWebServer
+
+    @Bean
+    fun aaregMockWebServer() = aaregMockWebServer
+
     companion object {
         val logger = logger()
 
@@ -33,7 +39,7 @@ class MockWebServereConfig {
         val aaregMockWebServer =
             MockWebServer().apply {
                 System.setProperty("AAREG_URL", "http://localhost:$port")
-                dispatcher = AaregMockDispatcher
+                dispatcher = notFoundDispatcher
             }
 
         val eregMockWebServer =
@@ -42,7 +48,4 @@ class MockWebServereConfig {
                 dispatcher = EregMockDispatcher
             }
     }
-
-    @Bean
-    fun pdlMockWebServer() = pdlMockWebServer
 }
