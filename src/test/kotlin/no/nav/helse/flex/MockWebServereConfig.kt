@@ -8,22 +8,26 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import kotlin.apply
 
-val noopDispatcher =
+fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatcher =
     object : Dispatcher() {
-        override fun dispatch(request: RecordedRequest): MockResponse = MockResponse().setResponseCode(404)
+        override fun dispatch(request: RecordedRequest): MockResponse = dispatcherFunc(request)
     }
+
+val notFoundDispatcher = simpleDispatcher { MockResponse().setResponseCode(404) }
 
 @TestConfiguration
 class MockWebServereConfig {
     companion object {
+        val logger = logger()
+
         init {
-            println("Starting mock webservers")
+            logger.info("[TEST] Starter mock webservere")
         }
 
         val pdlMockWebServer =
             MockWebServer().apply {
                 System.setProperty("PDL_BASE_URL", "http://localhost:$port")
-                dispatcher = noopDispatcher
+                dispatcher = notFoundDispatcher
             }
 
         val aaregMockWebServer =

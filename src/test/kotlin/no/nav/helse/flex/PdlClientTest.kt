@@ -1,43 +1,51 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.mockdispatcher.PdlMockDispatcher
 import no.nav.helse.flex.pdl.*
+import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldNotBeNull
 import org.amshove.kluent.shouldStartWith
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.MediaType
 
 class PdlClientTest : FellesTestOppsett() {
     @Autowired
-    private lateinit var pdlClient: PdlClient
-
-    final val fnr = "12345678910"
+    lateinit var pdlClient: PdlClient
 
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
 
-    private lateinit var dispatcher: PdlMockDispatcher
-
-    @BeforeAll
-    fun setUp() {
-        dispatcher = PdlMockDispatcher
-        pdlMockWebServer.dispatcher = dispatcher
+    @AfterEach
+    fun cleanUp() {
+        pdlMockWebServer.dispatcher = notFoundDispatcher
     }
 
-    @Test
-    fun `Vi tester happycase`() {
-        val responseData = pdlClient.hentFormattertNavn(fnr)
+    @Nested
+    inner class HentIdenterMedHistorikk {
+        @Test
+        fun `burde produsere riktig request`() {
+            var recordedRequest: RecordedRequest? = null
 
-        responseData `should be equal to` "Ole Gunnar"
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher { request ->
+                    recordedRequest = request
+                    lagGraphQlResponse(lagGetPersonResponseData())
+                }
 
-        val request = dispatcher.requester.last()
-        request.headers["Behandlingsnummer"] `should be equal to` "B128"
-        request.headers["Tema"] `should be equal to` "SYK"
-        val parsedBody = GraphQlRequest.fraJson(request.body)
-        parsedBody.query shouldBeGraphQlQueryEqualTo
-            """
+            pdlClient.hentFormattertNavn("fnr")
+
+            recordedRequest.shouldNotBeNull()
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B128"
+            recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
+            parsedBody.query shouldBeGraphQlQueryEqualTo
+                """
             query(${'$'}ident: ID!) {
                 hentPerson(ident: ${'$'}ident) {
                     navn(historikk: false) {
@@ -48,22 +56,133 @@ class PdlClientTest : FellesTestOppsett() {
                 }
             }
             """
-        parsedBody.variables `should be equal to` mapOf("ident" to "12345678910")
+            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
 
-        request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+        }
+
+        @Test
+        fun `burde svare med riktig navn`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(
+                        lagGetPersonResponseData(
+                            fornavn = "Navn",
+                            mellomnavn = "Mellom",
+                            etternavn = "Navnesen",
+                        ),
+                    )
+                }
+
+            val responseData = pdlClient.hentFormattertNavn("fnr")
+            responseData `should be equal to` "Navn Mellom Navnesen"
+        }
     }
 
-    @Test
-    fun `Tor-Henry blir riktig kapitalisert`() {
-        val responseData = pdlClient.hentFormattertNavn("00888888821")
-        responseData `should be equal to` "Tor-Henry Roarsen"
-    }
+    @Nested
+    inner class HentFormattertNavn {
+        @Test
+        fun `burde produsere riktig request`() {
+            var recordedRequest: RecordedRequest? = null
 
-    @Test
-    fun `æøå blir riktig`() {
-        val responseData = pdlClient.hentFormattertNavn("00333888821")
-        responseData `should be equal to` "Åge Roger Åæøå"
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher { request ->
+                    recordedRequest = request
+                    lagGraphQlResponse(lagGetPersonResponseData())
+                }
+
+            pdlClient.hentFormattertNavn("fnr")
+
+            recordedRequest.shouldNotBeNull()
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B128"
+            recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
+            parsedBody.query shouldBeGraphQlQueryEqualTo
+                """
+            query(${'$'}ident: ID!) {
+                hentPerson(ident: ${'$'}ident) {
+                    navn(historikk: false) {
+                        fornavn
+                        mellomnavn
+                        etternavn
+                    }
+                }
+            }
+            """
+            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
+
+            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+        }
+
+        @Test
+        fun `burde svare med riktig navn`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(
+                        lagGetPersonResponseData(
+                            fornavn = "Navn",
+                            mellomnavn = "Mellom",
+                            etternavn = "Navnesen",
+                        ),
+                    )
+                }
+
+            val responseData = pdlClient.hentFormattertNavn("fnr")
+            responseData `should be equal to` "Navn Mellom Navnesen"
+        }
+
+        @Test
+        fun `burde handtere kapitalisering riktig`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Tor-Henry", etternavn = "Roarsen"))
+                }
+
+            val responseData = pdlClient.hentFormattertNavn("00888888821")
+            responseData `should be equal to` "Tor-Henry Roarsen"
+        }
+
+        @Test
+        fun `burde handtere æøå riktig`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Åge Roger", etternavn = "Åæøå"))
+                }
+
+            val responseData = pdlClient.hentFormattertNavn("00333888821")
+            responseData `should be equal to` "Åge Roger Åæøå"
+        }
     }
+}
+
+fun lagGetPersonResponseData(
+    fornavn: String = "Ole",
+    mellomnavn: String? = null,
+    etternavn: String = "Gunnar",
+): GetPersonResponseData =
+    GetPersonResponseData(
+        hentPerson =
+            HentPerson(
+                navn =
+                    listOf(
+                        Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn),
+                    ),
+            ),
+    )
+
+fun <T : Any> lagGraphQlResponse(
+    data: T,
+    errors: List<ResponseError> = emptyList(),
+): MockResponse {
+    val response: GraphQlResponse<T> =
+        GraphQlResponse(
+            errors = errors,
+            data = data,
+        )
+
+    return MockResponse()
+        .setBody(response.tilJson())
+        .setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 }
 
 private infix fun String.shouldBeGraphQlQueryEqualTo(expected: String) {
