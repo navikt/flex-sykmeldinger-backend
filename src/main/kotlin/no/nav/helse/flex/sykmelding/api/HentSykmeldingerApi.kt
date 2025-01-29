@@ -3,21 +3,26 @@ package no.nav.helse.flex.sykmelding.api
 import SykmeldingDtoKonverterer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
 import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
 import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.domain.StatusEvent
+import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.tokenx.TOKENX
 import no.nav.helse.flex.tokenx.TokenxValidering
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.postgresql.util.PGobject
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import java.time.Instant
 
 @Controller
 class HentSykmeldingerApi(
@@ -130,7 +135,7 @@ class HentSykmeldingerApi(
         TODO("Ikke implementert")
     }
 
-    @PostMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/send")
+    @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -138,10 +143,38 @@ class HentSykmeldingerApi(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun sendSykmelding(
-        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
+        @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendSykmeldingValues: Any,
-    ): ResponseEntity<Any> {
-        TODO("Ikke implementert")
+    ): ResponseEntity<SykmeldingDTO> {
+        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            logger.warn("Fant ikke sykmeldingen")
+            return ResponseEntity.notFound().build()
+        }
+        if (sykmelding.pasientFnr != fnr) {
+            logger.warn("Fnr på sykmeldingen er forskjellig fra token")
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+
+        val besvartSykmelding =
+            sykmelding.leggTilStatus(
+                SykmeldingStatus(
+                    // TODO: Finn ut forskjell på SENDT og BEKREFTET
+                    status = StatusEvent.SENDT,
+                    opprettet = Instant.now(),
+                    sporsmalSvar =
+                        PGobject().apply {
+                            type = "json"
+                            value = sendSykmeldingValues.serialisertTilString()
+                        },
+                ),
+            )
+
+        sykmeldingRepository.save(besvartSykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+
+        return ResponseEntity.ok(konvertertSykmelding)
     }
 
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/change-status")
