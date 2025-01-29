@@ -27,7 +27,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @EnableMockOAuth2Server
-@SpringBootTest(classes = [Application::class, KafkaTestConfig::class])
+@SpringBootTest(classes = [Application::class, KafkaTestConfig::class, MockWebServereConfig::class])
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FellesTestOppsett {
     @Autowired
@@ -69,8 +69,6 @@ abstract class FellesTestOppsett {
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
             }
-
-            startMockWebServere()
         }
     }
 

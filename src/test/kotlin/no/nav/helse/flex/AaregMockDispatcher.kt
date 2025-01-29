@@ -5,11 +5,10 @@ import okhttp3.mockwebserver.QueueDispatcher
 import okhttp3.mockwebserver.RecordedRequest
 
 object AaregMockDispatcher : QueueDispatcher() {
-    override fun dispatch(request: RecordedRequest): MockResponse {
-        return MockResponse()
+    override fun dispatch(request: RecordedRequest): MockResponse =
+        MockResponse()
             .addHeader("Content-Type", "application/json")
             .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-    }
 }
 
 private val EKSEMPEL_RESPONSE_FRA_AAREG =
