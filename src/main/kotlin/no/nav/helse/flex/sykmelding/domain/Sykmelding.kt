@@ -41,8 +41,15 @@ data class Sykmelding(
 
 data class SykmeldingStatus(
     internal val databaseId: String? = null,
-    val status: String,
+    val status: StatusEvent,
     val opprettet: Instant,
-    // TODO: Change type
     val sporsmalSvar: PGobject? = null,
 )
+
+enum class StatusEvent {
+    APEN,
+    AVBRUTT,
+    BEKREFTET,
+    SENDT,
+    UTGATT,
+}

@@ -51,7 +51,7 @@ class SykmeldingDtoKonvertererTest {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -175,7 +175,7 @@ class SykmeldingDtoKonvertererTest {
     fun `burde konvertere status NY`() {
         val status =
             SykmeldingStatus(
-                status = "NY",
+                status = StatusEvent.APEN,
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 sporsmalSvar =
                     PGobject().apply {
@@ -186,7 +186,7 @@ class SykmeldingDtoKonvertererTest {
 
         val forventetStatus =
             SykmeldingStatusDTO(
-                statusEvent = "NY",
+                statusEvent = "APEN",
                 timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
                 arbeidsgiver = null,
                 sporsmalOgSvarListe = emptyList(),

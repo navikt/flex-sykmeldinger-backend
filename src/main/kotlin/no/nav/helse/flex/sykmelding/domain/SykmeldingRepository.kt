@@ -150,7 +150,7 @@ data class SykmeldingStatusDbRecord(
     fun mapTilStatus(): SykmeldingStatus =
         SykmeldingStatus(
             databaseId = this.id,
-            status = this.status,
+            status = enumValueOf(this.status),
             sporsmalSvar =
                 this.sporsmal?.value?.let {
                     objectMapper.readValue(it)
@@ -167,7 +167,7 @@ data class SykmeldingStatusDbRecord(
                 SykmeldingStatusDbRecord(
                     id = status.databaseId,
                     sykmeldingUuid = sykmeldingId,
-                    status = status.status,
+                    status = status.status.name,
                     tidligereArbeidsgiver = null,
                     sporsmal =
                         status.sporsmalSvar?.let { sp ->
