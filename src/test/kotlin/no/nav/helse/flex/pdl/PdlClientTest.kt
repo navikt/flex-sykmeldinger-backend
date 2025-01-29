@@ -1,7 +1,8 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.pdl
 
-import no.nav.helse.flex.pdl.*
-import okhttp3.mockwebserver.MockResponse
+import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
@@ -11,8 +12,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
-import org.springframework.http.MediaType
 
 class PdlClientTest : FellesTestOppsett() {
     @Autowired
@@ -65,7 +64,11 @@ class PdlClientTest : FellesTestOppsett() {
                 simpleDispatcher {
                     lagGraphQlResponse(
                         lagHentIdenterResponseData(
-                            identer = listOf(PdlIdent(gruppe = "g1", ident = "i1"), PdlIdent(gruppe = "g2", ident = "i2")),
+                            identer =
+                                listOf(
+                                    PdlIdent(gruppe = "g1", ident = "i1"),
+                                    PdlIdent(gruppe = "g2", ident = "i2"),
+                                ),
                         ),
                     )
                 }
@@ -165,44 +168,6 @@ class PdlClientTest : FellesTestOppsett() {
             responseData `should be equal to` "Åge Roger Åæøå"
         }
     }
-}
-
-fun lagHentIdenterResponseData(identer: Iterable<PdlIdent> = emptyList()): HentIdenterResponseData =
-    HentIdenterResponseData(
-        hentIdenter =
-            HentIdenter(
-                identer = identer.toList(),
-            ),
-    )
-
-fun lagGetPersonResponseData(
-    fornavn: String = "Ole",
-    mellomnavn: String? = null,
-    etternavn: String = "Gunnar",
-): GetPersonResponseData =
-    GetPersonResponseData(
-        hentPerson =
-            HentPerson(
-                navn =
-                    listOf(
-                        Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn),
-                    ),
-            ),
-    )
-
-fun <T : Any> lagGraphQlResponse(
-    data: T,
-    errors: List<ResponseError> = emptyList(),
-): MockResponse {
-    val response: GraphQlResponse<T> =
-        GraphQlResponse(
-            errors = errors,
-            data = data,
-        )
-
-    return MockResponse()
-        .setBody(response.tilJson())
-        .setHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 }
 
 private infix fun String.shouldBeGraphQlQueryEqualTo(expected: String) {

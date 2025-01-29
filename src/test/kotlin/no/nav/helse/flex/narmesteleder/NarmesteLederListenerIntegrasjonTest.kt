@@ -1,10 +1,10 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.lagGetPersonResponseData
-import no.nav.helse.flex.lagGraphQlResponse
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.pdl.lagGraphQlResponse
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
