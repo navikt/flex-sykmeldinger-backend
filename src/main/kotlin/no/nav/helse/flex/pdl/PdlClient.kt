@@ -27,7 +27,7 @@ class PdlClient(
                     GraphQlRequest(
                         query =
                             """
-                            query(${"$"}ident: ID!){
+                            query(${"$"}ident: ID!) {
                               hentIdenter(ident: ${"$"}ident, historikk: true) {
                                 identer {
                                   ident,
@@ -40,6 +40,7 @@ class PdlClient(
                     ),
                 headers =
                     mapOf(
+                        // TODO: Burde vi ha med BEHANDLINGSNUMMER header?
                         TEMA to TEMA_SYK,
                     ),
             )

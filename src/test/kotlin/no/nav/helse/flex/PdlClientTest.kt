@@ -35,47 +35,59 @@ class PdlClientTest : FellesTestOppsett() {
             pdlMockWebServer.dispatcher =
                 simpleDispatcher { request ->
                     recordedRequest = request
-                    lagGraphQlResponse(lagGetPersonResponseData())
+                    lagGraphQlResponse(lagHentIdenterResponseData())
                 }
 
-            pdlClient.hentFormattertNavn("fnr")
+            pdlClient.hentIdenterMedHistorikk(ident = "ident")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B128"
             recordedRequest.headers["Tema"] `should be equal to` "SYK"
             val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
-            query(${'$'}ident: ID!) {
-                hentPerson(ident: ${'$'}ident) {
-                    navn(historikk: false) {
-                        fornavn
-                        mellomnavn
-                        etternavn
+                query(${"$"}ident: ID!) {
+                    hentIdenter(ident: ${"$"}ident, historikk: true) {
+                        identer {
+                            ident,
+                            gruppe
+                        }
                     }
                 }
-            }
-            """
-            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
+                """
+            parsedBody.variables `should be equal to` mapOf("ident" to "ident")
 
             recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
-        fun `burde svare med riktig navn`() {
+        fun `burde svare med riktig identer`() {
             pdlMockWebServer.dispatcher =
                 simpleDispatcher {
                     lagGraphQlResponse(
-                        lagGetPersonResponseData(
-                            fornavn = "Navn",
-                            mellomnavn = "Mellom",
-                            etternavn = "Navnesen",
+                        lagHentIdenterResponseData(
+                            identer = listOf(PdlIdent(gruppe = "g1", ident = "i1"), PdlIdent(gruppe = "g2", ident = "i2")),
                         ),
                     )
                 }
 
-            val responseData = pdlClient.hentFormattertNavn("fnr")
-            responseData `should be equal to` "Navn Mellom Navnesen"
+            val responseData = pdlClient.hentIdenterMedHistorikk("ident")
+            responseData `should be equal to` listOf(PdlIdent(gruppe = "g1", ident = "i1"), PdlIdent(gruppe = "g2", ident = "i2"))
+        }
+
+        @Test
+        fun `burde inkludere ident som blir spurt paa, dersom den er registrert`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(
+                        lagHentIdenterResponseData(
+                            identer = listOf(PdlIdent(gruppe = "g", ident = "ident")),
+                        ),
+                    )
+                }
+
+            val responseData = pdlClient.hentIdenterMedHistorikk("ident")
+            responseData.size `should be equal to` 1
+            responseData.first().ident `should be equal to` "ident"
         }
     }
 
@@ -154,6 +166,14 @@ class PdlClientTest : FellesTestOppsett() {
         }
     }
 }
+
+fun lagHentIdenterResponseData(identer: Iterable<PdlIdent> = emptyList()): HentIdenterResponseData =
+    HentIdenterResponseData(
+        hentIdenter =
+            HentIdenter(
+                identer = identer.toList(),
+            ),
+    )
 
 fun lagGetPersonResponseData(
     fornavn: String = "Ole",
