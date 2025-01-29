@@ -24,7 +24,7 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
 @AutoConfigureObservability
 @EnableMockOAuth2Server
 @SpringBootTest(
-    classes = [Application::class, FakesTestOppsett.TestConfig::class],
+    classes = [Application::class, FakesTestOppsett.TestConfig::class, MockWebServereConfig::class],
     properties = [
         "spring.main.allow-bean-definition-overriding=true",
         "spring.data.jdbc.repositories.enabled=false",
@@ -60,12 +60,6 @@ abstract class FakesTestOppsett {
 
     @Autowired
     lateinit var sykmeldingRepository: ISykmeldingRepository
-
-    companion object {
-        init {
-            startMockWebServere()
-        }
-    }
 
     @AfterAll
     fun `Vi resetter databasen`() {

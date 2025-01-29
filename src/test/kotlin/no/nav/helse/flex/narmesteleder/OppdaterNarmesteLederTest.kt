@@ -1,11 +1,18 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.FakesTestOppsett
+import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.pdl.lagGraphQlResponse
 import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.simpleDispatcher
+import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -14,6 +21,20 @@ import java.util.UUID
 class OppdaterNarmesteLederTest : FakesTestOppsett() {
     @Autowired
     lateinit var oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder
+
+    @Autowired
+    lateinit var pdlMockWebServer: MockWebServer
+
+    @BeforeAll
+    fun beforeAll() {
+        pdlMockWebServer.dispatcher =
+            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
+    }
+
+    @AfterAll
+    fun afterAll() {
+        pdlMockWebServer.dispatcher = notFoundDispatcher
+    }
 
     @AfterEach
     fun afterEach() {
