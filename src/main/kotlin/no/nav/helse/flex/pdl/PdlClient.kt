@@ -9,6 +9,8 @@ import java.util.Collections
 private const val HEADER_TEMA = "Tema"
 private const val TEMA_SYK = "SYK"
 private const val HEADER_BEHANDLINGSNUMMER = "Behandlingsnummer"
+
+// Se behandlinger: https://behandlingskatalog.ansatt.nav.no/process/purpose/SYKEPENGER
 private const val BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING = "B229"
 
 @Component
