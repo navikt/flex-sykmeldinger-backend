@@ -1,18 +1,19 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.QueueDispatcher
-import okhttp3.mockwebserver.RecordedRequest
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdOversikt
+import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdoversiktResponse
+import no.nav.helse.flex.objectMapper
 
-object AaregMockDispatcher : QueueDispatcher() {
-    override fun dispatch(request: RecordedRequest): MockResponse =
-        MockResponse()
-            .addHeader("Content-Type", "application/json")
-            .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-}
+fun lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter: List<ArbeidsforholdOversikt>? = null): ArbeidsforholdoversiktResponse =
+    EKSEMPEL_RESPONSE_FRA_AAREG.copy(
+        arbeidsforholdoversikter = arbeidsforholdoversikter ?: EKSEMPEL_RESPONSE_FRA_AAREG.arbeidsforholdoversikter,
+    )
 
-private val EKSEMPEL_RESPONSE_FRA_AAREG =
-    objectMapper.readTree(
+fun lagArbeidsforholdOversikt(): ArbeidsforholdOversikt = EKSEMPEL_RESPONSE_FRA_AAREG.arbeidsforholdoversikter.first()
+
+private val EKSEMPEL_RESPONSE_FRA_AAREG: ArbeidsforholdoversiktResponse =
+    objectMapper.readValue(
         """
     {
   "arbeidsforholdoversikter": [

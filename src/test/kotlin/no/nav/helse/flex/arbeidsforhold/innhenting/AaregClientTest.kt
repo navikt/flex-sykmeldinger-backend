@@ -1,19 +1,19 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.MockWebServereConfig
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdRequest
+import no.nav.helse.flex.notFoundDispatcher
 import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.simpleDispatcher
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.QueueDispatcher
-import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should throw`
 import org.amshove.kluent.shouldThrow
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,32 +25,52 @@ import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
-@SpringBootTest(classes = [AaregClient::class, RestTemplate::class])
+@SpringBootTest(classes = [AaregClient::class, RestTemplate::class, MockWebServereConfig::class])
 class AaregClientTest {
+    @Autowired
+    private lateinit var aaregMockWebServer: MockWebServer
+
     @Autowired
     private lateinit var aaregClient: AaregClient
 
-    init {
-        MockWebServer().apply {
-            System.setProperty("AAREG_URL", "http://localhost:$port")
-            dispatcher = AaregMockDispatcher
-        }
+    @AfterEach
+    fun afterEach() {
+        aaregMockWebServer.dispatcher = notFoundDispatcher
     }
 
     @Test
     fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
         aaregClient.getArbeidsforholdoversikt("_") `should not be` null
     }
 
     @Test
     fun `burde kaste feil ved error response`() {
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+                    .setResponseCode(HttpStatus.NOT_FOUND.value())
+            }
+
         invoking {
-            aaregClient.getArbeidsforholdoversikt("feilmeldig_fnr")
+            aaregClient.getArbeidsforholdoversikt("_")
         } `should throw` RestClientException::class
     }
 
     @Test
     fun `burde kaste RuntimeException ved tom respons body`() {
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
+            }
         invoking {
             aaregClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
         } `should throw` RuntimeException::class
@@ -58,29 +78,8 @@ class AaregClientTest {
 
     @Test
     fun `burde kaste unauthorized exception dersom vi ikke sender med auth token`() {
-        invoking {
-            aaregClient.getArbeidsforholdoversikt("ingen_auth_token_fnr")
-        } shouldThrow HttpClientErrorException::class
-    }
-}
-
-private object AaregMockDispatcher : QueueDispatcher() {
-    override fun dispatch(request: RecordedRequest): MockResponse {
-        val req: ArbeidsforholdRequest = objectMapper.readValue(request.body.readUtf8())
-        return when (req.arbeidstakerId) {
-            "feilmeldig_fnr" -> {
-                MockResponse()
-                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
-                    .setResponseCode(HttpStatus.NOT_FOUND.value())
-            }
-
-            "suksess_uten_body_fnr" -> {
-                MockResponse()
-                    .addHeader("Content-Type", "application/json")
-            }
-
-            "ingen_auth_token_fnr" -> {
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher { request ->
                 val token = request.headers["Authorization"]
                 if (token == null) {
                     MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value())
@@ -88,12 +87,9 @@ private object AaregMockDispatcher : QueueDispatcher() {
                     MockResponse()
                 }
             }
-
-            else -> {
-                MockResponse().setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
-            }
-        }
+        invoking {
+            aaregClient.getArbeidsforholdoversikt("_")
+        } shouldThrow HttpClientErrorException::class
     }
 }
 
