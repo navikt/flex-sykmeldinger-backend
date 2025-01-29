@@ -23,6 +23,9 @@ class MockWebServereConfig {
     @Bean
     fun aaregMockWebServer() = aaregMockWebServer
 
+    @Bean
+    fun eregMockWebServer() = eregMockWebServer
+
     companion object {
         val logger = logger()
 
@@ -45,7 +48,7 @@ class MockWebServereConfig {
         val eregMockWebServer =
             MockWebServer().apply {
                 System.setProperty("EREG_URL", "http://localhost:$port")
-                dispatcher = EregMockDispatcher
+                dispatcher = notFoundDispatcher
             }
     }
 }

@@ -1,18 +1,12 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.RecordedRequest
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.flex.objectMapper
 
-object EregMockDispatcher : Dispatcher() {
-    override fun dispatch(request: RecordedRequest): MockResponse {
-        return MockResponse()
-            .addHeader("Content-Type", "application/json")
-            .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
-    }
-}
+val EKSEMPEL_ERROR_RESPONSE_FRA_EREG: JsonNode =
+    objectMapper.readTree("""{"melding": "Det oppsto en feil!"}""")
 
-private val EKSEMPEL_RESPONSE_FRA_EREG =
+val EKSEMPEL_RESPONSE_FRA_EREG: JsonNode =
     objectMapper.readTree(
         """
     {
