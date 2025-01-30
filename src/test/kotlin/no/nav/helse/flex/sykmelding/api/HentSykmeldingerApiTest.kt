@@ -70,7 +70,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke finne søknad som ikke finnes`() {
+        fun `burde ikke finne sykmelding som ikke finnes`() {
             mockMvc
                 .perform(
                     MockMvcRequestBuilders
@@ -87,7 +87,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke returnere søknad med feil fnr`() {
+        fun `burde ikke returnere sykmelding med feil fnr`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -203,7 +203,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke returnere søknad med feil fnr`() {
+        fun `burde ikke returnere sykmeldinger med feil fnr`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -362,7 +362,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde få 404 når sykmeldingen ikke finnes`() {
+        fun `burde få 404 når sykmeldingen ikke finnes, selv om arbeidsforhold finnes`() {
             arbeidsforholdRepository.save(
                 lagArbeidsforhold(
                     fnr = "fnr",
@@ -519,20 +519,11 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status?.name `should be equal to` "SENDT"
+            sykmelding?.sisteStatus()?.status `should be equal to` StatusEvent.SENDT
         }
 
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() {
-            arbeidsforholdRepository.save(
-                lagArbeidsforhold(
-                    fnr = "fnr",
-                    orgnummer = "orgnummer",
-                    fom = LocalDate.parse("2021-01-01"),
-                    tom = LocalDate.parse("2021-01-09"),
-                ),
-            )
-
             mockMvc
                 .perform(
                     MockMvcRequestBuilders
@@ -550,7 +541,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke returnere brukerinfo med feil fnr`() {
+        fun `burde feile dersom sykmelding har feil fnr`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
