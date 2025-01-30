@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.sykmelding.api.dto.*
+import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
 import org.springframework.stereotype.Component
@@ -128,7 +129,14 @@ class SykmeldingDtoKonverterer(
             statusEvent = status.status.name,
             timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
             sporsmalOgSvarListe = emptyList(),
-            arbeidsgiver = null,
+            arbeidsgiver =
+                status.arbeidstakerInfo?.arbeidsgiver?.let { arbeidsgiver ->
+                    ArbeidsgiverStatusDTO(
+                        orgnummer = arbeidsgiver.orgnummer,
+                        juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
+                        orgNavn = arbeidsgiver.orgnummer,
+                    )
+                },
             brukerSvar = null,
         )
 

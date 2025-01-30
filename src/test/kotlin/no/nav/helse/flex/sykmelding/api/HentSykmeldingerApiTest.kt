@@ -5,6 +5,7 @@ import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tokenxToken
@@ -12,6 +13,7 @@ import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be`
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -494,7 +496,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                 ),
             )
 
-            val sykmeldingSporsmalSvarDto = lagSykmeldingSporsmalSvarDto()
+            // val sykmeldingSporsmalSvarDto = lagSykmeldingSporsmalSvarDto()
 
             val result =
                 mockMvc
@@ -510,7 +512,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody(),
+                                lagSendBody().serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -521,6 +523,46 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
             sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT
+        }
+
+        @Test
+        fun `burde inkludere arbeidsgiver info i sendt sykmelding`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(orgnummer = "orgnummer", fnr = "fnr"),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .post("/api/v1/sykmeldinger/1/send")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON)
+                            .content(
+                                lagSendBody(arbeidsgiverOrgnummer = "orgnummer").serialisertTilString(),
+                            ),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            returnertSykmelding.arbeidsgiver.shouldNotBeNull()
         }
 
         @Test
@@ -536,7 +578,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "fnr",
                                 )
                             }",
-                        ).content(lagSendBody())
+                        ).content(lagSendBody().serialisertTilString())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isNotFound)
         }
@@ -563,7 +605,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "feil_fnr",
                                 )
                             }",
-                        ).content(lagSendBody())
+                        ).content(lagSendBody().serialisertTilString())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isForbidden)
         }
@@ -600,8 +642,13 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
     }
 }
 
-fun lagSendBody(): String =
-"""
-{"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
-"arbeidsgiverOrgnummer":"907670201","riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}
-"""
+fun lagSendBody(arbeidsgiverOrgnummer: String? = null): HentSykmeldingerApi.SendBody {
+    val sendBody: HentSykmeldingerApi.SendBody =
+        objectMapper.readValue(
+            """
+        {"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
+        "arbeidsgiverOrgnummer":null,"riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}
+        """,
+        )
+    return sendBody.copy(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
+}
