@@ -143,13 +143,13 @@ data class SykmeldingStatusDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
-    val status: StatusEvent,
+    val status: HendelseStatus,
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
     val opprettet: Instant,
 ) {
-    fun mapTilStatus(): SykmeldingStatus =
-        SykmeldingStatus(
+    fun mapTilStatus(): SykmeldingHendelse =
+        SykmeldingHendelse(
             databaseId = this.id,
             status = this.status,
             sporsmalSvar =
@@ -161,7 +161,7 @@ data class SykmeldingStatusDbRecord(
 
     companion object {
         fun mapFraStatus(
-            statuser: List<SykmeldingStatus>,
+            statuser: List<SykmeldingHendelse>,
             sykmeldingId: String,
         ): List<SykmeldingStatusDbRecord> =
             statuser.map { status ->

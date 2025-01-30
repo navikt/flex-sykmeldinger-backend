@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.api
 
-import SykmeldingDtoKonverterer
+import no.nav.helse.flex.FakesTestOppsett
+import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.sykmelding.api.dto.AnnenFraverGrunnDTO
 import no.nav.helse.flex.sykmelding.api.dto.AnnenFraversArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
@@ -29,7 +30,7 @@ import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
 import no.nav.helse.flex.sykmelding.domain.SvarRestriksjon
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
+import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
@@ -37,12 +38,15 @@ import org.amshove.kluent.`should be null`
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.postgresql.util.PGobject
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-class SykmeldingDtoKonvertererTest {
+class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
+    @Autowired
+    lateinit var sykmeldingDtoKonverterer: SykmeldingDtoKonverterer
+
     @Test
     fun `burde konvertere med riktig id`() {
         val sykmelding =
@@ -50,8 +54,8 @@ class SykmeldingDtoKonvertererTest {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -59,9 +63,7 @@ class SykmeldingDtoKonvertererTest {
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
-        val konverterer = SykmeldingDtoKonverterer()
-
-        val dto = konverterer.konverter(sykmelding)
+        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
         dto.id `should be equal to` "1"
     }
 
@@ -76,9 +78,7 @@ class SykmeldingDtoKonvertererTest {
                 kontaktinfo = emptyList(),
             )
 
-        val konverterer = SykmeldingDtoKonverterer()
-
-        val pasientDto = konverterer.konverterPasient(pasient)
+        val pasientDto = sykmeldingDtoKonverterer.konverterPasient(pasient)
         pasientDto `should be equal to`
             PasientDTO(
                 fnr = "fnr",
@@ -90,14 +90,33 @@ class SykmeldingDtoKonvertererTest {
     }
 
     @Test
-    fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
-        val konverterer = SykmeldingDtoKonverterer()
+    fun `burde konvertere arbeidsgiver som har arbeidsforhold`() {
+        arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnummer", orgnavn = "orgnavn"))
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(
+            arbeidsgiverInfo =
+                EnArbeidsgiver(
+                    meldingTilArbeidsgiver = "_",
+                    tiltakArbeidsplassen = "_",
+                ),
+            fnr = "fnr",
+            sisteStatus = lagSykmeldingHendelse(lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer = "orgnummer")),
+        ) `should be equal to`
+            ArbeidsgiverDTO(
+                navn = "orgnavn",
+                stillingsprosent = null,
+            )
+    }
 
-        konverterer.konverterArbeidsgiver(
-            EnArbeidsgiver(
-                meldingTilArbeidsgiver = "_",
-                tiltakArbeidsplassen = "_",
-            ),
+    @Test
+    fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(
+            arbeidsgiverInfo =
+                EnArbeidsgiver(
+                    meldingTilArbeidsgiver = "_",
+                    tiltakArbeidsplassen = "_",
+                ),
+            fnr = "fnr",
+            sisteStatus = lagSykmeldingHendelse(),
         ) `should be equal to`
             ArbeidsgiverDTO(
                 navn = null,
@@ -122,22 +141,17 @@ class SykmeldingDtoKonvertererTest {
                 stillingsprosent = 50,
             )
 
-        val konverterer = SykmeldingDtoKonverterer()
-
-        konverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to` forventetArbeidsgiver
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(arbeidsgiver, "fnr", lagSykmeldingHendelse()) `should be equal to`
+            forventetArbeidsgiver
     }
 
     @Test
     fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-        val konverterer = SykmeldingDtoKonverterer()
-
-        konverterer.konverterArbeidsgiver(IngenArbeidsgiver()) `should be equal to` null
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(IngenArbeidsgiver(), "fnr", lagSykmeldingHendelse()) `should be equal to` null
     }
 
     @Test
     fun `burde konvertere aktivitet til en periode`() {
-        val konverterer = SykmeldingDtoKonverterer()
-
         val aktivitet =
             AktivitetIkkeMulig(
                 medisinskArsak =
@@ -154,7 +168,7 @@ class SykmeldingDtoKonvertererTest {
                 tom = LocalDate.parse("2021-01-21"),
             )
 
-        val periode = konverterer.konverterSykmeldingsperiode(aktivitet)
+        val periode = sykmeldingDtoKonverterer.konverterSykmeldingsperiode(aktivitet)
         periode.fom `should be equal to` LocalDate.parse("2021-01-01")
         periode.tom `should be equal to` LocalDate.parse("2021-01-21")
         periode.aktivitetIkkeMulig?.let {
@@ -174,14 +188,9 @@ class SykmeldingDtoKonvertererTest {
     @Test
     fun `burde konvertere status NY`() {
         val status =
-            SykmeldingStatus(
-                status = StatusEvent.APEN,
+            SykmeldingHendelse(
+                status = HendelseStatus.APEN,
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                sporsmalSvar =
-                    PGobject().apply {
-                        type = "json"
-                        value = ""
-                    },
             )
 
         val forventetStatus =
@@ -193,15 +202,11 @@ class SykmeldingDtoKonvertererTest {
                 brukerSvar = null,
             )
 
-        val konverterer = SykmeldingDtoKonverterer()
-
-        konverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
+        sykmeldingDtoKonverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
     }
 
     @Test
     fun `burde konvertere medisinsk vurdering`() {
-        val konverterer = SykmeldingDtoKonverterer()
-
         val medisinskVurdering =
             MedisinskVurdering(
                 hovedDiagnose =
@@ -231,7 +236,7 @@ class SykmeldingDtoKonvertererTest {
             )
 
         val konvertertMedisinskVurdering =
-            konverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+            sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
                 MedisinskVurderingDTO(
                     hovedDiagnose =
                         DiagnoseDTO(
@@ -259,26 +264,23 @@ class SykmeldingDtoKonvertererTest {
                     yrkesskadeDato = LocalDate.parse("2021-01-01"),
                 )
 
-        konverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to` konvertertMedisinskVurdering
+        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to` konvertertMedisinskVurdering
     }
 
     @Test
     fun `burde konvertere annen fraværsårsak`() {
-        val konverterer = SykmeldingDtoKonverterer()
-
         val annenFraverArsak =
             AnnenFraverArsak(
                 beskrivelse = "",
                 arsak = null,
             )
 
-        val konvertertArsak = konverterer.konverterAnnenFraversArsak(annenFraverArsak)
+        val konvertertArsak = sykmeldingDtoKonverterer.konverterAnnenFraversArsak(annenFraverArsak)
         konvertertArsak?.grunn `should be equal to` emptyList()
     }
 
     @Test
     fun `burde konvertere prognose`() {
-        val konverterer = SykmeldingDtoKonverterer()
         val prognose =
             Prognose(
                 arbeidsforEtterPeriode = true,
@@ -291,26 +293,24 @@ class SykmeldingDtoKonvertererTest {
                         vurderingsdato = LocalDate.parse("2021-01-01"),
                     ),
             )
-        val konverterePrognose = konverterer.konverterPrognose(prognose)
+        val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
         konverterePrognose.erIkkeIArbeid.`should be null`()
         konverterePrognose.erIArbeid?.egetArbeidPaSikt `should be` true
     }
 
     @Test
     fun `burde konvertere bistand Nav til melding til nav`() {
-        val konverterer = SykmeldingDtoKonverterer()
         val bistandNav =
             BistandNav(
                 bistandUmiddelbart = true,
                 beskrivBistand = "",
             )
-        val konvertertTilMelding = konverterer.konverterMeldingTilNAV(bistandNav)
+        val konvertertTilMelding = sykmeldingDtoKonverterer.konverterMeldingTilNAV(bistandNav)
         konvertertTilMelding.bistandUmiddelbart `should be` true
     }
 
     @Test
     fun `burde konvertere behandler`() {
-        val konverterer = SykmeldingDtoKonverterer()
         val behandler =
             Behandler(
                 navn =
@@ -336,15 +336,13 @@ class SykmeldingDtoKonvertererTest {
                     ),
             )
 
-        val konvertereBehandler = konverterer.konverterBehandler(behandler)
+        val konvertereBehandler = sykmeldingDtoKonverterer.konverterBehandler(behandler)
         konvertereBehandler.fornavn `should be equal to` "behandler"
     }
 
     @Test
     fun `burde konvertere tiltak arbeidsplassen`() {
-        val konverterer = SykmeldingDtoKonverterer()
-
-        konverterer
+        sykmeldingDtoKonverterer
             .konverterTiltakArbeidsplassen(
                 EnArbeidsgiver(
                     meldingTilArbeidsgiver = "_",
@@ -352,7 +350,7 @@ class SykmeldingDtoKonvertererTest {
                 ),
             ).shouldBeEqualTo("tiltak")
 
-        konverterer.konverterTiltakArbeidsplassen(
+        sykmeldingDtoKonverterer.konverterTiltakArbeidsplassen(
             FlereArbeidsgivere(
                 meldingTilArbeidsgiver = "_",
                 tiltakArbeidsplassen = "tiltak",
@@ -362,15 +360,14 @@ class SykmeldingDtoKonvertererTest {
             ),
         ) `should be equal to` "tiltak"
 
-        konverterer.konverterTiltakArbeidsplassen(
+        sykmeldingDtoKonverterer.konverterTiltakArbeidsplassen(
             IngenArbeidsgiver(),
         ) `should be equal to` null
     }
 
     @Test
     fun `burde konvertere kontakt med pasient, ingen kontakt`() {
-        val konverterer = SykmeldingDtoKonverterer()
-        konverterer.konverterKontaktMedPasient() `should be equal to`
+        sykmeldingDtoKonverterer.konverterKontaktMedPasient() `should be equal to`
             KontaktMedPasientDTO(
                 kontaktDato = null,
                 begrunnelseIkkeKontakt = null,
@@ -379,11 +376,9 @@ class SykmeldingDtoKonvertererTest {
 
     @Nested
     inner class UtdypendeOpplysningerTest {
-        private val konverterer = SykmeldingDtoKonverterer()
-
         @Test
         fun `burde håndtere én opplysning`() {
-            konverterer.konverterUtdypendeOpplysninger(
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(
                 mapOf(
                     "a" to
                         mapOf(
@@ -411,7 +406,7 @@ class SykmeldingDtoKonvertererTest {
 
         @Test
         fun `burde håndtere restriksjoner`() {
-            konverterer.konverterUtdypendeOpplysninger(
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(
                 mapOf(
                     "a" to
                         mapOf(
@@ -449,13 +444,13 @@ class SykmeldingDtoKonvertererTest {
 
         @Test
         fun `burde håndtere ingen opplysning`() {
-            konverterer.konverterUtdypendeOpplysninger(null) `should be equal to` emptyMap()
-            konverterer.konverterUtdypendeOpplysninger(emptyMap()) `should be equal to` emptyMap()
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(null) `should be equal to` emptyMap()
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(emptyMap()) `should be equal to` emptyMap()
         }
 
         @Test
         fun `burde håndtere flere opplysningskategorier`() {
-            konverterer.konverterUtdypendeOpplysninger(
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(
                 mapOf(
                     "a" to
                         mapOf(

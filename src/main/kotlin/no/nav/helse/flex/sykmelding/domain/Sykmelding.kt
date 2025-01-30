@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import org.postgresql.util.PGobject
+import no.nav.helse.flex.sykmelding.api.dto.SykmeldingSporsmalSvarDto
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus
@@ -8,7 +8,7 @@ import kotlin.collections.plus
 data class Sykmelding(
     internal val databaseId: String? = null,
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
-    val statuser: List<SykmeldingStatus>,
+    val statuser: List<SykmeldingHendelse>,
     val opprettet: Instant,
     val oppdatert: Instant,
 ) {
@@ -29,24 +29,24 @@ data class Sykmelding(
     val tom: LocalDate
         get() = sykmeldingGrunnlag.aktivitet.maxOf { it.tom }
 
-    fun sisteStatus(): SykmeldingStatus =
+    fun sisteStatus(): SykmeldingHendelse =
         statuser.maxByOrNull { it.opprettet } ?: error("Fant ikke status for sykmeldingen. Skal ikke skje.")
 
-    fun leggTilStatus(sykmeldingStatus: SykmeldingStatus): Sykmelding =
+    fun leggTilStatus(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
-            statuser = this.statuser + sykmeldingStatus,
-            oppdatert = sykmeldingStatus.opprettet,
+            statuser = this.statuser + sykmeldingHendelse,
+            oppdatert = sykmeldingHendelse.opprettet,
         )
 }
 
-data class SykmeldingStatus(
+data class SykmeldingHendelse(
     internal val databaseId: String? = null,
-    val status: StatusEvent,
+    val status: HendelseStatus,
+    val sporsmalSvar: SykmeldingSporsmalSvarDto? = null,
     val opprettet: Instant,
-    val sporsmalSvar: PGobject? = null,
 )
 
-enum class StatusEvent {
+enum class HendelseStatus {
     APEN,
     AVBRUTT,
     BEKREFTET,
