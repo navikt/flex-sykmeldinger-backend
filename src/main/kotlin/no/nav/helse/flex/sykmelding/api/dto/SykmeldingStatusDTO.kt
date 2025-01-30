@@ -8,7 +8,7 @@ data class SykmeldingStatusDTO(
     val arbeidsgiver: ArbeidsgiverStatusDTO?,
     val sporsmalOgSvarListe: List<SporsmalDTO>,
     // TODO: This is nullable because older sykmeldinger are not migrated to the new format
-    val brukerSvar: SykmeldingFormResponse?,
+    val brukerSvar: SykmeldingSporsmalSvarDto?,
 )
 
 data class ArbeidsgiverStatusDTO(

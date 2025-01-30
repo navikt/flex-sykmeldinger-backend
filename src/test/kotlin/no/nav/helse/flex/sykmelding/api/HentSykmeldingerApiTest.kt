@@ -5,10 +5,8 @@ import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.sykmelding.api.dto.BrukerinformasjonDTO
-import no.nav.helse.flex.sykmelding.api.dto.NarmesteLederDTO
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingDTO
-import no.nav.helse.flex.sykmelding.api.dto.VirksomhetDTO
+import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tokenxToken
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
@@ -497,6 +495,8 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                 ),
             )
 
+            val sykmeldingSporsmalSvarDto = lagSykmeldingSporsmalSvarDto()
+
             val result =
                 mockMvc
                     .perform(
@@ -510,7 +510,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     )
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"),
+                            .content(sykmeldingSporsmalSvarDto.serialisertTilString()),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
                     .response.contentAsString
@@ -519,7 +519,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` StatusEvent.SENDT
+            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT
         }
 
         @Test

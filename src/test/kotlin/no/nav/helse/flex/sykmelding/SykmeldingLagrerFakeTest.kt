@@ -8,7 +8,7 @@ import no.nav.helse.flex.defaultAaregDispatcher
 import no.nav.helse.flex.defaultEregDispatcher
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.simpleDispatcher
-import no.nav.helse.flex.sykmelding.domain.StatusEvent
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagPasient
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
@@ -79,7 +79,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
         sykmelding.shouldNotBeNull()
         sykmelding.statuser.size `should be equal to` 1
         val status = sykmelding.statuser[0]
-        status.status `should be equal to` StatusEvent.APEN
+        status.status `should be equal to` HendelseStatus.APEN
     }
 
     @Test

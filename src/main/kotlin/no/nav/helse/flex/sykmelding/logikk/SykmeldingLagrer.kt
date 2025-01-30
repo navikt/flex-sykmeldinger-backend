@@ -33,9 +33,8 @@ class SykmeldingLagrer(
             sykmeldingGrunnlag = sykmeldingMedBehandlingsutfallMelding.sykmelding,
             statuser =
                 listOf(
-                    SykmeldingStatus(
-                        status = StatusEvent.APEN,
-                        sporsmalSvar = null,
+                    SykmeldingHendelse(
+                        status = HendelseStatus.APEN,
                         opprettet = nowFactory.get(),
                     ),
                 ),

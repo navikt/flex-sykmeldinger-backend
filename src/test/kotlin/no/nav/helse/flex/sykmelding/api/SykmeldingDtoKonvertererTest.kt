@@ -29,7 +29,7 @@ import no.nav.helse.flex.sykmelding.domain.Pasient
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
 import no.nav.helse.flex.sykmelding.domain.SvarRestriksjon
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
+import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
@@ -37,7 +37,6 @@ import org.amshove.kluent.`should be null`
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.postgresql.util.PGobject
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -50,8 +49,8 @@ class SykmeldingDtoKonvertererTest {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -174,14 +173,9 @@ class SykmeldingDtoKonvertererTest {
     @Test
     fun `burde konvertere status NY`() {
         val status =
-            SykmeldingStatus(
-                status = StatusEvent.APEN,
+            SykmeldingHendelse(
+                status = HendelseStatus.APEN,
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                sporsmalSvar =
-                    PGobject().apply {
-                        type = "json"
-                        value = ""
-                    },
             )
 
         val forventetStatus =

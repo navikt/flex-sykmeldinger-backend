@@ -2,7 +2,7 @@ package no.nav.helse.flex.sykmelding.api.dto
 
 import java.time.LocalDate
 
-data class SykmeldingFormResponse(
+data class SykmeldingSporsmalSvarDto(
     val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
     val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
     val arbeidssituasjon: FormSporsmalSvar<Arbeidssituasjon>,

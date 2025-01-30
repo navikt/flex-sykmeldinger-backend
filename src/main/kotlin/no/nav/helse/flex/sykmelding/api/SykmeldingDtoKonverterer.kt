@@ -110,7 +110,7 @@ class SykmeldingDtoKonverterer {
         )
     }
 
-    fun konverterSykmeldingStatus(status: SykmeldingStatus): SykmeldingStatusDTO =
+    fun konverterSykmeldingStatus(status: SykmeldingHendelse): SykmeldingStatusDTO =
         SykmeldingStatusDTO(
             // TODO
             statusEvent = status.status.name,

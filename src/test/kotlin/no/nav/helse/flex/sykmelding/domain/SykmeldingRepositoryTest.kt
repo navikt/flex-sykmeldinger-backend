@@ -21,8 +21,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -41,8 +41,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -62,8 +62,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -100,8 +100,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -126,8 +126,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -141,7 +141,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding
                 ?.leggTilStatus(
-                    SykmeldingStatus(status = StatusEvent.APEN, opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
+                    SykmeldingHendelse(status = HendelseStatus.APEN, opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
                 ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -159,8 +159,8 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(
-                        SykmeldingStatus(
-                            status = StatusEvent.APEN,
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z").trimToMillisForOperativsystemForskjeller(),
                         ),
                     ),
