@@ -1,8 +1,8 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.FellesTestOppsett
+import no.nav.helse.flex.defaultPdlDispatcher
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
-import no.nav.helse.flex.notFoundDispatcher
 import no.nav.helse.flex.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.pdl.lagGraphQlResponse
 import no.nav.helse.flex.serialisertTilString
@@ -25,7 +25,7 @@ class NarmesteLederListenerIntegrasjonTest : FellesTestOppsett() {
 
     @AfterEach
     fun cleanUp() {
-        pdlMockWebServer.dispatcher = notFoundDispatcher
+        pdlMockWebServer.dispatcher = defaultPdlDispatcher
     }
 
     @Test

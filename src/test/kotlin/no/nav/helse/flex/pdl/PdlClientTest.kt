@@ -1,7 +1,7 @@
 package no.nav.helse.flex.pdl
 
 import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.defaultPdlDispatcher
 import no.nav.helse.flex.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
@@ -22,7 +22,7 @@ class PdlClientTest : FellesTestOppsett() {
 
     @AfterEach
     fun cleanUp() {
-        pdlMockWebServer.dispatcher = notFoundDispatcher
+        pdlMockWebServer.dispatcher = defaultPdlDispatcher
     }
 
     @Nested

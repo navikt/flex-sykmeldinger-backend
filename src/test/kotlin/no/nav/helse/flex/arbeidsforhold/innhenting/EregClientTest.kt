@@ -2,7 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.MockWebServereConfig
 import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
-import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.defaultEregDispatcher
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.simpleDispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -29,7 +29,7 @@ class EregClientTest {
 
     @AfterEach
     fun afterEach() {
-        eregMockWebServer.dispatcher = notFoundDispatcher
+        eregMockWebServer.dispatcher = defaultEregDispatcher
     }
 
     @Test

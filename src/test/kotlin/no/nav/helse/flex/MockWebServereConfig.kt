@@ -1,5 +1,7 @@
 package no.nav.helse.flex
 
+import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -14,6 +16,22 @@ fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatc
     }
 
 val notFoundDispatcher = simpleDispatcher { MockResponse().setResponseCode(404) }
+
+val defaultAaregDispatcher =
+    simpleDispatcher {
+        MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+    }
+
+val defaultEregDispatcher =
+    simpleDispatcher {
+        MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString().serialisertTilString())
+    }
+
+val defaultPdlDispatcher = notFoundDispatcher
 
 @TestConfiguration
 class MockWebServereConfig {
@@ -36,19 +54,19 @@ class MockWebServereConfig {
         val pdlMockWebServer =
             MockWebServer().apply {
                 System.setProperty("PDL_BASE_URL", "http://localhost:$port")
-                dispatcher = notFoundDispatcher
+                dispatcher = defaultPdlDispatcher
             }
 
         val aaregMockWebServer =
             MockWebServer().apply {
                 System.setProperty("AAREG_URL", "http://localhost:$port")
-                dispatcher = notFoundDispatcher
+                dispatcher = defaultAaregDispatcher
             }
 
         val eregMockWebServer =
             MockWebServer().apply {
                 System.setProperty("EREG_URL", "http://localhost:$port")
-                dispatcher = notFoundDispatcher
+                dispatcher = defaultEregDispatcher
             }
     }
 }
