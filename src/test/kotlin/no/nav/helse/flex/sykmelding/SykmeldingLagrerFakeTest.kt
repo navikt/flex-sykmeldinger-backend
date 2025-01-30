@@ -4,7 +4,8 @@ import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.defaultAaregDispatcher
+import no.nav.helse.flex.defaultEregDispatcher
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.simpleDispatcher
 import no.nav.helse.flex.sykmelding.domain.StatusEvent
@@ -18,7 +19,6 @@ import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,27 +32,12 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer
 
-    @BeforeEach
-    fun setup() {
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher {
-                lagJsonResponse(
-                    lagArbeidsforholdOversiktResponse(emptyList()).serialisertTilString(),
-                )
-            }
-
-        eregMockWebServer.dispatcher =
-            simpleDispatcher {
-                lagJsonResponse(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
-            }
-    }
-
     @AfterEach
     fun tearDown() {
         slettDatabase()
 
-        aaregMockWebServer.dispatcher = notFoundDispatcher
-        eregMockWebServer.dispatcher = notFoundDispatcher
+        aaregMockWebServer.dispatcher = defaultAaregDispatcher
+        eregMockWebServer.dispatcher = defaultEregDispatcher
     }
 
     @Test

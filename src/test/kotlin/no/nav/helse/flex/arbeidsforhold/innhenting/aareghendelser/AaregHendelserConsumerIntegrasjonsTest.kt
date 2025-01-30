@@ -3,7 +3,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.defaultAaregDispatcher
 import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.simpleDispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -48,7 +48,7 @@ class AaregHendelserConsumerIntegrasjonsTest : FellesTestOppsett() {
 
     @AfterAll
     fun tearDown() {
-        aaregMockWebServer.dispatcher = notFoundDispatcher
+        aaregMockWebServer.dispatcher = defaultAaregDispatcher
     }
 
     @AfterEach

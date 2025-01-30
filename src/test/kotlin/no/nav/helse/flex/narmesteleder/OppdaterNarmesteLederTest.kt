@@ -1,7 +1,7 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.FakesTestOppsett
-import no.nav.helse.flex.notFoundDispatcher
+import no.nav.helse.flex.defaultPdlDispatcher
 import no.nav.helse.flex.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.pdl.lagGraphQlResponse
 import no.nav.helse.flex.serialisertTilString
@@ -33,7 +33,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
 
     @AfterAll
     fun afterAll() {
-        pdlMockWebServer.dispatcher = notFoundDispatcher
+        pdlMockWebServer.dispatcher = defaultPdlDispatcher
     }
 
     @AfterEach
