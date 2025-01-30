@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
+import java.util.function.Supplier
 
 @Controller
 class HentSykmeldingerApi(
@@ -30,6 +31,7 @@ class HentSykmeldingerApi(
     private val tokenxValidering: TokenxValidering,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
+    private val nowFactory: Supplier<Instant>,
 ) {
     private val sykmeldingDtoKonverterer = SykmeldingDtoKonverterer()
     private val logger = logger()
@@ -162,7 +164,7 @@ class HentSykmeldingerApi(
                 SykmeldingStatus(
                     // TODO: Finn ut forskjell på SENDT og BEKREFTET
                     status = StatusEvent.SENDT,
-                    opprettet = Instant.now(),
+                    opprettet = nowFactory.get(),
                     sporsmalSvar =
                         PGobject().apply {
                             type = "json"
