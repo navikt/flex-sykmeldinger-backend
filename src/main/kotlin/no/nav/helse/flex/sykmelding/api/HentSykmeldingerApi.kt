@@ -131,6 +131,24 @@ class HentSykmeldingerApi(
         TODO("Ikke implementert")
     }
 
+    data class SendBody(
+        val erOpplysningeneRiktige: String,
+        val arbeidsgiverOrgnummer: String?,
+        val arbeidssituasjon: String,
+        val harEgenmeldingsdager: String?,
+        val riktigNarmesteLeder: String?,
+    )
+
+    private fun jAEllerNeiFromString(value: String): JaEllerNei {
+        if (value == "YES") {
+            return JaEllerNei.JA
+        } else if (value == "NO") {
+            return JaEllerNei.NEI
+        } else {
+            return JaEllerNei.valueOf(value)
+        }
+    }
+
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
     @ResponseBody
     @ProtectedWithClaims(
@@ -140,8 +158,39 @@ class HentSykmeldingerApi(
     )
     fun sendSykmelding(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-        @RequestBody sykmeldingSporsmalSvarDto: SykmeldingSporsmalSvarDto,
+        @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
+        val sykmeldingSporsmalSvarDto =
+            SykmeldingSporsmalSvarDto(
+                erOpplysningeneRiktige =
+                    FormSporsmalSvar(
+                        sporsmaltekst = "Er opplysningene riktige?",
+                        svar = jAEllerNeiFromString(sendBody.erOpplysningeneRiktige),
+                    ),
+                uriktigeOpplysninger = null,
+                arbeidssituasjon = FormSporsmalSvar(sporsmaltekst = "Hva er din arbeidssituasjon?", svar = Arbeidssituasjon.ARBEIDSTAKER),
+                arbeidsgiverOrgnummer =
+                    sendBody.arbeidsgiverOrgnummer?.let {
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
+                            svar = sendBody.arbeidsgiverOrgnummer,
+                        )
+                    },
+                arbeidsledig = null,
+                riktigNarmesteLeder =
+                    sendBody.riktigNarmesteLeder?.let {
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = jAEllerNeiFromString(sendBody.riktigNarmesteLeder),
+                        )
+                    },
+                harBruktEgenmelding = null,
+                egenmeldingsperioder = null,
+                harForsikring = null,
+                egenmeldingsdager = null,
+                harBruktEgenmeldingsdager = null,
+                fisker = null,
+            )
         val fnr = tokenxValidering.validerFraDittSykefravaer()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {

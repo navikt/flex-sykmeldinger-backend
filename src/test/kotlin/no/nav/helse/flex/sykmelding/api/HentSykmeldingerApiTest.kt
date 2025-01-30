@@ -5,7 +5,6 @@ import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tokenxToken
@@ -510,7 +509,9 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     )
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
-                            .content(sykmeldingSporsmalSvarDto.serialisertTilString()),
+                            .content(
+                                lagSendBody(),
+                            ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
                     .response.contentAsString
@@ -535,7 +536,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "fnr",
                                 )
                             }",
-                        ).content(lagSykmeldingSporsmalSvarDto().serialisertTilString())
+                        ).content(lagSendBody())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isNotFound)
         }
@@ -562,7 +563,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "feil_fnr",
                                 )
                             }",
-                        ).content(lagSykmeldingSporsmalSvarDto().serialisertTilString())
+                        ).content(lagSendBody())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isForbidden)
         }
@@ -598,3 +599,9 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
     }
 }
+
+fun lagSendBody(): String =
+"""
+{"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
+"arbeidsgiverOrgnummer":"907670201","riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}
+"""
