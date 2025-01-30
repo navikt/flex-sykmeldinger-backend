@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import org.postgresql.util.PGobject
+import no.nav.helse.flex.sykmelding.api.dto.SykmeldingSporsmalSvarDto
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus
@@ -42,7 +42,7 @@ data class Sykmelding(
 data class SykmeldingHendelse(
     internal val databaseId: String? = null,
     val status: HendelseStatus,
-    val sporsmalSvar: PGobject? = null,
+    val sporsmalSvar: SykmeldingSporsmalSvarDto? = null,
     val opprettet: Instant,
 )
 

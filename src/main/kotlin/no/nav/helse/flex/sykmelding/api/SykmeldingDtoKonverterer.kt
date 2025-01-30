@@ -1,9 +1,16 @@
+package no.nav.helse.flex.sykmelding.api
+
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
+import org.springframework.stereotype.Component
 import java.time.ZoneOffset
 
-class SykmeldingDtoKonverterer {
+@Component
+class SykmeldingDtoKonverterer(
+    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+) {
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
             is SykmeldingGrunnlag -> konverterSykmelding(sykmelding)
@@ -19,7 +26,12 @@ class SykmeldingDtoKonverterer {
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
             // TODO
             legekontorOrgnummer = null,
-            arbeidsgiver = konverterArbeidsgiver(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
+            arbeidsgiver =
+                konverterArbeidsgiver(
+                    sykmelding.sykmeldingGrunnlag.arbeidsgiver,
+                    sykmelding.pasientFnr,
+                    sykmelding.sisteStatus(),
+                ),
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
             sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
@@ -324,20 +336,36 @@ class SykmeldingDtoKonverterer {
         )
     }
 
-    internal fun konverterArbeidsgiver(arbeidsgiverInfo: ArbeidsgiverInfo): ArbeidsgiverDTO? =
-        when (arbeidsgiverInfo) {
+    internal fun konverterArbeidsgiver(
+        arbeidsgiverInfo: ArbeidsgiverInfo,
+        fnr: String,
+        sisteStatus: SykmeldingHendelse,
+    ): ArbeidsgiverDTO? {
+        val arbeidsgiverOrgnummer = sisteStatus.sporsmalSvar?.arbeidsgiverOrgnummer?.svar
+        val arbeidsforhold =
+            if (arbeidsgiverOrgnummer == null) {
+                null
+            } else {
+                arbeidsforholdRepository.getAllByFnr(fnr = fnr).find { it.orgnummer == arbeidsgiverOrgnummer }
+            }
+
+        return when (arbeidsgiverInfo) {
             is FlereArbeidsgivere ->
                 ArbeidsgiverDTO(
-                    navn = arbeidsgiverInfo.navn,
+                    // TODO: Hva blir riktig for flere arbeidsgivere?
+                    navn = arbeidsforhold?.orgnavn ?: arbeidsgiverInfo.navn,
                     stillingsprosent = arbeidsgiverInfo.stillingsprosent,
                 )
+
             is EnArbeidsgiver ->
                 ArbeidsgiverDTO(
-                    navn = null,
+                    navn = arbeidsforhold?.orgnavn,
                     stillingsprosent = null,
                 )
+
             is IngenArbeidsgiver -> null
         }
+    }
 
     internal fun konverterUtdypendeOpplysninger(
         utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,

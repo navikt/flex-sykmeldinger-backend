@@ -11,13 +11,17 @@ fun lagSykmelding(sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnla
         sykmeldingGrunnlag = sykmeldingGrunnlag,
         statuser =
             listOf(
-                SykmeldingHendelse(
-                    status = HendelseStatus.APEN,
-                    opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                ),
+                lagSykmeldingHendelse(),
             ),
         opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
         oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+    )
+
+fun lagSykmeldingHendelse(sporsmalSvarDto: SykmeldingSporsmalSvarDto? = null) =
+    SykmeldingHendelse(
+        status = HendelseStatus.APEN,
+        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+        sporsmalSvar = sporsmalSvarDto,
     )
 
 fun lagSykmeldingGrunnlag(
@@ -233,7 +237,7 @@ fun lagValidation(): ValidationResult =
         rules = listOf(),
     )
 
-fun lagSykmeldingSporsmalSvarDto(): SykmeldingSporsmalSvarDto =
+fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): SykmeldingSporsmalSvarDto =
     SykmeldingSporsmalSvarDto(
         erOpplysningeneRiktige =
             FormSporsmalSvar(
@@ -253,7 +257,7 @@ fun lagSykmeldingSporsmalSvarDto(): SykmeldingSporsmalSvarDto =
         arbeidsgiverOrgnummer =
             FormSporsmalSvar(
                 sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
-                svar = "123456789",
+                svar = arbeidsgiverOrgnummer,
             ),
         arbeidsledig =
             ArbeidsledigFraOrgnummer(

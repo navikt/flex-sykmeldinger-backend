@@ -1,9 +1,7 @@
 package no.nav.helse.flex.sykmelding.api
 
-import SykmeldingDtoKonverterer
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
@@ -14,7 +12,6 @@ import no.nav.helse.flex.tokenx.TokenxValidering
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.postgresql.util.PGobject
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -29,8 +26,8 @@ class HentSykmeldingerApi(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
     private val nowFactory: Supplier<Instant>,
+    private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
 ) {
-    private val sykmeldingDtoKonverterer = SykmeldingDtoKonverterer()
     private val logger = logger()
 
     @GetMapping("/api/v1/sykmeldinger")
@@ -162,11 +159,7 @@ class HentSykmeldingerApi(
                     // TODO: Finn ut forskjell på SENDT og BEKREFTET
                     status = HendelseStatus.SENDT,
                     opprettet = nowFactory.get(),
-                    sporsmalSvar =
-                        PGobject().apply {
-                            type = "json"
-                            value = sykmeldingSporsmalSvarDto.serialisertTilString()
-                        },
+                    sporsmalSvar = sykmeldingSporsmalSvarDto,
                 ),
             )
 

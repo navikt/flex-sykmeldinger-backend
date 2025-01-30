@@ -535,7 +535,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "fnr",
                                 )
                             }",
-                        ).content("{}")
+                        ).content(lagSykmeldingSporsmalSvarDto().serialisertTilString())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isNotFound)
         }
@@ -562,7 +562,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                                     fnr = "feil_fnr",
                                 )
                             }",
-                        ).content("{}")
+                        ).content(lagSykmeldingSporsmalSvarDto().serialisertTilString())
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isForbidden)
         }
