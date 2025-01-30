@@ -153,6 +153,39 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
     }
 
     @Test
+    fun `burde lagre status med arbeidstaker info`() {
+        val hendelse =
+            lagSykmeldingHendelse(
+                status = HendelseStatus.SENDT,
+                arbeidstakerInfo =
+                    ArbeidstakerInfo(
+                        arbeidsgiver =
+                            Arbeidsgiver(
+                                orgnummer = "orgnummer",
+                                juridiskOrgnummer = "juridiskOrgnummer",
+                                orgnavn = "orgnavn",
+                            ),
+                    ),
+            )
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                statuser = listOf(hendelse),
+            )
+
+        val lagretSykmelding = sykmeldingRepository.save(sykmelding)
+        val arbeidstakerInfo = lagretSykmelding.sisteStatus().arbeidstakerInfo
+        arbeidstakerInfo `should be equal to`
+            ArbeidstakerInfo(
+                Arbeidsgiver(
+                    orgnummer = "orgnummer",
+                    juridiskOrgnummer = "juridiskOrgnummer",
+                    orgnavn = "orgnavn",
+                ),
+            )
+    }
+
+    @Test
     fun `sykmelding burde være lik når hentet`() {
         val sykmelding =
             Sykmelding(

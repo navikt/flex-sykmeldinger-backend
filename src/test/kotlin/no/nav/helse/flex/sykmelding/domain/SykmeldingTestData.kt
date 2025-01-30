@@ -6,23 +6,30 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-fun lagSykmelding(sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")): Sykmelding =
+fun lagSykmelding(
+    sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+    statuser: List<SykmeldingHendelse> =
+        listOf(
+            lagSykmeldingHendelse(),
+        ),
+): Sykmelding =
     Sykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
-        statuser =
-            listOf(
-                lagSykmeldingHendelse(),
-            ),
+        statuser = statuser,
         opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
         oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
     )
 
-fun lagSykmeldingHendelse(sporsmalSvarDto: SykmeldingSporsmalSvarDto? = null) =
-    SykmeldingHendelse(
-        status = HendelseStatus.APEN,
-        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-        sporsmalSvar = sporsmalSvarDto,
-    )
+fun lagSykmeldingHendelse(
+    status: HendelseStatus = HendelseStatus.APEN,
+    sporsmalSvarDto: SykmeldingSporsmalSvarDto? = null,
+    arbeidstakerInfo: ArbeidstakerInfo? = null,
+) = SykmeldingHendelse(
+    status = status,
+    opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+    sporsmalSvar = sporsmalSvarDto,
+    arbeidstakerInfo = arbeidstakerInfo,
+)
 
 fun lagSykmeldingGrunnlag(
     id: String = "1",

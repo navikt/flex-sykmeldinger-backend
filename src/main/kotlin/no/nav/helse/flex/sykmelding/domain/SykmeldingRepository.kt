@@ -146,6 +146,7 @@ data class SykmeldingStatusDbRecord(
     val status: HendelseStatus,
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
+    val arbeidstakerInfo: PGobject?,
     val opprettet: Instant,
 ) {
     fun mapTilStatus(): SykmeldingHendelse =
@@ -154,6 +155,10 @@ data class SykmeldingStatusDbRecord(
             status = this.status,
             sporsmalSvar =
                 this.sporsmal?.value?.let {
+                    objectMapper.readValue(it)
+                },
+            arbeidstakerInfo =
+                this.arbeidstakerInfo?.value?.let {
                     objectMapper.readValue(it)
                 },
             opprettet = opprettet,
@@ -175,6 +180,13 @@ data class SykmeldingStatusDbRecord(
                             PGobject().apply {
                                 type = "json"
                                 value = sp.serialisertTilString()
+                            }
+                        },
+                    arbeidstakerInfo =
+                        status.arbeidstakerInfo?.let {
+                            PGobject().apply {
+                                type = "json"
+                                value = it.serialisertTilString()
                             }
                         },
                     opprettet = status.opprettet,
