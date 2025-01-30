@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.FakesTestOppsett
-import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.sykmelding.api.dto.AnnenFraverGrunnDTO
 import no.nav.helse.flex.sykmelding.api.dto.AnnenFraversArsakDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
@@ -90,24 +89,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere arbeidsgiver som har arbeidsforhold`() {
-        arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnummer", orgnavn = "orgnavn"))
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(
-            arbeidsgiverInfo =
-                EnArbeidsgiver(
-                    meldingTilArbeidsgiver = "_",
-                    tiltakArbeidsplassen = "_",
-                ),
-            fnr = "fnr",
-            sisteStatus = lagSykmeldingHendelse(lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer = "orgnummer")),
-        ) `should be equal to`
-            ArbeidsgiverDTO(
-                navn = "orgnavn",
-                stillingsprosent = null,
-            )
-    }
-
-    @Test
     fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
         sykmeldingDtoKonverterer.konverterArbeidsgiver(
             arbeidsgiverInfo =
@@ -115,8 +96,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     meldingTilArbeidsgiver = "_",
                     tiltakArbeidsplassen = "_",
                 ),
-            fnr = "fnr",
-            sisteStatus = lagSykmeldingHendelse(),
         ) `should be equal to`
             ArbeidsgiverDTO(
                 navn = null,
@@ -141,13 +120,13 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 stillingsprosent = 50,
             )
 
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(arbeidsgiver, "fnr", lagSykmeldingHendelse()) `should be equal to`
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to`
             forventetArbeidsgiver
     }
 
     @Test
     fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(IngenArbeidsgiver(), "fnr", lagSykmeldingHendelse()) `should be equal to` null
+        sykmeldingDtoKonverterer.konverterArbeidsgiver(IngenArbeidsgiver()) `should be equal to` null
     }
 
     @Test
