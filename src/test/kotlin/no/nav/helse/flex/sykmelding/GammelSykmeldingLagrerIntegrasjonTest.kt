@@ -4,6 +4,7 @@ import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.kafka.SYKMELDING_TOPIC
 import no.nav.helse.flex.kafka.SykmeldingListener
 import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.sykmelding.domain.StatusEvent
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
@@ -107,6 +108,6 @@ class GammelSykmeldingLagrerIntegrasjonTest : FellesTestOppsett() {
         sykmelding.shouldNotBeNull()
         sykmelding.statuser.size `should be equal to` 1
         val status = sykmelding.statuser[0]
-        status.status `should be equal to` "APEN"
+        status.status `should be equal to` StatusEvent.APEN
     }
 }

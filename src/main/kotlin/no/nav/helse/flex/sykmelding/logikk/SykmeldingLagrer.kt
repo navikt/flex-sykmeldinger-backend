@@ -1,10 +1,7 @@
 package no.nav.helse.flex.sykmelding.logikk
 
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatus
+import no.nav.helse.flex.sykmelding.domain.*
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.function.Supplier
@@ -31,7 +28,7 @@ class SykmeldingLagrer(
             statuser =
                 listOf(
                     SykmeldingStatus(
-                        status = "APEN",
+                        status = StatusEvent.APEN,
                         sporsmalSvar = null,
                         opprettet = nowFactory.get(),
                     ),

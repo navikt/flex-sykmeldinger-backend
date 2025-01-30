@@ -22,7 +22,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -35,6 +35,27 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
     }
 
     @Test
+    fun `burde returnere lagret sykmelding`() {
+        val sykmelding =
+            Sykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                statuser =
+                    listOf(
+                        SykmeldingStatus(
+                            status = StatusEvent.APEN,
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        ),
+                    ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+            )
+
+        val lagretSykmelding = sykmeldingRepository.save(sykmelding)
+        lagretSykmelding.databaseId.`should not be null`()
+        lagretSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
+    }
+
+    @Test
     fun `burde oppdatere en sykmelding`() {
         val sykmelding =
             Sykmelding(
@@ -42,7 +63,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -80,7 +101,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -106,7 +127,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
@@ -120,7 +141,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding
                 ?.leggTilStatus(
-                    SykmeldingStatus(status = "LEST", opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
+                    SykmeldingStatus(status = StatusEvent.APEN, opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
                 ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -139,7 +160,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
                 statuser =
                     listOf(
                         SykmeldingStatus(
-                            status = "NY",
+                            status = StatusEvent.APEN,
                             opprettet = Instant.parse("2021-01-01T00:00:00.00Z").trimToMillisForOperativsystemForskjeller(),
                         ),
                     ),

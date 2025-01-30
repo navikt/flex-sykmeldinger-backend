@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.FakesTestOppsett
+import no.nav.helse.flex.sykmelding.domain.StatusEvent
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
@@ -59,6 +60,6 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
         sykmelding.shouldNotBeNull()
         sykmelding.statuser.size `should be equal to` 1
         val status = sykmelding.statuser[0]
-        status.status `should be equal to` "APEN"
+        status.status `should be equal to` StatusEvent.APEN
     }
 }

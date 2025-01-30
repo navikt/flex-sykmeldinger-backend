@@ -14,6 +14,7 @@ import no.nav.helse.flex.tokenxToken
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -69,7 +70,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke finne søknad som ikke finnes`() {
+        fun `burde ikke finne sykmelding som ikke finnes`() {
             mockMvc
                 .perform(
                     MockMvcRequestBuilders
@@ -86,7 +87,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke returnere søknad med feil fnr`() {
+        fun `burde ikke returnere sykmelding med feil fnr`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -202,7 +203,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke returnere søknad med feil fnr`() {
+        fun `burde ikke returnere sykmeldinger med feil fnr`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -361,7 +362,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde få 404 når sykmeldingen ikke finnes`() {
+        fun `burde få 404 når sykmeldingen ikke finnes, selv om arbeidsforhold finnes`() {
             arbeidsforholdRepository.save(
                 lagArbeidsforhold(
                     fnr = "fnr",
@@ -479,6 +480,121 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                     navn = "Navn",
                     orgnummer = "orgnr",
                 )
+        }
+    }
+
+    @Nested
+    inner class SendSykmeldingEndepunkt {
+        @Test
+        fun `burde sende sykmelding`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .post("/api/v1/sykmeldinger/1/send")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON)
+                            .content("{}"),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            returnertSykmelding `should not be` null
+
+            val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
+            sykmelding?.sisteStatus()?.status `should be equal to` StatusEvent.SENDT
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/send")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                )
+                            }",
+                        ).content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNotFound)
+        }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/send")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "feil_fnr",
+                                )
+                            }",
+                        ).content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isForbidden)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi ikke har token`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/send")
+                        .content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi har feil claim`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/send")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                    acrClaim = "feil-claim",
+                                )
+                            }",
+                        ).content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
         }
     }
 }
