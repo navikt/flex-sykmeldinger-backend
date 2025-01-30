@@ -51,6 +51,7 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
+        lagretSykmelding.databaseId.`should not be null`()
         lagretSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
     }
 
