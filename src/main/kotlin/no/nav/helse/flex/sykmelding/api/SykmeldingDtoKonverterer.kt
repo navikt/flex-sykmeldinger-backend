@@ -129,7 +129,7 @@ class SykmeldingDtoKonverterer {
                     ArbeidsgiverStatusDTO(
                         orgnummer = arbeidsgiver.orgnummer,
                         juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
-                        orgNavn = arbeidsgiver.orgnummer,
+                        orgNavn = arbeidsgiver.orgnavn,
                     )
                 },
             brukerSvar = null,
