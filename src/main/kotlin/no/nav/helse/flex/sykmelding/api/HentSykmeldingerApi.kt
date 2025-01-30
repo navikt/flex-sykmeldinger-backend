@@ -173,8 +173,8 @@ class HentSykmeldingerApi(
                 ),
             )
 
-        sykmeldingRepository.save(besvartSykmelding)
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        val lagretSykmelding = sykmeldingRepository.save(besvartSykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(lagretSykmelding)
 
         return ResponseEntity.ok(konvertertSykmelding)
     }

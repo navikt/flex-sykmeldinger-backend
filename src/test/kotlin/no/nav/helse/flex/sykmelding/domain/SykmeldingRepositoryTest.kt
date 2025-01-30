@@ -35,6 +35,26 @@ class SykmeldingRepositoryTest : FellesTestOppsett() {
     }
 
     @Test
+    fun `burde returnere lagret sykmelding`() {
+        val sykmelding =
+            Sykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                statuser =
+                    listOf(
+                        SykmeldingStatus(
+                            status = StatusEvent.APEN,
+                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        ),
+                    ),
+                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+            )
+
+        val lagretSykmelding = sykmeldingRepository.save(sykmelding)
+        lagretSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
+    }
+
+    @Test
     fun `burde oppdatere en sykmelding`() {
         val sykmelding =
             Sykmelding(

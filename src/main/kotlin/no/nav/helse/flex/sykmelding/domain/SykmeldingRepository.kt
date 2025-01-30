@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 interface ISykmeldingRepository {
-    fun save(sykmelding: Sykmelding)
+    fun save(sykmelding: Sykmelding): Sykmelding
 
     fun findBySykmeldingId(id: String): Sykmelding?
 
@@ -29,15 +29,16 @@ class SykmeldingRepository(
     private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
 ) : ISykmeldingRepository {
     @Transactional
-    override fun save(sykmelding: Sykmelding) {
+    override fun save(sykmelding: Sykmelding): Sykmelding {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
         val statuser = sykmelding.statuser
 
         val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
         val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
 
-        sykmeldingDbRepository.save(sykmeldingDbRecord)
-        sykmeldingStatusDbRepository.saveAll(statusDbRecords)
+        val lagretSykmeldingDbRecord = sykmeldingDbRepository.save(sykmeldingDbRecord)
+        val lagredeStatusDbRecords = sykmeldingStatusDbRepository.saveAll(statusDbRecords)
+        return mapTilSykmelding(lagretSykmeldingDbRecord, lagredeStatusDbRecords)
     }
 
     override fun findBySykmeldingId(id: String): Sykmelding? {
@@ -75,7 +76,7 @@ class SykmeldingRepository(
 
     private fun mapTilSykmelding(
         dbRecord: SykmeldingDbRecord,
-        statusDbRecords: List<SykmeldingStatusDbRecord>,
+        statusDbRecords: Iterable<SykmeldingStatusDbRecord>,
     ): Sykmelding =
         Sykmelding(
             databaseId = dbRecord.id,
