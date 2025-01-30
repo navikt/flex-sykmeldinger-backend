@@ -601,4 +601,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
 }
 
 fun lagSendBody(): String =
-    """{"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER","arbeidsgiverOrgnummer":"907670201","riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}"""
+"""
+{"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
+"arbeidsgiverOrgnummer":"907670201","riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}
+"""
