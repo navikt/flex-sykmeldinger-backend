@@ -164,37 +164,6 @@ class HentSykmeldingerApi(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
-        val sykmeldingSporsmalSvarDto =
-            SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige =
-                    FormSporsmalSvar(
-                        sporsmaltekst = "Er opplysningene riktige?",
-                        svar = jAEllerNeiFromString(sendBody.erOpplysningeneRiktige),
-                    ),
-                uriktigeOpplysninger = null,
-                arbeidssituasjon = FormSporsmalSvar(sporsmaltekst = "Hva er din arbeidssituasjon?", svar = Arbeidssituasjon.ARBEIDSTAKER),
-                arbeidsgiverOrgnummer =
-                    sendBody.arbeidsgiverOrgnummer?.let {
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
-                            svar = sendBody.arbeidsgiverOrgnummer,
-                        )
-                    },
-                arbeidsledig = null,
-                riktigNarmesteLeder =
-                    sendBody.riktigNarmesteLeder?.let {
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Er dette riktig nærmeste leder?",
-                            svar = jAEllerNeiFromString(sendBody.riktigNarmesteLeder),
-                        )
-                    },
-                harBruktEgenmelding = null,
-                egenmeldingsperioder = null,
-                harForsikring = null,
-                egenmeldingsdager = null,
-                harBruktEgenmeldingsdager = null,
-                fisker = null,
-            )
         val fnr = tokenxValidering.validerFraDittSykefravaer()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
@@ -231,7 +200,7 @@ class HentSykmeldingerApi(
                     // TODO: Finn ut forskjell på SENDT og BEKREFTET
                     status = HendelseStatus.SENDT,
                     opprettet = nowFactory.get(),
-                    sporsmalSvar = sykmeldingSporsmalSvarDto,
+                    sporsmalSvar = TODO(),
                     arbeidstakerInfo = arbeidstakerInfo,
                 ),
             )

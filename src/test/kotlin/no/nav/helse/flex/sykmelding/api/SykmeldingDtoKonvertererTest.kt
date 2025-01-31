@@ -1,20 +1,7 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.FakesTestOppsett
-import no.nav.helse.flex.sykmelding.api.dto.AnnenFraverGrunnDTO
-import no.nav.helse.flex.sykmelding.api.dto.AnnenFraversArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.DiagnoseDTO
-import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskVurderingDTO
-import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvarDTO
-import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
+import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
@@ -182,6 +169,53 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
 
         sykmeldingDtoKonverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
+    }
+
+    @Test
+    fun `burde konvertere liste med spørsmål til gammelt format`() {
+        val sporsmalOgSvarListe =
+            listOf(
+                Sporsmal(
+                    tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
+                    sporsmalstekst = "tekst",
+                    svartype = Svartype.JA_NEI,
+                    undersporsmal = emptyList(),
+                    svar = emptyList(),
+                ),
+                Sporsmal(
+                    tag = SporsmalTag.ARBEIDSSITUASJON,
+                    sporsmalstekst = "tekst",
+                    svartype = Svartype.JA_NEI,
+                    undersporsmal = emptyList(),
+                    svar = emptyList(),
+                ),
+            )
+
+        val forventetSporsmalSvarDto =
+            SykmeldingSporsmalSvarDto(
+                erOpplysningeneRiktige =
+                    FormSporsmalSvar(
+                        sporsmaltekst = "tekst",
+                        svar = JaEllerNei.JA,
+                    ),
+                arbeidssituasjon =
+                    FormSporsmalSvar(
+                        sporsmaltekst = "",
+                        svar = Arbeidssituasjon.ARBEIDSTAKER,
+                    ),
+                uriktigeOpplysninger = null,
+                arbeidsgiverOrgnummer = null,
+                arbeidsledig = null,
+                riktigNarmesteLeder = null,
+                harBruktEgenmelding = null,
+                egenmeldingsperioder = null,
+                harForsikring = null,
+                egenmeldingsdager = null,
+                harBruktEgenmeldingsdager = null,
+                fisker = null,
+            )
+
+        sykmeldingDtoKonverterer.konverterSykmeldingSporsmal(sporsmalOgSvarListe) `should be equal to` forventetSporsmalSvarDto
     }
 
     @Test

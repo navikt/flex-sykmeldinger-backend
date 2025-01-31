@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingSporsmalSvarDto
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus
@@ -42,7 +41,7 @@ data class Sykmelding(
 data class SykmeldingHendelse(
     internal val databaseId: String? = null,
     val status: HendelseStatus,
-    val sporsmalSvar: SykmeldingSporsmalSvarDto? = null,
+    val sporsmalSvar: List<Sporsmal>? = null,
     val arbeidstakerInfo: ArbeidstakerInfo? = null,
     val opprettet: Instant,
 )

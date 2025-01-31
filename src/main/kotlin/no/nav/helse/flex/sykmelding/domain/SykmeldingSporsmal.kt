@@ -5,6 +5,7 @@ data class Sporsmal(
     val tag: SporsmalTag,
     val sporsmalstekst: String? = null,
     val svartype: Svartype,
+    val undersporsmal: List<Sporsmal> = emptyList(),
     val svar: List<Svar> = emptyList(),
 ) {
     val forsteSvarVerdi: String?
