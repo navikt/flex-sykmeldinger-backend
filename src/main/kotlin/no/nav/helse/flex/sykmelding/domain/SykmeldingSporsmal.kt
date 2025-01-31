@@ -13,7 +13,7 @@ data class Sporsmal(
 }
 
 data class Svar(
-    val id: String?,
+    val id: String? = null,
     val verdi: String,
 )
 

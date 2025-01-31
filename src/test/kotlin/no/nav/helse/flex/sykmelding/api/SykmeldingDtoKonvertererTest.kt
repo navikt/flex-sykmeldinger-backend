@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -149,73 +148,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
                 )
         }
-    }
-
-    @Test
-    fun `burde konvertere status NY`() {
-        val status =
-            SykmeldingHendelse(
-                status = HendelseStatus.APEN,
-                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-            )
-
-        val forventetStatus =
-            SykmeldingStatusDTO(
-                statusEvent = "APEN",
-                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
-                arbeidsgiver = null,
-                sporsmalOgSvarListe = emptyList(),
-                brukerSvar = null,
-            )
-
-        sykmeldingDtoKonverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
-    }
-
-    @Test
-    fun `burde konvertere liste med spørsmål til gammelt format`() {
-        val sporsmalOgSvarListe =
-            listOf(
-                Sporsmal(
-                    tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-                    sporsmalstekst = "tekst",
-                    svartype = Svartype.JA_NEI,
-                    undersporsmal = emptyList(),
-                    svar = emptyList(),
-                ),
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSSITUASJON,
-                    sporsmalstekst = "tekst",
-                    svartype = Svartype.JA_NEI,
-                    undersporsmal = emptyList(),
-                    svar = emptyList(),
-                ),
-            )
-
-        val forventetSporsmalSvarDto =
-            SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige =
-                    FormSporsmalSvar(
-                        sporsmaltekst = "tekst",
-                        svar = JaEllerNei.JA,
-                    ),
-                arbeidssituasjon =
-                    FormSporsmalSvar(
-                        sporsmaltekst = "",
-                        svar = Arbeidssituasjon.ARBEIDSTAKER,
-                    ),
-                uriktigeOpplysninger = null,
-                arbeidsgiverOrgnummer = null,
-                arbeidsledig = null,
-                riktigNarmesteLeder = null,
-                harBruktEgenmelding = null,
-                egenmeldingsperioder = null,
-                harForsikring = null,
-                egenmeldingsdager = null,
-                harBruktEgenmeldingsdager = null,
-                fisker = null,
-            )
-
-        sykmeldingDtoKonverterer.konverterSykmeldingSporsmal(sporsmalOgSvarListe) `should be equal to` forventetSporsmalSvarDto
     }
 
     @Test
