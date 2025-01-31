@@ -200,7 +200,7 @@ class HentSykmeldingerApi(
                     // TODO: Finn ut forskjell på SENDT og BEKREFTET
                     status = HendelseStatus.SENDT,
                     opprettet = nowFactory.get(),
-                    sporsmalSvar = TODO(),
+                    sporsmalSvar = null,
                     arbeidstakerInfo = arbeidstakerInfo,
                 ),
             )
