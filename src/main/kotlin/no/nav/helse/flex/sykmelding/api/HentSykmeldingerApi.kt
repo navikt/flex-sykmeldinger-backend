@@ -1,8 +1,11 @@
 package no.nav.helse.flex.sykmelding.api
 
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.api.dto.*
+import no.nav.helse.flex.sykmelding.domain.Arbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.ArbeidstakerInfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
@@ -27,6 +30,7 @@ class HentSykmeldingerApi(
     private val virksomhetHenterService: VirksomhetHenterService,
     private val nowFactory: Supplier<Instant>,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
+    private val arbeidsforholdRepository: ArbeidsforholdRepository,
 ) {
     private val logger = logger()
 
@@ -202,6 +206,25 @@ class HentSykmeldingerApi(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
+        val arbeidstakerInfo: ArbeidstakerInfo? =
+            if (sendBody.arbeidsgiverOrgnummer != null) {
+                val arbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
+                val valgtArbeidsforhold = arbeidsforhold.find { it.orgnummer == sendBody.arbeidsgiverOrgnummer }
+                if (valgtArbeidsforhold == null) {
+                    throw IllegalArgumentException("Fant ikke arbeidsgiver med orgnummer ${sendBody.arbeidsgiverOrgnummer}")
+                }
+                ArbeidstakerInfo(
+                    arbeidsgiver =
+                        Arbeidsgiver(
+                            orgnummer = valgtArbeidsforhold.orgnummer,
+                            juridiskOrgnummer = valgtArbeidsforhold.juridiskOrgnummer,
+                            orgnavn = valgtArbeidsforhold.orgnavn,
+                        ),
+                )
+            } else {
+                null
+            }
+
         val besvartSykmelding =
             sykmelding.leggTilStatus(
                 SykmeldingHendelse(
@@ -209,6 +232,7 @@ class HentSykmeldingerApi(
                     status = HendelseStatus.SENDT,
                     opprettet = nowFactory.get(),
                     sporsmalSvar = sykmeldingSporsmalSvarDto,
+                    arbeidstakerInfo = arbeidstakerInfo,
                 ),
             )
 
