@@ -642,8 +642,8 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
     }
 }
 
-fun lagSendBody(arbeidsgiverOrgnummer: String? = null): HentSykmeldingerApi.SendBody {
-    val sendBody: HentSykmeldingerApi.SendBody =
+fun lagSendBody(arbeidsgiverOrgnummer: String? = null): SendBody {
+    val sendBody: SendBody =
         objectMapper.readValue(
             """
         {"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
