@@ -18,6 +18,7 @@ data class Svar(
 )
 
 enum class SporsmalTag {
+    GRUPPE_AV_UNDERSPORSMAL,
     ER_OPPLYSNINGENE_RIKTIGE,
     URIKTIGE_OPPLYSNINGER,
     ARBEIDSSITUASJON,
