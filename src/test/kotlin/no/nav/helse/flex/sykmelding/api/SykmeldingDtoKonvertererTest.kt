@@ -1,20 +1,7 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.FakesTestOppsett
-import no.nav.helse.flex.sykmelding.api.dto.AnnenFraverGrunnDTO
-import no.nav.helse.flex.sykmelding.api.dto.AnnenFraversArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsrelatertArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.DiagnoseDTO
-import no.nav.helse.flex.sykmelding.api.dto.KontaktMedPasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskArsakTypeDTO
-import no.nav.helse.flex.sykmelding.api.dto.MedisinskVurderingDTO
-import no.nav.helse.flex.sykmelding.api.dto.PasientDTO
-import no.nav.helse.flex.sykmelding.api.dto.SporsmalSvarDTO
-import no.nav.helse.flex.sykmelding.api.dto.SvarRestriksjonDTO
-import no.nav.helse.flex.sykmelding.api.dto.SykmeldingStatusDTO
+import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
 import no.nav.helse.flex.sykmelding.domain.ArbeidsrelatertArsak
@@ -40,7 +27,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -162,26 +148,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
                 )
         }
-    }
-
-    @Test
-    fun `burde konvertere status NY`() {
-        val status =
-            SykmeldingHendelse(
-                status = HendelseStatus.APEN,
-                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-            )
-
-        val forventetStatus =
-            SykmeldingStatusDTO(
-                statusEvent = "APEN",
-                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
-                arbeidsgiver = null,
-                sporsmalOgSvarListe = emptyList(),
-                brukerSvar = null,
-            )
-
-        sykmeldingDtoKonverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
     }
 
     @Test

@@ -8,6 +8,10 @@ import no.nav.helse.flex.sykmelding.domain.Arbeidsgiver
 import no.nav.helse.flex.sykmelding.domain.ArbeidstakerInfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.domain.Sporsmal
+import no.nav.helse.flex.sykmelding.domain.SporsmalTag
+import no.nav.helse.flex.sykmelding.domain.Svar
+import no.nav.helse.flex.sykmelding.domain.Svartype
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.tokenx.TOKENX
@@ -135,24 +139,6 @@ class HentSykmeldingerApi(
         TODO("Ikke implementert")
     }
 
-    data class SendBody(
-        val erOpplysningeneRiktige: String,
-        val arbeidsgiverOrgnummer: String?,
-        val arbeidssituasjon: String,
-        val harEgenmeldingsdager: String?,
-        val riktigNarmesteLeder: String?,
-    )
-
-    private fun jAEllerNeiFromString(value: String): JaEllerNei {
-        if (value == "YES") {
-            return JaEllerNei.JA
-        } else if (value == "NO") {
-            return JaEllerNei.NEI
-        } else {
-            return JaEllerNei.valueOf(value)
-        }
-    }
-
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
     @ResponseBody
     @ProtectedWithClaims(
@@ -164,37 +150,6 @@ class HentSykmeldingerApi(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
-        val sykmeldingSporsmalSvarDto =
-            SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige =
-                    FormSporsmalSvar(
-                        sporsmaltekst = "Er opplysningene riktige?",
-                        svar = jAEllerNeiFromString(sendBody.erOpplysningeneRiktige),
-                    ),
-                uriktigeOpplysninger = null,
-                arbeidssituasjon = FormSporsmalSvar(sporsmaltekst = "Hva er din arbeidssituasjon?", svar = Arbeidssituasjon.ARBEIDSTAKER),
-                arbeidsgiverOrgnummer =
-                    sendBody.arbeidsgiverOrgnummer?.let {
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
-                            svar = sendBody.arbeidsgiverOrgnummer,
-                        )
-                    },
-                arbeidsledig = null,
-                riktigNarmesteLeder =
-                    sendBody.riktigNarmesteLeder?.let {
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Er dette riktig nærmeste leder?",
-                            svar = jAEllerNeiFromString(sendBody.riktigNarmesteLeder),
-                        )
-                    },
-                harBruktEgenmelding = null,
-                egenmeldingsperioder = null,
-                harForsikring = null,
-                egenmeldingsdager = null,
-                harBruktEgenmeldingsdager = null,
-                fisker = null,
-            )
         val fnr = tokenxValidering.validerFraDittSykefravaer()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
@@ -231,7 +186,7 @@ class HentSykmeldingerApi(
                     // TODO: Finn ut forskjell på SENDT og BEKREFTET
                     status = HendelseStatus.SENDT,
                     opprettet = nowFactory.get(),
-                    sporsmalSvar = sykmeldingSporsmalSvarDto,
+                    sporsmalSvar = sendBody.tilSporsmalListe(),
                     arbeidstakerInfo = arbeidstakerInfo,
                 ),
             )
@@ -275,3 +230,64 @@ internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
             orgnummer = this.orgnummer,
         )
     }
+
+data class SendBody(
+    val erOpplysningeneRiktige: String,
+    val arbeidsgiverOrgnummer: String?,
+    val arbeidssituasjon: String,
+    val harEgenmeldingsdager: String?,
+    val riktigNarmesteLeder: String?,
+) {
+    fun tilSporsmalListe(): List<Sporsmal> {
+        val sporsmal = mutableListOf<Sporsmal>()
+        sporsmal.add(
+            Sporsmal(
+                tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
+                svartype = Svartype.JA_NEI,
+                svar = listOf(Svar(verdi = konverterJaNeiSvar(erOpplysningeneRiktige))),
+            ),
+        )
+        arbeidsgiverOrgnummer?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
+                    svartype = Svartype.FRITEKST,
+                    svar = listOf(Svar(verdi = it)),
+                ),
+            )
+        }
+        sporsmal.add(
+            Sporsmal(
+                tag = SporsmalTag.ARBEIDSSITUASJON,
+                svartype = Svartype.RADIO,
+                svar = listOf(Svar(verdi = arbeidssituasjon)),
+            ),
+        )
+        harEgenmeldingsdager?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
+                    svartype = Svartype.JA_NEI,
+                    svar = listOf(Svar(verdi = konverterJaNeiSvar(it))),
+                ),
+            )
+        }
+        riktigNarmesteLeder?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
+                    svartype = Svartype.JA_NEI,
+                    svar = listOf(Svar(verdi = konverterJaNeiSvar(it))),
+                ),
+            )
+        }
+        return sporsmal
+    }
+
+    private fun konverterJaNeiSvar(svar: String): String =
+        when (svar) {
+            "YES" -> "JA"
+            "NO" -> "NEI"
+            else -> svar
+        }
+}

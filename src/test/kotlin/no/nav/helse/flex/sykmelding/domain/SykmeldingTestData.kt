@@ -22,12 +22,12 @@ fun lagSykmelding(
 
 fun lagSykmeldingHendelse(
     status: HendelseStatus = HendelseStatus.APEN,
-    sporsmalSvarDto: SykmeldingSporsmalSvarDto? = null,
+    sporsmalSvar: List<Sporsmal>? = null,
     arbeidstakerInfo: ArbeidstakerInfo? = null,
 ) = SykmeldingHendelse(
     status = status,
     opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-    sporsmalSvar = sporsmalSvarDto,
+    sporsmalSvar = sporsmalSvar,
     arbeidstakerInfo = arbeidstakerInfo,
 )
 

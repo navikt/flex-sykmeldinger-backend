@@ -1,14 +1,14 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.sykmelding.api.dto.*
-import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.SporsmalSvar
 import org.springframework.stereotype.Component
-import java.time.ZoneOffset
 
 @Component
-class SykmeldingDtoKonverterer {
+class SykmeldingDtoKonverterer(
+    private val sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer,
+) {
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
             is SykmeldingGrunnlag -> konverterSykmelding(sykmelding)
@@ -29,7 +29,7 @@ class SykmeldingDtoKonverterer {
                     sykmelding.sykmeldingGrunnlag.arbeidsgiver,
                 ),
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
-            sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
+            sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteStatus()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
@@ -70,7 +70,7 @@ class SykmeldingDtoKonverterer {
             legekontorOrgnummer = null,
             arbeidsgiver = null,
             sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
-            sykmeldingStatus = konverterSykmeldingStatus(sykmelding.sisteStatus()),
+            sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteStatus()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             prognose = null,
@@ -117,23 +117,6 @@ class SykmeldingDtoKonverterer {
                 ),
         )
     }
-
-    fun konverterSykmeldingStatus(status: SykmeldingHendelse): SykmeldingStatusDTO =
-        SykmeldingStatusDTO(
-            // TODO
-            statusEvent = status.status.name,
-            timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
-            sporsmalOgSvarListe = emptyList(),
-            arbeidsgiver =
-                status.arbeidstakerInfo?.arbeidsgiver?.let { arbeidsgiver ->
-                    ArbeidsgiverStatusDTO(
-                        orgnummer = arbeidsgiver.orgnummer,
-                        juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
-                        orgNavn = arbeidsgiver.orgnavn,
-                    )
-                },
-            brukerSvar = null,
-        )
 
     internal fun konverterPasient(pasient: Pasient): PasientDTO =
         PasientDTO(
