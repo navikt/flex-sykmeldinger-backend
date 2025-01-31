@@ -135,6 +135,51 @@ class SykmeldingDtoKonverterer {
             brukerSvar = null,
         )
 
+    internal fun konverterSykmeldingSporsmal(sporsmal: List<Sporsmal>): SykmeldingSporsmalSvarDto {
+        fun hentSporsmal(
+            sporsmal: List<Sporsmal>,
+            tag: SporsmalTag,
+        ): Sporsmal? = sporsmal.find { it.tag == tag }
+
+        fun <T> Sporsmal.tilSvar(mapper: (verdi: String) -> T): FormSporsmalSvar<T>? {
+            val forsteSvarVerdi: String? = this.forsteSvarVerdi
+            return if (forsteSvarVerdi == null) {
+                null
+            } else {
+                FormSporsmalSvar(sporsmaltekst = this.sporsmalstekst ?: "", svar = mapper(forsteSvarVerdi))
+            }
+        }
+
+        fun Sporsmal.tilJaNeiSvar(): FormSporsmalSvar<JaEllerNei>? = this.tilSvar { enumValueOf(it) }
+
+        SykmeldingSporsmalSvarDto(
+            erOpplysningeneRiktige =
+                hentSporsmal(sporsmal, SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE)?.tilJaNeiSvar()
+                    ?: error("ER_OPPLYSNINGENE_RIKTIGE må ha svar"),
+            uriktigeOpplysninger =
+                hentSporsmal(sporsmal, SporsmalTag.URIKTIGE_OPPLYSNINGER)?.let {
+                    val verdier =
+                        it.svar.map { svar ->
+                            enumValueOf<UriktigeOpplysningerType>(svar.verdi)
+                        }
+                    FormSporsmalSvar(
+                        sporsmaltekst = it.sporsmalstekst ?: "",
+                        svar = verdier,
+                    )
+                },
+            arbeidssituasjon = TODO(),
+            arbeidsgiverOrgnummer = TODO(),
+            arbeidsledig = TODO(),
+            riktigNarmesteLeder = hentSporsmal(sporsmal, SporsmalTag.RIKTIG_NARMESTE_LEDER)?.tilJaNeiSvar(),
+            harBruktEgenmelding = TODO(),
+            egenmeldingsperioder = TODO(),
+            harForsikring = TODO(),
+            egenmeldingsdager = TODO(),
+            harBruktEgenmeldingsdager = TODO(),
+            fisker = TODO(),
+        )
+    }
+
     internal fun konverterPasient(pasient: Pasient): PasientDTO =
         PasientDTO(
             fnr = pasient.fnr,
