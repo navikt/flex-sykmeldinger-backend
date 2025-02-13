@@ -28,7 +28,7 @@ val tokenSupportVersion = "5.0.5"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
 val inntektsmeldingKontraktVersion = "2024.05.21-09-56-5528e"
-val sykepengesoknadKafkaVersion = "2024.12.06-09.11-55fbeea5"
+val sykepengesoknadKafkaVersion = "2025.02.12-08.40-d2285164"
 val commonsTextVersion = "1.12.0"
 val mockitoKotlinVersion = "2.2.0"
 
