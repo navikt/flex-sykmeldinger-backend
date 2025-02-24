@@ -1,6 +1,7 @@
 package no.nav.helse.flex.clients
 
 import no.nav.helse.flex.clients.aareg.AaregClient
+import no.nav.helse.flex.clients.aareg.AaregEksternClient
 import no.nav.helse.flex.testconfig.MockWebServereConfig
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
@@ -25,7 +26,7 @@ import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnableMockOAuth2Server
-@SpringBootTest(classes = [AaregClient::class, RestTemplate::class, MockWebServereConfig::class])
+@SpringBootTest(classes = [AaregEksternClient::class, RestTemplate::class, MockWebServereConfig::class])
 class AaregClientTest {
     @Autowired
     private lateinit var aaregMockWebServer: MockWebServer
