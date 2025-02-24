@@ -2,7 +2,8 @@ package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.clients.ereg.Navn
+import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagPasient
@@ -10,12 +11,8 @@ import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
-import no.nav.helse.flex.testconfig.simpleDispatcher
-import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
@@ -27,7 +24,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     private lateinit var sykmeldingLagrer: SykmeldingLagrer
 
     @Autowired
-    private lateinit var eregMockWebServer: MockWebServer
+    private lateinit var eregClient: EregClientFake
 
     @Autowired
     private lateinit var aaregClient: AaregClientFake
@@ -35,7 +32,6 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @AfterEach
     fun tearDown() {
         slettDatabase()
-        eregMockWebServer.dispatcher = defaultEregDispatcher
         aaregClient.reset()
     }
 
@@ -83,12 +79,12 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
-        aaregClient.setArbeidsforholdoversikt(lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(fnr = "fnr"))), "fnr")
-
-        eregMockWebServer.dispatcher =
-            simpleDispatcher {
-                lagJsonResponse(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
-            }
+        aaregClient.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(fnr = "fnr", orgnummer = "910825518"))),
+            "fnr",
+        )
+        eregClient.setNokkelinfo(failure = RuntimeException())
+        eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
 
         val sykmeldingMedBehandlingsutfall =
             SykmeldingMedBehandlingsutfallMelding(
@@ -100,10 +96,6 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnr("fnr")
         arbeidsforhold.size `should be equal to` 1
+        arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
     }
 }
-
-private fun lagJsonResponse(body: String) =
-    MockResponse()
-        .setBody(body)
-        .setHeader("Content-Type", "application/json")

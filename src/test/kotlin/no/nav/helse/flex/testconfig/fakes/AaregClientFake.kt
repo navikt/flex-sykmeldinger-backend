@@ -35,12 +35,7 @@ class AaregClientFake : AaregClient {
     }
 
     override fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
-        val value =
-            arbeidsforholdOversikter.getOrElse(fnr) {
-                arbeidsforholdOversikter.getOrElse("__default") {
-                    throw RuntimeException("Fant ikke arbeidsforholdoversikt for $fnr")
-                }
-            }
+        val value = arbeidsforholdOversikter[fnr] ?: arbeidsforholdOversikter["__default"]!!
         return value.getOrThrow()
     }
 }
