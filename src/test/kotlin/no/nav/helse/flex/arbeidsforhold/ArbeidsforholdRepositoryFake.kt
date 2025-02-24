@@ -1,6 +1,6 @@
 package no.nav.helse.flex.arbeidsforhold
 
-import no.nav.helse.flex.AbstractCrudRepositoryFake
+import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
 
 class ArbeidsforholdRepositoryFake :
     AbstractCrudRepositoryFake<Arbeidsforhold>(

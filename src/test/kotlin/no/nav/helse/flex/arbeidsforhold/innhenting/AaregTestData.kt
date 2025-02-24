@@ -1,9 +1,9 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdOversikt
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.ArbeidsforholdoversiktResponse
-import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.clients.aareg.ArbeidsforholdOversikt
+import no.nav.helse.flex.clients.aareg.ArbeidsforholdoversiktResponse
+import no.nav.helse.flex.utils.objectMapper
 
 fun lagArbeidsforholdOversiktResponse(
     arbeidsforholdoversikter: List<ArbeidsforholdOversikt> = listOf(lagArbeidsforholdOversikt()),

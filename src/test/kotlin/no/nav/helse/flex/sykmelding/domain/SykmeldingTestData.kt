@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.sykmelding.api.dto.*
+import no.nav.helse.flex.api.dto.*
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -254,7 +254,11 @@ fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): S
         uriktigeOpplysninger =
             FormSporsmalSvar(
                 sporsmaltekst = "Hvilke opplysninger er uriktige?",
-                svar = listOf(UriktigeOpplysningerType.PERIODE, UriktigeOpplysningerType.DIAGNOSE),
+                svar =
+                    listOf(
+                        UriktigeOpplysningerType.PERIODE,
+                        UriktigeOpplysningerType.DIAGNOSE,
+                    ),
             ),
         arbeidssituasjon =
             FormSporsmalSvar(

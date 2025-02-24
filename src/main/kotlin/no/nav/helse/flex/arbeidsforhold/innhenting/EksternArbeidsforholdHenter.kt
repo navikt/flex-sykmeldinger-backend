@@ -1,8 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
-import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
+import no.nav.helse.flex.clients.aareg.*
+import no.nav.helse.flex.clients.ereg.EregClient
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -55,23 +55,26 @@ class EksternArbeidsforholdHenter(
                                 //  IdentType.AKTORID,
                                 IdentType.FOLKEREGISTERIDENT,
                             )
-                    }
-                    .filter { it.gjeldende == true }
+                    }.filter { it.gjeldende == true }
             require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
 
             return gjeldendePersonIdenter.first().ident
         }
 
-        fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String {
-            return arbeidssted.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
-        }
+        fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String =
+            arbeidssted.identer
+                .first {
+                    it.type == IdentType.ORGANISASJONSNUMMER
+                }.ident
 
-        fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String {
-            return opplysningspliktig.identer.first { it.type == IdentType.ORGANISASJONSNUMMER }.ident
-        }
+        fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String =
+            opplysningspliktig.identer
+                .first {
+                    it.type == IdentType.ORGANISASJONSNUMMER
+                }.ident
 
-        fun parseArbeidsforholdType(kode: String): ArbeidsforholdType {
-            return when (kode) {
+        fun parseArbeidsforholdType(kode: String): ArbeidsforholdType =
+            when (kode) {
                 "forenkletOppgjoersordning" -> ArbeidsforholdType.FORENKLET_OPPGJOERSORDNING
                 "frilanserOppdragstakerHonorarPersonerMm" ->
                     ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
@@ -83,6 +86,5 @@ class EksternArbeidsforholdHenter(
 
                 else -> throw IllegalArgumentException("Ugyldig arbeidsforhold type $kode")
             }
-        }
     }
 }

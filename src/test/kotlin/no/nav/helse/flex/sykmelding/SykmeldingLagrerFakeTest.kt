@@ -1,19 +1,19 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.FakesTestOppsett
-import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.defaultAaregDispatcher
-import no.nav.helse.flex.defaultEregDispatcher
-import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagPasient
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
+import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.defaultAaregDispatcher
+import no.nav.helse.flex.testconfig.defaultEregDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`

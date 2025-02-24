@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding.logikk
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
-import no.nav.helse.flex.logger
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
