@@ -40,9 +40,9 @@ class PdlClientTest : FellesTestOppsett() {
             pdlClient.hentIdenterMedHistorikk(ident = "ident")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
-            val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
+            recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
+            recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
+            val parsedBody = GraphQlRequest.fraJson(recordedRequest!!.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query(${"$"}ident: ID!) {
@@ -56,7 +56,7 @@ class PdlClientTest : FellesTestOppsett() {
                 """
             parsedBody.variables `should be equal to` mapOf("ident" to "ident")
 
-            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            recordedRequest!!.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
@@ -110,9 +110,9 @@ class PdlClientTest : FellesTestOppsett() {
             pdlClient.hentFormattertNavn("fnr")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest.headers["Tema"] `should be equal to` "SYK"
-            val parsedBody = GraphQlRequest.fraJson(recordedRequest.body.readUtf8())
+            recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
+            recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
+            val parsedBody = GraphQlRequest.fraJson(recordedRequest!!.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
             query(${'$'}ident: ID!) {
@@ -127,7 +127,7 @@ class PdlClientTest : FellesTestOppsett() {
             """
             parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
 
-            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            recordedRequest!!.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
