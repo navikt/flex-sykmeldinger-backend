@@ -10,8 +10,8 @@ import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.defaultEregDispatcher
+import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
@@ -32,19 +32,25 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer
 
+    @Autowired
+    private lateinit var aaregClient: AaregClientFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
-
-        aaregMockWebServer.dispatcher = defaultAaregDispatcher
         eregMockWebServer.dispatcher = defaultEregDispatcher
     }
 
     @Test
     fun `burde lagre sykmelding`() {
+        aaregClient.setArbeidsforholdoversikt(
+            "fnr",
+            lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()),
+        )
+
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
             SykmeldingMedBehandlingsutfallMelding(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
                 validation = lagValidation(),
             ),
         )

@@ -3,10 +3,12 @@ package no.nav.helse.flex.testconfig
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
+import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -48,6 +50,9 @@ abstract class FakesTestOppsett {
 
         @Bean
         fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
+
+        @Bean
+        fun aaregClient(): AaregClient = AaregClientFake()
     }
 
     @Autowired
