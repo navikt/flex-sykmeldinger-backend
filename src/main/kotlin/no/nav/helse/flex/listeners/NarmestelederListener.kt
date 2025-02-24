@@ -13,6 +13,8 @@ class NarmestelederListener(
     @KafkaListener(
         topics = [NARMESTELEDER_LEESAH_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
+        // TODO: Hvordan offset?
+        properties = ["auto.offset.reset = latest"],
     )
     fun listen(
         cr: ConsumerRecord<String, String>,

@@ -22,6 +22,7 @@ class SykmeldingListener(
     @KafkaListener(
         topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
+        // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(

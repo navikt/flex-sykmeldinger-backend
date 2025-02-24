@@ -2,7 +2,7 @@ package no.nav.helse.flex.clients
 
 import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.testconfig.MockWebServereConfig
-import no.nav.helse.flex.testconfig.notFoundDispatcher
+import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -35,7 +35,7 @@ class AaregClientTest {
 
     @AfterEach
     fun afterEach() {
-        aaregMockWebServer.dispatcher = notFoundDispatcher
+        aaregMockWebServer.dispatcher = defaultAaregDispatcher
     }
 
     @Test

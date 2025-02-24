@@ -30,7 +30,7 @@ val defaultEregDispatcher =
     simpleDispatcher {
         MockResponse()
             .setHeader("Content-Type", "application/json")
-            .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString().serialisertTilString())
+            .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
     }
 
 val defaultPdlDispatcher = notFoundDispatcher
