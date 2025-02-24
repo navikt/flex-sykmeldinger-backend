@@ -1,4 +1,4 @@
-package no.nav.helse.flex.exception
+package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.utils.logger

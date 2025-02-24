@@ -1,7 +1,7 @@
 package no.nav.helse.flex.config
 
-import no.nav.helse.flex.exception.AbstractApiError
-import no.nav.helse.flex.exception.LogLevel
+import no.nav.helse.flex.api.AbstractApiError
+import no.nav.helse.flex.api.LogLevel
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.springframework.beans.factory.annotation.Value
