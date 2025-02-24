@@ -44,8 +44,8 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde lagre sykmelding`() {
         aaregClient.setArbeidsforholdoversikt(
-            "fnr",
             lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()),
+            fnr = "fnr",
         )
 
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
