@@ -2,13 +2,8 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
-import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
-import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
-import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -17,8 +12,6 @@ import org.springframework.boot.test.autoconfigure.actuate.observability.AutoCon
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.test.web.servlet.MockMvc
 
 const val IGNORED_KAFKA_BROKERS = "localhost:1"
@@ -27,7 +20,7 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
 @AutoConfigureObservability
 @EnableMockOAuth2Server
 @SpringBootTest(
-    classes = [Application::class, FakesTestOppsett.TestConfig::class, MockWebServereConfig::class],
+    classes = [Application::class, FakesTestConfig::class, MockWebServereConfig::class],
     properties = [
         "spring.main.allow-bean-definition-overriding=true",
         "spring.data.jdbc.repositories.enabled=false",
@@ -40,21 +33,6 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class FakesTestOppsett {
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
-
-        @Bean
-        fun arbeidsforholdRepository(): ArbeidsforholdRepository = ArbeidsforholdRepositoryFake()
-
-        @Bean
-        fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
-
-        @Bean
-        fun aaregClient(): AaregClient = AaregClientFake()
-    }
-
     @Autowired
     lateinit var mockMvc: MockMvc
 

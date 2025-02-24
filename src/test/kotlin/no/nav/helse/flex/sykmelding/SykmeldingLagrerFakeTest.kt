@@ -27,9 +27,6 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     private lateinit var sykmeldingLagrer: SykmeldingLagrer
 
     @Autowired
-    private lateinit var aaregMockWebServer: MockWebServer
-
-    @Autowired
     private lateinit var eregMockWebServer: MockWebServer
 
     @Autowired
@@ -39,14 +36,11 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     fun tearDown() {
         slettDatabase()
         eregMockWebServer.dispatcher = defaultEregDispatcher
+        aaregClient.reset()
     }
 
     @Test
     fun `burde lagre sykmelding`() {
-        aaregClient.setArbeidsforholdoversikt(
-            lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()),
-        )
-
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
             SykmeldingMedBehandlingsutfallMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
@@ -89,12 +83,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher {
-                lagJsonResponse(
-                    lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(fnr = "fnr"))).serialisertTilString(),
-                )
-            }
+        aaregClient.setArbeidsforholdoversikt(lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(fnr = "fnr"))), "fnr")
 
         eregMockWebServer.dispatcher =
             simpleDispatcher {
