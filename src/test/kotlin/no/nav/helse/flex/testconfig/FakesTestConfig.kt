@@ -8,6 +8,7 @@ import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 
@@ -21,6 +22,9 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
+
+    @Bean
+    fun pdlClient(): PdlClientFake = PdlClientFake()
 
     @Bean
     fun aaregClient(): AaregClientFake = AaregClientFake()
