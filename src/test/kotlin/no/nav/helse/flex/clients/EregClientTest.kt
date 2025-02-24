@@ -2,6 +2,7 @@ package no.nav.helse.flex.clients
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.clients.ereg.EregClient
+import no.nav.helse.flex.clients.ereg.EregEksternClient
 import no.nav.helse.flex.testconfig.MockWebServereConfig
 import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
@@ -21,7 +22,7 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = [EregClient::class, RestTemplate::class, MockWebServereConfig::class])
+@SpringBootTest(classes = [EregEksternClient::class, RestTemplate::class, MockWebServereConfig::class])
 class EregClientTest {
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer

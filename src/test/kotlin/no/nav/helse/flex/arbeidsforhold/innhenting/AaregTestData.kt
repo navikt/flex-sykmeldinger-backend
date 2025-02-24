@@ -12,7 +12,10 @@ fun lagArbeidsforholdOversiktResponse(
         arbeidsforholdoversikter = arbeidsforholdoversikter,
     )
 
-fun lagArbeidsforholdOversikt(fnr: String = "2175141353812"): ArbeidsforholdOversikt =
+fun lagArbeidsforholdOversikt(
+    fnr: String = "2175141353812",
+    orgnummer: String = "910825518",
+): ArbeidsforholdOversikt =
     objectMapper.readValue(
         """
             {
@@ -34,7 +37,7 @@ fun lagArbeidsforholdOversikt(fnr: String = "2175141353812"): ArbeidsforholdOver
             "identer": [
               {
                 "type": "ORGANISASJONSNUMMER",
-                "ident": "910825518"
+                "ident": "$orgnummer"
               }
             ]
           },

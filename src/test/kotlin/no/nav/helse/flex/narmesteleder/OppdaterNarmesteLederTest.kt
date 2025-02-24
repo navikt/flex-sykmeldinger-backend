@@ -1,18 +1,12 @@
 package no.nav.helse.flex.narmesteleder
 
-import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
-import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.defaultPdlDispatcher
-import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -23,26 +17,18 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     lateinit var oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder
 
     @Autowired
-    lateinit var pdlMockWebServer: MockWebServer
-
-    @BeforeAll
-    fun beforeAll() {
-        pdlMockWebServer.dispatcher =
-            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        pdlMockWebServer.dispatcher = defaultPdlDispatcher
-    }
+    lateinit var pdlClient: PdlClientFake
 
     @AfterEach
     fun afterEach() {
         slettDatabase()
+        pdlClient.reset()
     }
 
     @Test
     fun `Oppretter ny nærmeste leder hvis den ikke finnes fra før og er aktiv`() {
+        pdlClient.setFormatertNavn("Supreme Leader")
+
         val narmesteLederId = UUID.randomUUID()
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
 
