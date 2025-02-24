@@ -45,12 +45,11 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     fun `burde lagre sykmelding`() {
         aaregClient.setArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()),
-            fnr = "fnr",
         )
 
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
             SykmeldingMedBehandlingsutfallMelding(
-                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             ),
         )
