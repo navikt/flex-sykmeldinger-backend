@@ -1,12 +1,12 @@
 package no.nav.helse.flex.arbeidsforhold
 
-import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class ArbeidsforholdRepositoryIntegrasjonsTest : FellesTestOppsett() {
+class ArbeidsforholdRepositoryIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde hente arbeidsforhold ved fnr`() {
         val opprettetArbeidsforhold =

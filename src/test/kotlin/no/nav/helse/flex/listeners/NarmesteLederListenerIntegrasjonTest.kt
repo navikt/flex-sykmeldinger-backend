@@ -4,7 +4,7 @@ import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.narmesteleder.lagNarmesteLederLeesah
-import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-class NarmesteLederListenerIntegrasjonTest : FellesTestOppsett() {
+class NarmesteLederListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
 
