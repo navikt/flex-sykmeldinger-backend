@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsgiverStatusDTO
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
 import no.nav.helse.flex.sykmelding.api.dto.Egenmeldingsperiode
@@ -14,6 +13,7 @@ import no.nav.helse.flex.sykmelding.api.dto.UriktigeOpplysningerType
 import no.nav.helse.flex.sykmelding.domain.Sporsmal
 import no.nav.helse.flex.sykmelding.domain.SporsmalTag
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.utils.objectMapper
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset

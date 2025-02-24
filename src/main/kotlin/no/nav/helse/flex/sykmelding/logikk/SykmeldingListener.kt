@@ -1,11 +1,10 @@
-package no.nav.helse.flex.kafka
+package no.nav.helse.flex.sykmelding.logikk
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.logger
-import no.nav.helse.flex.objectMapper
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener

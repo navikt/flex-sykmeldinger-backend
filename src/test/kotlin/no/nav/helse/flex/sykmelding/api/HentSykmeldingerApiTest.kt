@@ -1,14 +1,14 @@
 package no.nav.helse.flex.sykmelding.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.tokenxToken
+import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testutils.tokenxToken
+import no.nav.helse.flex.utils.objectMapper
+import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`

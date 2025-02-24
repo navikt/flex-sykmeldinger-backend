@@ -1,8 +1,8 @@
 package no.nav.helse.flex.pdl
 
-import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.defaultPdlDispatcher
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.defaultPdlDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`

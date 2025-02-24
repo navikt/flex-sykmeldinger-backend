@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.utils.objectMapper
+import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table

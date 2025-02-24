@@ -1,12 +1,12 @@
 package no.nav.helse.flex.narmesteleder
 
-import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.defaultPdlDispatcher
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.pdl.lagGraphQlResponse
-import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.defaultPdlDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull

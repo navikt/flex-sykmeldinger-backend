@@ -3,8 +3,8 @@ package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
-import no.nav.helse.flex.logger
-import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
@@ -82,9 +82,7 @@ class AaregHendelserConsumer(
         )
     }
 
-    fun skalSynkroniseres(fnr: String): Boolean {
-        return registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
-    }
+    fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
 
     companion object {
         internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering {
@@ -107,11 +105,10 @@ class AaregHendelserConsumer(
             }
         }
 
-        private fun harGyldigEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse): Boolean {
-            return arbeidsforholdHendelse.entitetsendringer.any { endring ->
+        private fun harGyldigEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse): Boolean =
+            arbeidsforholdHendelse.entitetsendringer.any { endring ->
                 endring == Entitetsendring.Ansettelsesdetaljer ||
                     endring == Entitetsendring.Ansettelsesperiode
             }
-        }
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import no.nav.helse.flex.MockWebServereConfig
 import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
-import no.nav.helse.flex.defaultEregDispatcher
-import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.testconfig.MockWebServereConfig
+import no.nav.helse.flex.testconfig.defaultEregDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.invoking

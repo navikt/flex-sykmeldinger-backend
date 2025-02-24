@@ -1,4 +1,4 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.utils
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
@@ -10,7 +10,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 
 val objectMapper: ObjectMapper =
-    JsonMapper.builder()
+    JsonMapper
+        .builder()
         .addModule(JavaTimeModule())
         .addModule(KotlinModule.Builder().build())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -21,6 +22,4 @@ val objectMapper: ObjectMapper =
 
 fun Any.serialisertTilString(): String = objectMapper.writeValueAsString(this)
 
-fun Any.toJsonNode(): JsonNode {
-    return objectMapper.readTree(objectMapper.writeValueAsString(this))
-}
+fun Any.toJsonNode(): JsonNode = objectMapper.readTree(objectMapper.writeValueAsString(this))

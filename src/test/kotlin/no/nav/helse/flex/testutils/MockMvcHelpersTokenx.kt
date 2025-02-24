@@ -1,4 +1,4 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.testutils
 
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback

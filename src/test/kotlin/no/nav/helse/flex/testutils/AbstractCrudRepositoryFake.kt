@@ -1,4 +1,4 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.testutils
 
 import org.springframework.data.repository.CrudRepository
 import java.util.Optional

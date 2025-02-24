@@ -1,4 +1,4 @@
-package no.nav.helse.flex.kafka
+package no.nav.helse.flex.config.kafka
 
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -7,16 +7,17 @@ import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
-import no.nav.helse.flex.logger as slf4jLogger
+import no.nav.helse.flex.utils.logger as slf4jLogger
 
 @Component
-class AivenKafkaErrorHandler : DefaultErrorHandler(
-    null,
-    ExponentialBackOff(1000L, 1.5).also {
-        // 8 minutter, som er mindre enn max.poll.interval.ms på 10 minutter.
-        it.maxInterval = 60_000L * 8
-    },
-) {
+class AivenKafkaErrorHandler :
+    DefaultErrorHandler(
+        null,
+        ExponentialBackOff(1000L, 1.5).also {
+            // 8 minutter, som er mindre enn max.poll.interval.ms på 10 minutter.
+            it.maxInterval = 60_000L * 8
+        },
+    ) {
     // Bruker aliased logger for unngå kollisjon med CommonErrorHandler.logger(): LogAccessor.
     val log = slf4jLogger()
 

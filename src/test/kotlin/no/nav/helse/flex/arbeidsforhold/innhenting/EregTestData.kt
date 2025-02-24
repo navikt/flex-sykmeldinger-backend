@@ -1,7 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.utils.objectMapper
 
 val EKSEMPEL_ERROR_RESPONSE_FRA_EREG: JsonNode =
     objectMapper.readTree("""{"melding": "Det oppsto en feil!"}""")

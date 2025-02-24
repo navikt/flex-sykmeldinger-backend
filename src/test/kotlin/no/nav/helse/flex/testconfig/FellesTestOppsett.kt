@@ -1,7 +1,7 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.testconfig
 
+import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.kafka.KafkaTestConfig
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.security.mock.oauth2.MockOAuth2Server

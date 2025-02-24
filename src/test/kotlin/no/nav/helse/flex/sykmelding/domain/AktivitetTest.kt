@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.utils.objectMapper
+import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.params.ParameterizedTest

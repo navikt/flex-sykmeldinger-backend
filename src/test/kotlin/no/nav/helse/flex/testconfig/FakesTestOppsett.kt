@@ -1,5 +1,6 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.testconfig
 
+import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository

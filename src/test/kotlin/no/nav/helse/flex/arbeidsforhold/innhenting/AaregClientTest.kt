@@ -1,11 +1,11 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import no.nav.helse.flex.MockWebServereConfig
 import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
-import no.nav.helse.flex.notFoundDispatcher
-import no.nav.helse.flex.objectMapper
-import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.testconfig.MockWebServereConfig
+import no.nav.helse.flex.testconfig.notFoundDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.objectMapper
+import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

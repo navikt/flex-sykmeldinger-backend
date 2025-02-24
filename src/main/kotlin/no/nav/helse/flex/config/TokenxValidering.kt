@@ -1,4 +1,4 @@
-package no.nav.helse.flex.tokenx
+package no.nav.helse.flex.config
 
 import no.nav.helse.flex.exception.AbstractApiError
 import no.nav.helse.flex.exception.LogLevel
@@ -14,9 +14,7 @@ class TokenxValidering(
     @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
     private val dittSykefravaerFrontendClientId: String,
 ) {
-    fun validerFraDittSykefravaer(): String {
-        return tokenValidationContextHolder.validerTokenXClaims(dittSykefravaerFrontendClientId).fnr()
-    }
+    fun validerFraDittSykefravaer(): String = tokenValidationContextHolder.validerTokenXClaims(dittSykefravaerFrontendClientId).fnr()
 }
 
 fun TokenValidationContextHolder.validerTokenXClaims(vararg tillattClient: String): JwtTokenClaims {
@@ -30,15 +28,15 @@ fun TokenValidationContextHolder.validerTokenXClaims(vararg tillattClient: Strin
     return claims
 }
 
-fun JwtTokenClaims.fnr(): String {
-    return this.getStringClaim("pid")
-}
+fun JwtTokenClaims.fnr(): String = this.getStringClaim("pid")
 
 const val TOKENX = "tokenx"
 
-class IngenTilgang(override val message: String) : AbstractApiError(
-    message = message,
-    httpStatus = HttpStatus.FORBIDDEN,
-    reason = "INGEN_TILGANG",
-    loglevel = LogLevel.WARN,
-)
+class IngenTilgang(
+    override val message: String,
+) : AbstractApiError(
+        message = message,
+        httpStatus = HttpStatus.FORBIDDEN,
+        reason = "INGEN_TILGANG",
+        loglevel = LogLevel.WARN,
+    )

@@ -1,7 +1,7 @@
 package no.nav.helse.flex.exception
 
 import jakarta.servlet.http.HttpServletRequest
-import no.nav.helse.flex.logger
+import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.exceptions.JwtTokenInvalidClaimException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.springframework.http.HttpStatus
@@ -18,8 +18,8 @@ class GlobalExceptionHandler {
     fun handleException(
         ex: Exception,
         request: HttpServletRequest,
-    ): ResponseEntity<Any> {
-        return when (ex) {
+    ): ResponseEntity<Any> =
+        when (ex) {
             is AbstractApiError -> {
                 when (ex.loglevel) {
                     LogLevel.WARN -> log.warn(ex.message, ex)
@@ -38,12 +38,13 @@ class GlobalExceptionHandler {
                 skapResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
             }
         }
-    }
 }
 
 private fun skapResponseEntity(status: HttpStatus): ResponseEntity<Any> = ResponseEntity(ApiError(status.reasonPhrase), status)
 
-private data class ApiError(val reason: String)
+private data class ApiError(
+    val reason: String,
+)
 
 abstract class AbstractApiError(
     message: String,

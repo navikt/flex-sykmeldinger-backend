@@ -1,7 +1,7 @@
 package no.nav.helse.flex.narmesteleder
 
-import no.nav.helse.flex.AbstractCrudRepositoryFake
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
 import java.util.*
 
 class NarmesteLederRepositoryFake :

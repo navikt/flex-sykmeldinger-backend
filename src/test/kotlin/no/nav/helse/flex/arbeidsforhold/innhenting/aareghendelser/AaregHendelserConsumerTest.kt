@@ -9,7 +9,7 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
-import no.nav.helse.flex.objectMapper
+import no.nav.helse.flex.utils.objectMapper
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
@@ -158,8 +158,8 @@ fun lagArbeidsforholdHendelse(
     fnr: String = "fnr_med_sykmelding",
     endringstype: Endringstype = Endringstype.Opprettelse,
     entitetsendringer: List<Entitetsendring> = listOf(Entitetsendring.Ansettelsesdetaljer),
-): ArbeidsforholdHendelse {
-    return ArbeidsforholdHendelse(
+): ArbeidsforholdHendelse =
+    ArbeidsforholdHendelse(
         id = 1L,
         endringstype = endringstype,
         arbeidsforhold =
@@ -179,4 +179,3 @@ fun lagArbeidsforholdHendelse(
             ),
         entitetsendringer = entitetsendringer,
     )
-}

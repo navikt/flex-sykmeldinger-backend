@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding.api
 
-import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.sykmelding.api.dto.ArbeidsledigFraOrgnummer
 import no.nav.helse.flex.sykmelding.api.dto.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.api.dto.Blad
@@ -18,6 +17,7 @@ import no.nav.helse.flex.sykmelding.domain.SporsmalTag
 import no.nav.helse.flex.sykmelding.domain.Svar
 import no.nav.helse.flex.sykmelding.domain.Svartype
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

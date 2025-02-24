@@ -1,7 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient
 
-import no.nav.helse.flex.logger
-import no.nav.helse.flex.serialisertTilString
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.retry.annotation.Retryable

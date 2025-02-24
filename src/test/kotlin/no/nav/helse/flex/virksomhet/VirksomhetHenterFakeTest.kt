@@ -1,8 +1,8 @@
 package no.nav.helse.flex.virksomhet
 
-import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
+import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull

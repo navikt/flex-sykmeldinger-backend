@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding.api
 
-import no.nav.helse.flex.FakesTestOppsett
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.AktivitetIkkeMulig
@@ -18,6 +17,7 @@ import no.nav.helse.flex.sykmelding.domain.SvarRestriksjon
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be null`

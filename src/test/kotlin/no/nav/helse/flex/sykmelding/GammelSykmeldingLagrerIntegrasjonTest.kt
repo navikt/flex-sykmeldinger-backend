@@ -1,14 +1,14 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.FellesTestOppsett
-import no.nav.helse.flex.kafka.SYKMELDING_TOPIC
-import no.nav.helse.flex.kafka.SykmeldingListener
-import no.nav.helse.flex.serialisertTilString
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
-import no.nav.helse.flex.testdata.TEST_SYKMELDING_TOPIC
+import no.nav.helse.flex.sykmelding.logikk.SYKMELDING_TOPIC
+import no.nav.helse.flex.sykmelding.logikk.SykmeldingListener
+import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
+import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord

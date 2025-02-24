@@ -1,7 +1,8 @@
 package no.nav.helse.flex.sykmelding.api
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.logger
+import no.nav.helse.flex.config.TOKENX
+import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.Arbeidsgiver
@@ -14,8 +15,7 @@ import no.nav.helse.flex.sykmelding.domain.Svar
 import no.nav.helse.flex.sykmelding.domain.Svartype
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
-import no.nav.helse.flex.tokenx.TOKENX
-import no.nav.helse.flex.tokenx.TokenxValidering
+import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims

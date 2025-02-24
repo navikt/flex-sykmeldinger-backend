@@ -1,7 +1,9 @@
-package no.nav.helse.flex
+package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

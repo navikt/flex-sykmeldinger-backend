@@ -1,5 +1,6 @@
-package no.nav.helse.flex.kafka
+package no.nav.helse.flex.testconfig
 
+import no.nav.helse.flex.config.kafka.AivenKafkaConfig
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord

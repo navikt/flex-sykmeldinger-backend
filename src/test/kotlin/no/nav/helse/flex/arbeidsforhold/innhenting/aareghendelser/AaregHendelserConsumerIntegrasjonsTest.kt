@@ -1,11 +1,11 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
 
-import no.nav.helse.flex.FellesTestOppsett
 import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.defaultAaregDispatcher
-import no.nav.helse.flex.serialisertTilString
-import no.nav.helse.flex.simpleDispatcher
+import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.defaultAaregDispatcher
+import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.apache.kafka.clients.producer.ProducerRecord

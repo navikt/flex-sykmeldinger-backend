@@ -1,6 +1,6 @@
-package no.nav.helse.flex.testdata
+package no.nav.helse.flex.testdatagenerator
 
-import no.nav.helse.flex.logger
+import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("testdata")
-class TestdataResetListener() {
+class TestdataResetListener {
     val log = logger()
 
     @KafkaListener(
