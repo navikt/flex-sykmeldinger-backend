@@ -244,64 +244,70 @@ fun lagValidation(): ValidationResult =
         rules = listOf(),
     )
 
-fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): SykmeldingSporsmalSvarDto =
-    SykmeldingSporsmalSvarDto(
+fun lagSykmeldingSporsmalSvarDto(
+    arbeidsgiverOrgnummer: String = "123456789",
+): _root_ide_package_.no.nav.helse.flex.api.dto.SykmeldingSporsmalSvarDto =
+    _root_ide_package_.no.nav.helse.flex.api.dto.SykmeldingSporsmalSvarDto(
         erOpplysningeneRiktige =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Er opplysningene riktige?",
-                svar = JaEllerNei.JA,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.JA,
             ),
         uriktigeOpplysninger =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Hvilke opplysninger er uriktige?",
-                svar = listOf(UriktigeOpplysningerType.PERIODE, UriktigeOpplysningerType.DIAGNOSE),
+                svar =
+                    listOf(
+                        _root_ide_package_.no.nav.helse.flex.api.dto.UriktigeOpplysningerType.PERIODE,
+                        _root_ide_package_.no.nav.helse.flex.api.dto.UriktigeOpplysningerType.DIAGNOSE,
+                    ),
             ),
         arbeidssituasjon =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Hva er din arbeidssituasjon?",
-                svar = Arbeidssituasjon.ARBEIDSTAKER,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.Arbeidssituasjon.ARBEIDSTAKER,
             ),
         arbeidsgiverOrgnummer =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
                 svar = arbeidsgiverOrgnummer,
             ),
         arbeidsledig =
-            ArbeidsledigFraOrgnummer(
+            _root_ide_package_.no.nav.helse.flex.api.dto.ArbeidsledigFraOrgnummer(
                 arbeidsledigFraOrgnummer =
-                    FormSporsmalSvar(
+                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                         sporsmaltekst = "Hva er orgnummeret du er arbeidsledig fra?",
                         svar = "987654321",
                     ),
             ),
         riktigNarmesteLeder =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Er dette riktig nærmeste leder?",
-                svar = JaEllerNei.JA,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.JA,
             ),
         harBruktEgenmelding =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Har du brukt egenmelding?",
-                svar = JaEllerNei.NEI,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
             ),
         egenmeldingsperioder =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Hvilke egenmeldingsperioder har du hatt?",
                 svar =
                     listOf(
-                        Egenmeldingsperiode(
+                        _root_ide_package_.no.nav.helse.flex.api.dto.Egenmeldingsperiode(
                             fom = LocalDate.parse("2023-01-01"),
                             tom = LocalDate.parse("2023-01-05"),
                         ),
                     ),
             ),
         harForsikring =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Har du forsikring?",
-                svar = JaEllerNei.JA,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.JA,
             ),
         egenmeldingsdager =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Hvilke egenmeldingsdager har du hatt?",
                 svar =
                     listOf(
@@ -310,21 +316,21 @@ fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): S
                     ),
             ),
         harBruktEgenmeldingsdager =
-            FormSporsmalSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                 sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                svar = JaEllerNei.NEI,
+                svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
             ),
         fisker =
-            FiskerSvar(
+            _root_ide_package_.no.nav.helse.flex.api.dto.FiskerSvar(
                 blad =
-                    FormSporsmalSvar(
+                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                         sporsmaltekst = "Hvilket blad?",
-                        svar = Blad.A,
+                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.Blad.A,
                     ),
                 lottOgHyre =
-                    FormSporsmalSvar(
+                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
                         sporsmaltekst = "Lott og hyre?",
-                        svar = LottOgHyre.LOTT,
+                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.LottOgHyre.LOTT,
                     ),
             ),
     )
