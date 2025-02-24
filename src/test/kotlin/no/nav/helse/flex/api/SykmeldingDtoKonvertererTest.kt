@@ -123,12 +123,12 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         periode.tom `should be equal to` LocalDate.parse("2021-01-21")
         periode.aktivitetIkkeMulig?.let {
             it.medisinskArsak `should be equal to`
-                no.nav.helse.flex.api.dto.MedisinskArsakDTO(
+                MedisinskArsakDTO(
                     beskrivelse = "",
-                    arsak = listOf(no.nav.helse.flex.api.dto.MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
+                    arsak = listOf(MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
                 )
             it.arbeidsrelatertArsak `should be equal to`
-                no.nav.helse.flex.api.dto.ArbeidsrelatertArsakDTO(
+                ArbeidsrelatertArsakDTO(
                     beskrivelse = "",
                     arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
                 )
@@ -185,7 +185,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                             ),
                         ),
                     annenFraversArsak =
-                        no.nav.helse.flex.api.dto.AnnenFraversArsakDTO(
+                        AnnenFraversArsakDTO(
                             beskrivelse = "beskrivelse",
                             grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
                         ),

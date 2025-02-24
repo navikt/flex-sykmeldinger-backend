@@ -1,6 +1,6 @@
 package no.nav.helse.flex.api
 
-import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
+import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be equal to`
@@ -192,51 +192,51 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             )
 
         val forventetSporsmalSvarDto =
-            _root_ide_package_.no.nav.helse.flex.api.dto.SykmeldingSporsmalSvarDto(
+            SykmeldingSporsmalSvarDto(
                 erOpplysningeneRiktige =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "tekst",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.JA,
+                        svar = JaEllerNei.JA,
                     ),
                 arbeidssituasjon =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "tekst",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.Arbeidssituasjon.ARBEIDSTAKER,
+                        svar = Arbeidssituasjon.ARBEIDSTAKER,
                     ),
                 uriktigeOpplysninger =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Hvilke opplysninger er uriktige?",
-                        svar = listOf(_root_ide_package_.no.nav.helse.flex.api.dto.UriktigeOpplysningerType.PERIODE),
+                        svar = listOf(UriktigeOpplysningerType.PERIODE),
                     ),
                 arbeidsgiverOrgnummer =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
                         svar = "123456789",
                     ),
                 arbeidsledig =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.ArbeidsledigFraOrgnummer(
+                    ArbeidsledigFraOrgnummer(
                         arbeidsledigFraOrgnummer =
-                            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                            FormSporsmalSvar(
                                 sporsmaltekst = "Arbeidsledig fra orgnummer?",
                                 svar = "123456789",
                             ),
                     ),
                 riktigNarmesteLeder =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Er dette riktig nærmeste leder?",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
+                        svar = JaEllerNei.NEI,
                     ),
                 harBruktEgenmelding =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Har du brukt egenmelding?",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
+                        svar = JaEllerNei.NEI,
                     ),
                 egenmeldingsperioder =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Egenmeldingsperioder",
                         svar =
                             listOf(
-                                _root_ide_package_.no.nav.helse.flex.api.dto.Egenmeldingsperiode(
+                                Egenmeldingsperiode(
                                     fom =
                                         LocalDate.parse(
                                             "2021-01-01",
@@ -246,31 +246,31 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             ),
                     ),
                 harForsikring =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Har du forsikring?",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
+                        svar = JaEllerNei.NEI,
                     ),
                 egenmeldingsdager =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Egenmeldingsdager",
                         svar = listOf(LocalDate.parse("2021-01-03")),
                     ),
                 harBruktEgenmeldingsdager =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                    FormSporsmalSvar(
                         sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                        svar = _root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei.NEI,
+                        svar = JaEllerNei.NEI,
                     ),
                 fisker =
-                    _root_ide_package_.no.nav.helse.flex.api.dto.FiskerSvar(
+                    FiskerSvar(
                         blad =
-                            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                            FormSporsmalSvar(
                                 sporsmaltekst = "Hvilket blad?",
-                                svar = _root_ide_package_.no.nav.helse.flex.api.dto.Blad.A,
+                                svar = Blad.A,
                             ),
                         lottOgHyre =
-                            _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar(
+                            FormSporsmalSvar(
                                 sporsmaltekst = "Lott og hyre?",
-                                svar = _root_ide_package_.no.nav.helse.flex.api.dto.LottOgHyre.LOTT,
+                                svar = LottOgHyre.LOTT,
                             ),
                     ),
             )

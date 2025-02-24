@@ -1,19 +1,14 @@
 package no.nav.helse.flex.api
 
-import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.api.dto.BrukerinformasjonDTO
+import no.nav.helse.flex.api.dto.NarmesteLederDTO
+import no.nav.helse.flex.api.dto.SykmeldingDTO
+import no.nav.helse.flex.api.dto.VirksomhetDTO
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
-import no.nav.helse.flex.sykmelding.domain.Arbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.ArbeidstakerInfo
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.domain.Sporsmal
-import no.nav.helse.flex.sykmelding.domain.SporsmalTag
-import no.nav.helse.flex.sykmelding.domain.Svar
-import no.nav.helse.flex.sykmelding.domain.Svartype
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
@@ -27,7 +22,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Controller
-class HentSykmeldingerApi(
+class SykmeldingController(
     private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
     private val sykmeldingRepository: ISykmeldingRepository,
@@ -107,7 +102,7 @@ class HentSykmeldingerApi(
     )
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<no.nav.helse.flex.api.dto.BrukerinformasjonDTO> {
+    ): ResponseEntity<BrukerinformasjonDTO> {
         val fnr = tokenxValidering.validerFraDittSykefravaer()
         val sykmlding =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)
@@ -120,7 +115,7 @@ class HentSykmeldingerApi(
         val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(fnr, sykmeldingPeriode)
 
         return ResponseEntity.ok(
-            no.nav.helse.flex.api.dto.BrukerinformasjonDTO(
+            BrukerinformasjonDTO(
                 arbeidsgivere = virksomheter.map { it.konverterTilDto() },
             ),
         )
@@ -212,8 +207,8 @@ class HentSykmeldingerApi(
     }
 }
 
-internal fun Virksomhet.konverterTilDto(): no.nav.helse.flex.api.dto.VirksomhetDTO =
-    no.nav.helse.flex.api.dto.VirksomhetDTO(
+internal fun Virksomhet.konverterTilDto(): VirksomhetDTO =
+    VirksomhetDTO(
         orgnummer = this.orgnummer,
         juridiskOrgnummer = this.juridiskOrgnummer,
         navn = this.navn,
@@ -221,11 +216,11 @@ internal fun Virksomhet.konverterTilDto(): no.nav.helse.flex.api.dto.VirksomhetD
         naermesteLeder = this.naermesteLeder?.konverterTilDto(),
     )
 
-internal fun NarmesteLeder.konverterTilDto(): no.nav.helse.flex.api.dto.NarmesteLederDTO? =
+internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
     if (this.narmesteLederNavn == null) {
         null
     } else {
-        no.nav.helse.flex.api.dto.NarmesteLederDTO(
+        NarmesteLederDTO(
             navn = this.narmesteLederNavn,
             orgnummer = this.orgnummer,
         )

@@ -3,26 +3,18 @@ package no.nav.helse.flex.api.dto
 import java.time.LocalDate
 
 data class SykmeldingSporsmalSvarDto(
-    val erOpplysningeneRiktige:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei>,
-    val uriktigeOpplysninger:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<List<_root_ide_package_.no.nav.helse.flex.api.dto.UriktigeOpplysningerType>>?,
-    val arbeidssituasjon:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.Arbeidssituasjon>,
-    val arbeidsgiverOrgnummer: _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<String>?,
-    val arbeidsledig: _root_ide_package_.no.nav.helse.flex.api.dto.ArbeidsledigFraOrgnummer?,
-    val riktigNarmesteLeder:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei>?,
-    val harBruktEgenmelding:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei>?,
-    val egenmeldingsperioder:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<List<_root_ide_package_.no.nav.helse.flex.api.dto.Egenmeldingsperiode>>?,
-    val harForsikring:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei>?,
-    val egenmeldingsdager: _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<List<LocalDate>>?,
-    val harBruktEgenmeldingsdager:
-        _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.JaEllerNei>?,
-    val fisker: _root_ide_package_.no.nav.helse.flex.api.dto.FiskerSvar?,
+    val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
+    val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
+    val arbeidssituasjon: FormSporsmalSvar<Arbeidssituasjon>,
+    val arbeidsgiverOrgnummer: FormSporsmalSvar<String>?,
+    val arbeidsledig: ArbeidsledigFraOrgnummer?,
+    val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
+    val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>?,
+    val egenmeldingsperioder: FormSporsmalSvar<List<Egenmeldingsperiode>>?,
+    val harForsikring: FormSporsmalSvar<JaEllerNei>?,
+    val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>?,
+    val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>?,
+    val fisker: FiskerSvar?,
 )
 
 data class FormSporsmalSvar<T>(
@@ -31,12 +23,12 @@ data class FormSporsmalSvar<T>(
 )
 
 data class ArbeidsledigFraOrgnummer(
-    val arbeidsledigFraOrgnummer: _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<String>?,
+    val arbeidsledigFraOrgnummer: FormSporsmalSvar<String>?,
 )
 
 data class FiskerSvar(
-    val blad: _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.Blad>,
-    val lottOgHyre: _root_ide_package_.no.nav.helse.flex.api.dto.FormSporsmalSvar<_root_ide_package_.no.nav.helse.flex.api.dto.LottOgHyre>,
+    val blad: FormSporsmalSvar<Blad>,
+    val lottOgHyre: FormSporsmalSvar<LottOgHyre>,
 )
 
 enum class Blad {

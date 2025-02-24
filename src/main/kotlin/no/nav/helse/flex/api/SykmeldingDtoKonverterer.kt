@@ -237,8 +237,8 @@ class SykmeldingDtoKonverterer(
             hovedDiagnose = medisinskVurdering.hovedDiagnose?.let { konverterDiagnose(it) },
         )
 
-    internal fun konverterAnnenFraversArsak(annenFraverArsak: AnnenFraverArsak): no.nav.helse.flex.api.dto.AnnenFraversArsakDTO? =
-        no.nav.helse.flex.api.dto.AnnenFraversArsakDTO(
+    internal fun konverterAnnenFraversArsak(annenFraverArsak: AnnenFraverArsak): AnnenFraversArsakDTO? =
+        AnnenFraversArsakDTO(
             beskrivelse = annenFraverArsak.beskrivelse,
             grunn =
                 annenFraverArsak.arsak?.map {
@@ -266,10 +266,10 @@ class SykmeldingDtoKonverterer(
             kode = diagnose.kode,
         )
 
-    internal fun konverterPrognose(prognose: Prognose): no.nav.helse.flex.api.dto.PrognoseDTO {
+    internal fun konverterPrognose(prognose: Prognose): PrognoseDTO {
         val erIArbeidDTO =
             (prognose.arbeid as? ErIArbeid)?.let {
-                no.nav.helse.flex.api.dto.ErIArbeidDTO(
+                ErIArbeidDTO(
                     egetArbeidPaSikt = it.egetArbeidPaSikt,
                     annetArbeidPaSikt = it.annetArbeidPaSikt,
                     arbeidFOM = it.arbeidFOM,
@@ -286,7 +286,7 @@ class SykmeldingDtoKonverterer(
                 )
             }
 
-        return no.nav.helse.flex.api.dto.PrognoseDTO(
+        return PrognoseDTO(
             arbeidsforEtterPeriode = prognose.arbeidsforEtterPeriode,
             hensynArbeidsplassen = prognose.hensynArbeidsplassen,
             erIArbeid = erIArbeidDTO,
@@ -316,12 +316,11 @@ class SykmeldingDtoKonverterer(
             adresse = konverterAdresse(behandler.adresse),
         )
 
-    internal fun konverterAdresse(adresse: Adresse?): no.nav.helse.flex.api.dto.AdresseDTO {
+    internal fun konverterAdresse(adresse: Adresse?): AdresseDTO {
         if (adresse == null) {
-            return no.nav.helse.flex.api.dto
-                .AdresseDTO(null, null, null, null, null)
+            return AdresseDTO(null, null, null, null, null)
         }
-        return no.nav.helse.flex.api.dto.AdresseDTO(
+        return AdresseDTO(
             postnummer = adresse.postnummer?.toIntOrNull(),
             postboks = adresse.postboks,
             kommune = adresse.kommune,

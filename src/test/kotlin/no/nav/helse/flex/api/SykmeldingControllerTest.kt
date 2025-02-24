@@ -1,7 +1,7 @@
 package no.nav.helse.flex.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.api.dto.SykmeldingDTO
+import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.domain.*
@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.time.LocalDate
 
-class HentSykmeldingerApiTest : FakesTestOppsett() {
+class SykmeldingControllerTest : FakesTestOppsett() {
     @AfterEach
     fun ryddOpp() {
         slettDatabase()
@@ -356,7 +356,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                     .andReturn()
                     .response.contentAsString
 
-            val brukerinformasjon: no.nav.helse.flex.api.dto.BrukerinformasjonDTO = objectMapper.readValue(result)
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 0
         }
 
@@ -457,7 +457,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                 )
             val virksomhetDTO = virksomhet.konverterTilDto()
             virksomhetDTO `should be equal to`
-                no.nav.helse.flex.api.dto.VirksomhetDTO(
+                VirksomhetDTO(
                     orgnummer = "orgnr",
                     juridiskOrgnummer = "jurorgnr",
                     navn = "Navn",
@@ -475,7 +475,7 @@ class HentSykmeldingerApiTest : FakesTestOppsett() {
                 )
             val narmesteLederDTO = narmesteLeder.konverterTilDto()
             narmesteLederDTO `should be equal to`
-                no.nav.helse.flex.api.dto.NarmesteLederDTO(
+                NarmesteLederDTO(
                     navn = "Navn",
                     orgnummer = "orgnr",
                 )
