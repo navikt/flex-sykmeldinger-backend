@@ -4,9 +4,7 @@ import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.Producer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -29,15 +27,9 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @EnableMockOAuth2Server
 @SpringBootTest(classes = [Application::class, KafkaTestConfig::class, MockWebServereConfig::class])
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
-abstract class FellesTestOppsett {
-    @Autowired
-    lateinit var kafkaConsumer: KafkaConsumer<String, String>
-
+abstract class IntegrasjonTestOppsett {
     @Autowired
     lateinit var mockMvc: MockMvc
-
-    @Autowired
-    lateinit var server: MockOAuth2Server
 
     @Autowired
     lateinit var kafkaProducer: Producer<String, String>

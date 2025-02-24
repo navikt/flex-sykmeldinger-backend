@@ -2,7 +2,7 @@ package no.nav.helse.flex.listeners.aareghendelser
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
-import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import java.time.Duration
 
-class AaregHendelserConsumerIntegrasjonsTest : FellesTestOppsett() {
+class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Value("\${AAREG_HENDELSE_TOPIC}")
     lateinit var aaregTopic: String
 

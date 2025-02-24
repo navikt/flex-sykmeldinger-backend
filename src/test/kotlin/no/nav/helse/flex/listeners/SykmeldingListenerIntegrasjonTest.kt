@@ -3,7 +3,7 @@ package no.nav.helse.flex.listeners
 import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
 import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.lagValidation
-import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldNotBeNull
@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 
-class SykmeldingListenerIntegrasjonTest : FellesTestOppsett() {
+class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @AfterEach
     fun tearDown() {
         slettDatabase()

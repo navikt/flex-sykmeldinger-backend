@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.testconfig.FellesTestOppsett
+import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class SykmeldingRepositoryTest : FellesTestOppsett() {
+class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     @AfterEach
     fun rensDatabase() {
         super.slettDatabase()
