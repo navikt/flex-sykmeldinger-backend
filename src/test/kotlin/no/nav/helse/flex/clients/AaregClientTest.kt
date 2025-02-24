@@ -1,6 +1,6 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting
+package no.nav.helse.flex.clients
 
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.AaregClient
+import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.testconfig.MockWebServereConfig
 import no.nav.helse.flex.testconfig.notFoundDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

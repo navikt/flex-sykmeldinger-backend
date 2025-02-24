@@ -1,4 +1,4 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient
+package no.nav.helse.flex.clients.aareg
 
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString

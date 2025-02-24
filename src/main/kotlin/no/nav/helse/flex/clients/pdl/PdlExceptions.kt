@@ -1,4 +1,4 @@
-package no.nav.helse.flex.pdl
+package no.nav.helse.flex.clients.pdl
 
 open class FunctionalPdlError(
     message: String,

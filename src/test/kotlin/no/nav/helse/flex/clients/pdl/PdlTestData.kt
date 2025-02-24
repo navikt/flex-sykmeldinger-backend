@@ -1,4 +1,4 @@
-package no.nav.helse.flex.pdl
+package no.nav.helse.flex.clients.pdl
 
 import okhttp3.mockwebserver.MockResponse
 import org.springframework.http.HttpHeaders

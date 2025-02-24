@@ -1,8 +1,9 @@
-package no.nav.helse.flex.narmesteleder
+package no.nav.helse.flex.listeners
 
+import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
-import no.nav.helse.flex.pdl.lagGetPersonResponseData
-import no.nav.helse.flex.pdl.lagGraphQlResponse
+import no.nav.helse.flex.narmesteleder.lagNarmesteLederLeesah
 import no.nav.helse.flex.testconfig.FellesTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

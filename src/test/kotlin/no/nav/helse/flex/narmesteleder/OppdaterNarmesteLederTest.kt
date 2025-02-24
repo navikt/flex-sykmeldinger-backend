@@ -1,7 +1,7 @@
 package no.nav.helse.flex.narmesteleder
 
-import no.nav.helse.flex.pdl.lagGetPersonResponseData
-import no.nav.helse.flex.pdl.lagGraphQlResponse
+import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

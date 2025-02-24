@@ -1,5 +1,6 @@
-package no.nav.helse.flex.narmesteleder
+package no.nav.helse.flex.listeners
 
+import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

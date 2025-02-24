@@ -1,4 +1,4 @@
-package no.nav.helse.flex.pdl
+package no.nav.helse.flex.clients.pdl
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper

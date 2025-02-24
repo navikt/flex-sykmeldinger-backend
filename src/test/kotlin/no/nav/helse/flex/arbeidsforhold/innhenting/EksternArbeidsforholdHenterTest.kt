@@ -5,10 +5,10 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.EksternArbeidsforholdHenter.Companion.getOrgnummerFraArbeidssted
-import no.nav.helse.flex.arbeidsforhold.innhenting.aaregclient.*
-import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.EregClient
-import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.Navn
-import no.nav.helse.flex.arbeidsforhold.innhenting.eregclient.Nokkelinfo
+import no.nav.helse.flex.clients.aareg.*
+import no.nav.helse.flex.clients.ereg.EregClient
+import no.nav.helse.flex.clients.ereg.Navn
+import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
@@ -292,7 +292,7 @@ class EksternArbeidsforholdHenterTest {
             )
         invoking {
             getOrgnummerFraArbeidssted(arbeidssted) `should be equal to` "orgnummer"
-        } shouldThrow(Exception::class)
+        } shouldThrow (Exception::class)
     }
 
     private fun lagArbeidsforholdOversikt(
@@ -319,8 +319,8 @@ class EksternArbeidsforholdHenterTest {
             ),
         startdato: LocalDate = LocalDate.parse("2020-01-01"),
         sluttdato: LocalDate = LocalDate.parse("2020-01-01"),
-    ): ArbeidsforholdOversikt {
-        return ArbeidsforholdOversikt(
+    ): ArbeidsforholdOversikt =
+        ArbeidsforholdOversikt(
             navArbeidsforholdId = navArbeidsforholdId,
             type =
                 Kodeverksentitet(
@@ -358,5 +358,4 @@ class EksternArbeidsforholdHenterTest {
             permisjonsprosent = 50,
             permitteringsprosent = 50,
         )
-    }
 }

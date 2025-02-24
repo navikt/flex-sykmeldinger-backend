@@ -1,7 +1,7 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
+package no.nav.helse.flex.listeners.aareghendelser
 
-import no.nav.helse.flex.arbeidsforhold.innhenting.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
+import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.testconfig.FellesTestOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

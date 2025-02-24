@@ -1,4 +1,4 @@
-package no.nav.helse.flex.pdl
+package no.nav.helse.flex.clients.pdl
 
 import no.nav.helse.flex.testconfig.FellesTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher

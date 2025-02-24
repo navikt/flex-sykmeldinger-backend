@@ -1,4 +1,4 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
+package no.nav.helse.flex.listeners.aareghendelser
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue

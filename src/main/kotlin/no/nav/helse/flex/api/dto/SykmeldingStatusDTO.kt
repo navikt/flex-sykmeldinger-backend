@@ -9,7 +9,7 @@ data class SykmeldingStatusDTO(
     // TODO: Remove this, use "brukerSvar" istedet
     val sporsmalOgSvarListe: List<SporsmalDTO>,
     // TODO: make this not nullable
-    val brukerSvar: _root_ide_package_.no.nav.helse.flex.api.dto.SykmeldingSporsmalSvarDto?,
+    val brukerSvar: SykmeldingSporsmalSvarDto?,
 )
 
 data class ArbeidsgiverStatusDTO(

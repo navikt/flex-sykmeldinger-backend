@@ -1,4 +1,4 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting.aareghendelser
+package no.nav.helse.flex.listeners.aareghendelser
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 
@@ -38,9 +38,7 @@ data class ArbeidsforholdKafka(
 data class Arbeidstaker(
     val identer: List<Ident>,
 ) {
-    fun getFnr(): String {
-        return identer.first { it.type == IdentType.FOLKEREGISTERIDENT && it.gjeldende }.ident
-    }
+    fun getFnr(): String = identer.first { it.type == IdentType.FOLKEREGISTERIDENT && it.gjeldende }.ident
 }
 
 data class Ident(

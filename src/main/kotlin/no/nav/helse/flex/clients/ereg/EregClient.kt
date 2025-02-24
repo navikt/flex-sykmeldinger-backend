@@ -1,4 +1,4 @@
-package no.nav.helse.flex.arbeidsforhold.innhenting.eregclient
+package no.nav.helse.flex.clients.ereg
 
 import no.nav.helse.flex.utils.logger
 import org.springframework.beans.factory.annotation.Value

@@ -1,4 +1,4 @@
-package no.nav.helse.flex.pdl
+package no.nav.helse.flex.clients.pdl
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.retry.annotation.Retryable
