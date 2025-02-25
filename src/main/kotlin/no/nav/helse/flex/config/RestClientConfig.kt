@@ -41,6 +41,23 @@ class RestClientConfig {
     }
 
     @Bean
+    fun pdlRestClient(
+        @Value("\${PDL_BASE_URL}") url: String,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        restClientBuilder: RestClient.Builder,
+    ): RestClient {
+        val clientProperties =
+            clientConfigurationProperties.registration["pdl-api-client-credentials"]
+                ?: throw RuntimeException("Fant ikke config for aareg-client-credentials.")
+
+        return restClientBuilder
+            .baseUrl(url)
+            .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
+            .build()
+    }
+
+    @Bean
     fun eregRestClient(
         @Value("\${EREG_URL}") url: String,
         restClientBuilder: RestClient.Builder,

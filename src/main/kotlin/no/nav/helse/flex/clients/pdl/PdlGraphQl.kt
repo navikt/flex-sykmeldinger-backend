@@ -1,21 +1,16 @@
 package no.nav.helse.flex.clients.pdl
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.web.client.RestTemplate
+import org.springframework.http.HttpStatusCode
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
 import kotlin.reflect.KClass
 
 class PdlGraphQlClient(
-    private val url: String,
-    private val restTemplate: RestTemplate,
+    private val restClient: RestClient,
 ) {
     inline fun <reified T : Any> exchange(
         req: GraphQlRequest,
@@ -27,30 +22,23 @@ class PdlGraphQlClient(
         headers: Map<String, String>,
         type: KClass<T>,
     ): GraphQlResponse<T> {
-        val headers =
-            HttpHeaders().apply {
-                contentType = MediaType.APPLICATION_JSON
-                headers.forEach { (key, value) -> this[key] = value }
-            }
-
+        val uri = restClient.post().uri { uriBuilder -> uriBuilder.path("/graphql").build() }
         val responseEntity =
-            restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                HttpEntity(
+            uri
+                .headers { httpHeaders ->
+                    headers.forEach { (key, value) ->
+                        httpHeaders.add(key, value)
+                    }
+                }.body(
                     try {
-                        req.tilJson()
+                        req.serialisertTilString()
                     } catch (e: JsonProcessingException) {
                         throw RuntimeException(e)
                     },
-                    headers,
-                ),
-                String::class.java,
-            )
-
-        if (responseEntity.statusCode != HttpStatus.OK) {
-            throw RuntimeException("PDL svarer med status ${responseEntity.statusCode} - ${responseEntity.body}")
-        }
+                ).retrieve()
+                .onStatus(HttpStatusCode::isError) { _, response ->
+                    throw RuntimeException("PDL svarer med status: ${response.statusCode}")
+                }.toEntity<String>()
 
         val resBody = responseEntity.body
         if (resBody == null) {
@@ -69,8 +57,6 @@ data class GraphQlRequest(
     companion object {
         fun fraJson(json: String): GraphQlRequest = objectMapper.readValue(json)
     }
-
-    fun tilJson(): String = ObjectMapper().writeValueAsString(this)
 }
 
 data class GraphQlResponse<out T : Any>(
