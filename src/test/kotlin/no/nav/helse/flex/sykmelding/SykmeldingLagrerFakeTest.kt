@@ -4,11 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
-import no.nav.helse.flex.sykmelding.domain.lagPasient
-import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.domain.lagValidation
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
@@ -38,9 +34,10 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde lagre sykmelding`() {
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
-            SykmeldingMedBehandlingsutfallMelding(
+            SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
+                metadata = lagMeldingsinformasjonEgenmeldt(),
             ),
         )
 
@@ -51,9 +48,10 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     fun `burde deduplisere sykmeldinger`() {
         repeat(2) {
             sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
-                SykmeldingMedBehandlingsutfallMelding(
+                SykmeldingKafkaRecord(
                     sykmelding = lagSykmeldingGrunnlag(id = "1"),
                     validation = lagValidation(),
+                    metadata = lagMeldingsinformasjonEgenmeldt(),
                 ),
             )
         }
@@ -64,9 +62,10 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde sette status til ny`() {
         val sykmeldingMedBehandlingsutfall =
-            SykmeldingMedBehandlingsutfallMelding(
+            SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
+                metadata = lagMeldingsinformasjonEgenmeldt(),
             )
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
 
@@ -87,9 +86,10 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
         eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
 
         val sykmeldingMedBehandlingsutfall =
-            SykmeldingMedBehandlingsutfallMelding(
+            SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
                 validation = lagValidation(),
+                metadata = lagMeldingsinformasjonEgenmeldt(),
             )
 
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)

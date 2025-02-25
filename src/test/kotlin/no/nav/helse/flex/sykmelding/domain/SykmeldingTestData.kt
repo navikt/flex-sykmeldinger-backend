@@ -246,6 +246,17 @@ fun lagValidation(): ValidationResult =
         rules = listOf(),
     )
 
+fun lagMeldingsinformasjonEgenmeldt(): Egenmeldt =
+    Egenmeldt(
+        msgInfo =
+            MeldingMetadata(
+                type = Meldingstype.SYKMELDING,
+                genDate = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
+                msgId = "0",
+                migVersjon = null,
+            ),
+    )
+
 fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): SykmeldingSporsmalSvarDto =
     SykmeldingSporsmalSvarDto(
         erOpplysningeneRiktige =

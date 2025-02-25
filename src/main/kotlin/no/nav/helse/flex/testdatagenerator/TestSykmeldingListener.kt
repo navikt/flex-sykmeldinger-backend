@@ -2,7 +2,7 @@ package no.nav.helse.flex.testdatagenerator
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
+import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -29,7 +29,7 @@ class TestSykmeldingListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
-            val sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding =
+            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
                 objectMapper.readValue(cr.value())
             sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
             log.info(

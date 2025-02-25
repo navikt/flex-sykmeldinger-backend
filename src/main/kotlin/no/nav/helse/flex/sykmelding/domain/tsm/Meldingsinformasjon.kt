@@ -51,18 +51,6 @@ data class EmottakEnkel(
     override val type = MetadataType.ENKEL
 }
 
-enum class AckType {
-    JA,
-    NEI,
-    KUN_VED_FEIL,
-    IKKE_OPPGITT,
-    UGYLDIG,
-}
-
-data class Ack(
-    val ackType: AckType,
-)
-
 data class EDIEmottak(
     val mottakenhetBlokk: MottakenhetBlokk,
     val ack: Ack,
@@ -77,15 +65,6 @@ data class EDIEmottak(
 
 enum class Meldingstype {
     SYKMELDING,
-    ;
-
-    companion object {
-        fun parse(v: String): Meldingstype =
-            when (v) {
-                "SYKMELD" -> SYKMELDING
-                else -> throw IllegalArgumentException("Ukjent meldingstype: $v")
-            }
-    }
 }
 
 data class MeldingMetadata(
@@ -111,4 +90,16 @@ data class MottakenhetBlokk(
     val ebRole: String,
     val ebService: String,
     val ebAction: String,
+)
+
+enum class AckType {
+    JA,
+    NEI,
+    KUN_VED_FEIL,
+    IKKE_OPPGITT,
+    UGYLDIG,
+}
+
+data class Ack(
+    val ackType: AckType,
 )
