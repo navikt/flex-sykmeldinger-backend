@@ -28,14 +28,16 @@ class RestClientConfig {
         @Value("\${AAREG_URL}") url: String,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         clientConfigurationProperties: ClientConfigurationProperties,
-        restClientBuilder: RestClient.Builder,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
     ): RestClient {
         val clientProperties =
             clientConfigurationProperties.registration["aareg-client-credentials"]
                 ?: throw RuntimeException("Fant ikke config for aareg-client-credentials.")
 
-        return restClientBuilder
+        return RestClient
+            .builder()
             .baseUrl(url)
+            .requestFactory(requestFactory)
             .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
             .build()
     }
@@ -45,14 +47,16 @@ class RestClientConfig {
         @Value("\${PDL_BASE_URL}") url: String,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         clientConfigurationProperties: ClientConfigurationProperties,
-        restClientBuilder: RestClient.Builder,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
     ): RestClient {
         val clientProperties =
             clientConfigurationProperties.registration["pdl-api-client-credentials"]
                 ?: throw RuntimeException("Fant ikke config for aareg-client-credentials.")
 
-        return restClientBuilder
+        return RestClient
+            .builder()
             .baseUrl(url)
+            .requestFactory(requestFactory)
             .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
             .build()
     }
@@ -60,11 +64,16 @@ class RestClientConfig {
     @Bean
     fun eregRestClient(
         @Value("\${EREG_URL}") url: String,
-        restClientBuilder: RestClient.Builder,
-    ): RestClient = restClientBuilder.baseUrl(url).build()
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+    ): RestClient =
+        RestClient
+            .builder()
+            .baseUrl(url)
+            .requestFactory(requestFactory)
+            .build()
 
     @Bean
-    fun restClientBuilder(): RestClient.Builder {
+    fun requestFactory(): HttpComponentsClientHttpRequestFactory {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
                 maxTotal = 10
@@ -77,47 +86,15 @@ class RestClientConfig {
                 .setConnectionManager(connectionManager)
                 .build()
 
-        val requestFactory =
-            HttpComponentsClientHttpRequestFactory(httpClient).apply {
-                setConnectTimeout(Duration.ofSeconds(API_CONNECT_TIMEOUT))
-                setReadTimeout(Duration.ofSeconds(API_READ_TIMEOUT))
-            }
-
-        return RestClient.builder().requestFactory(requestFactory)
+        return HttpComponentsClientHttpRequestFactory(httpClient).apply {
+            setConnectTimeout(Duration.ofSeconds(API_CONNECT_TIMEOUT))
+            setReadTimeout(Duration.ofSeconds(API_READ_TIMEOUT))
+        }
     }
 
-//    fun restClientBuilder(
-//        oAuth2AccessTokenService: OAuth2AccessTokenService,
-//        clientConfigurationProperties: ClientConfigurationProperties,
-//        registrationName: String,
-//    ): RestClient.Builder {
-//        val connectionManager =
-//            PoolingHttpClientConnectionManager().apply {
-//                maxTotal = 10
-//                defaultMaxPerRoute = 10
-//            }
-//
-//        val httpClient =
-//            HttpClientBuilder
-//                .create()
-//                .setConnectionManager(connectionManager)
-//                .build()
-//
-//        val requestFactory =
-//            HttpComponentsClientHttpRequestFactory(httpClient).apply {
-//                setConnectTimeout(Duration.ofSeconds(API_CONNECT_TIMEOUT))
-//                setReadTimeout(Duration.ofSeconds(API_READ_TIMEOUT))
-//            }
-//
-//        val clientProperties =
-//            clientConfigurationProperties.registration[registrationName]
-//                ?: throw RuntimeException("Fant ikke config for $registrationName.")
-//
-//        return RestClient
-//            .builder()
-//            .requestFactory(requestFactory)
-//            .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
-//    }
+    @Bean
+    fun oAuth2AccessTokenServiceRestClientBuilder(requestFactory: HttpComponentsClientHttpRequestFactory): RestClient.Builder =
+        RestClient.builder().requestFactory(requestFactory)
 }
 
 class BearerTokenInterceptor(
