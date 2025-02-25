@@ -1,7 +1,8 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding.domain.tsm
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
+import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
+import no.nav.helse.flex.sykmelding.domain.tsm.values.SignerendeBehandler
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -10,11 +11,6 @@ enum class SykmeldingType {
     UTENLANDSK_SYKMELDING,
 }
 
-@JsonSubTypes(
-    JsonSubTypes.Type(SykmeldingGrunnlag::class, name = "SYKMELDING"),
-    JsonSubTypes.Type(UtenlandskSykmeldingGrunnlag::class, name = "UTENLANDSK_SYKMELDING"),
-)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface ISykmeldingGrunnlag {
     val type: SykmeldingType
     val id: String
@@ -53,7 +49,10 @@ data class SykmeldingGrunnlag(
     override val type = SykmeldingType.SYKMELDING
 }
 
-data class AvsenderSystem(val navn: String, val versjon: String)
+data class AvsenderSystem(
+    val navn: String,
+    val versjon: String,
+)
 
 data class SykmeldingMetadata(
     val mottattDato: OffsetDateTime,
@@ -97,7 +96,7 @@ data class SporsmalSvar(
     val restriksjoner: List<SvarRestriksjon>,
 )
 
-enum class SvarRestriksjon() {
+enum class SvarRestriksjon {
     SKJERMET_FOR_ARBEIDSGIVER,
     SKJERMET_FOR_PASIENT,
     SKJERMET_FOR_NAV,

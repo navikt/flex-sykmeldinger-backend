@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject

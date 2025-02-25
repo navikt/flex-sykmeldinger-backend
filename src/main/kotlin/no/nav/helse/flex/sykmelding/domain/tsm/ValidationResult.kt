@@ -1,7 +1,5 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding.domain.tsm
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.OffsetDateTime
 
 data class ValidationResult(
@@ -31,12 +29,6 @@ data class RuleOutcome(
     val timestamp: OffsetDateTime,
 )
 
-@JsonSubTypes(
-    JsonSubTypes.Type(OKRule::class, name = "OK"),
-    JsonSubTypes.Type(InvalidRule::class, name = "INVALID"),
-    JsonSubTypes.Type(PendingRule::class, name = "PENDING"),
-)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed interface Rule {
     val type: RuleType
     val name: String

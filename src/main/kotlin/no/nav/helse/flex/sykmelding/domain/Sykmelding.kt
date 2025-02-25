@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus

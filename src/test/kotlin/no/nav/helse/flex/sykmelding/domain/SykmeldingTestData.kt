@@ -1,6 +1,8 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
