@@ -70,23 +70,6 @@ class AaregClientTest {
             aaregEksternClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
         } `should throw` RuntimeException::class
     }
-
-    // TODO: Trengs denne?
-//    @Test
-//    fun `burde kaste unauthorized exception dersom vi ikke sender med auth token`() {
-//        aaregMockWebServer.dispatcher =
-//            simpleDispatcher { request ->
-//                val token = request.headers["Authorization"]
-//                if (token == null) {
-//                    MockResponse().setResponseCode(HttpStatus.UNAUTHORIZED.value())
-//                } else {
-//                    MockResponse()
-//                }
-//            }
-//        invoking {
-//            aaregEksternClient.getArbeidsforholdoversikt("_")
-//        } shouldThrow HttpClientErrorException::class
-//    }
 }
 
 private val EKSEMPEL_ERROR_RESPONSE_FRA_AAREG =
