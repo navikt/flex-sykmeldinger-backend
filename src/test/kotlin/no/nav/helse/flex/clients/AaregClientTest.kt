@@ -2,15 +2,11 @@ package no.nav.helse.flex.clients
 
 import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.clients.aareg.AaregEksternClient
-import no.nav.helse.flex.config.RestClientConfig
-import no.nav.helse.flex.testconfig.MockWebServereConfig
+import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.invoking
@@ -18,18 +14,13 @@ import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnableMockOAuth2Server
-@EnableJwtTokenValidation
-@EnableOAuth2Client
-@SpringBootTest(classes = [AaregEksternClient::class, RestClient::class, RestClientConfig::class, MockWebServereConfig::class])
+@RestClientOppsett
+@Import(AaregEksternClient::class)
 class AaregClientTest {
     @Autowired
     private lateinit var aaregMockWebServer: MockWebServer
