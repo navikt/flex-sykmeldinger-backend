@@ -1,6 +1,6 @@
 package no.nav.helse.flex.clients.pdl
 
-import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
@@ -12,8 +12,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Import
 
-class PdlClientTest : IntegrasjonTestOppsett() {
+@RestClientOppsett
+@Import(PdlEksternClient::class)
+class PdlClientTest {
     @Autowired
     lateinit var pdlClient: PdlClient
 
