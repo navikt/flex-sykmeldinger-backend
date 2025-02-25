@@ -41,6 +41,12 @@ class RestClientConfig {
     }
 
     @Bean
+    fun eregRestClient(
+        @Value("\${EREG_URL}") url: String,
+        restClientBuilder: RestClient.Builder,
+    ): RestClient = restClientBuilder.baseUrl(url).build()
+
+    @Bean
     fun restClientBuilder(): RestClient.Builder {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
