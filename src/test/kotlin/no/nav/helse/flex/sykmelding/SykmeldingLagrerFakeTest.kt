@@ -9,10 +9,7 @@ import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
-import no.nav.helse.flex.testdata.lagMeldingsinformasjonEgenmeldt
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
@@ -38,11 +35,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde lagre sykmelding`() {
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
-            SykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                validation = lagValidation(),
-                metadata = lagMeldingsinformasjonEgenmeldt(),
-            ),
+            lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
@@ -52,11 +45,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     fun `burde deduplisere sykmeldinger`() {
         repeat(2) {
             sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
-                SykmeldingKafkaRecord(
-                    sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                    validation = lagValidation(),
-                    metadata = lagMeldingsinformasjonEgenmeldt(),
-                ),
+                lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
             )
         }
 
@@ -65,13 +54,8 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
     @Test
     fun `burde sette status til ny`() {
-        val sykmeldingMedBehandlingsutfall =
-            SykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                validation = lagValidation(),
-                metadata = lagMeldingsinformasjonEgenmeldt(),
-            )
-        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+        val sykmeldingKafkaRecord = lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1"))
+        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding.shouldNotBeNull()
