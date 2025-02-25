@@ -17,20 +17,20 @@ class SykmeldingLagrer(
     val log = logger()
 
     @Transactional
-    fun lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall: SykmeldingMedBehandlingsutfallMelding) {
-        if (sykmeldingRepository.findBySykmeldingId(sykmeldingMedBehandlingsutfall.sykmelding.id) != null) {
-            log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} finnes fra før")
+    fun lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
+        if (sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id) != null) {
+            log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} finnes fra før")
         } else {
-            val sykmelding = sykmeldingFactory(sykmeldingMedBehandlingsutfall)
+            val sykmelding = sykmeldingFactory(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
-            log.info("Sykmelding ${sykmeldingMedBehandlingsutfall.sykmelding.id} lagret")
+            log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} lagret")
         }
     }
 
-    private fun sykmeldingFactory(sykmeldingMedBehandlingsutfallMelding: SykmeldingMedBehandlingsutfallMelding): Sykmelding =
+    private fun sykmeldingFactory(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding =
         Sykmelding(
-            sykmeldingGrunnlag = sykmeldingMedBehandlingsutfallMelding.sykmelding,
+            sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
             statuser =
                 listOf(
                     SykmeldingHendelse(

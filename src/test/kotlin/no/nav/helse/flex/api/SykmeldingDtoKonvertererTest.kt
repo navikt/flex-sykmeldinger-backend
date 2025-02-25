@@ -2,7 +2,10 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be null`

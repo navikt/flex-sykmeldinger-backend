@@ -1,6 +1,8 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding.domain.tsm
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`

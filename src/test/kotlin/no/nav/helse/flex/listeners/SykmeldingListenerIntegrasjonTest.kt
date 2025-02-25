@@ -1,9 +1,10 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.sykmelding.domain.SykmeldingMedBehandlingsutfallMelding
-import no.nav.helse.flex.sykmelding.domain.lagSykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.domain.lagValidation
+import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.lagMeldingsinformasjonEgenmeldt
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldNotBeNull
@@ -24,7 +25,8 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @ValueSource(strings = [TEST_SYKMELDING_TOPIC, SYKMELDING_TOPIC])
     fun `burde lagre sykmelding fra kafka`(topic: String) {
         val kafkaMelding =
-            SykmeldingMedBehandlingsutfallMelding(
+            SykmeldingKafkaRecord(
+                metadata = lagMeldingsinformasjonEgenmeldt(),
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )

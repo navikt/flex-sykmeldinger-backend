@@ -1,10 +1,5 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding.domain.tsm
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.time.LocalDate
 
 enum class ArbeidsgiverType {
@@ -13,12 +8,6 @@ enum class ArbeidsgiverType {
     INGEN_ARBEIDSGIVER,
 }
 
-@JsonSubTypes(
-    Type(EnArbeidsgiver::class, name = "EN_ARBEIDSGIVER"),
-    Type(FlereArbeidsgivere::class, name = "FLERE_ARBEIDSGIVERE"),
-    Type(IngenArbeidsgiver::class, name = "INGEN_ARBEIDSGIVER"),
-)
-@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface ArbeidsgiverInfo {
     val type: ArbeidsgiverType
 }
@@ -40,7 +29,7 @@ data class FlereArbeidsgivere(
     override val type: ArbeidsgiverType = ArbeidsgiverType.FLERE_ARBEIDSGIVERE
 }
 
-class IngenArbeidsgiver() : ArbeidsgiverInfo {
+class IngenArbeidsgiver : ArbeidsgiverInfo {
     override val type: ArbeidsgiverType = ArbeidsgiverType.INGEN_ARBEIDSGIVER
 
     override fun equals(other: Any?) = other is IngenArbeidsgiver
@@ -55,11 +44,6 @@ enum class IArbeidType {
     ER_IKKE_I_ARBEID,
 }
 
-@JsonSubTypes(
-    Type(ErIArbeid::class, name = "ER_I_ARBEID"),
-    Type(ErIkkeIArbeid::class, name = "ER_IKKE_I_ARBEID"),
-)
-@JsonTypeInfo(use = Id.NAME, include = PROPERTY, property = "type")
 sealed interface IArbeid {
     val type: IArbeidType
     val vurderingsdato: LocalDate?

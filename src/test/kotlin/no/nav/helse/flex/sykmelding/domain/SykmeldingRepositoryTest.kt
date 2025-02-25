@@ -1,6 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
