@@ -30,23 +30,11 @@ class AadRestTemplateConfiguration {
         )
 
     @Bean
-    fun aaregRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder,
-        clientConfigurationProperties: ClientConfigurationProperties,
-        oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): RestTemplate =
-        downstreamRestTemplate(
-            registrationName = "aareg-client-credentials",
-            restTemplateBuilder = restTemplateBuilder,
-            clientConfigurationProperties = clientConfigurationProperties,
-            oAuth2AccessTokenService = oAuth2AccessTokenService,
-        )
-
-    @Bean
     fun plainRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate =
         restTemplateBuilder
             .connectTimeout(Duration.ofSeconds(5L))
-            .readTimeout(Duration.ofSeconds(10L)).build()
+            .readTimeout(Duration.ofSeconds(10L))
+            .build()
 
     private fun downstreamRestTemplate(
         restTemplateBuilder: RestTemplateBuilder,
@@ -69,11 +57,10 @@ class AadRestTemplateConfiguration {
     private fun bearerTokenInterceptor(
         clientProperties: ClientProperties,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
-    ): ClientHttpRequestInterceptor {
-        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
+    ): ClientHttpRequestInterceptor =
+        ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
             response.accessToken?.let { request.headers.setBearerAuth(it) }
             execution.execute(request, body)
         }
-    }
 }
