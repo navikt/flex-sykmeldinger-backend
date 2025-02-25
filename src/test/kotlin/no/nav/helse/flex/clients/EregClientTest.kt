@@ -3,7 +3,7 @@ package no.nav.helse.flex.clients
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.clients.ereg.EregClient
 import no.nav.helse.flex.clients.ereg.EregEksternClient
-import no.nav.helse.flex.testconfig.MockWebServereConfig
+import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
@@ -15,20 +15,18 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestTemplate
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = [EregEksternClient::class, RestTemplate::class, MockWebServereConfig::class])
+@RestClientOppsett
+@Import(EregEksternClient::class)
 class EregClientTest {
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer
 
     @Autowired
-    private lateinit var eregClient: EregClient
+    private lateinit var eregEksternClient: EregClient
 
     @AfterEach
     fun afterEach() {
@@ -46,7 +44,7 @@ class EregClientTest {
                     .addHeader("Content-Type", "application/json")
             }
 
-        eregClient.hentNokkelinfo("test-orgnummer")
+        eregEksternClient.hentNokkelinfo("test-orgnummer")
 
         path `should be equal to` "/v2/organisasjon/test-orgnummer/noekkelinfo"
     }
@@ -60,7 +58,7 @@ class EregClientTest {
                     .addHeader("Content-Type", "application/json")
             }
 
-        eregClient.hentNokkelinfo("_")
+        eregEksternClient.hentNokkelinfo("_")
     }
 
     @Test
@@ -74,7 +72,7 @@ class EregClientTest {
             }
 
         invoking {
-            eregClient.hentNokkelinfo("_")
+            eregEksternClient.hentNokkelinfo("_")
         } `should throw` RestClientException::class
     }
 
@@ -87,7 +85,7 @@ class EregClientTest {
             }
 
         invoking {
-            eregClient.hentNokkelinfo("suksess_uten_body_orgnummer")
+            eregEksternClient.hentNokkelinfo("suksess_uten_body_orgnummer")
         } `should throw` RuntimeException::class
     }
 }

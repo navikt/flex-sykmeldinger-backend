@@ -1,9 +1,8 @@
 package no.nav.helse.flex.clients.pdl
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 import java.util.*
 
 private const val HEADER_TEMA = "Tema"
@@ -15,11 +14,9 @@ private const val BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING = "B229"
 
 @Component
 class PdlEksternClient(
-    @Value("\${PDL_BASE_URL}")
-    pdlApiUrl: String,
-    pdlRestTemplate: RestTemplate,
+    pdlRestClient: RestClient,
 ) : PdlClient {
-    private val pdlGraphQlCLient = PdlGraphQlClient("$pdlApiUrl/graphql", pdlRestTemplate)
+    private val pdlGraphQlCLient = PdlGraphQlClient(pdlRestClient)
 
     @Retryable(exclude = [FunctionalPdlError::class])
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
