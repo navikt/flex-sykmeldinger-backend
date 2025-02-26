@@ -14,8 +14,6 @@ class ArbeidsforholdRepositoryFake :
                 navArbeidsforholdId
         }
 
-    override fun getAllByFnr(fnr: String): List<Arbeidsforhold> = entities.values.filter { it.fnr == fnr }
-
     override fun deleteByNavArbeidsforholdId(navArbeidsforholdId: String) {
         val key = entities.keys.find { entities[it]?.navArbeidsforholdId == navArbeidsforholdId }
         entities.remove(key)

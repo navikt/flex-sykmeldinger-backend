@@ -106,17 +106,17 @@ class SykmeldingController(
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<BrukerinformasjonDTO> {
-        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
+        val identer = tokenxValidering.hentIdenter()
 
         val sykmlding =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)
                 ?: return ResponseEntity.notFound().build()
-        if (sykmlding.pasientFnr != fnr) {
+        if (sykmlding.pasientFnr !in identer.alle()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
         val sykmeldingPeriode = sykmlding.fom to sykmlding.tom
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(fnr, sykmeldingPeriode)
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(identer, sykmeldingPeriode)
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(
@@ -149,20 +149,20 @@ class SykmeldingController(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
-        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
+        val identer = tokenxValidering.hentIdenter()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
             logger.warn("Fant ikke sykmeldingen")
             return ResponseEntity.notFound().build()
         }
-        if (sykmelding.pasientFnr != fnr) {
+        if (sykmelding.pasientFnr !in identer.alle()) {
             logger.warn("Fnr på sykmeldingen er forskjellig fra token")
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (sendBody.arbeidsgiverOrgnummer != null) {
-                val arbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
+                val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
                 val valgtArbeidsforhold = arbeidsforhold.find { it.orgnummer == sendBody.arbeidsgiverOrgnummer }
                 if (valgtArbeidsforhold == null) {
                     throw IllegalArgumentException("Fant ikke arbeidsgiver med orgnummer ${sendBody.arbeidsgiverOrgnummer}")

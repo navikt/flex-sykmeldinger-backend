@@ -82,7 +82,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
         sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
 
-        val arbeidsforhold = arbeidsforholdRepository.getAllByFnr("fnr")
+        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
         arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
     }

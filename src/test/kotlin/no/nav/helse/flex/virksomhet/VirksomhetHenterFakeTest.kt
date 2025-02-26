@@ -1,6 +1,7 @@
 package no.nav.helse.flex.virksomhet
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be equal to`
@@ -29,7 +30,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
             lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1"),
         )
 
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson("1")
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson(PersonIdenter("1"))
 
         virksomheter.size `should be equal to` 1
         virksomheter.first().naermesteLeder.shouldNotBeNull()
@@ -41,7 +42,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
             lagArbeidsforhold(fnr = "1", orgnummer = "org1"),
         )
 
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson("1")
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson(PersonIdenter("1"))
 
         virksomheter.size `should be equal to` 1
         virksomheter.first().naermesteLeder.shouldBeNull()
@@ -62,7 +63,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
             ),
         )
 
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson("1")
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson(PersonIdenter("1"))
 
         virksomheter.size `should be equal to` 1
         val virksomhet = virksomheter.first()
@@ -80,7 +81,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
 
         val virksomheter =
             virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
-                "1",
+                PersonIdenter("1"),
                 periode =
                     LocalDate.parse("2021-01-01") to LocalDate.parse("2021-02-01"),
             )
@@ -96,7 +97,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
 
         val virksomheter =
             virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
-                "1",
+                PersonIdenter("1"),
                 periode =
                     LocalDate.parse("2021-03-01") to LocalDate.parse("2021-04-01"),
             )
