@@ -7,35 +7,35 @@ import no.nav.helse.flex.clients.aareg.ArbeidsforholdoversiktResponse
 class AaregClientFake : AaregClient {
     private val arbeidsforholdOversikter: MutableMap<String, Result<ArbeidsforholdoversiktResponse>> = mutableMapOf()
 
-    init {
-        reset()
-    }
-
     companion object {
         val defaultArbeidsforholdoversiktResponse = lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList())
     }
 
     fun setArbeidsforholdoversikt(
         arbeidsforhold: ArbeidsforholdoversiktResponse,
-        fnr: String = "__default",
+        fnr: String = "__accept_any_fnr",
     ) {
         arbeidsforholdOversikter[fnr] = Result.success(arbeidsforhold)
     }
 
     fun setArbeidsforholdoversikt(
         failure: Exception,
-        fnr: String = "__default",
+        fnr: String = "__accept_any_fnr",
     ) {
         arbeidsforholdOversikter[fnr] = Result.failure(failure)
     }
 
     fun reset() {
         arbeidsforholdOversikter.clear()
-        setArbeidsforholdoversikt(defaultArbeidsforholdoversiktResponse)
     }
 
     override fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
-        val value = arbeidsforholdOversikter[fnr] ?: arbeidsforholdOversikter["__default"]!!
+        if (arbeidsforholdOversikter.isEmpty()) {
+            return defaultArbeidsforholdoversiktResponse
+        }
+        val value =
+            arbeidsforholdOversikter[fnr] ?: arbeidsforholdOversikter["__accept_any_fnr"]
+                ?: throw IllegalStateException("No response found for $fnr")
         return value.getOrThrow()
     }
 }
