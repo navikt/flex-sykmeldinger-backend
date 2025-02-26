@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import java.util.*
@@ -22,7 +23,11 @@ class SykmeldingRepositoryFake : ISykmeldingRepository {
 
     override fun findBySykmeldingId(id: String): Sykmelding? = lagretSykmelding.values.find { it.sykmeldingGrunnlag.id == id }
 
-    override fun findAllByFnr(fnr: String): List<Sykmelding> = lagretSykmelding.values.filter { it.sykmeldingGrunnlag.pasient.fnr == fnr }
+    override fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding> =
+        lagretSykmelding.values.filter {
+            it.sykmeldingGrunnlag.pasient.fnr in
+                identer.alle()
+        }
 
     override fun findAll(): List<Sykmelding> = lagretSykmelding.values.toList()
 

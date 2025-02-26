@@ -1,11 +1,14 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -208,6 +211,15 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
 
         hentetSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
+    }
+
+    @Test
+    fun `burde hente alle ved person identer`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "1"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "2"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "3", pasient = lagPasient(fnr = "3"))))
+
+        sykmeldingRepository.findAllByPersonIdenter(PersonIdenter("1", listOf("2"))) shouldHaveSize 2
     }
 
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =

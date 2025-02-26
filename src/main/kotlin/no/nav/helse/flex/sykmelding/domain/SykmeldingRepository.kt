@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -17,7 +18,7 @@ interface ISykmeldingRepository {
 
     fun findBySykmeldingId(id: String): Sykmelding?
 
-    fun findAllByFnr(fnr: String): List<Sykmelding>
+    fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding>
 
     fun findAll(): List<Sykmelding>
 
@@ -51,8 +52,8 @@ class SykmeldingRepository(
         return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
-    override fun findAllByFnr(fnr: String): List<Sykmelding> {
-        val dbRecords = sykmeldingDbRepository.findByFnr(fnr)
+    override fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding> {
+        val dbRecords = sykmeldingDbRepository.findAllByFnrIn(identer.alle())
         val statusDbRecords =
             sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
         return dbRecords.map { dbRecord ->
@@ -90,7 +91,7 @@ class SykmeldingRepository(
 
 @Repository
 interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
-    fun findByFnr(fnr: String): List<SykmeldingDbRecord>
+    fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord>
 
     fun findBySykmeldingUuid(sykmeldingUuid: String): SykmeldingDbRecord?
 }

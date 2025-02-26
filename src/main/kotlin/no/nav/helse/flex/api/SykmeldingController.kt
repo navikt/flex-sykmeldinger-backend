@@ -5,6 +5,8 @@ import no.nav.helse.flex.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.api.dto.VirksomhetDTO
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.config.IdentService
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
@@ -25,6 +27,7 @@ import java.util.function.Supplier
 class SykmeldingController(
     private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
+    private val identService: IdentService,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
     private val nowFactory: Supplier<Instant>,
@@ -41,9 +44,9 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
-        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val identer = tokenxValidering.hentIdenter()
 
-        val sykmeldinger = sykmeldingRepository.findAllByFnr(fnr)
+        val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
@@ -58,7 +61,7 @@ class SykmeldingController(
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
     ): ResponseEntity<Any> {
-        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
 
         val tidligereArbeidsgivere = sykmeldingHenter.finnTidligereArbeidsgivere(fnr, sykmeldingUuid)
         return ResponseEntity.ok(tidligereArbeidsgivere)
@@ -74,7 +77,7 @@ class SykmeldingController(
     fun getSykmelding(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<SykmeldingDTO> {
-        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val identer = tokenxValidering.hentIdenter()
 
         if (sykmeldingId == "null") {
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
@@ -85,8 +88,8 @@ class SykmeldingController(
             logger.warn("Fant ikke sykmeldingen")
             return ResponseEntity.notFound().build()
         }
-        if (sykmelding.sykmeldingGrunnlag.pasient.fnr != fnr) {
-            logger.warn("Fnr på sykmeldingen er forskjellig fra token")
+        if (sykmelding.sykmeldingGrunnlag.pasient.fnr !in identer.alle()) {
+            logger.warn("Person har ikke tilgang til sykmelding")
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
@@ -103,7 +106,8 @@ class SykmeldingController(
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<BrukerinformasjonDTO> {
-        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
+
         val sykmlding =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)
                 ?: return ResponseEntity.notFound().build()
@@ -145,7 +149,7 @@ class SykmeldingController(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
-        val fnr = tokenxValidering.validerFraDittSykefravaer()
+        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
             logger.warn("Fant ikke sykmeldingen")
@@ -205,6 +209,9 @@ class SykmeldingController(
     ): ResponseEntity<Any> {
         TODO("Ikke implementert")
     }
+
+    private fun TokenxValidering.hentIdenter(): PersonIdenter =
+        identService.hentFolkeregisterIdenterMedHistorikkForFnr(this.validerFraDittSykefravaerOgHentFnr())
 }
 
 internal fun Virksomhet.konverterTilDto(): VirksomhetDTO =

@@ -14,7 +14,8 @@ class TokenxValidering(
     @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
     private val dittSykefravaerFrontendClientId: String,
 ) {
-    fun validerFraDittSykefravaer(): String = tokenValidationContextHolder.validerTokenXClaims(dittSykefravaerFrontendClientId).fnr()
+    fun validerFraDittSykefravaerOgHentFnr(): String =
+        tokenValidationContextHolder.validerTokenXClaims(dittSykefravaerFrontendClientId).fnr()
 }
 
 fun TokenValidationContextHolder.validerTokenXClaims(vararg tillattClient: String): JwtTokenClaims {
