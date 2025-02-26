@@ -180,7 +180,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde hente nytt arbeidsforhold dersom person har endret ident og har nytt arbeidsforhold`() {
+    fun `burde opprette et arbeidsforhold når personen har endret ident og fått nytt arbeidsforhold`() {
         arbeidsforholdRepository.save(lagArbeidsforhold(navArbeidsforholdId = "første", fnr = "første-ident"))
 
         aaregClientFake.setArbeidsforholdoversikt(
@@ -209,9 +209,29 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde hente oppdatert arbeidsforhold dersom person har endret ident og har samme arbeidsforhold`(): Unit =
-        throw Exception("Not implemented")
+    fun `burde oppdatere et arbeidsforhold selv om personen har endret ident`() {
+        val originaltArbeidsforhold = lagArbeidsforhold(navArbeidsforholdId = "originaltArbeidsforhold", fnr = "første-ident")
+        arbeidsforholdRepository.save(originaltArbeidsforhold)
 
-    @Test
-    fun `burde hente arbeidsforhold dersom person bruker gammel ident`(): Unit = throw Exception("Not implemented")
+        val oppdatertArbeidsforholdMedNyIdent =
+            lagArbeidsforholdOversikt(
+                navArbeidsforholdId = "originaltArbeidsforhold",
+                identer = listOf("første-ident", "ny-ident"),
+            )
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    oppdatertArbeidsforholdMedNyIdent,
+                ),
+            ),
+            fnr = "ny-ident",
+        )
+
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("ny-ident")
+
+        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("første-ident", "ny-ident"))
+        arbeidsforhold.size `should be equal to` 1
+
+        arbeidsforhold.first().fnr `should be equal to` "første-ident"
+    }
 }
