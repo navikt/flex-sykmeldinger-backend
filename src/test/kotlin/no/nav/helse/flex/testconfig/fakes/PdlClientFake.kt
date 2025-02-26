@@ -7,10 +7,6 @@ class PdlClientFake : PdlClient {
     private val identerMedHistorikk: MutableMap<String, Result<List<PdlIdent>>> = mutableMapOf()
     private val formaterteNavn: MutableMap<String, Result<String>> = mutableMapOf()
 
-    init {
-        reset()
-    }
-
     companion object {
         val defaultIdenterMedHistorikk = listOf(PdlIdent(gruppe = "default-gruppe", ident = "default-ident"))
         val defaultFormatertNavn = "default-navn"
@@ -18,46 +14,54 @@ class PdlClientFake : PdlClient {
 
     fun setIdentMedHistorikk(
         identer: List<PdlIdent>,
-        ident: String = "__default",
+        ident: String = "__accept_any_ident",
     ) {
         this.identerMedHistorikk[ident] = Result.success(identer)
     }
 
     fun setIdentMedHistorikk(
         failure: Exception,
-        ident: String = "__default",
+        ident: String = "__accept_any_ident",
     ) {
         this.identerMedHistorikk[ident] = Result.failure(failure)
     }
 
     fun setFormatertNavn(
         navn: String,
-        fnr: String = "__default",
+        fnr: String = "__accept_any_fnr",
     ) {
         this.formaterteNavn[fnr] = Result.success(navn)
     }
 
     fun setFormatertNavn(
         failure: Exception,
-        fnr: String = "__default",
+        fnr: String = "__accept_any_fnr",
     ) {
         this.formaterteNavn[fnr] = Result.failure(failure)
     }
 
     fun reset() {
         identerMedHistorikk.clear()
-        setIdentMedHistorikk(defaultIdenterMedHistorikk)
         formaterteNavn.clear()
-        setFormatertNavn(defaultFormatertNavn)
     }
 
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
-        val identHistorikk = identerMedHistorikk[ident] ?: identerMedHistorikk["__default"]!!
+        if (identerMedHistorikk.isEmpty()) {
+            return defaultIdenterMedHistorikk
+        }
+
+        val identHistorikk =
+            identerMedHistorikk[ident] ?: identerMedHistorikk["__accept_any_ident"]
+                ?: throw IllegalStateException("No response found for $ident")
         return identHistorikk.getOrThrow()
     }
 
     override fun hentFormattertNavn(fnr: String): String {
-        val formattertNavn = formaterteNavn[fnr] ?: formaterteNavn["__default"]!!
+        if (formaterteNavn.isEmpty()) {
+            return defaultFormatertNavn
+        }
+        val formattertNavn =
+            formaterteNavn[fnr] ?: formaterteNavn["__accept_any_fnr"] ?: throw IllegalStateException("No response found for $fnr")
         return formattertNavn.getOrThrow()
     }
 }
