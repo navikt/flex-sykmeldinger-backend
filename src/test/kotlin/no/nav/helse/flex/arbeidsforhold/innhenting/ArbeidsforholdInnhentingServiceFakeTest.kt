@@ -10,6 +10,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import org.amshove.kluent.`should be equal to`
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
@@ -24,6 +25,12 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
     @Autowired
     lateinit var eregClientFake: EregClientFake
+
+    @AfterEach
+    fun tearDown() {
+        aaregClientFake.reset()
+        eregClientFake.reset()
+    }
 
     @Test
     fun `lagrer arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
