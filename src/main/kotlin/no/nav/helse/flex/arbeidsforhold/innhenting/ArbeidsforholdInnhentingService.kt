@@ -23,9 +23,15 @@ class ArbeidsforholdInnhentingService(
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
-        val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
-        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
-        val synkroniserteArbeidsforhold = synkroniserArbeidsforhold(interneArbeidsforhold, eksterntArbeidsforhold, now = nowFactory.get())
+        val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
+        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identerOgEksterneArbeidsforhold.identer.alle())
+        val synkroniserteArbeidsforhold =
+            synkroniserArbeidsforhold(
+                interneArbeidsforhold = interneArbeidsforhold,
+                eksterneArbeidsforhold = identerOgEksterneArbeidsforhold.eksterneArbeidsforhold,
+                fnr = fnr,
+                now = nowFactory.get(),
+            )
         lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
         return synkroniserteArbeidsforhold
     }
@@ -50,6 +56,7 @@ class ArbeidsforholdInnhentingService(
         internal fun synkroniserArbeidsforhold(
             interneArbeidsforhold: List<Arbeidsforhold>,
             eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
+            fnr: String,
             now: Instant = Instant.now(),
         ): SynkroniserteArbeidsforhold {
             val eksterneArbeidsforholdVedId = eksterneArbeidsforhold.associateBy { it.navArbeidsforholdId }
@@ -64,7 +71,7 @@ class ArbeidsforholdInnhentingService(
                     val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[navArbeidsforholdId]!!
                     Arbeidsforhold(
                         navArbeidsforholdId = eksterntArbeidsforhold.navArbeidsforholdId,
-                        fnr = eksterntArbeidsforhold.fnr,
+                        fnr = fnr,
                         orgnummer = eksterntArbeidsforhold.orgnummer,
                         juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
                         orgnavn = eksterntArbeidsforhold.orgnavn,
@@ -81,7 +88,6 @@ class ArbeidsforholdInnhentingService(
                     val eksterntArbeidsforhold = eksterneArbeidsforholdVedId[navArbeidsforholdId]!!
                     interntArbeidsforhold.copy(
                         navArbeidsforholdId = eksterntArbeidsforhold.navArbeidsforholdId,
-                        fnr = eksterntArbeidsforhold.fnr,
                         orgnummer = eksterntArbeidsforhold.orgnummer,
                         juridiskOrgnummer = eksterntArbeidsforhold.juridiskOrgnummer,
                         orgnavn = eksterntArbeidsforhold.orgnavn,

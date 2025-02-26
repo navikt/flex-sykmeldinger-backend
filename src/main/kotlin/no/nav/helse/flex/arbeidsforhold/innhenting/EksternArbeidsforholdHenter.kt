@@ -3,12 +3,12 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
+import no.nav.helse.flex.clients.pdl.PersonIdenter
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
     val navArbeidsforholdId: String,
-    val fnr: String,
     val orgnummer: String,
     val juridiskOrgnummer: String,
     val orgnavn: String,
@@ -17,50 +17,53 @@ data class EksterntArbeidsforhold(
     val arbeidsforholdType: ArbeidsforholdType?,
 )
 
+data class IdenterOgEksterneArbeidsforhold(
+    val identer: PersonIdenter,
+    val eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
+)
+
 @Component
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
     private val eregClient: EregClient,
 ) {
-    fun hentEksterneArbeidsforholdForPerson(fnr: String): List<EksterntArbeidsforhold> {
+    fun hentEksterneArbeidsforholdForPerson(fnr: String): IdenterOgEksterneArbeidsforhold {
         val result = aaregClient.getArbeidsforholdoversikt(fnr)
 
-        return result.arbeidsforholdoversikter
-            .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
-            .map { arbeidsforholdOversikt ->
-                val orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted)
-                val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
-                val orgnavn = orgNokkelinfo.navn.sammensattnavn
-                EksterntArbeidsforhold(
-                    navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
-                    fnr = getFnrFraArbeidstaker(arbeidsforholdOversikt.arbeidstaker),
-                    orgnummer = orgnummer,
-                    juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
-                    orgnavn = orgnavn,
-                    fom = arbeidsforholdOversikt.startdato,
-                    tom = arbeidsforholdOversikt.sluttdato,
-                    arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
-                )
-            }
+        val eksterneArbeidsforhold =
+            result.arbeidsforholdoversikter
+                .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
+                .map { arbeidsforholdOversikt ->
+                    val orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted)
+                    val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
+                    val orgnavn = orgNokkelinfo.navn.sammensattnavn
+                    EksterntArbeidsforhold(
+                        navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
+                        orgnummer = orgnummer,
+                        juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
+                        orgnavn = orgnavn,
+                        fom = arbeidsforholdOversikt.startdato,
+                        tom = arbeidsforholdOversikt.sluttdato,
+                        arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
+                    )
+                }
+        val identer =
+            PersonIdenter(
+                originalIdent = fnr,
+                andreIdenter =
+                    result.arbeidsforholdoversikter
+                        .flatMap { arbeidsforhold ->
+                            arbeidsforhold.arbeidstaker.identer.map { it.ident }
+                        }.distinct(),
+            )
+
+        return IdenterOgEksterneArbeidsforhold(
+            identer = identer,
+            eksterneArbeidsforhold = eksterneArbeidsforhold,
+        )
     }
 
     companion object {
-        fun getFnrFraArbeidstaker(arbeidstaker: Arbeidstaker): String {
-            val gjeldendePersonIdenter =
-                arbeidstaker.identer
-                    .filter {
-                        it.type in
-                            setOf(
-                                // TODO: skal vi sjekke aktorId også?
-                                //  IdentType.AKTORID,
-                                IdentType.FOLKEREGISTERIDENT,
-                            )
-                    }.filter { it.gjeldende == true }
-            require(gjeldendePersonIdenter.isNotEmpty()) { "Ingen gjeldende identer inneholder fnr" }
-
-            return gjeldendePersonIdenter.first().ident
-        }
-
         fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String =
             arbeidssted.identer
                 .first {
