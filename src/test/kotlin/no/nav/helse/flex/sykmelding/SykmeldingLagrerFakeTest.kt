@@ -67,7 +67,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
         aaregClient.setArbeidsforholdoversikt(
-            lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(fnr = "fnr", orgnummer = "910825518"))),
+            lagArbeidsforholdOversiktResponse(listOf(lagArbeidsforholdOversikt(identer = listOf("fnr"), orgnummer = "910825518"))),
             "fnr",
         )
         eregClient.setNokkelinfo(failure = RuntimeException())

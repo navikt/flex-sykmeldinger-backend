@@ -20,4 +20,6 @@ class ArbeidsforholdRepositoryFake :
         val key = entities.keys.find { entities[it]?.navArbeidsforholdId == navArbeidsforholdId }
         entities.remove(key)
     }
+
+    override fun getAllByFnrIn(identer: List<String>): List<Arbeidsforhold> = entities.values.filter { it.fnr in identer }
 }

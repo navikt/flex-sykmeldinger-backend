@@ -1,6 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.EksterntArbeidsforhold
+import no.nav.helse.flex.arbeidsforhold.innhenting.IdenterOgEksterneArbeidsforhold
+import no.nav.helse.flex.clients.pdl.PersonIdenter
 import java.time.Instant
 import java.time.LocalDate
 
@@ -31,7 +33,6 @@ fun lagArbeidsforhold(
 
 fun lagEksterntArbeidsforhold(
     navArbeidsforholdId: String = "navArbeidsforholdId",
-    fnr: String = "fnr",
     orgnummer: String = "orgnummer",
     juridiskOrgnummer: String = "jorgnummer",
     orgnavn: String = "Orgnavn",
@@ -41,11 +42,19 @@ fun lagEksterntArbeidsforhold(
 ): EksterntArbeidsforhold =
     EksterntArbeidsforhold(
         navArbeidsforholdId = navArbeidsforholdId,
-        fnr = fnr,
         orgnummer = orgnummer,
         juridiskOrgnummer = juridiskOrgnummer,
         orgnavn = orgnavn,
         fom = fom,
         tom = tom,
         arbeidsforholdType = arbeidsforholdType,
+    )
+
+fun lagIdenterOgEksterneArbeidsforhold(
+    identer: PersonIdenter = PersonIdenter(originalIdent = "00000000001"),
+    eksterneArbeidsforhold: List<EksterntArbeidsforhold> = listOf(lagEksterntArbeidsforhold()),
+): IdenterOgEksterneArbeidsforhold =
+    IdenterOgEksterneArbeidsforhold(
+        identer = identer,
+        eksterneArbeidsforhold = eksterneArbeidsforhold,
     )

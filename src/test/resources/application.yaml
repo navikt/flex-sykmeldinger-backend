@@ -50,8 +50,9 @@ no.nav.security.jwt:
           client-secret: secretzz
           client-auth-method: client_secret_basic
 
-pdl.api.url: "http://pdl-api.pdl"
+
 AAREG_HENDELSE_TOPIC: "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
 REGISTRERT_FOR_ARBEIDSFORHOLD: true
 AAREG_URL: "url"
 EREG_URL: "url"
+PDL_BASE_URL: "url"

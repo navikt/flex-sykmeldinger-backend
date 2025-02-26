@@ -13,8 +13,9 @@ fun lagArbeidsforholdOversiktResponse(
     )
 
 fun lagArbeidsforholdOversikt(
-    fnr: String = "2175141353812",
+    identer: List<String> = listOf("2175141353812"),
     orgnummer: String = "910825518",
+    navArbeidsforholdId: String = "navArbeidsforholdId",
 ): ArbeidsforholdOversikt =
     objectMapper.readValue(
         """
@@ -25,11 +26,17 @@ fun lagArbeidsforholdOversikt(
           },
           "arbeidstaker": {
             "identer": [
-              {
-                "type": "FOLKEREGISTERIDENT",
-                "ident": "$fnr",
-                "gjeldende": true
-              }
+            ${
+            identer.joinToString(",\n") {
+                """
+                {
+                  "type": "FOLKEREGISTERIDENT",
+                  "ident": "$it",
+                  "gjeldende": true
+                }
+                """
+            }
+        }
             ]
           },
           "arbeidssted": {
@@ -62,7 +69,7 @@ fun lagArbeidsforholdOversikt(
             "kode": "a-ordningen",
             "beskrivelse": "Rapportert via a-ordningen (2015-d.d.)"
           },
-          "navArbeidsforholdId": 12345,
+          "navArbeidsforholdId": "$navArbeidsforholdId",
           "sistBekreftet": "2020-09-15T08:19:53"
         },
         """.trimIndent(),

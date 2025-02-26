@@ -8,4 +8,6 @@ interface ArbeidsforholdRepository : CrudRepository<Arbeidsforhold, String> {
     fun findByNavArbeidsforholdId(navArbeidsforholdId: String): Arbeidsforhold?
 
     fun deleteByNavArbeidsforholdId(navArbeidsforholdId: String)
+
+    fun getAllByFnrIn(identer: List<String>): List<Arbeidsforhold>
 }
