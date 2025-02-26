@@ -3,7 +3,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
-import no.nav.helse.flex.clients.pdl.PersonIdenter
+import no.nav.helse.flex.config.PersonIdenter
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 

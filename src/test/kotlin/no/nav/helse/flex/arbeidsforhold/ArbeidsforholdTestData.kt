@@ -2,7 +2,7 @@ package no.nav.helse.flex.arbeidsforhold
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.EksterntArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.innhenting.IdenterOgEksterneArbeidsforhold
-import no.nav.helse.flex.clients.pdl.PersonIdenter
+import no.nav.helse.flex.config.PersonIdenter
 import java.time.Instant
 import java.time.LocalDate
 
