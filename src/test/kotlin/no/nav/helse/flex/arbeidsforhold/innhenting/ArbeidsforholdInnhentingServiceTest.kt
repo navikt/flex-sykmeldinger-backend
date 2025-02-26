@@ -69,25 +69,4 @@ class ArbeidsforholdInnhentingServiceTest {
             )
         resultat.skalOpprettes shouldHaveSize 0
     }
-
-//    @Test
-//    fun `burde hente arbeidsforhold for flere identer`() {
-//        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-//            mock {
-//                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-//                    listOf(
-//                        lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId1"),
-//                        lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId2"),
-//                    )
-//            }
-//        val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
-//        val arbeidsforholdInnhentingService =
-//            ArbeidsforholdInnhentingService(
-//                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-//                arbeidsforholdRepository = arbeidsforholdRepository,
-//            )
-//
-//        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("navArbeidsforholdId1", "navArbeidsforholdId2")
-//        verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
-//    }
 }

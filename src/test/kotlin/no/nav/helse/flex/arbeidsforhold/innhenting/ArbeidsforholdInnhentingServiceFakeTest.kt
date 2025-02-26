@@ -7,11 +7,24 @@ import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.*
 import no.nav.helse.flex.clients.pdl.PersonIdenter
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.AaregClientFake
+import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.LocalDate
 
 class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
+    @Autowired
+    lateinit var arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService
+
+    @Autowired
+    lateinit var aaregClientFake: AaregClientFake
+
+    @Autowired
+    lateinit var eregClientFake: EregClientFake
+
     @Test
     fun `lagrer arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
         val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
@@ -165,4 +178,40 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             )
         verify(arbeidsforholdRepository).saveAll(listOf(forventetArbeidsforhold))
     }
+
+    @Test
+    fun `burde hente nytt arbeidsforhold dersom person har endret ident og har nytt arbeidsforhold`() {
+        arbeidsforholdRepository.save(lagArbeidsforhold(navArbeidsforholdId = "første", fnr = "første-ident"))
+
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "første",
+                        identer = listOf("første-ident", "ny-ident"),
+                    ),
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "andre",
+                        identer = listOf("første-ident", "ny-ident"),
+                    ),
+                ),
+            ),
+            fnr = "ny-ident",
+        )
+
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("ny-ident")
+
+        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("første-ident", "ny-ident"))
+        arbeidsforhold.size `should be equal to` 2
+
+        arbeidsforhold.first().fnr `should be equal to` "første-ident"
+        arbeidsforhold.last().fnr `should be equal to` "ny-ident"
+    }
+
+    @Test
+    fun `burde hente oppdatert arbeidsforhold dersom person har endret ident og har samme arbeidsforhold`(): Unit =
+        throw Exception("Not implemented")
+
+    @Test
+    fun `burde hente arbeidsforhold dersom person bruker gammel ident`(): Unit = throw Exception("Not implemented")
 }
