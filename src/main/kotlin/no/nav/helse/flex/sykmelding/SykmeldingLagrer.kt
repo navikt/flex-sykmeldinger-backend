@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.logikk
+package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.sykmelding.domain.*

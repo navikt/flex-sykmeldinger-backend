@@ -5,7 +5,6 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResp
 import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake

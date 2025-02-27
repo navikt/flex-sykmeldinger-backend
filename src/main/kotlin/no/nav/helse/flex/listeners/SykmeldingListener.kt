@@ -2,8 +2,8 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.sykmelding.SykmeldingLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
