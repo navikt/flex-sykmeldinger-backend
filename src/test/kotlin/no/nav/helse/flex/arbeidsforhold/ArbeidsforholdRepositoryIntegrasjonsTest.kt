@@ -23,7 +23,7 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : IntegrasjonTestOppsett() {
                 ),
             )
 
-        val alleLagredeArbeidsforhold = arbeidsforholdRepository.getAllByFnr("1")
+        val alleLagredeArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("1"))
         alleLagredeArbeidsforhold shouldHaveSize 1
 
         val lagretArbeidsforhold = alleLagredeArbeidsforhold.first()

@@ -9,5 +9,5 @@ import java.util.UUID
 interface NarmesteLederRepository : CrudRepository<NarmesteLeder, String> {
     fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder?
 
-    fun findAllByBrukerFnr(fnr: String): List<NarmesteLeder>
+    fun findAllByBrukerFnrIn(identer: List<String>): List<NarmesteLeder>
 }

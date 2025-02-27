@@ -3,6 +3,7 @@ package no.nav.helse.flex.virksomhet
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.getDagensDatoINorge
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
@@ -18,9 +19,9 @@ class VirksomhetHenterService(
     private val narmeseteLederRepository: NarmesteLederRepository,
     private val nowFactory: Supplier<Instant>,
 ) {
-    fun hentVirksomheterForPerson(fnr: String): List<Virksomhet> {
-        val arbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnr(fnr)
+    fun hentVirksomheterForPerson(identer: PersonIdenter): List<Virksomhet> {
+        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
         val virksomheter =
             sammenstillVirksomheter(
@@ -33,13 +34,13 @@ class VirksomhetHenterService(
     }
 
     fun hentVirksomheterForPersonInnenforPeriode(
-        fnr: String,
+        identer: PersonIdenter,
         periode: Pair<LocalDate, LocalDate>,
     ): List<Virksomhet> {
-        val arbeidsforhold = arbeidsforholdRepository.getAllByFnr(fnr)
+        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
         val arbeidsforholdInnenPeriode = arbeidsforhold.filtrerInnenPeriode(periode)
 
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnr(fnr)
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
         val virksomheter =
             sammenstillVirksomheter(

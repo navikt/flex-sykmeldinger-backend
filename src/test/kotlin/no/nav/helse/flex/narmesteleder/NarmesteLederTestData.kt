@@ -13,11 +13,12 @@ fun lagNarmesteLeder(
     orgnummer: String = "123456789",
     aktivFom: LocalDate = LocalDate.parse("2022-02-02"),
     narmesteLederNavn: String = "Leder Navn",
+    narmesteLederId: UUID = UUID.randomUUID(),
 ): NarmesteLeder =
     NarmesteLeder(
         oppdatert = Instant.parse("2022-02-02T00:00:00.00Z"),
         timestamp = Instant.parse("2022-02-02T00:00:00.00Z"),
-        narmesteLederId = UUID.fromString("00000000-0000-0000-0000-000000000000"),
+        narmesteLederId = narmesteLederId,
         orgnummer = orgnummer,
         brukerFnr = brukerFnr,
         narmesteLederFnr = "lederFnr",
