@@ -2,8 +2,8 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingLagrer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Profile("test") // TODO: Skru på når topic er prodsatt
 @Component
 class SykmeldingListener(
-    private val sykmeldingLagrer: SykmeldingLagrer,
+    private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
 ) {
     val log = logger()
 
@@ -32,7 +32,7 @@ class SykmeldingListener(
         try {
             val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
                 objectMapper.readValue(cr.value())
-            sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
             acknowledgment.acknowledge()
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}")

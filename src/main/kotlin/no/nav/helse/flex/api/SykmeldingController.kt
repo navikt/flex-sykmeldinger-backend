@@ -4,14 +4,14 @@ import no.nav.helse.flex.api.dto.BrukerinformasjonDTO
 import no.nav.helse.flex.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.api.dto.VirksomhetDTO
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.sykmelding.logikk.SykmeldingHenter
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
@@ -20,19 +20,15 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
-import java.util.function.Supplier
 
 @Controller
 class SykmeldingController(
-    private val sykmeldingHenter: SykmeldingHenter,
     private val tokenxValidering: TokenxValidering,
     private val identService: IdentService,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
-    private val nowFactory: Supplier<Instant>,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
-    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val sykmeldingHandterer: SykmeldingHandterer,
 ) {
     private val logger = logger()
 
@@ -46,12 +42,12 @@ class SykmeldingController(
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
+        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/tidligere-arbeidsgivere")
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/tidligere-arbeidsgivere")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -59,13 +55,8 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getTidligereArbeidsgivere(
-        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
-    ): ResponseEntity<Any> {
-        val fnr = tokenxValidering.validerFraDittSykefravaerOgHentFnr()
-
-        val tidligereArbeidsgivere = sykmeldingHenter.finnTidligereArbeidsgivere(fnr, sykmeldingUuid)
-        return ResponseEntity.ok(tidligereArbeidsgivere)
-    }
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<Any> = ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build()
 
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -83,15 +74,9 @@ class SykmeldingController(
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
             return ResponseEntity.notFound().build()
         }
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmelding == null) {
-            logger.warn("Fant ikke sykmeldingen")
-            return ResponseEntity.notFound().build()
-        }
-        if (sykmelding.sykmeldingGrunnlag.pasient.fnr !in identer.alle()) {
-            logger.warn("Person har ikke tilgang til sykmelding")
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+
+        val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
     }
@@ -150,48 +135,16 @@ class SykmeldingController(
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmelding == null) {
-            logger.warn("Fant ikke sykmeldingen")
-            return ResponseEntity.notFound().build()
-        }
-        if (sykmelding.pasientFnr !in identer.alle()) {
-            logger.warn("Fnr på sykmeldingen er forskjellig fra token")
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
 
-        val arbeidstakerInfo: ArbeidstakerInfo? =
-            if (sendBody.arbeidsgiverOrgnummer != null) {
-                val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-                val valgtArbeidsforhold = arbeidsforhold.find { it.orgnummer == sendBody.arbeidsgiverOrgnummer }
-                if (valgtArbeidsforhold == null) {
-                    throw IllegalArgumentException("Fant ikke arbeidsgiver med orgnummer ${sendBody.arbeidsgiverOrgnummer}")
-                }
-                ArbeidstakerInfo(
-                    arbeidsgiver =
-                        Arbeidsgiver(
-                            orgnummer = valgtArbeidsforhold.orgnummer,
-                            juridiskOrgnummer = valgtArbeidsforhold.juridiskOrgnummer,
-                            orgnavn = valgtArbeidsforhold.orgnavn,
-                        ),
-                )
-            } else {
-                null
-            }
-
-        val besvartSykmelding =
-            sykmelding.leggTilStatus(
-                SykmeldingHendelse(
-                    // TODO: Finn ut forskjell på SENDT og BEKREFTET
-                    status = HendelseStatus.SENDT,
-                    opprettet = nowFactory.get(),
-                    sporsmalSvar = sendBody.tilSporsmalListe(),
-                    arbeidstakerInfo = arbeidstakerInfo,
-                ),
+        val sykmelding =
+            sykmeldingHandterer.sendSykmelding(
+                sykmeldingId = sykmeldingId,
+                identer = identer,
+                arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
+                sporsmalSvar = sendBody.tilSporsmalListe(),
             )
 
-        val lagretSykmelding = sykmeldingRepository.save(besvartSykmelding)
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(lagretSykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
 
         return ResponseEntity.ok(konvertertSykmelding)
     }

@@ -1,7 +1,8 @@
-package no.nav.helse.flex.sykmelding.logikk
+package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -9,7 +10,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Component
-class SykmeldingLagrer(
+class SykmeldingKafkaLagrer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val nowFactory: Supplier<Instant>,
