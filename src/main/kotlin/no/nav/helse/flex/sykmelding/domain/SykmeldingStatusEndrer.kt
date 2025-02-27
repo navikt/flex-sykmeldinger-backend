@@ -1,8 +1,7 @@
-package no.nav.helse.flex.sykmelding
+package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import java.time.Instant

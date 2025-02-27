@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import java.util.*
 

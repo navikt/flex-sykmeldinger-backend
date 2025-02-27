@@ -1,12 +1,12 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
-import no.nav.helse.flex.sykmelding.SykmeldingStatusEndrer
+import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sporsmal
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
+import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
