@@ -10,7 +10,7 @@ import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.SykmeldingStatusEndrer
+import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
@@ -28,7 +28,7 @@ class SykmeldingController(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
-    private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
+    private val sykmeldingHandterer: SykmeldingHandterer,
 ) {
     private val logger = logger()
 
@@ -152,16 +152,14 @@ class SykmeldingController(
         }
 
         val oppdatertSykmelding =
-            sykmeldingStatusEndrer.endreStatusTilSendt(
-                sykmelding = sykmelding,
+            sykmeldingHandterer.sendSykmelding(
+                sykmeldingId = sykmeldingId,
                 identer = identer,
                 arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
                 sporsmalSvar = sendBody.tilSporsmalListe(),
             )
 
-        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(lagretSykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(oppdatertSykmelding)
 
         return ResponseEntity.ok(konvertertSykmelding)
     }
