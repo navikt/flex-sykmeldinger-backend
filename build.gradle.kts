@@ -2,19 +2,17 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.springframework.boot") version "3.4.2"
+    id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.spring") version "2.1.10"
 }
 
 group = "no.nav.helse.flex"
 version = "1.0.0"
 description = "flex-sykmeldinger-backend"
 java.sourceCompatibility = JavaVersion.VERSION_21
-
-ext["okhttp3.version"] = "4.12" // Token-support tester trenger MockWebServer.
 
 repositories {
     mavenCentral()
@@ -28,9 +26,14 @@ val tokenSupportVersion = "5.0.17"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
 val inntektsmeldingKontraktVersion = "2024.05.21-09-56-5528e"
-val sykepengesoknadKafkaVersion = "2024.12.06-09.11-55fbeea5"
-val commonsTextVersion = "1.12.0"
+val sykepengesoknadKafkaVersion = "2025.02.19-16.24-5e00417f"
+val commonsTextVersion = "1.13.0"
 val mockitoKotlinVersion = "2.2.0"
+
+ktlint {
+    // Midlertidig, se: https://github.com/JLLeitschuh/ktlint-gradle/issues/809
+    version.set("1.4.1")
+}
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
