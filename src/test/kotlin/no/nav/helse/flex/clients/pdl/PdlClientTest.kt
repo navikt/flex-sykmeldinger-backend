@@ -1,8 +1,10 @@
 package no.nav.helse.flex.clients.pdl
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.utils.objectMapper
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
@@ -45,7 +47,8 @@ class PdlClientTest {
             recordedRequest.shouldNotBeNull()
             recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
             recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
-            val parsedBody = GraphQlRequest.fraJson(recordedRequest!!.body.readUtf8())
+            recordedRequest!!.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest!!.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query(${"$"}ident: ID!) {
@@ -115,7 +118,8 @@ class PdlClientTest {
             recordedRequest.shouldNotBeNull()
             recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
             recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
-            val parsedBody = GraphQlRequest.fraJson(recordedRequest!!.body.readUtf8())
+            recordedRequest!!.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest!!.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
             query(${'$'}ident: ID!) {

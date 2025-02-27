@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
 import kotlin.reflect.KClass
@@ -26,6 +27,7 @@ class PdlGraphQlClient(
         val responseEntity =
             uri
                 .headers { httpHeaders ->
+                    httpHeaders.contentType = MediaType.APPLICATION_JSON
                     headers.forEach { (key, value) ->
                         httpHeaders.add(key, value)
                     }
@@ -53,11 +55,7 @@ class PdlGraphQlClient(
 data class GraphQlRequest(
     val query: String,
     val variables: Map<String, String>,
-) {
-    companion object {
-        fun fraJson(json: String): GraphQlRequest = objectMapper.readValue(json)
-    }
-}
+)
 
 data class GraphQlResponse<out T : Any>(
     val data: T?,
