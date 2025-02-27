@@ -14,8 +14,6 @@ version = "1.0.0"
 description = "flex-sykmeldinger-backend"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
-ext["okhttp3.version"] = "4.12" // Token-support tester trenger MockWebServer.
-
 repositories {
     mavenCentral()
     maven {
