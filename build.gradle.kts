@@ -30,6 +30,11 @@ val sykepengesoknadKafkaVersion = "2025.02.19-16.24-5e00417f"
 val commonsTextVersion = "1.13.0"
 val mockitoKotlinVersion = "2.2.0"
 
+ktlint {
+    // Midlertidig, se: https://github.com/JLLeitschuh/ktlint-gradle/issues/809
+    version.set("1.4.1")
+}
+
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation(kotlin("stdlib"))
