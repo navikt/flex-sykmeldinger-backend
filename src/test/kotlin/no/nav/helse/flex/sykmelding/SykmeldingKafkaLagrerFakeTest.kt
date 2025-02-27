@@ -15,9 +15,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class SykmeldingLagrerFakeTest : FakesTestOppsett() {
+class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     @Autowired
-    private lateinit var sykmeldingLagrer: SykmeldingLagrer
+    private lateinit var sykmeldingKafkaLagrer: SykmeldingKafkaLagrer
 
     @Autowired
     private lateinit var eregClient: EregClientFake
@@ -33,7 +33,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
 
     @Test
     fun `burde lagre sykmelding`() {
-        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
@@ -43,7 +43,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde deduplisere sykmeldinger`() {
         repeat(2) {
-            sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
                 lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
             )
         }
@@ -54,7 +54,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
     @Test
     fun `burde sette status til ny`() {
         val sykmeldingKafkaRecord = lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1"))
-        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding.shouldNotBeNull()
@@ -79,7 +79,7 @@ class SykmeldingLagrerFakeTest : FakesTestOppsett() {
                 metadata = lagMeldingsinformasjonEgenmeldt(),
             )
 
-        sykmeldingLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1

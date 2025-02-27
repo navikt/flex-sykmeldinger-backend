@@ -9,7 +9,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Component
-class SykmeldingLagrer(
+class SykmeldingKafkaLagrer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val nowFactory: Supplier<Instant>,
