@@ -2,7 +2,6 @@ package no.nav.helse.flex.config
 
 import no.nav.helse.flex.clients.pdl.PdlClient
 import no.nav.helse.flex.clients.pdl.PdlIdent
-import no.nav.helse.flex.config.PersonIdenter
 import org.springframework.stereotype.Component
 import java.io.Serializable
 
