@@ -10,6 +10,7 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService

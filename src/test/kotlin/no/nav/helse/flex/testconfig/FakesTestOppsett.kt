@@ -3,7 +3,7 @@ package no.nav.helse.flex.testconfig
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance

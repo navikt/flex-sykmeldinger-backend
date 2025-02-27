@@ -4,8 +4,8 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
