@@ -9,9 +9,11 @@ class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde hente arbeidsforhold ved bruker fnr`() {
         val narmesteLeder = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1"))
+        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "2"))
+        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "3"))
 
-        val alleNarmesteLedere = narmesteLederRepository.findAllByBrukerFnr("1")
-        alleNarmesteLedere shouldHaveSize 1
+        val alleNarmesteLedere = narmesteLederRepository.findAllByBrukerFnrIn(listOf("1", "2"))
+        alleNarmesteLedere shouldHaveSize 2
 
         val lagretNarmesteLeder = alleNarmesteLedere.first()
         narmesteLeder `should be equal to` lagretNarmesteLeder

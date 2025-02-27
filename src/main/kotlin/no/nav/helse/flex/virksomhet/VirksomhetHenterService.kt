@@ -21,8 +21,7 @@ class VirksomhetHenterService(
 ) {
     fun hentVirksomheterForPerson(identer: PersonIdenter): List<Virksomhet> {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-        // TODO: håndter flere identer?
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnr(identer.originalIdent)
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
         val virksomheter =
             sammenstillVirksomheter(
@@ -41,8 +40,7 @@ class VirksomhetHenterService(
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
         val arbeidsforholdInnenPeriode = arbeidsforhold.filtrerInnenPeriode(periode)
 
-        // TODO: håndter flere identer?
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnr(identer.originalIdent)
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
         val virksomheter =
             sammenstillVirksomheter(
