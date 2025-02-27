@@ -141,17 +141,8 @@ class SykmeldingController(
         @RequestBody sendBody: SendBody,
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmelding == null) {
-            logger.warn("Fant ikke sykmeldingen")
-            return ResponseEntity.notFound().build()
-        }
-        if (sykmelding.pasientFnr !in identer.alle()) {
-            logger.warn("Fnr på sykmeldingen er forskjellig fra token")
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
 
-        val oppdatertSykmelding =
+        val sykmelding =
             sykmeldingHandterer.sendSykmelding(
                 sykmeldingId = sykmeldingId,
                 identer = identer,
@@ -159,7 +150,7 @@ class SykmeldingController(
                 sporsmalSvar = sendBody.tilSporsmalListe(),
             )
 
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(oppdatertSykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
 
         return ResponseEntity.ok(konvertertSykmelding)
     }
