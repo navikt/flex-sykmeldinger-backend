@@ -35,7 +35,10 @@ class SykmeldingHandterer(
         return sykmelding
     }
 
-    fun hentAlleSykmeldinger(identer: PersonIdenter): List<Sykmelding> = emptyList()
+    fun hentAlleSykmeldinger(identer: PersonIdenter): List<Sykmelding> {
+        val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
+        return sykmeldinger
+    }
 
     @Transactional
     fun sendSykmelding(

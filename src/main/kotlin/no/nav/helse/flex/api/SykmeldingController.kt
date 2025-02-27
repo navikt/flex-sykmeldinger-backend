@@ -42,7 +42,7 @@ class SykmeldingController(
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
+        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
