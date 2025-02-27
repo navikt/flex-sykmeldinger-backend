@@ -74,15 +74,9 @@ class SykmeldingController(
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
             return ResponseEntity.notFound().build()
         }
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmelding == null) {
-            logger.warn("Fant ikke sykmeldingen")
-            return ResponseEntity.notFound().build()
-        }
-        if (sykmelding.sykmeldingGrunnlag.pasient.fnr !in identer.alle()) {
-            logger.warn("Person har ikke tilgang til sykmelding")
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+
+        val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
     }

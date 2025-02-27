@@ -18,6 +18,25 @@ class SykmeldingHandterer(
 ) {
     private val logger = logger()
 
+    fun hentSykmelding(
+        sykmeldingId: String,
+        identer: PersonIdenter,
+    ): Sykmelding {
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            logger.warn("Fant ikke sykmelding med id $sykmeldingId")
+            throw SykmeldingIkkeFunnetException("Fant ikke sykmelding med id $sykmeldingId")
+        }
+        if (sykmelding.pasientFnr !in identer.alle()) {
+            logger.warn("Person har ikke tilgang til sykmelding")
+            throw SykmeldingErIkkeDinException("Person har ikke tilgang til sykmelding")
+        }
+
+        return sykmelding
+    }
+
+    fun hentAlleSykmeldinger(identer: PersonIdenter): List<Sykmelding> = emptyList()
+
     @Transactional
     fun sendSykmelding(
         sykmeldingId: String,
