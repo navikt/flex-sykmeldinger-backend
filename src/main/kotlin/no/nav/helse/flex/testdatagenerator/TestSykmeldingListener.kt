@@ -2,7 +2,7 @@ package no.nav.helse.flex.testdatagenerator
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaLagrer
+import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
