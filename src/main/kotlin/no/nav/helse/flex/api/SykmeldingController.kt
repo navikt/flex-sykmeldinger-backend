@@ -4,13 +4,13 @@ import no.nav.helse.flex.api.dto.BrukerinformasjonDTO
 import no.nav.helse.flex.api.dto.NarmesteLederDTO
 import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.api.dto.VirksomhetDTO
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.SykmeldingStatusEndrer
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
@@ -20,8 +20,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
-import java.util.function.Supplier
 
 @Controller
 class SykmeldingController(
@@ -29,9 +27,8 @@ class SykmeldingController(
     private val identService: IdentService,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val virksomhetHenterService: VirksomhetHenterService,
-    private val nowFactory: Supplier<Instant>,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
-    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
 ) {
     private val logger = logger()
 
@@ -154,37 +151,16 @@ class SykmeldingController(
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val arbeidstakerInfo: ArbeidstakerInfo? =
-            if (sendBody.arbeidsgiverOrgnummer != null) {
-                val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-                val valgtArbeidsforhold = arbeidsforhold.find { it.orgnummer == sendBody.arbeidsgiverOrgnummer }
-                if (valgtArbeidsforhold == null) {
-                    throw IllegalArgumentException("Fant ikke arbeidsgiver med orgnummer ${sendBody.arbeidsgiverOrgnummer}")
-                }
-                ArbeidstakerInfo(
-                    arbeidsgiver =
-                        Arbeidsgiver(
-                            orgnummer = valgtArbeidsforhold.orgnummer,
-                            juridiskOrgnummer = valgtArbeidsforhold.juridiskOrgnummer,
-                            orgnavn = valgtArbeidsforhold.orgnavn,
-                        ),
-                )
-            } else {
-                null
-            }
-
-        val besvartSykmelding =
-            sykmelding.leggTilStatus(
-                SykmeldingHendelse(
-                    // TODO: Finn ut forskjell på SENDT og BEKREFTET
-                    status = HendelseStatus.SENDT,
-                    opprettet = nowFactory.get(),
-                    sporsmalSvar = sendBody.tilSporsmalListe(),
-                    arbeidstakerInfo = arbeidstakerInfo,
-                ),
+        val oppdatertSykmelding =
+            sykmeldingStatusEndrer.endreStatusTilSendt(
+                sykmelding = sykmelding,
+                identer = identer,
+                arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
+                sporsmalSvar = sendBody.tilSporsmalListe(),
             )
 
-        val lagretSykmelding = sykmeldingRepository.save(besvartSykmelding)
+        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
+
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(lagretSykmelding)
 
         return ResponseEntity.ok(konvertertSykmelding)
