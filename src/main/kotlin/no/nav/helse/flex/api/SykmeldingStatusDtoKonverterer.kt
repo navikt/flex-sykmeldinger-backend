@@ -3,6 +3,7 @@ package no.nav.helse.flex.api
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.Sporsmal
 import no.nav.helse.flex.sykmelding.domain.SporsmalTag
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
@@ -16,7 +17,7 @@ class SykmeldingStatusDtoKonverterer {
     fun konverterSykmeldingStatus(status: SykmeldingHendelse): SykmeldingStatusDTO =
         SykmeldingStatusDTO(
             // TODO
-            statusEvent = status.status.name,
+            statusEvent = konverterHendelseStatus(status.status),
             timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
             sporsmalOgSvarListe = emptyList(),
             arbeidsgiver =
@@ -29,6 +30,15 @@ class SykmeldingStatusDtoKonverterer {
                 },
             brukerSvar = status.sporsmalSvar?.let { konverterSykmeldingSporsmal(it) },
         )
+
+    private fun konverterHendelseStatus(status: HendelseStatus): String =
+        when (status) {
+            HendelseStatus.APEN -> "APEN"
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER -> "SENDT"
+            HendelseStatus.SENDT_TIL_NAV -> "BEKREFTET"
+            HendelseStatus.AVBRUTT -> "AVBRUTT"
+            HendelseStatus.UTGATT -> "UTGATT"
+        }
 
     internal fun konverterSykmeldingSporsmal(sporsmal: List<Sporsmal>): SykmeldingSporsmalSvarDto {
         fun hentSporsmal(

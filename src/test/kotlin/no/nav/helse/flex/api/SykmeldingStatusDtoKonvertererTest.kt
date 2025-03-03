@@ -15,16 +15,37 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
     lateinit var sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer
 
     @Test
-    fun `burde konvertere status NY`() {
+    fun `burde konvertere status APEN til APEN`() = testStatusMapping(HendelseStatus.APEN, "APEN")
+
+    @Test
+    fun `burde konvertere status SENDT_TIL_ARBEIDSGIVER til SENDT`() =
+        testStatusMapping(
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+            "SENDT",
+        )
+
+    @Test
+    fun `burde konvertere status SENDT_TIL_NAV til BEKREFTET`() = testStatusMapping(HendelseStatus.SENDT_TIL_NAV, "BEKREFTET")
+
+    @Test
+    fun `burde konvertere status AVBRUTT til AVBRUTT`() = testStatusMapping(HendelseStatus.AVBRUTT, "AVBRUTT")
+
+    @Test
+    fun `burde konvertere status UTGATT til UTGATT`() = testStatusMapping(HendelseStatus.UTGATT, "UTGATT")
+
+    private fun testStatusMapping(
+        fra: HendelseStatus,
+        til: String,
+    ) {
         val status =
             SykmeldingHendelse(
-                status = HendelseStatus.APEN,
+                status = fra,
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         val forventetStatus =
             SykmeldingStatusDTO(
-                statusEvent = "APEN",
+                statusEvent = til,
                 timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
                 arbeidsgiver = null,
                 sporsmalOgSvarListe = emptyList(),

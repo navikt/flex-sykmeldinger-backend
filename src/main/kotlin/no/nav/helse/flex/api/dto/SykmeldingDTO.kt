@@ -14,7 +14,7 @@ data class SykmeldingDTO(
     val sykmeldingStatus: SykmeldingStatusDTO,
     val medisinskVurdering: MedisinskVurderingDTO?,
     val skjermesForPasient: Boolean,
-    val prognose: no.nav.helse.flex.api.dto.PrognoseDTO?,
+    val prognose: PrognoseDTO?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvarDTO>>,
     val tiltakArbeidsplassen: String?,
     val tiltakNAV: String?,
@@ -29,7 +29,7 @@ data class SykmeldingDTO(
     val egenmeldt: Boolean?,
     val papirsykmelding: Boolean?,
     val harRedusertArbeidsgiverperiode: Boolean?,
-    val merknader: List<no.nav.helse.flex.api.dto.MerknadDTO>?,
+    val merknader: List<MerknadDTO>?,
     val rulesetVersion: String?,
-    val utenlandskSykmelding: no.nav.helse.flex.api.dto.UtenlandskSykmelding?,
+    val utenlandskSykmelding: UtenlandskSykmelding?,
 )
