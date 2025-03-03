@@ -92,6 +92,7 @@ class SykmeldingStatusEndrer(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.BEKREFTET, HendelseStatus.AVBRUTT),
         )
+        // TODO: Burde vi kaste exception om vi endrer AVBRUTT til AVBRUTT?
         if (sisteHendelse.status == HendelseStatus.AVBRUTT) {
             return sykmelding
         }
@@ -117,6 +118,21 @@ class SykmeldingStatusEndrer(
         sykmelding.leggTilStatus(
             SykmeldingHendelse(
                 status = HendelseStatus.APEN,
+                opprettet = nowFactory.get(),
+            ),
+        )
+        return sykmelding
+    }
+
+    fun endreStatusTilUtgatt(sykmelding: Sykmelding): Sykmelding {
+        val sisteHendelse = sykmelding.sisteStatus()
+        require(
+            sisteHendelse.status in
+                setOf(HendelseStatus.APEN, HendelseStatus.AVBRUTT),
+        )
+        sykmelding.leggTilStatus(
+            SykmeldingHendelse(
+                status = HendelseStatus.UTGATT,
                 opprettet = nowFactory.get(),
             ),
         )
