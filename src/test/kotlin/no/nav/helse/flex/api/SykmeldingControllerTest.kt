@@ -526,7 +526,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT
+            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
 
         @Test

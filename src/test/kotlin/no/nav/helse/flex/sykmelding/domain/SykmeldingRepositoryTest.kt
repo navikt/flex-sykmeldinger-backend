@@ -162,7 +162,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `burde lagre status med arbeidstaker info`() {
         val hendelse =
             lagSykmeldingHendelse(
-                status = HendelseStatus.SENDT,
+                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
                 arbeidstakerInfo =
                     ArbeidstakerInfo(
                         arbeidsgiver =

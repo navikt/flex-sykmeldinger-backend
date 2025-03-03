@@ -60,7 +60,7 @@ data class Arbeidsgiver(
 enum class HendelseStatus {
     APEN,
     AVBRUTT,
-    BEKREFTET,
-    SENDT,
+    SENDT_TIL_NAV,
+    SENDT_TIL_ARBEIDSGIVER,
     UTGATT,
 }

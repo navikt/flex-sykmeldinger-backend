@@ -25,7 +25,7 @@ class SykmeldingStatusEndrer(
             sisteStatus.status in
                 setOf(
                     HendelseStatus.APEN,
-                    HendelseStatus.BEKREFTET,
+                    HendelseStatus.SENDT_TIL_NAV,
                     HendelseStatus.AVBRUTT,
                 ),
         )
@@ -51,7 +51,7 @@ class SykmeldingStatusEndrer(
 
         val hendelse =
             SykmeldingHendelse(
-                status = HendelseStatus.SENDT,
+                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
                 opprettet = nowFactory.get(),
                 sporsmalSvar = sporsmalSvar,
                 arbeidstakerInfo = arbeidstakerInfo,
@@ -70,7 +70,7 @@ class SykmeldingStatusEndrer(
             sisteStatus.status in
                 setOf(
                     HendelseStatus.APEN,
-                    HendelseStatus.BEKREFTET,
+                    HendelseStatus.SENDT_TIL_NAV,
                     HendelseStatus.AVBRUTT,
                 ),
         )
@@ -78,7 +78,7 @@ class SykmeldingStatusEndrer(
         // TODO: Hent tidligere arbeidsgivere
         val hendelse =
             SykmeldingHendelse(
-                status = HendelseStatus.BEKREFTET,
+                status = HendelseStatus.SENDT_TIL_NAV,
                 opprettet = nowFactory.get(),
                 // tidligereArbeidsgiver = tidligereArbeidsgiver,
             )
@@ -90,7 +90,7 @@ class SykmeldingStatusEndrer(
         val sisteHendelse = sykmelding.sisteStatus()
         require(
             sisteHendelse.status in
-                setOf(HendelseStatus.APEN, HendelseStatus.BEKREFTET, HendelseStatus.AVBRUTT),
+                setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT),
         )
         // TODO: Burde vi kaste exception om vi endrer AVBRUTT til AVBRUTT?
         if (sisteHendelse.status == HendelseStatus.AVBRUTT) {
@@ -110,7 +110,7 @@ class SykmeldingStatusEndrer(
         val sisteHendelse = sykmelding.sisteStatus()
         require(
             sisteHendelse.status in
-                setOf(HendelseStatus.APEN, HendelseStatus.BEKREFTET, HendelseStatus.AVBRUTT),
+                setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT),
         )
         if (sisteHendelse.status == HendelseStatus.APEN) {
             return sykmelding
