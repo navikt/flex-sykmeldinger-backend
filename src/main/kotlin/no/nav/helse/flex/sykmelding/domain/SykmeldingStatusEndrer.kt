@@ -14,7 +14,7 @@ class SykmeldingStatusEndrer(
 ) {
     private val logger = logger()
 
-    fun endreStatusTilSendt(
+    fun endreStatusTilSendtTilArbeidsgiver(
         sykmelding: Sykmelding,
         identer: PersonIdenter,
         arbeidsgiverOrgnummer: String? = null,
@@ -60,9 +60,10 @@ class SykmeldingStatusEndrer(
         return sykmelding.leggTilStatus(hendelse)
     }
 
-    fun endreStatusTilBekreftet(
+    fun endreStatusTilSendtTilNav(
         sykmelding: Sykmelding,
-        arbeidsgiverOrgnummer: String? = null,
+        identer: PersonIdenter,
+        arbeidsledigFraOrgnummer: String? = null,
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
         val sisteStatus = sykmelding.sisteStatus()

@@ -489,7 +489,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class SendSykmeldingEndepunkt {
         @Test
-        fun `burde sende sykmelding`() {
+        fun `burde sende sykmelding til arbeidsgiver`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -570,6 +570,51 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
+        fun `burde sende sykmelding til nav`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .post("/api/v1/sykmeldinger/1/send")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON)
+                            .content(
+                                lagSendBody(
+                                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                                    arbeidsledig =
+                                        Arbeidsledig(
+                                            arbeidsledigFraOrgnummer = "orgnummer",
+                                        ),
+                                ).serialisertTilString(),
+                            ),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            returnertSykmelding `should not be` null
+
+            val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
+            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+        }
+
+        @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() {
             mockMvc
                 .perform(
@@ -646,13 +691,16 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 }
 
-fun lagSendBody(arbeidsgiverOrgnummer: String? = null): SendBody {
-    val sendBody: SendBody =
-        objectMapper.readValue(
-            """
-        {"erOpplysningeneRiktige":"YES","arbeidssituasjon":"ARBEIDSTAKER",
-        "arbeidsgiverOrgnummer":null,"riktigNarmesteLeder":null,"harEgenmeldingsdager":"NO"}
-        """,
-        )
-    return sendBody.copy(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
-}
+fun lagSendBody(
+    arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+    arbeidsgiverOrgnummer: String? = null,
+    arbeidsledig: Arbeidsledig? = null,
+): SendBody =
+    SendBody(
+        erOpplysningeneRiktige = "YES",
+        arbeidssituasjon = arbeidssituasjon,
+        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+        riktigNarmesteLeder = null,
+        harEgenmeldingsdager = "NO",
+        arbeidsledig = arbeidsledig,
+    )
