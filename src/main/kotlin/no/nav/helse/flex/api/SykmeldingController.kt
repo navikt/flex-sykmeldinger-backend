@@ -1,9 +1,6 @@
 package no.nav.helse.flex.api
 
-import no.nav.helse.flex.api.dto.BrukerinformasjonDTO
-import no.nav.helse.flex.api.dto.NarmesteLederDTO
-import no.nav.helse.flex.api.dto.SykmeldingDTO
-import no.nav.helse.flex.api.dto.VirksomhetDTO
+import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
@@ -137,12 +134,33 @@ class SykmeldingController(
         val identer = tokenxValidering.hentIdenter()
 
         val sykmelding =
-            sykmeldingHandterer.sendSykmelding(
-                sykmeldingId = sykmeldingId,
-                identer = identer,
-                arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
-                sporsmalSvar = sendBody.tilSporsmalListe(),
-            )
+            when (sendBody.arbeidssituasjon) {
+                Arbeidssituasjon.ARBEIDSTAKER -> {
+                    sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
+                        sykmeldingId = sykmeldingId,
+                        identer = identer,
+                        arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
+                        sporsmalSvar = sendBody.tilSporsmalListe(),
+                    )
+                }
+                Arbeidssituasjon.ARBEIDSLEDIG,
+                -> {
+                    sykmeldingHandterer.sendSykmeldingTilNav(
+                        sykmeldingId = sykmeldingId,
+                        identer = identer,
+                        arbeidsledigFraOrgnummer = sendBody.arbeidsgiverOrgnummer,
+                        sporsmalSvar = sendBody.tilSporsmalListe(),
+                    )
+                }
+                Arbeidssituasjon.FRILANSER,
+                Arbeidssituasjon.NAERINGSDRIVENDE,
+                Arbeidssituasjon.JORDBRUKER,
+                Arbeidssituasjon.ANNET,
+                Arbeidssituasjon.FISKER,
+                -> {
+                    throw NotImplementedError("Ikke implementert")
+                }
+            }
 
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
 
@@ -186,12 +204,27 @@ internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
         )
     }
 
+data class Arbeidsledig(
+    val arbeidsledigFraOrgnummer: String? = null,
+)
+
+enum class Arbeidssituasjon {
+    ARBEIDSTAKER,
+    FRILANSER,
+    NAERINGSDRIVENDE,
+    FISKER,
+    JORDBRUKER,
+    ARBEIDSLEDIG,
+    ANNET,
+}
+
 data class SendBody(
     val erOpplysningeneRiktige: String,
     val arbeidsgiverOrgnummer: String?,
-    val arbeidssituasjon: String,
+    val arbeidssituasjon: Arbeidssituasjon,
     val harEgenmeldingsdager: String?,
     val riktigNarmesteLeder: String?,
+    val arbeidsledig: Arbeidsledig?,
 ) {
     fun tilSporsmalListe(): List<Sporsmal> {
         val sporsmal = mutableListOf<Sporsmal>()
@@ -215,7 +248,7 @@ data class SendBody(
             Sporsmal(
                 tag = SporsmalTag.ARBEIDSSITUASJON,
                 svartype = Svartype.RADIO,
-                svar = listOf(Svar(verdi = arbeidssituasjon)),
+                svar = listOf(Svar(verdi = arbeidssituasjon.name)),
             ),
         )
         harEgenmeldingsdager?.let {
@@ -233,6 +266,15 @@ data class SendBody(
                     tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
                     svartype = Svartype.JA_NEI,
                     svar = listOf(Svar(verdi = konverterJaNeiSvar(it))),
+                ),
+            )
+        }
+        arbeidsledig?.arbeidsledigFraOrgnummer?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
+                    svartype = Svartype.FRITEKST,
+                    svar = listOf(Svar(verdi = it)),
                 ),
             )
         }

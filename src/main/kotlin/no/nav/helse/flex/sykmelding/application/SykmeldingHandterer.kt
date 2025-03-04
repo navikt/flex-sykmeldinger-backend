@@ -41,7 +41,7 @@ class SykmeldingHandterer(
     }
 
     @Transactional
-    fun sendSykmelding(
+    fun sendSykmeldingTilArbeidsgiver(
         sykmeldingId: String,
         identer: PersonIdenter,
         arbeidsgiverOrgnummer: String?,
@@ -58,10 +58,40 @@ class SykmeldingHandterer(
         }
 
         val oppdatertSykmelding =
-            sykmeldingStatusEndrer.endreStatusTilSendt(
+            sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
                 sykmelding = sykmelding,
                 identer = identer,
                 arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                sporsmalSvar = sporsmalSvar,
+            )
+
+        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
+        sendSykmeldingKafka(lagretSykmelding)
+        return lagretSykmelding
+    }
+
+    @Transactional
+    fun sendSykmeldingTilNav(
+        sykmeldingId: String,
+        identer: PersonIdenter,
+        arbeidsledigFraOrgnummer: String?,
+        sporsmalSvar: List<Sporsmal>?,
+    ): Sykmelding {
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            logger.warn("Fant ikke sykmelding med id $sykmeldingId")
+            throw SykmeldingIkkeFunnetException("Fant ikke sykmelding med id $sykmeldingId")
+        }
+        if (sykmelding.pasientFnr !in identer.alle()) {
+            logger.warn("Person har ikke tilgang til sykmelding")
+            throw SykmeldingErIkkeDinException("Person har ikke tilgang til sykmelding")
+        }
+
+        val oppdatertSykmelding =
+            sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
+                sykmelding = sykmelding,
+                identer = identer,
+                arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
                 sporsmalSvar = sporsmalSvar,
             )
 
