@@ -489,7 +489,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class SendSykmeldingEndepunkt {
         @Test
-        fun `burde sende sykmelding til arbeidsgiver`() {
+        fun `burde sende sykmelding for arbeidstaker til arbeidsgiver`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -570,7 +570,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde sende sykmelding til nav`() {
+        fun `burde sende sykmelding for arbeidsledig til nav`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
