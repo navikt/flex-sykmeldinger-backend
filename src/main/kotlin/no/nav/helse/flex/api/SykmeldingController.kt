@@ -144,10 +144,6 @@ class SykmeldingController(
                     )
                 }
                 Arbeidssituasjon.ARBEIDSLEDIG,
-                Arbeidssituasjon.FRILANSER,
-                Arbeidssituasjon.NAERINGSDRIVENDE,
-                Arbeidssituasjon.JORDBRUKER,
-                Arbeidssituasjon.ANNET,
                 -> {
                     sykmeldingHandterer.sendSykmeldingTilNav(
                         sykmeldingId = sykmeldingId,
@@ -156,7 +152,12 @@ class SykmeldingController(
                         sporsmalSvar = sendBody.tilSporsmalListe(),
                     )
                 }
-                Arbeidssituasjon.FISKER -> {
+                Arbeidssituasjon.FRILANSER,
+                Arbeidssituasjon.NAERINGSDRIVENDE,
+                Arbeidssituasjon.JORDBRUKER,
+                Arbeidssituasjon.ANNET,
+                Arbeidssituasjon.FISKER,
+                -> {
                     throw NotImplementedError("Ikke implementert")
                 }
             }
