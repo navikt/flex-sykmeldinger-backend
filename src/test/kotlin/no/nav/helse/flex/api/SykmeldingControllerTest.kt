@@ -731,79 +731,24 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde få 404 når sykmeldingen ikke finnes`() {
-            mockMvc
-                .perform(
-                    MockMvcRequestBuilders
-                        .post("/api/v1/sykmeldinger/1/change-status")
-                        .header(
-                            "Authorization",
-                            "Bearer ${
-                                oauth2Server.tokenxToken(
-                                    fnr = "fnr",
-                                )
-                            }",
-                        ).content(SykmeldingChangeStatus.AVBRYT.serialisertTilString())
-                        .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(MockMvcResultMatchers.status().isNotFound)
-        }
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes(
+                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
         @Test
-        fun `burde feile dersom sykmelding har feil fnr`() {
-            sykmeldingRepository.save(
-                lagSykmelding(
-                    sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
-                            id = "1",
-                            pasient = lagPasient(fnr = "fnr"),
-                        ),
-                ),
-            )
-            mockMvc
-                .perform(
-                    MockMvcRequestBuilders
-                        .post("/api/v1/sykmeldinger/1/change-status")
-                        .header(
-                            "Authorization",
-                            "Bearer ${
-                                oauth2Server.tokenxToken(
-                                    fnr = "feil_fnr",
-                                )
-                            }",
-                        ).content(SykmeldingChangeStatus.AVBRYT.serialisertTilString())
-                        .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(MockMvcResultMatchers.status().isForbidden)
-        }
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
         @Test
-        fun `burde returnere unauthorized når vi ikke har token`() {
-            mockMvc
-                .perform(
-                    MockMvcRequestBuilders
-                        .post("/api/v1/sykmeldinger/1/change-status")
-                        .content("{}")
-                        .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
-        }
+        fun `burde returnere unauthorized når vi ikke har token`() =
+            sjekkAtReturnereUnauthorizedNårViIkkeHarToken("/api/v1/sykmeldinger/1/change-status")
 
         @Test
-        fun `burde returnere unauthorized når vi har feil claim`() {
-            mockMvc
-                .perform(
-                    MockMvcRequestBuilders
-                        .post("/api/v1/sykmeldinger/1/change-status")
-                        .header(
-                            "Authorization",
-                            "Bearer ${
-                                oauth2Server.tokenxToken(
-                                    fnr = "fnr",
-                                    acrClaim = "feil-claim",
-                                )
-                            }",
-                        ).content("{}")
-                        .contentType(MediaType.APPLICATION_JSON),
-                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
-        }
+        fun `burde returnere unauthorized når vi har feil claim`() =
+            sjekkAtReturnereUnauthorizedNårViHarFeilClaim("/api/v1/sykmeldinger/1/change-status")
 
         private fun kallChangeStatusEndepunkt(
             fnr: String,
@@ -832,6 +777,83 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
             return returnertSykmelding
         }
+    }
+
+    fun sjekkFår404NårSykmeldingenIkkeFinnes(
+        content: String = "{}",
+        urlProducer: (sykmeldingId: String) -> String,
+    ) {
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders
+                    .post(urlProducer("1"))
+                    .header(
+                        "Authorization",
+                        "Bearer ${
+                            oauth2Server.tokenxToken(
+                                fnr = "fnr",
+                            )
+                        }",
+                    ).content(content)
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    fun sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+        content: String,
+        urlProducer: (sykmeldingId: String) -> String,
+    ) {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        pasient = lagPasient(fnr = "fnr"),
+                    ),
+            ),
+        )
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders
+                    .post(urlProducer("1"))
+                    .header(
+                        "Authorization",
+                        "Bearer ${
+                            oauth2Server.tokenxToken(
+                                fnr = "feil_fnr",
+                            )
+                        }",
+                    ).content(content)
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(MockMvcResultMatchers.status().isForbidden)
+    }
+
+    fun sjekkAtReturnereUnauthorizedNårViIkkeHarToken(url: String) {
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders
+                    .post(url)
+                    .content("{}")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+    }
+
+    fun sjekkAtReturnereUnauthorizedNårViHarFeilClaim(url: String) {
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders
+                    .post(url)
+                    .header(
+                        "Authorization",
+                        "Bearer ${
+                            oauth2Server.tokenxToken(
+                                fnr = "fnr",
+                                acrClaim = "feil-claim",
+                            )
+                        }",
+                    ).content("{}")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
     }
 }
 
