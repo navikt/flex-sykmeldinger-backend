@@ -186,7 +186,7 @@ class SykmeldingController(
                     sykmeldingHandterer.avbrytSykmelding(sykmeldingUuid, identer)
                 }
                 SykmeldingChangeStatus.BEKREFT_AVVIST -> {
-                    TODO("Ikke implementert")
+                    sykmeldingHandterer.bekreftAvvistSykmelding(sykmeldingUuid, identer)
                 }
             }
 

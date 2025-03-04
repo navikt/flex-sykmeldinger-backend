@@ -693,7 +693,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class ChangeStatusSykmeldingEndepunkt {
         @Test
-        fun `burde endre status til Avbrutt`() {
+        fun `burde endre status til AVBRUTT`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -704,31 +704,30 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ),
             )
 
-            val result =
-                mockMvc
-                    .perform(
-                        MockMvcRequestBuilders
-                            .post("/api/v1/sykmeldinger/1/change-status")
-                            .header(
-                                "Authorization",
-                                "Bearer ${
-                                    oauth2Server.tokenxToken(
-                                        fnr = "fnr",
-                                    )
-                                }",
-                            ).contentType(MediaType.APPLICATION_JSON)
-                            .content(
-                                SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
-                            ),
-                    ).andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn()
-                    .response.contentAsString
-
-            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            val returnertSykmelding: SykmeldingDTO = kallChangeStatusEndepunkt(fnr = "fnr", content = SykmeldingChangeStatus.AVBRYT)
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
             sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.AVBRUTT
+        }
+
+        @Test
+        fun `burde endre status til BEKREFTET_AVVIST`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val returnertSykmelding: SykmeldingDTO = kallChangeStatusEndepunkt(fnr = "fnr", content = SykmeldingChangeStatus.BEKREFT_AVVIST)
+            returnertSykmelding `should not be` null
+
+            val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
+            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
 
         @Test
@@ -804,6 +803,34 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                         ).content("{}")
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+
+        private fun kallChangeStatusEndepunkt(
+            fnr: String,
+            content: SykmeldingChangeStatus,
+        ): SykmeldingDTO {
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .post("/api/v1/sykmeldinger/1/change-status")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = fnr,
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON)
+                            .content(
+                                content.serialisertTilString(),
+                            ),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            return returnertSykmelding
         }
     }
 }

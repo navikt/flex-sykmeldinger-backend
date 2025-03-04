@@ -87,6 +87,26 @@ class SykmeldingStatusEndrer(
         return sykmelding.leggTilStatus(hendelse)
     }
 
+    fun endreStatusTilBekreftetAvvist(
+        sykmelding: Sykmelding,
+        identer: PersonIdenter,
+    ): Sykmelding {
+        val sisteStatus = sykmelding.sisteStatus()
+        require(
+            sisteStatus.status in
+                setOf(
+                    HendelseStatus.APEN,
+                ),
+        )
+        val hendelse =
+            SykmeldingHendelse(
+                status = HendelseStatus.BEKREFTET_AVVIST,
+                opprettet = nowFactory.get(),
+            )
+
+        return sykmelding.leggTilStatus(hendelse)
+    }
+
     fun endreStatusTilAvbrutt(sykmelding: Sykmelding): Sykmelding {
         val sisteHendelse = sykmelding.sisteStatus()
         require(
