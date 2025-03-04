@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -21,14 +22,18 @@ class SykmeldingStatusEndrer(
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
         val sisteStatus = sykmelding.sisteStatus()
-        require(
-            sisteStatus.status in
-                setOf(
-                    HendelseStatus.APEN,
-                    HendelseStatus.SENDT_TIL_NAV,
-                    HendelseStatus.AVBRUTT,
-                ),
-        )
+        if (
+            sisteStatus.status !in
+            setOf(
+                HendelseStatus.APEN,
+                HendelseStatus.SENDT_TIL_NAV,
+                HendelseStatus.AVBRUTT,
+            )
+        ) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fra ${sisteStatus.status}",
+            )
+        }
 
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (arbeidsgiverOrgnummer != null) {
