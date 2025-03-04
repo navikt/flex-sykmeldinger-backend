@@ -392,8 +392,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ),
             )
 
-            // val sykmeldingSporsmalSvarDto = lagSykmeldingSporsmalSvarDto()
-
             val result =
                 mockMvc
                     .perform(
