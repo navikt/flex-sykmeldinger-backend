@@ -100,6 +100,28 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
+    @Transactional
+    fun avbrytSykmelding(
+        sykmeldingId: String,
+        identer: PersonIdenter,
+    ): Sykmelding {
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            logger.warn("Fant ikke sykmelding med id $sykmeldingId")
+            throw SykmeldingIkkeFunnetException("Fant ikke sykmelding med id $sykmeldingId")
+        }
+        if (sykmelding.pasientFnr !in identer.alle()) {
+            logger.warn("Person har ikke tilgang til sykmelding")
+            throw SykmeldingErIkkeDinException("Person har ikke tilgang til sykmelding")
+        }
+
+        val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilAvbrutt(sykmelding = sykmelding)
+
+        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
+        sendSykmeldingKafka(lagretSykmelding)
+        return lagretSykmelding
+    }
+
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
         logger.info("Ikke implementert: Sykmelding sendt til kafka")
     }

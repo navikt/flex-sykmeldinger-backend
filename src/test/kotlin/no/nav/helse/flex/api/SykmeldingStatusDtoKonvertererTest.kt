@@ -34,6 +34,9 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere status UTGATT til UTGATT`() = testStatusMapping(HendelseStatus.UTGATT, "UTGATT")
 
+    @Test
+    fun `burde konvertere status BEKREFTET_AVVIST til BEKREFTET`() = testStatusMapping(HendelseStatus.BEKREFTET_AVVIST, "BEKREFTET")
+
     private fun testStatusMapping(
         fra: HendelseStatus,
         til: String,

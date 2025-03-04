@@ -689,6 +689,123 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
         }
     }
+
+    @Nested
+    inner class ChangeStatusSykmeldingEndepunkt {
+        @Test
+        fun `burde endre status til Avbrutt`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .post("/api/v1/sykmeldinger/1/change-status")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON)
+                            .content(
+                                SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+                            ),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
+            returnertSykmelding `should not be` null
+
+            val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
+            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.AVBRUTT
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/change-status")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                )
+                            }",
+                        ).content(SykmeldingChangeStatus.AVBRYT.serialisertTilString())
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNotFound)
+        }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/change-status")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "feil_fnr",
+                                )
+                            }",
+                        ).content(SykmeldingChangeStatus.AVBRYT.serialisertTilString())
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isForbidden)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi ikke har token`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/change-status")
+                        .content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+
+        @Test
+        fun `burde returnere unauthorized når vi har feil claim`() {
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/change-status")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                    acrClaim = "feil-claim",
+                                )
+                            }",
+                        ).content("{}")
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
+        }
+    }
 }
 
 fun lagSendBody(

@@ -176,9 +176,22 @@ class SykmeldingController(
     )
     fun changeSykmeldingStatus(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
-        @RequestBody changeStatus: Any,
-    ): ResponseEntity<Any> {
-        TODO("Ikke implementert")
+        @RequestBody changeStatus: SykmeldingChangeStatus,
+    ): ResponseEntity<SykmeldingDTO> {
+        val identer = tokenxValidering.hentIdenter()
+
+        val sykmelding =
+            when (changeStatus) {
+                SykmeldingChangeStatus.AVBRYT -> {
+                    sykmeldingHandterer.avbrytSykmelding(sykmeldingUuid, identer)
+                }
+                SykmeldingChangeStatus.BEKREFT_AVVIST -> {
+                    TODO("Ikke implementert")
+                }
+            }
+
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        return ResponseEntity.ok(konvertertSykmelding)
     }
 
     private fun TokenxValidering.hentIdenter(): PersonIdenter =
@@ -287,4 +300,9 @@ data class SendBody(
             "NO" -> "NEI"
             else -> svar
         }
+}
+
+enum class SykmeldingChangeStatus {
+    AVBRYT,
+    BEKREFT_AVVIST,
 }
