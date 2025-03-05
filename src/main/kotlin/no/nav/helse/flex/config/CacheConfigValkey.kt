@@ -1,5 +1,6 @@
 package no.nav.helse.flex.config
 
+import no.nav.helse.flex.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
@@ -22,25 +23,31 @@ class CacheConfigValkey(
     @Value("\${VALKEY_USERNAME_SESSIONS}") val valkeyUsername: String,
     @Value("\${VALKEY_PASSWORD_SESSIONS}") val valkeyPassword: String,
 ) {
+    private val log = logger()
+
     @Bean
-    fun valkeyConnectionFactory(): LettuceConnectionFactory {
-        val valkeyUri = URI.create(valkeyUriString)
-        val valkeyConnection = RedisStandaloneConfiguration(valkeyUri.host, valkeyUri.port)
+    fun valkeyConnectionFactory(): LettuceConnectionFactory =
+        try {
+            val valkeyUri = URI.create(valkeyUriString)
+            val valkeyConnection = RedisStandaloneConfiguration(valkeyUri.host, valkeyUri.port)
 
-        valkeyConnection.username = valkeyUsername
-        valkeyConnection.password = RedisPassword.of(valkeyPassword)
+            valkeyConnection.username = valkeyUsername
+            valkeyConnection.password = RedisPassword.of(valkeyPassword)
 
-        val clientConfiguration =
-            LettuceClientConfiguration
-                .builder()
-                .apply {
-                    if ("default" != valkeyUsername) {
-                        useSsl()
-                    }
-                }.build()
+            val clientConfiguration =
+                LettuceClientConfiguration
+                    .builder()
+                    .apply {
+                        if ("default" != valkeyUsername) {
+                            useSsl()
+                        }
+                    }.build()
 
-        return LettuceConnectionFactory(valkeyConnection, clientConfiguration)
-    }
+            LettuceConnectionFactory(valkeyConnection, clientConfiguration)
+        } catch (e: Exception) {
+            log.error("Error creating Valkey connection factory", e)
+            throw e
+        }
 
     @Bean
     fun cacheManager(valkeyConnectionFactory: RedisConnectionFactory): CacheManager {

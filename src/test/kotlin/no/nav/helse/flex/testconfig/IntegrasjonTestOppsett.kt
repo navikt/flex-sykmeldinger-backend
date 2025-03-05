@@ -70,7 +70,7 @@ abstract class IntegrasjonTestOppsett {
                 withExposedPorts(6379)
                 start()
 
-                System.setProperty("VALKEY_URI_SESSIONS", "valkeys://$host:$firstMappedPort")
+                System.setProperty("VALKEY_URI_SESSIONS", "rediss://$host:$firstMappedPort")
                 System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
                 System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
             }

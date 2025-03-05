@@ -13,15 +13,6 @@ spring:
       minimum-idle: 1
       maximum-pool-size: 5
   cache.type: redis
-  data:
-    redis:
-      timeout: 2000
-      lettuce:
-        pool:
-          max-active: 16
-          min-idle: 8
-          enabled: true
-          time-between-eviction-runs: 10000
 
 aiven-kafka:
   auto-offset-reset: none
