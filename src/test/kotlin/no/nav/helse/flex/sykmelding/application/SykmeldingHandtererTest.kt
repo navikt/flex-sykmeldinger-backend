@@ -5,6 +5,7 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
@@ -21,9 +22,13 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingHandterer: SykmeldingHandterer
 
+    @Autowired
+    lateinit var sykmeldingProducer: SykmeldingProducerFake
+
     @AfterEach
     fun cleanUp() {
         slettDatabase()
+        sykmeldingProducer.reset()
     }
 
     @Nested
@@ -50,6 +55,31 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .also { it.statuser shouldHaveSize 2 }
                 .also { it.sisteStatus().status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER }
+        }
+
+        @Test
+        fun `burde sende sykmelding med hendelse til producer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ),
+            )
+
+            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
+
+            sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
+                sykmeldingId = "1",
+                identer = PersonIdenter("fnr"),
+                arbeidsgiverOrgnummer = "orgnr",
+                sporsmalSvar = null,
+            )
+
+            sykmeldingProducer
+                .sendteSykmeldinger()
+                .shouldHaveSize(1)
+                .first()
+                .sisteStatus()
+                .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
 
         @ParameterizedTest
@@ -122,6 +152,29 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .also { it.sisteStatus().status `should be equal to` HendelseStatus.SENDT_TIL_NAV }
         }
 
+        @Test
+        fun `burde sende sykmelding med hendelse til producer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ),
+            )
+
+            sykmeldingHandterer.sendSykmeldingTilNav(
+                sykmeldingId = "1",
+                identer = PersonIdenter("fnr"),
+                arbeidsledigFraOrgnummer = null,
+                sporsmalSvar = null,
+            )
+
+            sykmeldingProducer
+                .sendteSykmeldinger()
+                .shouldHaveSize(1)
+                .first()
+                .sisteStatus()
+                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+        }
+
         @ParameterizedTest
         @EnumSource(HendelseStatus::class, mode = EnumSource.Mode.INCLUDE, names = ["APEN", "SENDT_TIL_NAV", "AVBRUTT"])
         fun `burde gå fint med siste status`(sisteStatus: HendelseStatus) {
@@ -188,6 +241,27 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .also { it.sisteStatus().status `should be equal to` HendelseStatus.AVBRUTT }
         }
 
+        @Test
+        fun `burde sende sykmelding med hendelse til producer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ),
+            )
+
+            sykmeldingHandterer.avbrytSykmelding(
+                sykmeldingId = "1",
+                identer = PersonIdenter("fnr"),
+            )
+
+            sykmeldingProducer
+                .sendteSykmeldinger()
+                .shouldHaveSize(1)
+                .first()
+                .sisteStatus()
+                .status `should be equal to` HendelseStatus.AVBRUTT
+        }
+
         @ParameterizedTest
         @EnumSource(HendelseStatus::class, mode = EnumSource.Mode.INCLUDE, names = ["APEN", "SENDT_TIL_NAV", "AVBRUTT"])
         fun `burde gå fint med siste status`(sisteStatus: HendelseStatus) {
@@ -248,6 +322,27 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .also { it.statuser shouldHaveSize 2 }
                 .also { it.sisteStatus().status `should be equal to` HendelseStatus.BEKREFTET_AVVIST }
+        }
+
+        @Test
+        fun `burde sende sykmelding med hendelse til producer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ),
+            )
+
+            sykmeldingHandterer.bekreftAvvistSykmelding(
+                sykmeldingId = "1",
+                identer = PersonIdenter("fnr"),
+            )
+
+            sykmeldingProducer
+                .sendteSykmeldinger()
+                .shouldHaveSize(1)
+                .first()
+                .sisteStatus()
+                .status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
 
         @ParameterizedTest
