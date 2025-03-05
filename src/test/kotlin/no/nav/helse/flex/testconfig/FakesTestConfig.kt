@@ -39,5 +39,5 @@ class FakesTestConfig {
     fun cacheManager(): CacheManager = NoOpCacheManager()
 
     @Bean
-    fun redisConnectionFactory(): LettuceConnectionFactory = LettuceConnectionFactory()
+    fun valkeyConnectionFactory(): LettuceConnectionFactory = LettuceConnectionFactory()
 }

@@ -21,7 +21,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
-private class RedisContainer : GenericContainer<RedisContainer>("bitnami/redis:6.2")
+private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnami/valkey:8.0.2")
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -65,14 +65,14 @@ abstract class IntegrasjonTestOppsett {
                 System.setProperty("spring.datasource.password", password)
             }
 
-            RedisContainer().apply {
+            ValkeyContainer().apply {
                 withEnv("ALLOW_EMPTY_PASSWORD", "yes")
                 withExposedPorts(6379)
                 start()
 
-                System.setProperty("REDIS_URI_SESSIONS", "rediss://$host:$firstMappedPort")
-                System.setProperty("REDIS_USERNAME_SESSIONS", "default")
-                System.setProperty("REDIS_PASSWORD_SESSIONS", "")
+                System.setProperty("VALKEY_URI_SESSIONS", "valkeys://$host:$firstMappedPort")
+                System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
+                System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
             }
         }
     }
