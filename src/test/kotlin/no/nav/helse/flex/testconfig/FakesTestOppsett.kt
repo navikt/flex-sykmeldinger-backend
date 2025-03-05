@@ -22,6 +22,7 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
 @SpringBootTest(
     classes = [Application::class, FakesTestConfig::class],
     properties = [
+        "spring.profiles.active=fakes",
         "spring.main.allow-bean-definition-overriding=true",
         "spring.data.jdbc.repositories.enabled=false",
         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +

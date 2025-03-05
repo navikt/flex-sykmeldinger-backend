@@ -2,6 +2,7 @@ package no.nav.helse.flex.config
 
 import no.nav.helse.flex.clients.pdl.PdlClient
 import no.nav.helse.flex.clients.pdl.PdlIdent
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import java.io.Serializable
 
@@ -13,6 +14,7 @@ class IdentService(
         const val FOLKEREGISTERIDENT = "FOLKEREGISTERIDENT"
     }
 
+    @Cacheable("flex-folkeregister-identer-med-historikk")
     fun hentFolkeregisterIdenterMedHistorikkForFnr(fnr: String): PersonIdenter {
         val identer = pdlClient.hentIdenterMedHistorikk(fnr)
         return PersonIdenter(
