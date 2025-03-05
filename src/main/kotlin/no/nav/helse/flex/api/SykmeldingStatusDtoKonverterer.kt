@@ -38,6 +38,7 @@ class SykmeldingStatusDtoKonverterer {
             HendelseStatus.SENDT_TIL_NAV -> "BEKREFTET"
             HendelseStatus.AVBRUTT -> "AVBRUTT"
             HendelseStatus.UTGATT -> "UTGATT"
+            HendelseStatus.BEKREFTET_AVVIST -> "BEKREFTET"
         }
 
     internal fun konverterSykmeldingSporsmal(sporsmal: List<Sporsmal>): SykmeldingSporsmalSvarDto {

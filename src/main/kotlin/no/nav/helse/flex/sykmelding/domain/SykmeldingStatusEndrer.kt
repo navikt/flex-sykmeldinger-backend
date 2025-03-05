@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -21,14 +22,18 @@ class SykmeldingStatusEndrer(
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
         val sisteStatus = sykmelding.sisteStatus()
-        require(
-            sisteStatus.status in
-                setOf(
-                    HendelseStatus.APEN,
-                    HendelseStatus.SENDT_TIL_NAV,
-                    HendelseStatus.AVBRUTT,
-                ),
-        )
+        if (
+            sisteStatus.status !in
+            setOf(
+                HendelseStatus.APEN,
+                HendelseStatus.SENDT_TIL_NAV,
+                HendelseStatus.AVBRUTT,
+            )
+        ) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fra ${sisteStatus.status}",
+            )
+        }
 
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (arbeidsgiverOrgnummer != null) {
@@ -67,14 +72,18 @@ class SykmeldingStatusEndrer(
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
         val sisteStatus = sykmelding.sisteStatus()
-        require(
-            sisteStatus.status in
-                setOf(
-                    HendelseStatus.APEN,
-                    HendelseStatus.SENDT_TIL_NAV,
-                    HendelseStatus.AVBRUTT,
-                ),
-        )
+        if (
+            sisteStatus.status !in
+            setOf(
+                HendelseStatus.APEN,
+                HendelseStatus.SENDT_TIL_NAV,
+                HendelseStatus.AVBRUTT,
+            )
+        ) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_NAV} fra ${sisteStatus.status}",
+            )
+        }
 
         // TODO: Hent tidligere arbeidsgivere
         val hendelse =
@@ -87,12 +96,40 @@ class SykmeldingStatusEndrer(
         return sykmelding.leggTilStatus(hendelse)
     }
 
+    fun endreStatusTilBekreftetAvvist(
+        sykmelding: Sykmelding,
+        identer: PersonIdenter,
+    ): Sykmelding {
+        val sisteStatus = sykmelding.sisteStatus()
+        if (
+            sisteStatus.status !in
+            setOf(
+                HendelseStatus.APEN,
+            )
+        ) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.BEKREFTET_AVVIST} fra ${sisteStatus.status}",
+            )
+        }
+        val hendelse =
+            SykmeldingHendelse(
+                status = HendelseStatus.BEKREFTET_AVVIST,
+                opprettet = nowFactory.get(),
+            )
+
+        return sykmelding.leggTilStatus(hendelse)
+    }
+
     fun endreStatusTilAvbrutt(sykmelding: Sykmelding): Sykmelding {
         val sisteHendelse = sykmelding.sisteStatus()
-        require(
-            sisteHendelse.status in
-                setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT),
-        )
+        if (
+            sisteHendelse.status !in
+            setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT)
+        ) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.AVBRUTT} fra ${sisteHendelse.status}",
+            )
+        }
         // TODO: Burde vi kaste exception om vi endrer AVBRUTT til AVBRUTT?
         if (sisteHendelse.status == HendelseStatus.AVBRUTT) {
             return sykmelding

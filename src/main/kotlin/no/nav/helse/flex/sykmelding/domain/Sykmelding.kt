@@ -62,5 +62,6 @@ enum class HendelseStatus {
     AVBRUTT,
     SENDT_TIL_NAV,
     SENDT_TIL_ARBEIDSGIVER,
+    BEKREFTET_AVVIST,
     UTGATT,
 }

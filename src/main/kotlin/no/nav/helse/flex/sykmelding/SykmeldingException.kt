@@ -1,16 +1,26 @@
 package no.nav.helse.flex.sykmelding
 
-open class SykmeldingException : RuntimeException {
-    constructor(message: String) : super(message)
-    constructor(message: String, cause: Throwable) : super(message, cause)
-}
+open class SykmeldingException(
+    message: String,
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)
 
-class SykmeldingIkkeFunnetException : SykmeldingException {
-    constructor(message: String) : super(message)
-    constructor(message: String, cause: Throwable) : super(message, cause)
-}
+open class SykmeldingIkkeFunnetException(
+    message: String,
+    cause: Throwable? = null,
+) : SykmeldingException(message, cause)
 
-class SykmeldingErIkkeDinException : SykmeldingException {
-    constructor(message: String) : super(message)
-    constructor(message: String, cause: Throwable) : super(message, cause)
-}
+open class SykmeldingErIkkeDinException(
+    message: String,
+    cause: Throwable? = null,
+) : SykmeldingException(message, cause)
+
+open class SykmeldingHendelseException(
+    message: String,
+    cause: Throwable? = null,
+) : SykmeldingException(message, cause)
+
+open class UgyldigSykmeldingStatusException(
+    message: String,
+    cause: Throwable? = null,
+) : SykmeldingException(message, cause)
