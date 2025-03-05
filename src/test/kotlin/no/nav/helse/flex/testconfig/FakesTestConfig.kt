@@ -10,7 +10,10 @@ import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
+import org.springframework.cache.support.NoOpCacheManager
 import org.springframework.context.annotation.Bean
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 
 @TestConfiguration
 class FakesTestConfig {
@@ -31,4 +34,10 @@ class FakesTestConfig {
 
     @Bean
     fun eregClient(): EregClientFake = EregClientFake()
+
+    @Bean
+    fun cacheManager(): CacheManager = NoOpCacheManager()
+
+    @Bean
+    fun redisConnectionFactory(): LettuceConnectionFactory = LettuceConnectionFactory()
 }
