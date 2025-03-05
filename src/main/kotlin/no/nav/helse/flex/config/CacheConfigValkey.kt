@@ -1,5 +1,7 @@
 package no.nav.helse.flex.config
 
+import io.lettuce.core.ClientOptions
+import io.lettuce.core.SocketOptions
 import no.nav.helse.flex.utils.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
@@ -33,9 +35,13 @@ class CacheConfigValkey(
             valkeyConnection.username = valkeyUsername
             valkeyConnection.password = RedisPassword.of(valkeyPassword)
 
+            val socketOptions = SocketOptions.builder().tcpNoDelay(false).build()
+            val clientOptions = ClientOptions.builder().socketOptions(socketOptions).build()
+
             val clientConfiguration =
                 LettuceClientConfiguration
                     .builder()
+                    .clientOptions(clientOptions)
                     .apply {
                         if ("default" != valkeyUsername) {
                             useSsl()
