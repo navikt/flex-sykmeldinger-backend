@@ -17,33 +17,33 @@ import java.time.Duration
 
 @Configuration
 @EnableCaching
-class CacheConfigRedis(
-    @Value("\${REDIS_URI_SESSIONS}") val redisUriString: String,
-    @Value("\${REDIS_USERNAME_SESSIONS}") val redisUsername: String,
-    @Value("\${REDIS_PASSWORD_SESSIONS}") val redisPassword: String,
+class CacheConfigValkey(
+    @Value("\${VALKEY_URI_SESSIONS}") val valkeyUriString: String,
+    @Value("\${VALKEY_USERNAME_SESSIONS}") val valkeyUsername: String,
+    @Value("\${VALKEY_PASSWORD_SESSIONS}") val valkeyPassword: String,
 ) {
     @Bean
-    fun redisConnectionFactory(): LettuceConnectionFactory {
-        val redisUri = URI.create(redisUriString)
-        val redisConnection = RedisStandaloneConfiguration(redisUri.host, redisUri.port)
+    fun valkeyConnectionFactory(): LettuceConnectionFactory {
+        val valkeyUri = URI.create(valkeyUriString)
+        val valkeyConnection = RedisStandaloneConfiguration(valkeyUri.host, valkeyUri.port)
 
-        redisConnection.username = redisUsername
-        redisConnection.password = RedisPassword.of(redisPassword)
+        valkeyConnection.username = valkeyUsername
+        valkeyConnection.password = RedisPassword.of(valkeyPassword)
 
         val clientConfiguration =
             LettuceClientConfiguration
                 .builder()
                 .apply {
-                    if ("default" != redisUsername) {
+                    if ("default" != valkeyUsername) {
                         useSsl()
                     }
                 }.build()
 
-        return LettuceConnectionFactory(redisConnection, clientConfiguration)
+        return LettuceConnectionFactory(valkeyConnection, clientConfiguration)
     }
 
     @Bean
-    fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
+    fun cacheManager(valkeyConnectionFactory: RedisConnectionFactory): CacheManager {
         val cacheConfigurations: MutableMap<String, RedisCacheConfiguration> = HashMap()
 
         cacheConfigurations["flex-folkeregister-identer-med-historikk"] =
@@ -52,7 +52,7 @@ class CacheConfigRedis(
                 .entryTtl(Duration.ofHours(1))
 
         return RedisCacheManager
-            .builder(redisConnectionFactory)
+            .builder(valkeyConnectionFactory)
             .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
             .withInitialCacheConfigurations(cacheConfigurations)
             .enableStatistics()
