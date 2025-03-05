@@ -6,7 +6,6 @@ import no.nav.helse.flex.clients.pdl.PdlIdent
 class PdlClientFake : PdlClient {
     private val identerMedHistorikk: MutableMap<String, Result<List<PdlIdent>>> = mutableMapOf()
     private val formaterteNavn: MutableMap<String, Result<String>> = mutableMapOf()
-    var hentIdentTeller = 0
 
     companion object {
         val defaultIdenterMedHistorikk = listOf(PdlIdent(gruppe = "default-gruppe", ident = "default-ident"))
@@ -44,11 +43,9 @@ class PdlClientFake : PdlClient {
     fun reset() {
         identerMedHistorikk.clear()
         formaterteNavn.clear()
-        hentIdentTeller = 0
     }
 
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
-        hentIdentTeller++
         if (identerMedHistorikk.isEmpty()) {
             return defaultIdenterMedHistorikk
         }
