@@ -13,13 +13,13 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
-import java.net.URI
 import java.time.Duration
 
 @Configuration
 @EnableCaching
 class CacheConfigValkey(
-    @Value("\${VALKEY_URI_SESSIONS}") val valkeyUriString: String,
+    @Value("\${VALKEY_HOST_SESSIONS}") val valkeyHost: String,
+    @Value("\${VALKEY_PORT_SESSIONS}") val valkeyPort: Int,
     @Value("\${VALKEY_USERNAME_SESSIONS}") val valkeyUsername: String,
     @Value("\${VALKEY_PASSWORD_SESSIONS}") val valkeyPassword: String,
 ) {
@@ -28,8 +28,7 @@ class CacheConfigValkey(
     @Bean
     fun valkeyConnectionFactory(): LettuceConnectionFactory =
         try {
-            val valkeyUri = URI.create(valkeyUriString)
-            val valkeyConnection = RedisStandaloneConfiguration(valkeyUri.host, valkeyUri.port)
+            val valkeyConnection = RedisStandaloneConfiguration(valkeyHost, valkeyPort)
 
             valkeyConnection.username = valkeyUsername
             valkeyConnection.password = RedisPassword.of(valkeyPassword)
