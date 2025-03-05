@@ -16,11 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.test.web.servlet.MockMvc
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
+
+private class RedisContainer : GenericContainer<RedisContainer>("bitnami/redis:6.2")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
@@ -60,6 +63,16 @@ abstract class IntegrasjonTestOppsett {
                 System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
+            }
+
+            RedisContainer().apply {
+                withEnv("ALLOW_EMPTY_PASSWORD", "yes")
+                withExposedPorts(6379)
+                start()
+
+                System.setProperty("REDIS_URI_SESSIONS", "rediss://$host:$firstMappedPort")
+                System.setProperty("REDIS_USERNAME_SESSIONS", "default")
+                System.setProperty("REDIS_PASSWORD_SESSIONS", "")
             }
         }
     }
