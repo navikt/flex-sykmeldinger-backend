@@ -17,6 +17,7 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 3
+  cache.type: redis
 
 DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: frontend-client-id
 

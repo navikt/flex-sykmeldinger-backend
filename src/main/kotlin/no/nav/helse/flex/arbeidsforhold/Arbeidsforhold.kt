@@ -1,9 +1,11 @@
 package no.nav.helse.flex.arbeidsforhold
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 import java.time.LocalDate
 
+@Table("arbeidsforhold")
 data class Arbeidsforhold(
     @Id
     val id: String? = null,

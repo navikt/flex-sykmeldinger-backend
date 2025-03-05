@@ -40,6 +40,7 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("org.apache.httpcomponents.client5:httpclient5")
