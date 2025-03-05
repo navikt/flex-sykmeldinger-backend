@@ -86,6 +86,7 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
+    @Transactional
     fun bekreftAvvistSykmelding(
         sykmeldingId: String,
         identer: PersonIdenter,
