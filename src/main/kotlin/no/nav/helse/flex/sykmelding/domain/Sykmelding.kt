@@ -9,7 +9,7 @@ data class Sykmelding(
     internal val databaseId: String? = null,
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
     val meldingsinformasjon: Meldingsinformasjon,
-    val validationResult: ValidationResult,
+    val validation: ValidationResult,
     val statuser: List<SykmeldingHendelse>,
     val opprettet: Instant,
     val oppdatert: Instant,
@@ -32,7 +32,7 @@ data class Sykmelding(
         get() = sykmeldingGrunnlag.aktivitet.maxOf { it.tom }
 
     val erAvvist: Boolean
-        get() = validationResult.status == RuleType.INVALID
+        get() = validation.status == RuleType.INVALID
 
     val erEgenmeldt: Boolean
         get() = meldingsinformasjon.type == MetadataType.EGENMELDT

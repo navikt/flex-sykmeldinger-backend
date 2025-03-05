@@ -12,12 +12,16 @@ fun lagSykmelding(
         listOf(
             lagSykmeldingHendelse(),
         ),
+    opprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    oppdatert: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
 ): Sykmelding =
     Sykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
+        meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+        validation = lagValidation(),
         statuser = statuser,
-        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-        oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+        opprettet = opprettet,
+        oppdatert = oppdatert,
     )
 
 fun lagSykmeldingHendelse(
