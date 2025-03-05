@@ -129,11 +129,11 @@ data class SykmeldingDbRecord(
     }
 
     fun mapTilValidation(): ValidationResult {
-        val serialisertMeldingsinformasjon = this.meldingsinformasjon
-        check(serialisertMeldingsinformasjon.value != null) {
-            "meldingsinformasjon kolonne burde ikke være null"
+        val serialisertValidation = this.validation
+        check(serialisertValidation.value != null) {
+            "validation kolonne burde ikke være null"
         }
-        return objectMapper.readValue(serialisertMeldingsinformasjon.value!!)
+        return objectMapper.readValue(serialisertValidation.value!!)
     }
 
     companion object {
