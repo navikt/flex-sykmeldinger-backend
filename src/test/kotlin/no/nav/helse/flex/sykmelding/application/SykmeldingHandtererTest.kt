@@ -108,8 +108,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
-
             sykmeldingHandterer.sendSykmeldingTilNav(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
@@ -133,8 +131,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 ),
             )
-
-            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmeldingTilNav(
@@ -179,8 +175,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
-
-            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
 
             sykmeldingHandterer.avbrytSykmelding(
                 sykmeldingId = "1",
