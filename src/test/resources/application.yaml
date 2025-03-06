@@ -17,7 +17,6 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 3
-  cache.type: redis
 
 DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: frontend-client-id
 
@@ -57,8 +56,3 @@ REGISTRERT_FOR_ARBEIDSFORHOLD: true
 AAREG_URL: "url"
 EREG_URL: "url"
 PDL_BASE_URL: "url"
-
-VALKEY_HOST_SESSIONS: host
-VALKEY_PORT_SESSIONS: 1
-VALKEY_USERNAME_SESSIONS: username
-VALKEY_PASSWORD_SESSIONS: password

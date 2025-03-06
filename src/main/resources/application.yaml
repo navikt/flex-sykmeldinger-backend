@@ -12,7 +12,6 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
-  cache.type: redis
 
 aiven-kafka:
   auto-offset-reset: none
