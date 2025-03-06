@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.producers.sykmelding.SykmeldingProducer
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 class SykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
+    private val sykmeldingProducer: SykmeldingProducer,
 ) {
     private val logger = logger()
 
@@ -101,7 +103,7 @@ class SykmeldingHandterer(
     }
 
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
-        logger.info("Ikke implementert: Sykmelding sendt til kafka")
+        sykmeldingProducer.sendSykmelding(sykmelding)
     }
 
     private fun finnValidertSykmelding(

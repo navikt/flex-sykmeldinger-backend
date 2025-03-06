@@ -9,6 +9,7 @@ import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 
@@ -31,4 +32,7 @@ class FakesTestConfig {
 
     @Bean
     fun eregClient(): EregClientFake = EregClientFake()
+
+    @Bean
+    fun sykmeldingProducer(): SykmeldingProducerFake = SykmeldingProducerFake()
 }
