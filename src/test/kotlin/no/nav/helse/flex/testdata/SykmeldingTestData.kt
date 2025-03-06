@@ -8,6 +8,8 @@ import java.time.LocalDate
 
 fun lagSykmelding(
     sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+    meldingsinformasjon: Meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+    validation: ValidationResult = lagValidation(),
     statuser: List<SykmeldingHendelse> =
         listOf(
             lagSykmeldingHendelse(),
@@ -17,8 +19,8 @@ fun lagSykmelding(
 ): Sykmelding =
     Sykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
-        meldingsinformasjon = lagMeldingsinformasjonEnkel(),
-        validation = lagValidation(),
+        meldingsinformasjon = meldingsinformasjon,
+        validation = validation,
         statuser = statuser,
         opprettet = opprettet,
         oppdatert = oppdatert,

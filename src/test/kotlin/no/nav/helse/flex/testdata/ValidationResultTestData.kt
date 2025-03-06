@@ -5,9 +5,9 @@ import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
-fun lagValidation(): ValidationResult =
+fun lagValidation(status: RuleType = RuleType.OK): ValidationResult =
     ValidationResult(
-        status = RuleType.OK,
+        status = status,
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
         rules = listOf(),
     )
