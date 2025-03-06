@@ -5,6 +5,7 @@ import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
@@ -23,7 +24,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere med riktig id`() {
         val sykmelding =
-            Sykmelding(
+            lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 statuser =
                     listOf(

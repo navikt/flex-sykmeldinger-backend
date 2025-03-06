@@ -32,6 +32,8 @@ class SykmeldingKafkaLagrer(
     private fun sykmeldingFactory(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding =
         Sykmelding(
             sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
+            meldingsinformasjon = sykmeldingKafkaRecord.metadata,
+            validation = sykmeldingKafkaRecord.validation,
             statuser =
                 listOf(
                     SykmeldingHendelse(

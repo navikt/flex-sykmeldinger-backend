@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.domain.tsm.*
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus
@@ -8,6 +8,8 @@ import kotlin.collections.plus
 data class Sykmelding(
     internal val databaseId: String? = null,
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
+    val meldingsinformasjon: Meldingsinformasjon,
+    val validation: ValidationResult,
     val statuser: List<SykmeldingHendelse>,
     val opprettet: Instant,
     val oppdatert: Instant,
@@ -28,6 +30,12 @@ data class Sykmelding(
 
     val tom: LocalDate
         get() = sykmeldingGrunnlag.aktivitet.maxOf { it.tom }
+
+    val erAvvist: Boolean
+        get() = validation.status == RuleType.INVALID
+
+    val erEgenmeldt: Boolean
+        get() = meldingsinformasjon.type == MetadataType.EGENMELDT
 
     fun sisteStatus(): SykmeldingHendelse =
         statuser.maxByOrNull { it.opprettet } ?: error("Fant ikke status for sykmeldingen. Skal ikke skje.")

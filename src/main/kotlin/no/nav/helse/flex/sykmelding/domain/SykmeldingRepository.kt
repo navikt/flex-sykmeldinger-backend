@@ -3,6 +3,8 @@ package no.nav.helse.flex.sykmelding.domain
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.domain.tsm.Meldingsinformasjon
+import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
@@ -83,6 +85,8 @@ class SykmeldingRepository(
         Sykmelding(
             databaseId = dbRecord.id,
             sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
+            meldingsinformasjon = dbRecord.mapTilMeldingsinformasjon(),
+            validation = dbRecord.mapTilValidation(),
             statuser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
             opprettet = dbRecord.opprettet,
             oppdatert = dbRecord.oppdatert,
@@ -103,6 +107,8 @@ data class SykmeldingDbRecord(
     val sykmeldingUuid: String,
     val fnr: String,
     val sykmelding: PGobject,
+    val meldingsinformasjon: PGobject,
+    val validation: PGobject,
     val opprettet: Instant,
     val oppdatert: Instant,
 ) {
@@ -112,6 +118,22 @@ data class SykmeldingDbRecord(
             "sykmelding kolonne burde ikke være null"
         }
         return objectMapper.readValue(serialisertSykmelding.value!!)
+    }
+
+    fun mapTilMeldingsinformasjon(): Meldingsinformasjon {
+        val serialisertMeldingsinformasjon = this.meldingsinformasjon
+        check(serialisertMeldingsinformasjon.value != null) {
+            "meldingsinformasjon kolonne burde ikke være null"
+        }
+        return objectMapper.readValue(serialisertMeldingsinformasjon.value!!)
+    }
+
+    fun mapTilValidation(): ValidationResult {
+        val serialisertValidation = this.validation
+        check(serialisertValidation.value != null) {
+            "validation kolonne burde ikke være null"
+        }
+        return objectMapper.readValue(serialisertValidation.value!!)
     }
 
     companion object {
@@ -127,6 +149,16 @@ data class SykmeldingDbRecord(
                     PGobject().apply {
                         type = "json"
                         value = sykmeldingGrunnlag.serialisertTilString()
+                    },
+                meldingsinformasjon =
+                    PGobject().apply {
+                        type = "json"
+                        value = sykmelding.meldingsinformasjon.serialisertTilString()
+                    },
+                validation =
+                    PGobject().apply {
+                        type = "json"
+                        value = sykmelding.validation.serialisertTilString()
                     },
                 opprettet = sykmelding.opprettet,
                 oppdatert = sykmelding.oppdatert,

@@ -1,11 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldHaveSize
@@ -34,6 +32,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -54,6 +54,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
@@ -75,6 +77,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -113,6 +117,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -139,6 +145,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         sykmeldingRepository.save(sykmelding)
@@ -205,6 +213,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                 oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                meldingsinformasjon = lagMeldingsinformasjonEnkel(),
+                validation = lagValidation(),
             )
 
         sykmeldingRepository.save(sykmelding)
