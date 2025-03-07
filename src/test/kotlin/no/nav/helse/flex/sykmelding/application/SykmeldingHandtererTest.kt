@@ -129,7 +129,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er avvist`() {
+        fun `burde ikke bli sendt til arbeidsgiver dersom sykmelding er avvist`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -152,7 +152,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er egenmeldt`() {
+        fun `burde ikke bli sendt til arbeidsgiver dersom sykmelding er egenmeldt`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -269,7 +269,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er avvist`() {
+        fun `burde ikke bli sendt til Nav dersom sykmelding er avvist`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -291,7 +291,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er egenmeldt`() {
+        fun `burde ikke bli sendt til Nav dersom sykmelding er egenmeldt`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -399,7 +399,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er avvist`() {
+        fun `burde ikke bli avbrutt dersom sykmelding er avvist`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -419,7 +419,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er egenmeldt`() {
+        fun `burde ikke bli avbrutt dersom sykmelding er egenmeldt`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
@@ -549,7 +549,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke gå dersom sykmelding er egenmeldt`() {
+        fun `burde ikke bli bekreftet avvist dersom sykmelding er egenmeldt`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
