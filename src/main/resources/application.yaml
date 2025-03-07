@@ -12,6 +12,13 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
+  data:
+    redis:
+      ssl.enabled: true
+      username: "${VALKEY_USERNAME_SESSIONS}"
+      password: "${VALKEY_PASSWORD_SESSIONS}"
+      host: "${VALKEY_HOST_SESSIONS}"
+      port: "${VALKEY_PORT_SESSIONS}"
 
 aiven-kafka:
   auto-offset-reset: none

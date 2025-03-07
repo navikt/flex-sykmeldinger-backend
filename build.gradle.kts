@@ -40,8 +40,6 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("io.valkey:valkey-java:5.3.0")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("org.apache.httpcomponents.client5:httpclient5")
@@ -55,6 +53,13 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
+
+    // Caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis") {
+        exclude(group = "io.lettuce", module = "lettuce-core")
+    }
+    implementation("redis.clients:jedis")
 
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))
