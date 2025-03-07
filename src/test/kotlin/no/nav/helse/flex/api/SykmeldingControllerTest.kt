@@ -237,7 +237,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .andReturn()
                     .response.contentAsString
 
-            val brukerinformasjon: no.nav.helse.flex.api.dto.BrukerinformasjonDTO = objectMapper.readValue(result)
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 1
         }
 
@@ -710,10 +710,16 @@ fun lagSendSykmeldingRequestDTO(
     arbeidsledig: Arbeidsledig? = null,
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
-        erOpplysningeneRiktige = "YES",
+        erOpplysningeneRiktige = YesOrNo.YES,
         arbeidssituasjon = arbeidssituasjon,
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
         riktigNarmesteLeder = null,
-        harEgenmeldingsdager = "NO",
+        harEgenmeldingsdager = YesOrNo.NO,
         arbeidsledig = arbeidsledig,
+        egenmeldingsdager = null,
+        egenmeldingsperioder = null,
+        fisker = null,
+        harBruktEgenmelding = null,
+        harForsikring = null,
+        uriktigeOpplysninger = null,
     )
