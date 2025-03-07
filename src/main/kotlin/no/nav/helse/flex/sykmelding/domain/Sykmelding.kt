@@ -55,16 +55,6 @@ data class SykmeldingHendelse(
     val opprettet: Instant,
 )
 
-data class ArbeidstakerInfo(
-    val arbeidsgiver: Arbeidsgiver,
-)
-
-data class Arbeidsgiver(
-    val orgnummer: String,
-    val juridiskOrgnummer: String,
-    val orgnavn: String,
-)
-
 enum class HendelseStatus {
     APEN,
     AVBRUTT,
