@@ -1,5 +1,6 @@
 package no.nav.helse.flex.api.dto
 
+import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import java.time.LocalDate
 

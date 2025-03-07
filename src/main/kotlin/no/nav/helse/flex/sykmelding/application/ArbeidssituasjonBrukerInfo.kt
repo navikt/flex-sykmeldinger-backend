@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.api.dto.Arbeidssituasjon
 
