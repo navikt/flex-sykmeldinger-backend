@@ -1,5 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
+data class ArbeidsforholdInfo(
+    val arbeidstaker: ArbeidstakerInfo? = null,
+)
+
 data class ArbeidstakerInfo(
     val arbeidsgiver: Arbeidsgiver,
 )

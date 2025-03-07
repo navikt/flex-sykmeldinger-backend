@@ -132,34 +132,16 @@ class SykmeldingController(
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
 
+        val arbeidssituasjonBrukerInfo = sendSykmeldingRequestDTO.tilArbeidssituasjonBrukerInfo()
+        val sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe()
+
         val sykmelding =
-            when (sendSykmeldingRequestDTO.arbeidssituasjon) {
-                Arbeidssituasjon.ARBEIDSTAKER -> {
-                    sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
-                        sykmeldingId = sykmeldingId,
-                        identer = identer,
-                        arbeidsgiverOrgnummer = sendSykmeldingRequestDTO.arbeidsgiverOrgnummer,
-                        sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe(),
-                    )
-                }
-                Arbeidssituasjon.ARBEIDSLEDIG,
-                -> {
-                    sykmeldingHandterer.sendSykmeldingTilNav(
-                        sykmeldingId = sykmeldingId,
-                        identer = identer,
-                        arbeidsledigFraOrgnummer = sendSykmeldingRequestDTO.arbeidsgiverOrgnummer,
-                        sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe(),
-                    )
-                }
-                Arbeidssituasjon.FRILANSER,
-                Arbeidssituasjon.NAERINGSDRIVENDE,
-                Arbeidssituasjon.JORDBRUKER,
-                Arbeidssituasjon.ANNET,
-                Arbeidssituasjon.FISKER,
-                -> {
-                    throw NotImplementedError("Ikke implementert")
-                }
-            }
+            sykmeldingHandterer.sendSykmelding(
+                sykmeldingId = sykmeldingId,
+                identer = identer,
+                arbeidssituasjonBrukerInfo = arbeidssituasjonBrukerInfo,
+                sporsmalSvar = sporsmalSvar,
+            )
 
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
 

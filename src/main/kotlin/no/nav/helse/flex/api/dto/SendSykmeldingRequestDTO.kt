@@ -1,9 +1,6 @@
 package no.nav.helse.flex.api.dto
 
-import no.nav.helse.flex.sykmelding.domain.Sporsmal
-import no.nav.helse.flex.sykmelding.domain.SporsmalTag
-import no.nav.helse.flex.sykmelding.domain.Svar
-import no.nav.helse.flex.sykmelding.domain.Svartype
+import no.nav.helse.flex.sykmelding.domain.*
 import java.time.LocalDate
 
 data class SendSykmeldingRequestDTO(
@@ -20,6 +17,27 @@ data class SendSykmeldingRequestDTO(
     val harForsikring: YesOrNo?,
     val uriktigeOpplysninger: List<UriktigeOpplysning>?,
 ) {
+    fun tilArbeidssituasjonBrukerInfo(): ArbeidssituasjonBrukerInfo =
+        when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSLEDIG -> {
+                ArbeidsledigBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
+            }
+            Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerBrukerInfo(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
+            Arbeidssituasjon.FRILANSER -> FrilanserBrukerInfo()
+            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerInfo()
+            Arbeidssituasjon.FISKER -> {
+                requireNotNull(fisker) { "Fisker må være satt for fisker" }
+                FiskerBrukerInfo(
+                    blad = enumValueOf(fisker.blad.name),
+                    lottOgHyre = enumValueOf(fisker.lottOgHyre.name),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                )
+            }
+            Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerInfo(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
+            Arbeidssituasjon.PERMITTERT -> PermittertBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
+            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerInfo()
+        }
+
     fun tilSporsmalListe(): List<Sporsmal> {
         val sporsmal = mutableListOf<Sporsmal>()
         erOpplysningeneRiktige.let {
@@ -122,5 +140,6 @@ enum class Arbeidssituasjon {
     FISKER,
     JORDBRUKER,
     ARBEIDSLEDIG,
+    PERMITTERT,
     ANNET,
 }

@@ -4,10 +4,7 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.producers.sykmelding.SykmeldingProducer
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.domain.Sporsmal
-import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,6 +28,87 @@ class SykmeldingHandterer(
     }
 
     @Transactional
+    fun sendSykmelding(
+        sykmeldingId: String,
+        identer: PersonIdenter,
+        arbeidssituasjonBrukerInfo: ArbeidssituasjonBrukerInfo,
+        sporsmalSvar: List<Sporsmal>?,
+    ): Sykmelding {
+        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
+
+        val oppdatertSykmelding =
+            when (arbeidssituasjonBrukerInfo) {
+                is ArbeidstakerBrukerInfo -> {
+                    sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
+                        sykmelding = sykmelding,
+                        identer = identer,
+                        arbeidsgiverOrgnummer = arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
+                        sporsmalSvar = sporsmalSvar,
+                    )
+                }
+                is ArbeidsledigBrukerInfo -> {
+                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
+                        sykmelding = sykmelding,
+                        identer = identer,
+                        arbeidsledigFraOrgnummer = arbeidssituasjonBrukerInfo.arbeidsledigFraOrgnummer,
+                        sporsmalSvar = sporsmalSvar,
+                    )
+                }
+                is PermittertBrukerInfo -> {
+                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
+                        sykmelding = sykmelding,
+                        identer = identer,
+                        arbeidsledigFraOrgnummer = arbeidssituasjonBrukerInfo.arbeidsledigFraOrgnummer,
+                        sporsmalSvar = sporsmalSvar,
+                    )
+                }
+                is FiskerBrukerInfo -> {
+                    when (arbeidssituasjonBrukerInfo.lottOgHyre) {
+                        FiskerLottOgHyre.HYRE,
+                        FiskerLottOgHyre.BEGGE,
+                        -> {
+                            requireNotNull(
+                                arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
+                            ) { "arbeidsgiverOrgnummer må være satt dersom fisker med LOTT" }
+
+                            sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
+                                sykmelding = sykmelding,
+                                identer = identer,
+                                arbeidsgiverOrgnummer = arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
+                                sporsmalSvar = sporsmalSvar,
+                            )
+                        }
+                        FiskerLottOgHyre.LOTT -> {
+                            sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
+                                sykmelding = sykmelding,
+                                identer = identer,
+                                arbeidsledigFraOrgnummer = null,
+                                sporsmalSvar = sporsmalSvar,
+                            )
+                        }
+                    }
+                }
+                is FrilanserBrukerInfo,
+                is JordbrukerBrukerInfo,
+                is NaringsdrivendeBrukerInfo,
+                is AnnetArbeidssituasjonBrukerInfo,
+                -> {
+                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
+                        sykmelding = sykmelding,
+                        identer = identer,
+                        arbeidsledigFraOrgnummer = null,
+                        sporsmalSvar = sporsmalSvar,
+                    )
+                }
+            }
+
+        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
+        sendSykmeldingKafka(lagretSykmelding)
+        return lagretSykmelding
+    }
+
+    // TODO: Use sendSykmelding istedet
+    @Transactional
     fun sendSykmeldingTilArbeidsgiver(
         sykmeldingId: String,
         identer: PersonIdenter,
@@ -52,6 +130,7 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
+    // TODO: Use sendSykmelding istedet
     @Transactional
     fun sendSykmeldingTilNav(
         sykmeldingId: String,
