@@ -406,7 +406,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody().serialisertTilString(),
+                                lagSendSykmeldingRequestDTO().serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -449,7 +449,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody(arbeidsgiverOrgnummer = "orgnummer").serialisertTilString(),
+                                lagSendSykmeldingRequestDTO(arbeidsgiverOrgnummer = "orgnummer").serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -485,7 +485,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody(
+                                lagSendSykmeldingRequestDTO(
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                                     arbeidsledig =
                                         Arbeidsledig(
@@ -507,14 +507,14 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSendBody().serialisertTilString(),
+                content = lagSendSykmeldingRequestDTO().serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/send" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSendBody().serialisertTilString(),
+                content = lagSendSykmeldingRequestDTO().serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/send" }
 
@@ -704,12 +704,12 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 }
 
-fun lagSendBody(
+fun lagSendSykmeldingRequestDTO(
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
     arbeidsgiverOrgnummer: String? = null,
     arbeidsledig: Arbeidsledig? = null,
-): SendBody =
-    SendBody(
+): SendSykmeldingRequestDTO =
+    SendSykmeldingRequestDTO(
         erOpplysningeneRiktige = "YES",
         arbeidssituasjon = arbeidssituasjon,
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,

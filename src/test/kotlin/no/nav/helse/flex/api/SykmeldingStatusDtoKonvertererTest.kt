@@ -1,7 +1,7 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.api.dto.Arbeidssituasjon
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.amshove.kluent.`should be equal to`
@@ -226,7 +226,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 arbeidssituasjon =
                     FormSporsmalSvar(
                         sporsmaltekst = "tekst",
-                        svar = Arbeidssituasjon.ARBEIDSTAKER,
+                        svar = ArbeidssituasjonDTO.ARBEIDSTAKER,
                     ),
                 uriktigeOpplysninger =
                     FormSporsmalSvar(

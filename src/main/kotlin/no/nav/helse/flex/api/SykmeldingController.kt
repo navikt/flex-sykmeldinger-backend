@@ -7,7 +7,6 @@ import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
-import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
@@ -129,18 +128,18 @@ class SykmeldingController(
     )
     fun sendSykmelding(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-        @RequestBody sendBody: SendBody,
+        @RequestBody sendSykmeldingRequestDTO: SendSykmeldingRequestDTO,
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
 
         val sykmelding =
-            when (sendBody.arbeidssituasjon) {
+            when (sendSykmeldingRequestDTO.arbeidssituasjon) {
                 Arbeidssituasjon.ARBEIDSTAKER -> {
                     sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
                         sykmeldingId = sykmeldingId,
                         identer = identer,
-                        arbeidsgiverOrgnummer = sendBody.arbeidsgiverOrgnummer,
-                        sporsmalSvar = sendBody.tilSporsmalListe(),
+                        arbeidsgiverOrgnummer = sendSykmeldingRequestDTO.arbeidsgiverOrgnummer,
+                        sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe(),
                     )
                 }
                 Arbeidssituasjon.ARBEIDSLEDIG,
@@ -148,8 +147,8 @@ class SykmeldingController(
                     sykmeldingHandterer.sendSykmeldingTilNav(
                         sykmeldingId = sykmeldingId,
                         identer = identer,
-                        arbeidsledigFraOrgnummer = sendBody.arbeidsgiverOrgnummer,
-                        sporsmalSvar = sendBody.tilSporsmalListe(),
+                        arbeidsledigFraOrgnummer = sendSykmeldingRequestDTO.arbeidsgiverOrgnummer,
+                        sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe(),
                     )
                 }
                 Arbeidssituasjon.FRILANSER,
@@ -216,91 +215,6 @@ internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
             orgnummer = this.orgnummer,
         )
     }
-
-data class Arbeidsledig(
-    val arbeidsledigFraOrgnummer: String? = null,
-)
-
-enum class Arbeidssituasjon {
-    ARBEIDSTAKER,
-    FRILANSER,
-    NAERINGSDRIVENDE,
-    FISKER,
-    JORDBRUKER,
-    ARBEIDSLEDIG,
-    ANNET,
-}
-
-data class SendBody(
-    val erOpplysningeneRiktige: String,
-    val arbeidsgiverOrgnummer: String?,
-    val arbeidssituasjon: Arbeidssituasjon,
-    val harEgenmeldingsdager: String?,
-    val riktigNarmesteLeder: String?,
-    val arbeidsledig: Arbeidsledig?,
-) {
-    fun tilSporsmalListe(): List<Sporsmal> {
-        val sporsmal = mutableListOf<Sporsmal>()
-        sporsmal.add(
-            Sporsmal(
-                tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-                svartype = Svartype.JA_NEI,
-                svar = listOf(Svar(verdi = konverterJaNeiSvar(erOpplysningeneRiktige))),
-            ),
-        )
-        arbeidsgiverOrgnummer?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
-                    svartype = Svartype.FRITEKST,
-                    svar = listOf(Svar(verdi = it)),
-                ),
-            )
-        }
-        sporsmal.add(
-            Sporsmal(
-                tag = SporsmalTag.ARBEIDSSITUASJON,
-                svartype = Svartype.RADIO,
-                svar = listOf(Svar(verdi = arbeidssituasjon.name)),
-            ),
-        )
-        harEgenmeldingsdager?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
-                    svartype = Svartype.JA_NEI,
-                    svar = listOf(Svar(verdi = konverterJaNeiSvar(it))),
-                ),
-            )
-        }
-        riktigNarmesteLeder?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
-                    svartype = Svartype.JA_NEI,
-                    svar = listOf(Svar(verdi = konverterJaNeiSvar(it))),
-                ),
-            )
-        }
-        arbeidsledig?.arbeidsledigFraOrgnummer?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
-                    svartype = Svartype.FRITEKST,
-                    svar = listOf(Svar(verdi = it)),
-                ),
-            )
-        }
-        return sporsmal
-    }
-
-    private fun konverterJaNeiSvar(svar: String): String =
-        when (svar) {
-            "YES" -> "JA"
-            "NO" -> "NEI"
-            else -> svar
-        }
-}
 
 enum class SykmeldingChangeStatus {
     AVBRYT,

@@ -5,7 +5,7 @@ import java.time.LocalDate
 data class SykmeldingSporsmalSvarDto(
     val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
     val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
-    val arbeidssituasjon: FormSporsmalSvar<Arbeidssituasjon>,
+    val arbeidssituasjon: FormSporsmalSvar<ArbeidssituasjonDTO>,
     val arbeidsgiverOrgnummer: FormSporsmalSvar<String>?,
     val arbeidsledig: ArbeidsledigFraOrgnummer?,
     val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
@@ -61,7 +61,7 @@ enum class UriktigeOpplysningerType {
     ANDRE_OPPLYSNINGER,
 }
 
-enum class Arbeidssituasjon {
+enum class ArbeidssituasjonDTO {
     ARBEIDSTAKER,
     FRILANSER,
     NAERINGSDRIVENDE,
