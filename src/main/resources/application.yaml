@@ -29,6 +29,7 @@ management:
   endpoints.web:
     base-path: /internal
     exposure.include: health,prometheus
+  health.redis.enabled: false
 
 logging.config: "classpath:logback.xml"
 nais.cluster: ${NAIS_CLUSTER_NAME}
