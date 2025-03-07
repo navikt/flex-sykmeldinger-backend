@@ -16,9 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.test.web.servlet.MockMvc
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
+
+private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnami/valkey:8.0.2")
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
@@ -60,6 +63,17 @@ abstract class IntegrasjonTestOppsett {
                 System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
+            }
+
+            ValkeyContainer().apply {
+                withEnv("ALLOW_EMPTY_PASSWORD", "yes")
+                withExposedPorts(6379)
+                start()
+
+                System.setProperty("VALKEY_HOST_SESSIONS", host)
+                System.setProperty("VALKEY_PORT_SESSIONS", firstMappedPort.toString())
+                System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
+                System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
             }
         }
     }

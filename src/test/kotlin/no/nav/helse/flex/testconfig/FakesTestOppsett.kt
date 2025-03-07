@@ -24,7 +24,8 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
     properties = [
         "spring.main.allow-bean-definition-overriding=true",
         "spring.data.jdbc.repositories.enabled=false",
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
+        "spring.autoconfigure.exclude=" +
+            "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
             "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration",
         "spring.flyway.enabled=false",
         "spring.kafka.listener.auto-startup=false",

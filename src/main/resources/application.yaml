@@ -12,6 +12,16 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
+  data:
+    redis:
+      ssl.enabled: true
+      username: ${VALKEY_USERNAME_SESSIONS}
+      password: ${VALKEY_PASSWORD_SESSIONS}
+      host: ${VALKEY_HOST_SESSIONS}
+      port: ${VALKEY_PORT_SESSIONS}
+  cache:
+    redis:
+      time-to-live: 1h
 
 aiven-kafka:
   auto-offset-reset: none
@@ -22,6 +32,7 @@ management:
   endpoints.web:
     base-path: /internal
     exposure.include: health,prometheus
+  health.redis.enabled: false # Skru av redis helsesjekk ettersom valkey ikke gir tilgang til "info" endepunktet
 
 logging.config: "classpath:logback.xml"
 nais.cluster: ${NAIS_CLUSTER_NAME}
