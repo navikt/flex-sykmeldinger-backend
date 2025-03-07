@@ -35,6 +35,18 @@ class SykmeldingStatusEndrer(
             )
         }
 
+        if (sykmelding.erAvvist) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fordi sykmelding er avvist",
+            )
+        }
+
+        if (sykmelding.erEgenmeldt) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fordi sykmelding er egenmeldt",
+            )
+        }
+
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (arbeidsgiverOrgnummer != null) {
                 val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
