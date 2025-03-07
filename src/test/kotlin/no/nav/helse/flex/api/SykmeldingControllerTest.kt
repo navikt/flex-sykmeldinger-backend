@@ -5,11 +5,9 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagAktivitetIkkeMulig
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -557,6 +555,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 

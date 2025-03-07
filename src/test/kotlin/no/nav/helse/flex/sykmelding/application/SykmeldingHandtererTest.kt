@@ -4,12 +4,10 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -124,7 +122,56 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     arbeidsgiverOrgnummer = "orgnr",
                     sporsmalSvar = null,
                 )
-            } `should throw` UgyldigSykmeldingStatusException::class
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.SENDT_TIL_ARBEIDSGIVER.name)
+                .shouldContainIgnoringCase(sisteStatus.name)
+        }
+
+        @Test
+        fun `burde ikke bli sendt til arbeidsgiver dersom sykmelding er avvist`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
+                ),
+            )
+
+            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
+
+            invoking {
+                sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                    arbeidsgiverOrgnummer = "orgnr",
+                    sporsmalSvar = null,
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase("avvist")
+        }
+
+        @Test
+        fun `burde ikke bli sendt til arbeidsgiver dersom sykmelding er egenmeldt`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    meldingsinformasjon = lagMeldingsinformasjonEgenmeldt(),
+                ),
+            )
+
+            arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
+
+            invoking {
+                sykmeldingHandterer.sendSykmeldingTilArbeidsgiver(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                    arbeidsgiverOrgnummer = "orgnr",
+                    sporsmalSvar = null,
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase("egenmeldt")
         }
     }
 
@@ -215,7 +262,54 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     arbeidsledigFraOrgnummer = "orgnr",
                     sporsmalSvar = null,
                 )
-            } `should throw` UgyldigSykmeldingStatusException::class
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.SENDT_TIL_NAV.name)
+                .shouldContainIgnoringCase(sisteStatus.name)
+        }
+
+        @Test
+        fun `burde ikke bli sendt til Nav dersom sykmelding er avvist`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.sendSykmeldingTilNav(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                    arbeidsledigFraOrgnummer = null,
+                    sporsmalSvar = null,
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.SENDT_TIL_NAV.name)
+                .shouldContainIgnoringCase("avvist")
+        }
+
+        @Test
+        fun `burde ikke bli sendt til Nav dersom sykmelding er egenmeldt`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    meldingsinformasjon = lagMeldingsinformasjonEgenmeldt(),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.sendSykmeldingTilNav(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                    arbeidsledigFraOrgnummer = null,
+                    sporsmalSvar = null,
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.SENDT_TIL_NAV.name)
+                .shouldContainIgnoringCase("egenmeldt")
         }
     }
 
@@ -298,7 +392,50 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                 )
-            } `should throw` UgyldigSykmeldingStatusException::class
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.AVBRUTT.name)
+                .shouldContainIgnoringCase(sisteStatus.name)
+        }
+
+        @Test
+        fun `burde ikke bli avbrutt dersom sykmelding er avvist`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.avbrytSykmelding(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.AVBRUTT.name)
+                .shouldContainIgnoringCase("avvist")
+        }
+
+        @Test
+        fun `burde ikke bli avbrutt dersom sykmelding er egenmeldt`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    meldingsinformasjon = lagMeldingsinformasjonEgenmeldt(),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.avbrytSykmelding(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.AVBRUTT.name)
+                .shouldContainIgnoringCase("egenmeldt")
         }
     }
 
@@ -309,6 +446,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
@@ -329,6 +467,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
@@ -345,6 +484,26 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
 
+        @Test
+        fun `burde kun akseptere sykmeldinger som er avvist`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.OK),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.bekreftAvvistSykmelding(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.BEKREFTET_AVVIST.name)
+                .shouldContainIgnoringCase("avvist")
+        }
+
         @ParameterizedTest
         @EnumSource(HendelseStatus::class, mode = EnumSource.Mode.INCLUDE, names = ["APEN"])
         fun `burde gå fint med siste status`(sisteStatus: HendelseStatus) {
@@ -352,6 +511,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
@@ -373,6 +533,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
@@ -381,7 +542,31 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                 )
-            } `should throw` UgyldigSykmeldingStatusException::class
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.BEKREFTET_AVVIST.name)
+                .shouldContainIgnoringCase(sisteStatus.name)
+        }
+
+        @Test
+        fun `burde ikke bli bekreftet avvist dersom sykmelding er egenmeldt`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    meldingsinformasjon = lagMeldingsinformasjonEgenmeldt(),
+                    validation = lagValidation(status = RuleType.INVALID),
+                ),
+            )
+
+            invoking {
+                sykmeldingHandterer.bekreftAvvistSykmelding(
+                    sykmeldingId = "1",
+                    identer = PersonIdenter("fnr"),
+                )
+            }.shouldThrow(UgyldigSykmeldingStatusException::class)
+                .exceptionMessage
+                .shouldContainIgnoringCase(HendelseStatus.BEKREFTET_AVVIST.name)
+                .shouldContainIgnoringCase("egenmeldt")
         }
     }
 }
