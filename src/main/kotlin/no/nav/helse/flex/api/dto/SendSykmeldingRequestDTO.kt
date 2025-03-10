@@ -132,14 +132,3 @@ enum class UriktigeOpplysning {
     SYKMELDINGSGRAD_FOR_HOY,
     SYKMELDINGSGRAD_FOR_LAV,
 }
-
-enum class Arbeidssituasjon {
-    ARBEIDSTAKER,
-    ARBEIDSLEDIG,
-    PERMITTERT,
-    FISKER,
-    FRILANSER,
-    NAERINGSDRIVENDE,
-    JORDBRUKER,
-    ANNET,
-}

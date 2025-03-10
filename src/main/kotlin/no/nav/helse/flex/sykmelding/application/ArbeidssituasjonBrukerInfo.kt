@@ -1,7 +1,5 @@
 package no.nav.helse.flex.sykmelding.application
 
-import no.nav.helse.flex.api.dto.Arbeidssituasjon
-
 sealed interface ArbeidssituasjonBrukerInfo {
     val arbeidssituasjon: Arbeidssituasjon
 }
