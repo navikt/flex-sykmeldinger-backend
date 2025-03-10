@@ -35,6 +35,18 @@ class SykmeldingStatusEndrer(
             )
         }
 
+        if (sykmelding.erAvvist) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fordi sykmelding er avvist",
+            )
+        }
+
+        if (sykmelding.erEgenmeldt) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_ARBEIDSGIVER} fordi sykmelding er egenmeldt",
+            )
+        }
+
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (arbeidsgiverOrgnummer != null) {
                 val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
@@ -85,6 +97,18 @@ class SykmeldingStatusEndrer(
             )
         }
 
+        if (sykmelding.erAvvist) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_NAV} fordi sykmelding er avvist",
+            )
+        }
+
+        if (sykmelding.erEgenmeldt) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.SENDT_TIL_NAV} fordi sykmelding er egenmeldt",
+            )
+        }
+
         // TODO: Hent tidligere arbeidsgivere
         val hendelse =
             SykmeldingHendelse(
@@ -108,6 +132,19 @@ class SykmeldingStatusEndrer(
                 "Kan ikke endre status til ${HendelseStatus.BEKREFTET_AVVIST} fra ${sisteStatus.status}",
             )
         }
+
+        if (!sykmelding.erAvvist) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.BEKREFTET_AVVIST} fordi sykmelding ikke er avvist",
+            )
+        }
+
+        if (sykmelding.erEgenmeldt) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.BEKREFTET_AVVIST} fordi sykmelding er egenmeldt",
+            )
+        }
+
         val hendelse =
             SykmeldingHendelse(
                 status = HendelseStatus.BEKREFTET_AVVIST,
@@ -127,6 +164,19 @@ class SykmeldingStatusEndrer(
                 "Kan ikke endre status til ${HendelseStatus.AVBRUTT} fra ${sisteHendelse.status}",
             )
         }
+
+        if (sykmelding.erAvvist) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.AVBRUTT} fordi sykmelding er avvist",
+            )
+        }
+
+        if (sykmelding.erEgenmeldt) {
+            throw UgyldigSykmeldingStatusException(
+                "Kan ikke endre status til ${HendelseStatus.AVBRUTT} fordi sykmelding er egenmeldt",
+            )
+        }
+
         // TODO: Burde vi kaste exception om vi endrer AVBRUTT til AVBRUTT?
         if (sisteHendelse.status == HendelseStatus.AVBRUTT) {
             return sykmelding
