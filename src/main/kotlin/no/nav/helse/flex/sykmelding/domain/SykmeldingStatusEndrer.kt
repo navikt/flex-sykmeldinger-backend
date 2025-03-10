@@ -96,10 +96,7 @@ class SykmeldingStatusEndrer(
         return sykmelding.leggTilStatus(hendelse)
     }
 
-    fun endreStatusTilBekreftetAvvist(
-        sykmelding: Sykmelding,
-        identer: PersonIdenter,
-    ): Sykmelding {
+    fun endreStatusTilBekreftetAvvist(sykmelding: Sykmelding): Sykmelding {
         val sisteStatus = sykmelding.sisteStatus()
         if (
             sisteStatus.status !in

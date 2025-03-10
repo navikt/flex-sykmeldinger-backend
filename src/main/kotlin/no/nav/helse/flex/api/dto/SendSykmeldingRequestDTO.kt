@@ -24,19 +24,18 @@ data class SendSykmeldingRequestDTO(
                 ArbeidsledigBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
             }
             Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerBrukerInfo(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
-            Arbeidssituasjon.FRILANSER -> FrilanserBrukerInfo()
-            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerInfo()
+            Arbeidssituasjon.PERMITTERT -> PermittertBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
             Arbeidssituasjon.FISKER -> {
                 requireNotNull(fisker) { "Fisker må være satt for fisker" }
                 FiskerBrukerInfo(
-                    blad = enumValueOf(fisker.blad.name),
                     lottOgHyre = enumValueOf(fisker.lottOgHyre.name),
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
                 )
             }
-            Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerInfo(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
-            Arbeidssituasjon.PERMITTERT -> PermittertBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
-            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerInfo()
+            Arbeidssituasjon.FRILANSER -> FrilanserBrukerInfo
+            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerInfo
+            Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerInfo
+            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerInfo
         }
 
     fun tilSporsmalListe(): List<Sporsmal> {
@@ -136,11 +135,11 @@ enum class UriktigeOpplysning {
 
 enum class Arbeidssituasjon {
     ARBEIDSTAKER,
-    FRILANSER,
-    NAERINGSDRIVENDE,
-    FISKER,
-    JORDBRUKER,
     ARBEIDSLEDIG,
     PERMITTERT,
+    FISKER,
+    FRILANSER,
+    NAERINGSDRIVENDE,
+    JORDBRUKER,
     ANNET,
 }

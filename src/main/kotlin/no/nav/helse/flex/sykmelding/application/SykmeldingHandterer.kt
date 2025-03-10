@@ -107,52 +107,6 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
-    // TODO: Use sendSykmelding istedet
-    @Transactional
-    fun sendSykmeldingTilArbeidsgiver(
-        sykmeldingId: String,
-        identer: PersonIdenter,
-        arbeidsgiverOrgnummer: String?,
-        sporsmalSvar: List<Sporsmal>?,
-    ): Sykmelding {
-        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
-
-        val oppdatertSykmelding =
-            sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
-                sykmelding = sykmelding,
-                identer = identer,
-                arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-                sporsmalSvar = sporsmalSvar,
-            )
-
-        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sendSykmeldingKafka(lagretSykmelding)
-        return lagretSykmelding
-    }
-
-    // TODO: Use sendSykmelding istedet
-    @Transactional
-    fun sendSykmeldingTilNav(
-        sykmeldingId: String,
-        identer: PersonIdenter,
-        arbeidsledigFraOrgnummer: String?,
-        sporsmalSvar: List<Sporsmal>?,
-    ): Sykmelding {
-        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
-
-        val oppdatertSykmelding =
-            sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-                sykmelding = sykmelding,
-                identer = identer,
-                arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
-                sporsmalSvar = sporsmalSvar,
-            )
-
-        val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sendSykmeldingKafka(lagretSykmelding)
-        return lagretSykmelding
-    }
-
     @Transactional
     fun avbrytSykmelding(
         sykmeldingId: String,
@@ -174,7 +128,7 @@ class SykmeldingHandterer(
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
 
-        val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilBekreftetAvvist(sykmelding = sykmelding, identer = identer)
+        val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilBekreftetAvvist(sykmelding = sykmelding)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)

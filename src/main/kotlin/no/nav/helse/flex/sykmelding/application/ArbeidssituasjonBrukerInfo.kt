@@ -25,7 +25,6 @@ data class PermittertBrukerInfo(
 }
 
 data class FiskerBrukerInfo(
-    val blad: FiskerBlad,
     val lottOgHyre: FiskerLottOgHyre,
     val arbeidsgiverOrgnummer: String? = null,
 ) : ArbeidssituasjonBrukerInfo {
@@ -33,50 +32,25 @@ data class FiskerBrukerInfo(
 
     init {
         if (lottOgHyre in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)) {
-            require(arbeidsgiverOrgnummer != null) { "ArbeidsgiverOrgnummer må være satt for LOTT" }
+            require(arbeidsgiverOrgnummer != null) { "ArbeidsgiverOrgnummer må være satt for HYRE" }
         }
     }
 }
 
-class FrilanserBrukerInfo : ArbeidssituasjonBrukerInfo {
+data object FrilanserBrukerInfo : ArbeidssituasjonBrukerInfo {
     override val arbeidssituasjon = Arbeidssituasjon.FRILANSER
-
-    override fun equals(other: Any?) = other is FrilanserBrukerInfo
-
-    override fun hashCode() = FrilanserBrukerInfo::class.hashCode()
 }
 
-data class JordbrukerBrukerInfo(
-    val arbeidsgiverOrgnummer: String? = null,
-) : ArbeidssituasjonBrukerInfo {
+data object JordbrukerBrukerInfo : ArbeidssituasjonBrukerInfo {
     override val arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
-
-    override fun equals(other: Any?) = other is JordbrukerBrukerInfo
-
-    override fun hashCode() = JordbrukerBrukerInfo::class.hashCode()
 }
 
-class NaringsdrivendeBrukerInfo : ArbeidssituasjonBrukerInfo {
+data object NaringsdrivendeBrukerInfo : ArbeidssituasjonBrukerInfo {
     override val arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE
-
-    override fun equals(other: Any?) = other is NaringsdrivendeBrukerInfo
-
-    override fun hashCode() = NaringsdrivendeBrukerInfo::class.hashCode()
 }
 
-data class AnnetArbeidssituasjonBrukerInfo(
-    val arbeidsgiverOrgnummer: String? = null,
-) : ArbeidssituasjonBrukerInfo {
+data object AnnetArbeidssituasjonBrukerInfo : ArbeidssituasjonBrukerInfo {
     override val arbeidssituasjon = Arbeidssituasjon.ANNET
-
-    override fun equals(other: Any?) = other is AnnetArbeidssituasjonBrukerInfo
-
-    override fun hashCode() = AnnetArbeidssituasjonBrukerInfo::class.hashCode()
-}
-
-enum class FiskerBlad {
-    A,
-    B,
 }
 
 enum class FiskerLottOgHyre {
