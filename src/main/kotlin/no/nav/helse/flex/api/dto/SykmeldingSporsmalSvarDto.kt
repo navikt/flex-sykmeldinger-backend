@@ -68,5 +68,6 @@ enum class ArbeidssituasjonDTO {
     FISKER,
     JORDBRUKER,
     ARBEIDSLEDIG,
+    PERMITTERT,
     ANNET,
 }
