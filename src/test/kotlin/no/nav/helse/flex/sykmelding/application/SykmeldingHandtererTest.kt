@@ -3,11 +3,13 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -362,6 +364,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
@@ -382,6 +385,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
 
