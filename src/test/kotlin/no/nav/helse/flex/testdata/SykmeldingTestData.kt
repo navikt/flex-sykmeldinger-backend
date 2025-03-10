@@ -56,7 +56,7 @@ fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): S
         arbeidssituasjon =
             FormSporsmalSvar(
                 sporsmaltekst = "Hva er din arbeidssituasjon?",
-                svar = Arbeidssituasjon.ARBEIDSTAKER,
+                svar = ArbeidssituasjonDTO.ARBEIDSTAKER,
             ),
         arbeidsgiverOrgnummer =
             FormSporsmalSvar(

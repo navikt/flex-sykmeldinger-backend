@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
+import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -235,7 +236,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .andReturn()
                     .response.contentAsString
 
-            val brukerinformasjon: no.nav.helse.flex.api.dto.BrukerinformasjonDTO = objectMapper.readValue(result)
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 1
         }
 
@@ -404,7 +405,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody().serialisertTilString(),
+                                lagSendSykmeldingRequestDTO().serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -447,7 +448,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody(arbeidsgiverOrgnummer = "orgnummer").serialisertTilString(),
+                                lagSendSykmeldingRequestDTO(arbeidsgiverOrgnummer = "orgnummer").serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -483,7 +484,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendBody(
+                                lagSendSykmeldingRequestDTO(
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                                     arbeidsledig =
                                         Arbeidsledig(
@@ -505,14 +506,14 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSendBody().serialisertTilString(),
+                content = lagSendSykmeldingRequestDTO().serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/send" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSendBody().serialisertTilString(),
+                content = lagSendSykmeldingRequestDTO().serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/send" }
 
@@ -703,16 +704,22 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 }
 
-fun lagSendBody(
+fun lagSendSykmeldingRequestDTO(
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
     arbeidsgiverOrgnummer: String? = null,
     arbeidsledig: Arbeidsledig? = null,
-): SendBody =
-    SendBody(
-        erOpplysningeneRiktige = "YES",
+): SendSykmeldingRequestDTO =
+    SendSykmeldingRequestDTO(
+        erOpplysningeneRiktige = YesOrNo.YES,
         arbeidssituasjon = arbeidssituasjon,
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
         riktigNarmesteLeder = null,
-        harEgenmeldingsdager = "NO",
+        harEgenmeldingsdager = YesOrNo.NO,
         arbeidsledig = arbeidsledig,
+        egenmeldingsdager = null,
+        egenmeldingsperioder = null,
+        fisker = null,
+        harBruktEgenmelding = null,
+        harForsikring = null,
+        uriktigeOpplysninger = null,
     )
