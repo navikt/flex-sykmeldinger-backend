@@ -3,7 +3,9 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -26,9 +28,22 @@ data class IdenterOgEksterneArbeidsforhold(
 class EksternArbeidsforholdHenter(
     private val aaregClient: AaregClient,
     private val eregClient: EregClient,
+    private val environmentToggles: EnvironmentToggles,
 ) {
+    private val log = logger()
+
     fun hentEksterneArbeidsforholdForPerson(fnr: String): IdenterOgEksterneArbeidsforhold {
-        val result = aaregClient.getArbeidsforholdoversikt(fnr)
+        val result =
+            try {
+                aaregClient.getArbeidsforholdoversikt(fnr)
+            } catch (e: Exception) {
+                if (environmentToggles.isProduction()) {
+                    throw e
+                } else {
+                    log.warn("AAREG er midlertidig nede i dev. Returnerer tom liste.", e)
+                    ArbeidsforholdoversiktResponse(emptyList())
+                }
+            }
 
         val eksterneArbeidsforhold =
             result.arbeidsforholdoversikter
