@@ -3,6 +3,7 @@ package no.nav.helse.flex.api
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
+import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.domain.*
@@ -575,14 +576,14 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+                content = serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+                content = serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
@@ -637,7 +638,12 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ),
             )
 
-            syketilfelleClient.setErUtenforVentetid(true)
+            syketilfelleClient.setErUtenforVentetid(
+                ErUtenforVentetidResponse(
+                    erUtenforVentetid = true,
+                    oppfolgingsdato = LocalDate.parse("2025-01-01"),
+                ),
+            )
 
             val result =
                 mockMvc

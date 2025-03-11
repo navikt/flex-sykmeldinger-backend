@@ -1,6 +1,7 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.clients.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
@@ -117,7 +118,7 @@ class SykmeldingController(
     )
     fun getErUtenforVentetid(
         @PathVariable sykmeldingId: String,
-    ): ResponseEntity<Boolean> {
+    ): ResponseEntity<ErUtenforVentetidResponse> {
         val identer = tokenxValidering.hentIdenter()
 
         val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)

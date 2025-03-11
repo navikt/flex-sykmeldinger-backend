@@ -6,5 +6,5 @@ interface SyketilfelleClient {
     fun getErUtenforVentetid(
         identer: PersonIdenter,
         sykmeldingId: String,
-    ): Boolean
+    ): ErUtenforVentetidResponse
 }

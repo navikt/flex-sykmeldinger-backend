@@ -2,11 +2,11 @@ package no.nav.helse.flex.clients.syketilfelle
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
+import java.time.LocalDate
 
 @Component
 class SyketilfelleEksternClient(
@@ -18,28 +18,18 @@ class SyketilfelleEksternClient(
     override fun getErUtenforVentetid(
         identer: PersonIdenter,
         sykmeldingId: String,
-    ): Boolean {
+    ): ErUtenforVentetidResponse {
         val uri =
-            syketilfelleRestClient.post().uri { uriBuilder ->
+            syketilfelleRestClient.get().uri { uriBuilder ->
                 uriBuilder.path("/api/v1/ventetid/$sykmeldingId/erUtenforVentetid").build()
             }
-        val res =
-            uri
-                .body(
-                    VentetidRequest(
-                        fnr = identer.alle().joinToString(", "),
-                        sykmeldingId = sykmeldingId,
-                    ).serialisertTilString(),
-                ).retrieve()
-                .toEntity<Boolean>()
-                .body
+        val res = uri.retrieve().toEntity<ErUtenforVentetidResponse>().body
 
         return res ?: throw RuntimeException("Klarte ikke hente ventetid for sykmelding $sykmeldingId")
     }
 }
 
-data class VentetidRequest(
-    val fnr: String,
-    val sykmeldingId: String,
-    val hentAndreIdenter: Boolean = true,
+data class ErUtenforVentetidResponse(
+    val erUtenforVentetid: Boolean,
+    val oppfolgingsdato: LocalDate?,
 )
