@@ -80,8 +80,8 @@ class RestClientConfig {
         requestFactory: HttpComponentsClientHttpRequestFactory,
     ): RestClient {
         val clientProperties =
-            clientConfigurationProperties.registration["flex-syketilfelle-client-credentials"]
-                ?: throw RuntimeException("Fant ikke config for ventetid-client-credentials.")
+            clientConfigurationProperties.registration["flex-syketilfelle-tokenx"]
+                ?: throw RuntimeException("Fant ikke config for flex-syketilfelle-tokenx.")
 
         return RestClient
             .builder()
