@@ -17,7 +17,7 @@ import java.time.Duration
 
 class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @AfterEach
-    fun tearDown() {
+    fun afterEach() {
         slettDatabase()
     }
 
@@ -30,8 +30,6 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
-
-        super.ventPaConsumers()
 
         kafkaProducer
             .send(

@@ -4,6 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResp
 import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
+import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
@@ -29,7 +30,7 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
     private lateinit var eregMockWebServer: MockWebServer
 
     @BeforeAll
-    fun setup() {
+    fun beforeAll() {
         aaregMockWebServer.dispatcher =
             simpleDispatcher {
                 MockResponse()
@@ -47,19 +48,18 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
     }
 
     @AfterAll
-    fun tearDown() {
+    fun afterAll() {
         aaregMockWebServer.dispatcher = defaultAaregDispatcher
+        eregMockWebServer.dispatcher = defaultEregDispatcher
     }
 
     @AfterEach
-    fun rivNed() {
+    fun afterEach() {
         slettDatabase()
     }
 
     @Test
     fun `burde lese arbeidsforhold hendelse, og lagre endret arbeidsforhold fra aareg + ereg`() {
-        super.ventPaConsumers()
-
         val record: ProducerRecord<String, String> =
             ProducerRecord(
                 aaregTopic,
