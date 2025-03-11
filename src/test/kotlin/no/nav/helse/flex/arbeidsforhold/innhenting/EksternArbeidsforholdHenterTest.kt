@@ -2,6 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.innhenting.EksternArbeidsforholdHenter.Companion.getOrgnummerFraArbeidssted
@@ -9,11 +10,10 @@ import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
 import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldThrow
+import no.nav.helse.flex.config.EnvironmentToggles
+import org.amshove.kluent.*
 import org.junit.jupiter.api.Test
+import org.springframework.web.client.RestClientException
 import java.time.LocalDate
 
 class EksternArbeidsforholdHenterTest {
@@ -25,6 +25,11 @@ class EksternArbeidsforholdHenterTest {
     fun aaregClientMock(): AaregClient =
         mock {
             on { getArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
+        }
+
+    fun environmentTogglesMock(): EnvironmentToggles =
+        mock {
+            on { isProduction() } doReturn true
         }
 
     @Test
@@ -61,7 +66,12 @@ class EksternArbeidsforholdHenterTest {
                         ),
                     )
             }
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentTogglesMock(),
+            )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr").eksterneArbeidsforhold.first()
         eksterntArbeidsforhold.navArbeidsforholdId `should be equal to` "navArbeidsforholdId"
         eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
@@ -69,6 +79,29 @@ class EksternArbeidsforholdHenterTest {
         eksterntArbeidsforhold.juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
         eksterntArbeidsforhold.fom `should be equal to` LocalDate.parse("2020-01-01")
         eksterntArbeidsforhold.tom `should be equal to` LocalDate.parse("2020-01-02")
+    }
+
+    @Test
+    fun `burde bruke tom liste når AAREG er nede i dev`() {
+        val aaregClient: AaregClient =
+            mock {
+                on { getArbeidsforholdoversikt("fnr") } doThrow RestClientException("AAREG er nede")
+            }
+        val environmentToggles: EnvironmentToggles =
+            mock {
+                on { isProduction() } doReturn false
+            }
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentToggles,
+            )
+        eksternArbeidsforholdHenter
+            .hentEksterneArbeidsforholdForPerson(
+                "fnr",
+            ).eksterneArbeidsforhold
+            .`should be empty`()
     }
 
     @Test
@@ -82,6 +115,7 @@ class EksternArbeidsforholdHenterTest {
             EksternArbeidsforholdHenter(
                 aaregClient = aaregClientMock(),
                 eregClient = eregClient,
+                environmentToggles = environmentTogglesMock(),
             )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold.first()
         eksterntArbeidsforhold.orgnavn `should be equal to` "Org Navn"
@@ -105,7 +139,12 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentTogglesMock(),
+            )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold.first()
         eksterntArbeidsforhold.orgnummer `should be equal to` "orgnummer"
     }
@@ -128,7 +167,12 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentTogglesMock(),
+            )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold.first()
         eksterntArbeidsforhold.juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
     }
@@ -147,7 +191,12 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentTogglesMock(),
+            )
         val eksterntArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold.first()
         eksterntArbeidsforhold.arbeidsforholdType `should be equal to` ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
     }
@@ -166,7 +215,12 @@ class EksternArbeidsforholdHenterTest {
                     )
             }
 
-        val eksternArbeidsforholdHenter = EksternArbeidsforholdHenter(aaregClient = aaregClient, eregClient = eregClientMock())
+        val eksternArbeidsforholdHenter =
+            EksternArbeidsforholdHenter(
+                aaregClient = aaregClient,
+                eregClient = eregClientMock(),
+                environmentToggles = environmentTogglesMock(),
+            )
         eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold shouldHaveSize 0
     }
 
