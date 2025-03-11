@@ -8,12 +8,14 @@ import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.shouldNotBeNull
@@ -35,6 +37,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
     @Autowired
     lateinit var oauth2Server: MockOAuth2Server
+
+    @Autowired
+    lateinit var syketilfelleClient: SyketilfelleClientFake
 
     @Nested
     inner class HentSykmeldingEndepunkt {
@@ -616,6 +621,63 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
             return returnertSykmelding
         }
+    }
+
+    @Nested
+    inner class GetErUtenforVentetid {
+        @Test
+        fun `burde hente svar på om sykmelding er utenfor ventetid`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            syketilfelleClient.setErUtenforVentetid(true)
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/er-utenfor-ventetid")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            objectMapper.readValue<Boolean>(result) `should be` true
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes(
+                content = lagSykmeldingGrunnlag().serialisertTilString(),
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+                content = lagSykmeldingGrunnlag().serialisertTilString(),
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
+
+        @Test
+        fun `burde returnere unauthorized når vi ikke har token`() =
+            sjekkAtReturnereUnauthorizedNårViIkkeHarToken("/api/v1/sykmeldinger/1/er-utenfor-ventetid")
+
+        @Test
+        fun `burde returnere unauthorized når vi har feil claim`() =
+            sjekkAtReturnereUnauthorizedNårViHarFeilClaim("/api/v1/sykmeldinger/1/er-utenfor-ventetid")
     }
 
     fun sjekkFår404NårSykmeldingenIkkeFinnes(

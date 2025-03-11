@@ -22,3 +22,4 @@ env:
   EREG_URL: https://ereg-services.prod-fss-pub.nais.io
   AAREG_URL: https://aareg-services.prod-fss-pub.nais.io
   AAREG_AAD_CLIENT_ID: prod-fss.arbeidsforhold.aareg-services-nais
+  FLEX_SYKETILFELLE_URL: http://flex-syketilfelle

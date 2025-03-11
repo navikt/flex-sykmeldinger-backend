@@ -33,6 +33,13 @@ val defaultEregDispatcher =
             .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
     }
 
+val defaultSyketilfelleDispatcher =
+    simpleDispatcher {
+        MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody("true".serialisertTilString())
+    }
+
 val defaultPdlDispatcher = notFoundDispatcher
 
 @TestConfiguration
@@ -45,6 +52,9 @@ class MockWebServereConfig {
 
     @Bean
     fun eregMockWebServer() = eregMockWebServer
+
+    @Bean
+    fun syketilfelleMockWebServer() = syketilfelleMockWebServer
 
     companion object {
         val logger = logger()
@@ -69,6 +79,12 @@ class MockWebServereConfig {
             MockWebServer().apply {
                 System.setProperty("EREG_URL", "http://localhost:$port")
                 dispatcher = defaultEregDispatcher
+            }
+
+        val syketilfelleMockWebServer =
+            MockWebServer().apply {
+                System.setProperty("FLEX_SYKETILFELLE_URL", "http://localhost:$port")
+                dispatcher = defaultSyketilfelleDispatcher
             }
     }
 }

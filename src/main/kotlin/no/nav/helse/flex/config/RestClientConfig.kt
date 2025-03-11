@@ -73,6 +73,25 @@ class RestClientConfig {
             .build()
 
     @Bean
+    fun syketilfelleRestClient(
+        @Value("\${FLEX_SYKETILFELLE_URL}") url: String,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+    ): RestClient {
+        val clientProperties =
+            clientConfigurationProperties.registration["flex-syketilfelle-client-credentials"]
+                ?: throw RuntimeException("Fant ikke config for ventetid-client-credentials.")
+
+        return RestClient
+            .builder()
+            .baseUrl(url)
+            .requestFactory(requestFactory)
+            .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
+            .build()
+    }
+
+    @Bean
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
