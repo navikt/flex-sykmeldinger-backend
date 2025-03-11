@@ -46,6 +46,9 @@ class SykmeldingController(
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
+
+    // du kan se på status endrer for uavhengig service, vi kunne også vurdert en hjelpefunksjon
+    // dobbeltsjekk filtreringen til team sykmeldingen ... tar inn en liste med sykmeldinger
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/tidligere-arbeidsgivere")
     @ResponseBody
     @ProtectedWithClaims(
@@ -55,7 +58,18 @@ class SykmeldingController(
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<Any> = ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build()
+    ): ResponseEntity<List<TidligereArbeidsgiver>> {
+        val identer = tokenxValidering.hentIdenter()
+
+        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
+        val statuser = sykmeldinger.flatMap {it.statuser}
+
+        val tidligereArbeidsgivere = statuser
+            .mapNotNull { it.arbeidstakerInfo?.arbeidsgiver }
+            .map { arbeidsgiver -> TidligereArbeidsgiver(arbeidsgiver.orgnummer, arbeidsgiver.orgnavn) }
+
+        return ResponseEntity.ok(tidligereArbeidsgivere)
+    }
 
     @ProtectedWithClaims(
         issuer = TOKENX,
