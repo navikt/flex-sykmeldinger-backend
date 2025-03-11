@@ -2,6 +2,7 @@ package no.nav.helse.flex.clients
 
 import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.clients.aareg.AaregEksternClient
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
@@ -17,11 +18,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.RestClientException
 
 @RestClientOppsett
-@Import(AaregEksternClient::class)
-class AaregClientTest {
+@Import(AaregEksternClient::class, EnvironmentToggles::class)
+@TestPropertySource(properties = ["NAIS_CLUSTER_NAME= prod-gcp"])
+class AaregClientTestProd {
     @Autowired
     private lateinit var aaregMockWebServer: MockWebServer
 
