@@ -576,14 +576,14 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = serialisertTilString(),
+                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = serialisertTilString(),
+                content = SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
                 HttpMethod.POST,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/change-status" }
 
@@ -662,7 +662,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .andReturn()
                     .response.contentAsString
 
-            objectMapper.readValue<Boolean>(result) `should be` true
+            val erUtenforVentetidResponse: ErUtenforVentetidResponse = objectMapper.readValue(result)
+            erUtenforVentetidResponse.erUtenforVentetid `should be` true
+            erUtenforVentetidResponse.oppfolgingsdato `should be equal to` LocalDate.parse("2025-01-01")
         }
 
         @Test
