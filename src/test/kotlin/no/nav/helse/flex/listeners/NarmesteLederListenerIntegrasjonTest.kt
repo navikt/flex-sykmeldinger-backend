@@ -15,7 +15,6 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
@@ -24,11 +23,6 @@ import java.util.concurrent.TimeUnit
 class NarmesteLederListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
-
-    @BeforeAll
-    fun setup() {
-        super.ventPaConsumers()
-    }
 
     @AfterEach
     fun cleanUp() {

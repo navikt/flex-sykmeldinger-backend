@@ -1,21 +1,20 @@
 package no.nav.helse.flex.config
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.helse.flex.clients.pdl.PdlClient
 import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.clients.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
 import org.springframework.data.redis.cache.FixedDurationTtlFunction
 import org.springframework.data.redis.cache.RedisCache
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.time.Duration
 
 class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
@@ -25,28 +24,28 @@ class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var cacheManager: CacheManager
 
-    @MockitoSpyBean
-    lateinit var pdlEksternClient: PdlClient
-
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
 
-    @BeforeEach
+    @AfterEach
     fun setup() {
         cacheManager.getCache("flex-folkeregister-identer-med-historikk")?.clear()
+        pdlMockWebServer.dispatcher = defaultPdlDispatcher
     }
 
     @Test
     fun `burde bruke cache`() {
+        var pdlCalls = 0
         pdlMockWebServer.dispatcher =
             simpleDispatcher {
+                pdlCalls++
                 lagGraphQlResponse(lagHentIdenterResponseData())
             }
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
 
-        verify(pdlEksternClient, times(1)).hentIdenterMedHistorikk("ny-ident")
+        pdlCalls `should be equal to` 1
     }
 
     @Test

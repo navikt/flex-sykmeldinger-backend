@@ -4,9 +4,11 @@ import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
+import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.apache.kafka.clients.producer.Producer
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
@@ -28,7 +30,11 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureObservability
 @EnableMockOAuth2Server
-@SpringBootTest(classes = [Application::class, KafkaTestConfig::class, MockWebServereConfig::class])
+@SpringBootTest(
+    classes = [
+        Application::class, KafkaTestConfig::class, MockWebServereConfig::class,
+    ],
+)
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class IntegrasjonTestOppsett {
     @Autowired
@@ -47,14 +53,20 @@ abstract class IntegrasjonTestOppsett {
     lateinit var sykmeldingRepository: SykmeldingRepository
 
     @Autowired
-    lateinit var kafkaListenerRegistry: KafkaListenerEndpointRegistry
+    lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
 
     companion object {
-        init {
+        private val logger = logger()
 
+        init {
             KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.1")).apply {
                 start()
                 System.setProperty("KAFKA_BROKERS", bootstrapServers)
+
+                logger.info(
+                    "Started kafka testcontainer: bootstrapServers=${this.bootstrapServers}, " +
+                        "image=${this.dockerImageName}, containerId=${this.containerId.take(12)}",
+                )
             }
 
             PostgreSQLContainer14().apply {
@@ -63,6 +75,11 @@ abstract class IntegrasjonTestOppsett {
                 System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
                 System.setProperty("spring.datasource.username", username)
                 System.setProperty("spring.datasource.password", password)
+
+                logger.info(
+                    "Started Postgres testcontainer: jdbcUrl=${this.jdbcUrl}, " +
+                        "image=${this.dockerImageName}, containerId=${this.containerId.take(12)}",
+                )
             }
 
             ValkeyContainer().apply {
@@ -74,12 +91,22 @@ abstract class IntegrasjonTestOppsett {
                 System.setProperty("VALKEY_PORT_SESSIONS", firstMappedPort.toString())
                 System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
                 System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
+
+                logger.info(
+                    "Started Velkey testcontainer: host=${this.host}, port=${this.firstMappedPort}, " +
+                        "image=${this.dockerImageName}, containerId=${this.containerId.take(12)}",
+                )
             }
         }
     }
 
+    @BeforeAll
+    fun beforeAllFelles() {
+        ventPaConsumers()
+    }
+
     @AfterAll
-    fun `Vi resetter databasen`() {
+    fun afterAllFelles() {
         slettDatabase()
     }
 
@@ -89,9 +116,8 @@ abstract class IntegrasjonTestOppsett {
         sykmeldingRepository.deleteAll()
     }
 
-    fun ventPaConsumers() {
-        // Burde brukes dersom consumere har offset=latest
-        kafkaListenerRegistry.listenerContainers.forEach { container ->
+    private fun ventPaConsumers() {
+        kafkaListenerEndpointRegistry.listenerContainers.forEach { container ->
             ContainerTestUtils.waitForAssignment(container, 1)
         }
     }
