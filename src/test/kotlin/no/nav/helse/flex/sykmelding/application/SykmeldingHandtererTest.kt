@@ -1,15 +1,14 @@
 package no.nav.helse.flex.sykmelding.application
 
+import no.nav.helse.flex.api.dto.Blad
+import no.nav.helse.flex.api.dto.LottOgHyre
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -187,12 +186,40 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar =
+                        listOf(
+                            Sporsmal(
+                                tag = SporsmalTag.FISKER,
+                                svartype = Svartype.GRUPPE_AV_UNDERSPORSMAL,
+                                undersporsmal =
+                                    listOf(
+                                        Sporsmal(
+                                            tag = SporsmalTag.FISKER__BLAD,
+                                            svartype = Svartype.RADIO,
+                                            svar = listOf(Svar(verdi = Blad.A.name)),
+                                        ),
+                                        Sporsmal(
+                                            tag = SporsmalTag.FISKER__LOTT_OG_HYRE,
+                                            svartype = Svartype.RADIO,
+                                            svar = listOf(Svar(verdi = LottOgHyre.HYRE.name)),
+                                        ),
+                                    ),
+                                svar = emptyList(),
+                            ),
+                        ),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                .let {
+                    it.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    it.sporsmalSvar `should not be` null
+                    it.sporsmalSvar?.size `should be equal to` 1
+                    it.sporsmalSvar
+                        ?.first()
+                        ?.undersporsmal
+                        ?.size `should be equal to` 2
+                }
         }
 
         @Test

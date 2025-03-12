@@ -53,7 +53,7 @@ data class SendSykmeldingRequestDTO(
             sporsmal.add(
                 Sporsmal(
                     tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
-                    svartype = Svartype.FRITEKST,
+                    svartype = Svartype.RADIO,
                     svar = listOf(Svar(verdi = it)),
                 ),
             )
@@ -91,6 +91,75 @@ data class SendSykmeldingRequestDTO(
                     tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
                     svartype = Svartype.FRITEKST,
                     svar = listOf(Svar(verdi = it)),
+                ),
+            )
+        }
+        // Brukes for arbeidstaker og fisker på hyre
+        egenmeldingsdager?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.EGENMELINGSDAGER,
+                    svartype = Svartype.PERIODER,
+                    svar = it.map { dag -> Svar(verdi = dag.toString()) },
+                ),
+            )
+        }
+        // Brukes for selvstendig næringsdrivende, frilanser, jordbruker og fisker på lott
+        egenmeldingsperioder?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.EGENMELDINGSPERIODER,
+                    svartype = Svartype.PERIODER,
+                    svar = it.map { periode -> Svar(verdi = "${periode.fom} - ${periode.tom}") },
+                ),
+            )
+        }
+        fisker?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.FISKER,
+                    svartype = Svartype.GRUPPE_AV_UNDERSPORSMAL,
+                    svar = emptyList(),
+                    undersporsmal =
+                        listOf(
+                            Sporsmal(
+                                tag = SporsmalTag.FISKER__BLAD,
+                                svartype = Svartype.RADIO,
+                                svar = listOf(Svar(verdi = it.blad.name)),
+                            ),
+                            Sporsmal(
+                                tag = SporsmalTag.FISKER__LOTT_OG_HYRE,
+                                svartype = Svartype.RADIO,
+                                svar = listOf(Svar(verdi = it.lottOgHyre.name)),
+                            ),
+                        ),
+                ),
+            )
+        }
+        harBruktEgenmelding?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
+                    svartype = Svartype.JA_NEI,
+                    svar = konverterJaNeiSvar(it),
+                ),
+            )
+        }
+        harForsikring?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.HAR_FORSIKRING,
+                    svartype = Svartype.JA_NEI,
+                    svar = konverterJaNeiSvar(it),
+                ),
+            )
+        }
+        uriktigeOpplysninger?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.URIKTIGE_OPPLYSNINGER,
+                    svartype = Svartype.CHECKBOX_GRUPPE,
+                    svar = it.map { opplysning -> Svar(verdi = opplysning.name) },
                 ),
             )
         }
