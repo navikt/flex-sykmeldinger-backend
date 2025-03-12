@@ -21,7 +21,7 @@ class SyketilfelleEksternClient(
     ): ErUtenforVentetidResponse {
         val uri =
             syketilfelleRestClient.get().uri { uriBuilder ->
-                uriBuilder.path("/api/v1/ventetid/$sykmeldingId/erUtenforVentetid").build()
+                uriBuilder.path("/api/bruker/v2/ventetid/$sykmeldingId/erUtenforVentetid").build()
             }
         val res = uri.retrieve().toEntity<ErUtenforVentetidResponse>().body
 
