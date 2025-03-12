@@ -56,17 +56,23 @@ class SykmeldingController(
         combineWithOr = true,
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
+
+    // todo du må i hvert fall filtreere ut nåværende arbeidsgiver
+    // todo er det nødvendig å sortere ut arbeidsledig osv? kan vi stole på at de ikke har
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<List<TidligereArbeidsgiver>> {
         val identer = tokenxValidering.hentIdenter()
-
-        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
+        // val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId, identer)
+        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer).filter { it.sykmeldingId != sykmeldingId } // sorterer ut nåværende sykmelding
         val statuser = sykmeldinger.flatMap {it.statuser}
 
         val tidligereArbeidsgivere = statuser
             .mapNotNull { it.arbeidstakerInfo?.arbeidsgiver }
             .map { arbeidsgiver -> TidligereArbeidsgiver(arbeidsgiver.orgnummer, arbeidsgiver.orgnavn) }
+
+
+
 
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
