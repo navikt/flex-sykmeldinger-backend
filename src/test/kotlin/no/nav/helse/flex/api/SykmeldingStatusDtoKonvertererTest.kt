@@ -163,7 +163,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         ),
                 ),
                 Sporsmal(
-                    tag = SporsmalTag.EGENMELINGSDAGER,
+                    tag = SporsmalTag.EGENMELDINGSDAGER,
                     sporsmalstekst = "Egenmeldingsdager",
                     svartype = Svartype.DATOER,
                     svar =
@@ -174,7 +174,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         ),
                 ),
                 Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
+                    tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
                     sporsmalstekst = "Har du brukt egenmeldingsdager?",
                     svartype = Svartype.JA_NEI,
                     svar =

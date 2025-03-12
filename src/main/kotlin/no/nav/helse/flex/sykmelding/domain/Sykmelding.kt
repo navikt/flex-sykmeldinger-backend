@@ -37,8 +37,7 @@ data class Sykmelding(
     val erEgenmeldt: Boolean
         get() = meldingsinformasjon.type == MetadataType.EGENMELDT
 
-    fun sisteStatus(): SykmeldingHendelse =
-        statuser.maxByOrNull { it.opprettet } ?: error("Fant ikke status for sykmeldingen. Skal ikke skje.")
+    fun sisteStatus(): SykmeldingHendelse = statuser.lastMaxBy { it.opprettet } ?: error("Ingen statuser. Skal ikke skje.")
 
     fun leggTilStatus(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
@@ -63,3 +62,5 @@ enum class HendelseStatus {
     BEKREFTET_AVVIST,
     UTGATT,
 }
+
+private fun <T, R : Comparable<R>> Iterable<T>.lastMaxBy(selector: (T) -> R): T? = this.sortedBy(selector).lastOrNull()
