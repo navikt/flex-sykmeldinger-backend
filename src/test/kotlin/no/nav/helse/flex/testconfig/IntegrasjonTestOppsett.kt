@@ -34,7 +34,6 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
     classes = [
         Application::class, KafkaTestConfig::class, MockWebServereConfig::class,
     ],
-    properties = ["spring.kafka.admin.auto-create=true"],
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class IntegrasjonTestOppsett {
