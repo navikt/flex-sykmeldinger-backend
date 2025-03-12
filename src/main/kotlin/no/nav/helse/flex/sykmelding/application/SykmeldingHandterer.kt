@@ -145,7 +145,7 @@ class SykmeldingHandterer(
     ): Sykmelding {
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
-            logger.warn("Fant ikke sykmelding med id $sykmeldingId")
+            logger.warn("Fant ikke sykmeldingen")
             throw SykmeldingIkkeFunnetException("Fant ikke sykmelding med id $sykmeldingId")
         }
         if (sykmelding.pasientFnr !in identer.alle()) {

@@ -1,6 +1,8 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.clients.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
@@ -25,6 +27,7 @@ class SykmeldingController(
     private val virksomhetHenterService: VirksomhetHenterService,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
     private val sykmeldingHandterer: SykmeldingHandterer,
+    private val syketilfelleClient: SyketilfelleClient,
 ) {
     private val logger = logger()
 
@@ -106,7 +109,7 @@ class SykmeldingController(
         )
     }
 
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/er-utenfor-ventetid")
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/er-utenfor-ventetid")
     @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -114,9 +117,19 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getErUtenforVentetid(
-        @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
-    ): ResponseEntity<Any> {
-        TODO("Ikke implementert")
+        @PathVariable sykmeldingId: String,
+    ): ResponseEntity<ErUtenforVentetidResponse> {
+        val identer = tokenxValidering.hentIdenter()
+
+        val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val erUtenforVentetid =
+            syketilfelleClient.getErUtenforVentetid(
+                sykmeldingId = sykmelding.sykmeldingId,
+                identer = identer,
+            )
+
+        return ResponseEntity.ok(erUtenforVentetid)
     }
 
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")

@@ -46,6 +46,8 @@ spec:
       access: readwrite
   accessPolicy:
     outbound:
+      rules:
+        - application: flex-syketilfelle
       external:
     {{#each external-host}}
         - host: {{this}}

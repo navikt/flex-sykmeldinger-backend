@@ -2,6 +2,7 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.Dispatcher
@@ -10,6 +11,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import java.time.LocalDate
 import kotlin.apply
 
 fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatcher =
@@ -33,6 +35,18 @@ val defaultEregDispatcher =
             .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
     }
 
+val defaultSyketilfelleDispatcher =
+    simpleDispatcher {
+        MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody(
+                ErUtenforVentetidResponse(
+                    erUtenforVentetid = false,
+                    oppfolgingsdato = LocalDate.parse("2025-01-01"),
+                ).serialisertTilString(),
+            )
+    }
+
 val defaultPdlDispatcher = notFoundDispatcher
 
 @TestConfiguration
@@ -45,6 +59,9 @@ class MockWebServereConfig {
 
     @Bean
     fun eregMockWebServer() = eregMockWebServer
+
+    @Bean
+    fun syketilfelleMockWebServer() = syketilfelleMockWebServer
 
     companion object {
         val logger = logger()
@@ -69,6 +86,12 @@ class MockWebServereConfig {
             MockWebServer().apply {
                 System.setProperty("EREG_URL", "http://localhost:$port")
                 dispatcher = defaultEregDispatcher
+            }
+
+        val syketilfelleMockWebServer =
+            MockWebServer().apply {
+                System.setProperty("FLEX_SYKETILFELLE_URL", "http://localhost:$port")
+                dispatcher = defaultSyketilfelleDispatcher
             }
     }
 }

@@ -54,7 +54,15 @@ no.nav.security.jwt:
       aareg-client-credentials:
         token-endpoint-url: http://localhost:${mock-oauth2-server.port}/azureator/token
         grant-type: client_credentials
-        scope: pdl-api
+        scope: aareg-api
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
+      flex-syketilfelle-tokenx:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/tokenx/token
+        grant-type: client_credentials
+        scope: syketilfelle-api
         authentication:
           client-id: client-id
           client-secret: secretzz
@@ -66,3 +74,4 @@ REGISTRERT_FOR_ARBEIDSFORHOLD: true
 AAREG_URL: "url"
 EREG_URL: "url"
 PDL_BASE_URL: "url"
+FLEX_SYKETILFELLE_URL: "url"

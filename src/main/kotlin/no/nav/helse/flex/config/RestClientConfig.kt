@@ -73,6 +73,25 @@ class RestClientConfig {
             .build()
 
     @Bean
+    fun syketilfelleRestClient(
+        @Value("\${FLEX_SYKETILFELLE_URL}") url: String,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+    ): RestClient {
+        val clientProperties =
+            clientConfigurationProperties.registration["flex-syketilfelle-tokenx"]
+                ?: throw RuntimeException("Fant ikke config for flex-syketilfelle-tokenx.")
+
+        return RestClient
+            .builder()
+            .baseUrl(url)
+            .requestFactory(requestFactory)
+            .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
+            .build()
+    }
+
+    @Bean
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
