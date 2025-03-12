@@ -6,10 +6,7 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.testconfig.fakes.AaregClientFake
-import no.nav.helse.flex.testconfig.fakes.EregClientFake
-import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
+import no.nav.helse.flex.testconfig.fakes.*
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.support.NoOpCacheManager
@@ -17,6 +14,9 @@ import org.springframework.context.annotation.Bean
 
 @TestConfiguration
 class FakesTestConfig {
+    @Bean
+    fun nowFactory(): NowFactoryFake = NowFactoryFake()
+
     @Bean
     fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
 
