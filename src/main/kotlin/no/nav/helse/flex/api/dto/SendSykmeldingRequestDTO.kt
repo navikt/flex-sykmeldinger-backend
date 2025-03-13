@@ -7,17 +7,16 @@ import java.time.LocalDate
 data class SendSykmeldingRequestDTO(
     val erOpplysningeneRiktige: YesOrNo,
     val arbeidssituasjon: Arbeidssituasjon,
-    val arbeidsgiverOrgnummer: String?,
-    val harEgenmeldingsdager: YesOrNo?,
-    val riktigNarmesteLeder: YesOrNo?,
-    val arbeidsledig: Arbeidsledig?,
-    val egenmeldingsdager: List<LocalDate>?,
-    val egenmeldingsperioder: List<EgenmeldingsperiodeDTO>?,
-    val fisker: Fisker?,
-    val harBruktEgenmelding: YesOrNo?,
-    val harBruktEgenmeldingsdager: YesOrNo?,
-    val harForsikring: YesOrNo?,
-    val uriktigeOpplysninger: List<UriktigeOpplysning>?,
+    val arbeidsgiverOrgnummer: String? = null,
+    val harEgenmeldingsdager: YesOrNo? = null,
+    val riktigNarmesteLeder: YesOrNo? = null,
+    val arbeidsledig: Arbeidsledig? = null,
+    val egenmeldingsdager: List<LocalDate>? = null,
+    val egenmeldingsperioder: List<EgenmeldingsperiodeDTO>? = null,
+    val fisker: Fisker? = null,
+    val harBruktEgenmelding: YesOrNo? = null,
+    val harForsikring: YesOrNo? = null,
+    val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ) {
     fun tilArbeidssituasjonBrukerInfo(): ArbeidssituasjonBrukerInfo =
         when (arbeidssituasjon) {
@@ -68,15 +67,6 @@ data class SendSykmeldingRequestDTO(
                 ),
             )
         }
-        harEgenmeldingsdager?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
         riktigNarmesteLeder?.let {
             sporsmal.add(
                 Sporsmal(
@@ -90,7 +80,7 @@ data class SendSykmeldingRequestDTO(
             sporsmal.add(
                 Sporsmal(
                     tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
-                    svartype = Svartype.FRITEKST,
+                    svartype = Svartype.RADIO,
                     svar = listOf(Svar(verdi = it)),
                 ),
             )
@@ -100,7 +90,7 @@ data class SendSykmeldingRequestDTO(
             sporsmal.add(
                 Sporsmal(
                     tag = SporsmalTag.EGENMELINGSDAGER,
-                    svartype = Svartype.PERIODER,
+                    svartype = Svartype.DATOER,
                     svar = it.map { dag -> Svar(verdi = dag.toString()) },
                 ),
             )
@@ -111,7 +101,7 @@ data class SendSykmeldingRequestDTO(
                 Sporsmal(
                     tag = SporsmalTag.EGENMELDINGSPERIODER,
                     svartype = Svartype.PERIODER,
-                    svar = it.map { periode -> Svar(verdi = "{fom:${periode.fom}, tom: ${periode.tom}}") },
+                    svar = it.map { periode -> Svar(verdi = "{fom:${periode.fom},tom:${periode.tom}}") },
                 ),
             )
         }
@@ -146,7 +136,7 @@ data class SendSykmeldingRequestDTO(
                 ),
             )
         }
-        harBruktEgenmeldingsdager?.let {
+        harEgenmeldingsdager?.let {
             sporsmal.add(
                 Sporsmal(
                     tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,

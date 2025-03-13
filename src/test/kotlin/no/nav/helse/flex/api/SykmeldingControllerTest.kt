@@ -791,7 +791,6 @@ fun lagSendSykmeldingRequestDTO(
         egenmeldingsperioder = null,
         fisker = null,
         harBruktEgenmelding = null,
-        harBruktEgenmeldingsdager = null,
         harForsikring = null,
         uriktigeOpplysninger = null,
     )

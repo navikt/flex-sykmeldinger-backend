@@ -2,7 +2,6 @@ package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.api.dto.Blad
 import no.nav.helse.flex.api.dto.LottOgHyre
-import no.nav.helse.flex.api.dto.YesOrNo
 import no.nav.helse.flex.sykmelding.domain.Sporsmal
 import no.nav.helse.flex.sykmelding.domain.SporsmalTag
 import no.nav.helse.flex.sykmelding.domain.Svar
@@ -13,7 +12,7 @@ fun lagSporsmalSvarFiskerMedHyre() =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
@@ -46,17 +45,17 @@ fun lagSporsmalSvarFiskerMedHyre() =
         Sporsmal(
             tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
+            tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.EGENMELINGSDAGER,
             svartype = Svartype.DATOER,
-            svar = listOf(Svar(verdi = "2021-01-01"), Svar(verdi = "2021-01-02")),
+            svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),
     )
 
@@ -65,12 +64,12 @@ fun lagSporsmalSvarFiskerMedLott() =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
             svartype = Svartype.RADIO,
-            svar = listOf(Svar(verdi = "JORDBRUKER")),
+            svar = listOf(Svar(verdi = "FISKER")),
         ),
         Sporsmal(
             tag = SporsmalTag.FISKER,
@@ -93,17 +92,17 @@ fun lagSporsmalSvarFiskerMedLott() =
         Sporsmal(
             tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.EGENMELDINGSPERIODER,
             svartype = Svartype.PERIODER,
-            svar = listOf(Svar(verdi = "{fom: 2021-01-01, tom: 2021-01-02}")),
+            svar = listOf(Svar(verdi = "{fom:2025-01-01,tom:2025-01-02}")),
         ),
         Sporsmal(
             tag = SporsmalTag.HAR_FORSIKRING,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
     )
 
@@ -112,7 +111,7 @@ fun lagSporsmalSvarFiskerMedLottOgHyre() =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
@@ -145,17 +144,17 @@ fun lagSporsmalSvarFiskerMedLottOgHyre() =
         Sporsmal(
             tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
+            tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.EGENMELINGSDAGER,
             svartype = Svartype.DATOER,
-            svar = listOf(Svar(verdi = "2021-01-01"), Svar(verdi = "2021-01-02")),
+            svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),
     )
 
@@ -164,7 +163,7 @@ fun lagSporsmalSvarSelvstendigNaringsdrivende(arbeidssituasjon: String = "NAERIN
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
@@ -174,17 +173,17 @@ fun lagSporsmalSvarSelvstendigNaringsdrivende(arbeidssituasjon: String = "NAERIN
         Sporsmal(
             tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.EGENMELDINGSPERIODER,
             svartype = Svartype.PERIODER,
-            svar = listOf(Svar(verdi = "{fom: 2021-01-01, tom: 2021-01-02}")),
+            svar = listOf(Svar(verdi = "{fom:2025-01-01,tom:2025-01-02}")),
         ),
         Sporsmal(
             tag = SporsmalTag.HAR_FORSIKRING,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
     )
 
@@ -197,7 +196,7 @@ fun lagSporsmalSvarArbeidsledig(arbeidssituasjon: String = "ARBEIDSLEDIG") =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
@@ -218,7 +217,7 @@ fun lagSporsmalSvarArbeidstaker() =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
@@ -233,17 +232,17 @@ fun lagSporsmalSvarArbeidstaker() =
         Sporsmal(
             tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.EGENMELINGSDAGER,
             svartype = Svartype.DATOER,
-            svar = listOf(Svar(verdi = "2021-01-01"), Svar(verdi = "2021-01-02")),
+            svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),
     )
 
@@ -252,7 +251,7 @@ fun lagSporsmalSvarAnnet() =
         Sporsmal(
             tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svartype = Svartype.JA_NEI,
-            svar = listOf(Svar(verdi = YesOrNo.YES.name)),
+            svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
             tag = SporsmalTag.ARBEIDSSITUASJON,
