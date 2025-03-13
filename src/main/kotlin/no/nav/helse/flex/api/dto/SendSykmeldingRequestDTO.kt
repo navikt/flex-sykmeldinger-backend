@@ -15,6 +15,7 @@ data class SendSykmeldingRequestDTO(
     val egenmeldingsperioder: List<EgenmeldingsperiodeDTO>?,
     val fisker: Fisker?,
     val harBruktEgenmelding: YesOrNo?,
+    val harBruktEgenmeldingsdager: YesOrNo?,
     val harForsikring: YesOrNo?,
     val uriktigeOpplysninger: List<UriktigeOpplysning>?,
 ) {
@@ -110,7 +111,7 @@ data class SendSykmeldingRequestDTO(
                 Sporsmal(
                     tag = SporsmalTag.EGENMELDINGSPERIODER,
                     svartype = Svartype.PERIODER,
-                    svar = it.map { periode -> Svar(verdi = "${periode.fom} - ${periode.tom}") },
+                    svar = it.map { periode -> Svar(verdi = "{fom:${periode.fom}, tom: ${periode.tom}}") },
                 ),
             )
         }
@@ -140,6 +141,15 @@ data class SendSykmeldingRequestDTO(
             sporsmal.add(
                 Sporsmal(
                     tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
+                    svartype = Svartype.JA_NEI,
+                    svar = konverterJaNeiSvar(it),
+                ),
+            )
+        }
+        harBruktEgenmeldingsdager?.let {
+            sporsmal.add(
+                Sporsmal(
+                    tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
                     svartype = Svartype.JA_NEI,
                     svar = konverterJaNeiSvar(it),
                 ),
