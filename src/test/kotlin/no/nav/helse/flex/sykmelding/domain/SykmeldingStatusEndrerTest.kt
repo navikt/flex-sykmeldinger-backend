@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -113,6 +114,50 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             }.shouldThrow(UgyldigSykmeldingStatusException::class)
                 .exceptionMessage
                 .shouldContainIgnoringCase("egenmeldt")
+        }
+
+        @Test
+        fun `burde legge til arbeidstakerInfo på hendelse`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                )
+
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "fnr",
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jorgnr",
+                    orgnavn = "Orgnavn",
+                ),
+            )
+
+            narmesteLederRepository.save(
+                lagNarmesteLeder(
+                    brukerFnr = "fnr",
+                    orgnummer = "orgnr",
+                    narmesteLederNavn = "Navn",
+                ),
+            )
+
+            val endretSykmelding =
+                sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
+                    sykmelding = sykmelding,
+                    identer = PersonIdenter("fnr"),
+                    arbeidsgiverOrgnummer = "orgnr",
+                    sporsmalSvar = null,
+                )
+
+            val arbeidstakerInfo = endretSykmelding.sisteStatus().arbeidstakerInfo.shouldNotBeNull()
+            arbeidstakerInfo.arbeidsgiver
+                .also { it.orgnummer `should be equal to` "orgnr" }
+                .also { it.juridiskOrgnummer `should be equal to` "jorgnr" }
+                .also { it.orgnavn `should be equal to` "Orgnavn" }
+                .also {
+                    it.narmesteLeder
+                        .shouldNotBeNull()
+                        .navn `should be equal to` "Navn"
+                }
         }
     }
 

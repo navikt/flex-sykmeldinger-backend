@@ -1,8 +1,8 @@
 package no.nav.helse.flex.producers.sykmeldingstatus
 
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
-import no.nav.helse.flex.sykmelding.domain.Arbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.ArbeidstakerInfo
+import no.nav.helse.flex.testdata.lagArbeidsgiver
+import no.nav.helse.flex.testdata.lagArbeidstakerInfo
 import no.nav.helse.flex.utils.objectMapper
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEqualTo
@@ -86,13 +86,10 @@ class SporsmalsKafkaDTOKonvertererTest {
             )
 
         val arbeidstakerInfo =
-            ArbeidstakerInfo(
+            lagArbeidstakerInfo(
                 arbeidsgiver =
-                    Arbeidsgiver(
-                        orgnummer = "123456789",
-                        juridiskOrgnummer = "",
-                        orgnavn = "",
-                        // aktivtArbeidsforhold = true,
+                    lagArbeidsgiver(
+                        erAktivtArbeidsforhold = true,
                     ),
             )
 
@@ -151,14 +148,10 @@ class SporsmalsKafkaDTOKonvertererTest {
             )
 
         val arbeidstakerInfo =
-            ArbeidstakerInfo(
+            lagArbeidstakerInfo(
                 arbeidsgiver =
-                    Arbeidsgiver(
-                        orgnummer = "132456789",
-                        juridiskOrgnummer = "",
-                        orgnavn = "",
-//                    aktivtArbeidsforhold = false,
-//                    naermesteLeder = null,
+                    lagArbeidsgiver(
+                        erAktivtArbeidsforhold = false,
                     ),
             )
 

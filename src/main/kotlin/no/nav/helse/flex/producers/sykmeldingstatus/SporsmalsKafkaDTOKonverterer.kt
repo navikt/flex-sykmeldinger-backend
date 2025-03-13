@@ -2,9 +2,12 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.domain.ArbeidstakerInfo
+import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 
 class SporsmalsKafkaDTOKonverterer {
+    private val logger = logger()
+
     fun konverterTilSporsmals(
         brukerSvar: BrukerSvarKafkaDTO,
         arbeidstakerInfo: ArbeidstakerInfo? = null,
@@ -80,33 +83,34 @@ class SporsmalsKafkaDTOKonverterer {
         arbeidstakerInfo: ArbeidstakerInfo?,
         sykmeldingId: String? = null,
     ): SporsmalKafkaDTO? {
-        // TODO: Trenger erAktivtArbeidsforhold
-//        if (arbeidstakerInfo != null && arbeidstakerInfo.arbeidsgiver.aktivtArbeidsforhold == false) {
-//            logger.info(
-//                "Ber ikke om ny nærmeste leder for arbeidsforhold som ikke er aktivt: $sykmeldingId",
-//            )
-//            return SporsmalKafkaDTO(
-//                tekst = "Skal finne ny nærmeste leder",
-//                shortName = ShortNameKafkaDTO.NY_NARMESTE_LEDER,
-//                svartype = SvartypeKafkaDTO.JA_NEI,
-//                svar = "NEI",
-//            )
-//        }
+        if (arbeidstakerInfo != null && !arbeidstakerInfo.arbeidsgiver.erAktivtArbeidsforhold) {
+            logger.info(
+                "Ber ikke om ny nærmeste leder for arbeidsforhold som ikke er aktivt: $sykmeldingId",
+            )
+            return SporsmalKafkaDTO(
+                tekst = "Skal finne ny nærmeste leder",
+                shortName = ShortNameKafkaDTO.NY_NARMESTE_LEDER,
+                svartype = SvartypeKafkaDTO.JA_NEI,
+                svar = "NEI",
+            )
+        }
 
         if (riktigNarmesteLeder != null) {
             return SporsmalKafkaDTO(
                 tekst = riktigNarmesteLeder.sporsmaltekst,
                 shortName = ShortNameKafkaDTO.NY_NARMESTE_LEDER,
                 svartype = SvartypeKafkaDTO.JA_NEI,
-                svar =
-                    when (riktigNarmesteLeder.svar) {
-                        JaEllerNeiKafkaDTO.JA -> "JA"
-                        JaEllerNeiKafkaDTO.NEI -> "NEI"
-                    },
+                svar = riktigNarmesteLeder.svar.motsattSvar().name,
             )
         }
         return null
     }
+
+    private fun JaEllerNeiKafkaDTO.motsattSvar(): JaEllerNeiKafkaDTO =
+        when (this) {
+            JaEllerNeiKafkaDTO.JA -> JaEllerNeiKafkaDTO.NEI
+            JaEllerNeiKafkaDTO.NEI -> JaEllerNeiKafkaDTO.JA
+        }
 
     private fun BrukerSvarKafkaDTO.tilForsikringSporsmal(): SporsmalKafkaDTO? {
         if (harForsikring != null) {

@@ -14,8 +14,8 @@ class SykmeldingStatusKafkaDTOKonverterer(
         val sporsmols =
             brukerSvar?.let {
                 sporsmalsKafkaDTOKonverterer.konverterTilSporsmals(
-                    it,
-                    sisteHendelse.arbeidstakerInfo,
+                    brukerSvar = it,
+                    arbeidstakerInfo = sisteHendelse.arbeidstakerInfo,
                     sykmeldingId = sykmelding.sykmeldingId,
                 )
             }

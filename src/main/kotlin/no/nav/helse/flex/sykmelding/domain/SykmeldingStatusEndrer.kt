@@ -1,9 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.function.Supplier
@@ -11,7 +11,7 @@ import java.util.function.Supplier
 @Service
 class SykmeldingStatusEndrer(
     private val nowFactory: Supplier<Instant>,
-    private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val virksomhetHenterService: VirksomhetHenterService,
 ) {
     private val logger = logger()
 
@@ -49,9 +49,14 @@ class SykmeldingStatusEndrer(
 
         val arbeidstakerInfo: ArbeidstakerInfo? =
             if (arbeidsgiverOrgnummer != null) {
-                val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
+                val arbeidsforhold =
+                    virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
+                        identer = identer,
+                        periode = sykmelding.fom to sykmelding.tom,
+                    )
                 val valgtArbeidsforhold = arbeidsforhold.find { it.orgnummer == arbeidsgiverOrgnummer }
                 if (valgtArbeidsforhold == null) {
+                    // TODO: Exceptions should be mapped to a HTTP error code
                     throw IllegalArgumentException("Fant ikke arbeidsgiver med orgnummer $arbeidsgiverOrgnummer")
                 }
                 ArbeidstakerInfo(
@@ -59,7 +64,17 @@ class SykmeldingStatusEndrer(
                         Arbeidsgiver(
                             orgnummer = valgtArbeidsforhold.orgnummer,
                             juridiskOrgnummer = valgtArbeidsforhold.juridiskOrgnummer,
-                            orgnavn = valgtArbeidsforhold.orgnavn,
+                            orgnavn = valgtArbeidsforhold.navn,
+                            erAktivtArbeidsforhold = valgtArbeidsforhold.aktivtArbeidsforhold,
+                            narmesteLeder =
+                                valgtArbeidsforhold.naermesteLeder?.let {
+                                    NarmesteLeder(
+                                        navn =
+                                            it.narmesteLederNavn
+                                                // TODO: Exceptions should be mapped to a HTTP error code
+                                                ?: throw IllegalArgumentException("Mangler narmeste leder navn"),
+                                    )
+                                },
                         ),
                 )
             } else {
