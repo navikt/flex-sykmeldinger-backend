@@ -27,13 +27,16 @@ class SykmeldingStatusKafkaDTOKonverterer(
             // For bakoverkompatabilitet. Consumere burde bruke `brukerSvar`
             sporsmals = sporsmols,
             brukerSvar = brukerSvar,
-            erSvarOppdatering = null,
+            // TODO: Legg til når tidligereArbeidsgiver ligger i sykmeldingHendelse
             tidligereArbeidsgiver = null,
+            // Dette ser ut til å bli ignorert
+            erSvarOppdatering = null,
         )
     }
 
-    internal fun konverterStatusEvent(hendelseStatus: HendelseStatus): String =
-        when (hendelseStatus) {
+    internal fun konverterStatusEvent(hendelseStatus: HendelseStatus): String {
+        // TODO: Lurer på om dette er feil, se neders her: https://github.com/navikt/sykmeldinger-backend/blob/f50854794f617de634cc7972bfd4764983a3c20e/src/main/kotlin/no/nav/syfo/sykmeldingstatus/SykmeldingStatusService.kt#L392
+        return when (hendelseStatus) {
             HendelseStatus.APEN -> StatusEventKafkaDTO.APEN
             HendelseStatus.AVBRUTT -> StatusEventKafkaDTO.AVBRUTT
             HendelseStatus.SENDT_TIL_NAV -> StatusEventKafkaDTO.BEKREFTET
@@ -41,6 +44,7 @@ class SykmeldingStatusKafkaDTOKonverterer(
             HendelseStatus.BEKREFTET_AVVIST -> StatusEventKafkaDTO.BEKREFTET
             HendelseStatus.UTGATT -> StatusEventKafkaDTO.UTGATT
         }
+    }
 
     internal fun konverterArbeidsgiver(arbeidstakerInfo: ArbeidstakerInfo): ArbeidsgiverStatusKafkaDTO {
         val arbeidsgiver = arbeidstakerInfo.arbeidsgiver
