@@ -2,6 +2,7 @@ package no.nav.helse.flex.api.dto
 
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 
 data class SendSykmeldingRequestDTO(
@@ -101,7 +102,7 @@ data class SendSykmeldingRequestDTO(
                 Sporsmal(
                     tag = SporsmalTag.EGENMELDINGSPERIODER,
                     svartype = Svartype.PERIODER,
-                    svar = it.map { periode -> Svar(verdi = "{fom:${periode.fom},tom:${periode.tom}}") },
+                    svar = it.map { periode -> Svar(verdi = objectMapper.writeValueAsString(periode)) },
                 ),
             )
         }

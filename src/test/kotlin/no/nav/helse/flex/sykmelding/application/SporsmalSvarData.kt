@@ -97,7 +97,7 @@ fun lagSporsmalSvarFiskerMedLott() =
         Sporsmal(
             tag = SporsmalTag.EGENMELDINGSPERIODER,
             svartype = Svartype.PERIODER,
-            svar = listOf(Svar(verdi = "{fom:2025-01-01,tom:2025-01-02}")),
+            svar = listOf(Svar(verdi = """{"fom":"2025-01-01","tom":"2025-01-02"}""")),
         ),
         Sporsmal(
             tag = SporsmalTag.HAR_FORSIKRING,
@@ -178,7 +178,7 @@ fun lagSporsmalSvarSelvstendigNaringsdrivende(arbeidssituasjon: String = "NAERIN
         Sporsmal(
             tag = SporsmalTag.EGENMELDINGSPERIODER,
             svartype = Svartype.PERIODER,
-            svar = listOf(Svar(verdi = "{fom:2025-01-01,tom:2025-01-02}")),
+            svar = listOf(Svar(verdi = """{"fom":"2025-01-01","tom":"2025-01-02"}""")),
         ),
         Sporsmal(
             tag = SporsmalTag.HAR_FORSIKRING,
