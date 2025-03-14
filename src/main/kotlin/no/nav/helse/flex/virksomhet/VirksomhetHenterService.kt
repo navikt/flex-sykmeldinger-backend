@@ -4,7 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.config.getDagensDatoINorge
+import no.nav.helse.flex.config.tilNorgeLocalDate
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
@@ -27,7 +27,7 @@ class VirksomhetHenterService(
             sammenstillVirksomheter(
                 arbeidsforhold = arbeidsforhold,
                 narmesteLedere = narmesteLedere,
-                idagProvider = nowFactory::getDagensDatoINorge,
+                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
             )
 
         return virksomheter
@@ -46,7 +46,7 @@ class VirksomhetHenterService(
             sammenstillVirksomheter(
                 arbeidsforholdInnenPeriode,
                 narmesteLedere = narmesteLedere,
-                idagProvider = nowFactory::getDagensDatoINorge,
+                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
             )
 
         return virksomheter

@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Bean
 @TestConfiguration
 class FakesTestConfig {
     @Bean
+    fun nowFactory(): NowFactoryFake = NowFactoryFake()
+
+    @Bean
     fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
 
     @Bean

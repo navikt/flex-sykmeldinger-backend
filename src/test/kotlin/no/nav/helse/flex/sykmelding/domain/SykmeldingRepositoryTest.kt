@@ -172,12 +172,14 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             lagSykmeldingHendelse(
                 status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
                 arbeidstakerInfo =
-                    ArbeidstakerInfo(
+                    lagArbeidstakerInfo(
                         arbeidsgiver =
-                            Arbeidsgiver(
+                            lagArbeidsgiver(
                                 orgnummer = "orgnummer",
                                 juridiskOrgnummer = "juridiskOrgnummer",
                                 orgnavn = "orgnavn",
+                                erAktivtArbeidsforhold = true,
+                                narmesteLeder = NarmesteLeder(navn = "narmesteLederNavn"),
                             ),
                     ),
             )
@@ -195,6 +197,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     orgnummer = "orgnummer",
                     juridiskOrgnummer = "juridiskOrgnummer",
                     orgnavn = "orgnavn",
+                    erAktivtArbeidsforhold = true,
+                    narmesteLeder = NarmesteLeder(navn = "narmesteLederNavn"),
                 ),
             )
     }

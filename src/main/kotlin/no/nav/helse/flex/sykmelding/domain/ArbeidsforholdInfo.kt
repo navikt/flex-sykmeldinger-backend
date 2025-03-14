@@ -8,4 +8,10 @@ data class Arbeidsgiver(
     val orgnummer: String,
     val juridiskOrgnummer: String,
     val orgnavn: String,
+    val erAktivtArbeidsforhold: Boolean,
+    val narmesteLeder: NarmesteLeder?,
+)
+
+data class NarmesteLeder(
+    val navn: String,
 )

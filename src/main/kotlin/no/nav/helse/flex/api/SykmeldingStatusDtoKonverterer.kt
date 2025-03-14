@@ -107,9 +107,9 @@ class SykmeldingStatusDtoKonverterer {
             egenmeldingsdager =
                 hentSporsmal(
                     sporsmal,
-                    SporsmalTag.EGENMELINGSDAGER,
+                    SporsmalTag.EGENMELDINGSDAGER,
                 )?.tilSvarListe { LocalDate.parse(it) },
-            harBruktEgenmeldingsdager = hentSporsmal(sporsmal, SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER)?.tilJaNeiSvar(),
+            harBruktEgenmeldingsdager = hentSporsmal(sporsmal, SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER)?.tilJaNeiSvar(),
             fisker =
                 hentSporsmal(sporsmal, SporsmalTag.FISKER)?.let { sp ->
                     FiskerSvar(

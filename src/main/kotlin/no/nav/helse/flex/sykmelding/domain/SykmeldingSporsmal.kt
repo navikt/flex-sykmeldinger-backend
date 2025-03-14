@@ -1,5 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.utils.objectMapper
+import java.time.LocalDate
+
 data class Sporsmal(
     val id: String? = null,
     val tag: SporsmalTag,
@@ -10,7 +14,17 @@ data class Sporsmal(
 ) {
     val forsteSvarVerdi: String?
         get() = svar.firstOrNull()?.verdi
+
+    fun perioderSvar(): List<PeriodeSvar> {
+        require(svartype == Svartype.PERIODER) { "Spørsmålet er ikke av typen PERIODER" }
+        return svar.map { objectMapper.readValue(it.verdi) }
+    }
 }
+
+data class PeriodeSvar(
+    val fom: LocalDate,
+    val tom: LocalDate,
+)
 
 data class Svar(
     val id: String? = null,
@@ -28,8 +42,8 @@ enum class SporsmalTag {
     HAR_BRUKT_EGENMELDING,
     EGENMELDINGSPERIODER,
     HAR_FORSIKRING,
-    EGENMELINGSDAGER,
-    HAR_BRUKT_EGENMELINGSDAGER,
+    EGENMELDINGSDAGER,
+    HAR_BRUKT_EGENMELDINGSDAGER,
     FISKER,
     FISKER__BLAD,
     FISKER__LOTT_OG_HYRE,
