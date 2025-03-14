@@ -13,7 +13,7 @@ class SykmeldingStatusEndrer(
     private val nowFactory: Supplier<Instant>,
     private val virksomhetHenterService: VirksomhetHenterService,
 ) {
-    private val logger = logger()
+    private val log = logger()
 
     fun endreStatusTilSendtTilArbeidsgiver(
         sykmelding: Sykmelding,
@@ -129,6 +129,7 @@ class SykmeldingStatusEndrer(
             SykmeldingHendelse(
                 status = HendelseStatus.SENDT_TIL_NAV,
                 opprettet = nowFactory.get(),
+                sporsmalSvar = sporsmalSvar,
                 // tidligereArbeidsgiver = tidligereArbeidsgiver,
             )
 

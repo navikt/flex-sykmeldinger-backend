@@ -2,14 +2,11 @@ package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -93,12 +90,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarArbeidstaker(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 6
+                }
         }
 
         @Test
@@ -116,12 +117,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarArbeidsledig(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 3
+                }
         }
 
         @Test
@@ -139,12 +144,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarPermittert(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 3
+                }
         }
 
         @Test
@@ -162,12 +171,20 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarFiskerMedLott(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 6
+                    hendelse.sporsmalSvar
+                        ?.find { it.tag == SporsmalTag.FISKER }
+                        ?.undersporsmal
+                        ?.size `should be equal to` 2
+                }
         }
 
         @Test
@@ -187,12 +204,20 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarFiskerMedHyre(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 7
+                    hendelse.sporsmalSvar
+                        ?.find { it.tag == SporsmalTag.FISKER }
+                        ?.undersporsmal
+                        ?.size `should be equal to` 2
+                }
         }
 
         @Test
@@ -212,12 +237,20 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarFiskerMedLottOgHyre(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 7
+                    hendelse.sporsmalSvar
+                        ?.find { it.tag == SporsmalTag.FISKER }
+                        ?.undersporsmal
+                        ?.size `should be equal to` 2
+                }
         }
 
         @Test
@@ -235,12 +268,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarJordbruker(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                }
         }
 
         @Test
@@ -258,12 +295,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarSelvstendigNaringsdrivende(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                }
         }
 
         @Test
@@ -281,12 +322,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarFrilanser(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                }
         }
 
         @Test
@@ -304,12 +349,16 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     arbeidssituasjonBrukerInfo = brukerInfo,
-                    sporsmalSvar = null,
+                    sporsmalSvar = lagSporsmalSvarAnnet(),
                 )
 
             sykmelding
                 .sisteStatus()
-                .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                .let { hendelse ->
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+                    hendelse.sporsmalSvar.`should not be null`()
+                    hendelse.sporsmalSvar?.size `should be equal to` 2
+                }
         }
     }
 
