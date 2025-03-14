@@ -1,6 +1,7 @@
 package no.nav.helse.flex.producers.sykmelding
 
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
+import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 
 interface SykmeldingProducer {
@@ -9,5 +10,9 @@ interface SykmeldingProducer {
 
 @Component
 class SykmeldingKafkaProducer : SykmeldingProducer {
-    override fun sendSykmelding(sykmelding: Sykmelding): Unit = throw NotImplementedError("sendSykmelding is not implemented")
+    val log = logger()
+
+    override fun sendSykmelding(sykmelding: Sykmelding) {
+        log.warn("Sykmeldingen ${sykmelding.sykmeldingId} blir ikke sendt på kafka, det er ikke implementert")
+    }
 }
