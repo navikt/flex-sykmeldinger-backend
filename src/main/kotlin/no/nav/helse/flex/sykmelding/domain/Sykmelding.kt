@@ -55,6 +55,7 @@ data class SykmeldingHendelse(
     val opprettet: Instant,
 )
 
+// todo team sykmelding, har status_sendt = send til arbeidsgiver
 enum class HendelseStatus {
     APEN,
     AVBRUTT,
