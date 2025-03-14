@@ -48,12 +48,12 @@ fun lagSporsmalSvarFiskerMedHyre() =
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
+            tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
             svartype = Svartype.JA_NEI,
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.EGENMELINGSDAGER,
+            tag = SporsmalTag.EGENMELDINGSDAGER,
             svartype = Svartype.DATOER,
             svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),
@@ -147,12 +147,12 @@ fun lagSporsmalSvarFiskerMedLottOgHyre() =
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
+            tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
             svartype = Svartype.JA_NEI,
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.EGENMELINGSDAGER,
+            tag = SporsmalTag.EGENMELDINGSDAGER,
             svartype = Svartype.DATOER,
             svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),
@@ -235,12 +235,12 @@ fun lagSporsmalSvarArbeidstaker() =
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
+            tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
             svartype = Svartype.JA_NEI,
             svar = listOf(Svar(verdi = "JA")),
         ),
         Sporsmal(
-            tag = SporsmalTag.EGENMELINGSDAGER,
+            tag = SporsmalTag.EGENMELDINGSDAGER,
             svartype = Svartype.DATOER,
             svar = listOf(Svar(verdi = "2025-01-01"), Svar(verdi = "2025-01-02")),
         ),

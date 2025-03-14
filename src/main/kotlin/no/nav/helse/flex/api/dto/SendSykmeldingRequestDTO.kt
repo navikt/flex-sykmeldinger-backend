@@ -89,7 +89,7 @@ data class SendSykmeldingRequestDTO(
         egenmeldingsdager?.let {
             sporsmal.add(
                 Sporsmal(
-                    tag = SporsmalTag.EGENMELINGSDAGER,
+                    tag = SporsmalTag.EGENMELDINGSDAGER,
                     svartype = Svartype.DATOER,
                     svar = it.map { dag -> Svar(verdi = dag.toString()) },
                 ),
@@ -139,7 +139,7 @@ data class SendSykmeldingRequestDTO(
         harEgenmeldingsdager?.let {
             sporsmal.add(
                 Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELINGSDAGER,
+                    tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
                     svartype = Svartype.JA_NEI,
                     svar = konverterJaNeiSvar(it),
                 ),
