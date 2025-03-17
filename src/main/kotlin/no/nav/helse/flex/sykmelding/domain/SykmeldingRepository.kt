@@ -34,11 +34,10 @@ class SykmeldingRepository(
 ) : ISykmeldingRepository {
     @Transactional
     override fun save(sykmelding: Sykmelding): Sykmelding {
-        val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
         val hendelser = sykmelding.hendelser
 
         val statusDbRecords = SykmeldingHendelseDbRecord.mapFraHendelser(hendelser, sykmelding.sykmeldingId)
-        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
+        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding)
 
         val lagretSykmeldingDbRecord = sykmeldingDbRepository.save(sykmeldingDbRecord)
         val lagredeStatusDbRecords = sykmeldingHendelseDbRepository.saveAll(statusDbRecords)
@@ -137,18 +136,15 @@ data class SykmeldingDbRecord(
     }
 
     companion object {
-        fun mapFraSykmelding(
-            sykmelding: Sykmelding,
-            sykmeldingGrunnlag: ISykmeldingGrunnlag,
-        ): SykmeldingDbRecord =
+        fun mapFraSykmelding(sykmelding: Sykmelding): SykmeldingDbRecord =
             SykmeldingDbRecord(
                 id = sykmelding.databaseId,
                 sykmeldingId = sykmelding.sykmeldingId,
-                fnr = sykmeldingGrunnlag.pasient.fnr,
+                fnr = sykmelding.pasientFnr,
                 sykmelding =
                     PGobject().apply {
                         type = "json"
-                        value = sykmeldingGrunnlag.serialisertTilString()
+                        value = sykmelding.sykmeldingGrunnlag.serialisertTilString()
                     },
                 meldingsinformasjon =
                     PGobject().apply {
