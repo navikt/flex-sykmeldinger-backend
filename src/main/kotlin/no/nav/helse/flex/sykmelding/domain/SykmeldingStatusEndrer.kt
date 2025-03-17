@@ -89,7 +89,7 @@ class SykmeldingStatusEndrer(
                 arbeidstakerInfo = arbeidstakerInfo,
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilSendtTilNav(
@@ -133,7 +133,7 @@ class SykmeldingStatusEndrer(
                 // tidligereArbeidsgiver = tidligereArbeidsgiver,
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilBekreftetAvvist(sykmelding: Sykmelding): Sykmelding {
@@ -167,7 +167,7 @@ class SykmeldingStatusEndrer(
                 opprettet = nowFactory.get(),
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilAvbrutt(sykmelding: Sykmelding): Sykmelding {
@@ -204,7 +204,7 @@ class SykmeldingStatusEndrer(
                 opprettet = nowFactory.get(),
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilApen(sykmelding: Sykmelding): Sykmelding {
@@ -216,7 +216,7 @@ class SykmeldingStatusEndrer(
         if (sisteHendelse.status == HendelseStatus.APEN) {
             return sykmelding
         }
-        sykmelding.leggTilStatus(
+        sykmelding.leggTilHendelse(
             SykmeldingHendelse(
                 status = HendelseStatus.APEN,
                 opprettet = nowFactory.get(),
@@ -231,7 +231,7 @@ class SykmeldingStatusEndrer(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.AVBRUTT),
         )
-        sykmelding.leggTilStatus(
+        sykmelding.leggTilHendelse(
             SykmeldingHendelse(
                 status = HendelseStatus.UTGATT,
                 opprettet = nowFactory.get(),

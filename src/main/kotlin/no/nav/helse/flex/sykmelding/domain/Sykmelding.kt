@@ -39,7 +39,7 @@ data class Sykmelding(
 
     fun sisteHendelse(): SykmeldingHendelse = statuser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 
-    fun leggTilStatus(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
+    fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
             statuser = this.statuser + sykmeldingHendelse,
             oppdatert = sykmeldingHendelse.opprettet,

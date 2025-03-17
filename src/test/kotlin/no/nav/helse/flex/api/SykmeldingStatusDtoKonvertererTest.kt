@@ -41,7 +41,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
         fra: HendelseStatus,
         til: String,
     ) {
-        val status =
+        val hendelse =
             SykmeldingHendelse(
                 status = fra,
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
@@ -56,7 +56,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 brukerSvar = null,
             )
 
-        sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(status) `should be equal to` forventetStatus
+        sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(hendelse) `should be equal to` forventetStatus
     }
 
     @Test

@@ -23,7 +23,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
     @Test
     fun `burde ha riktig timestamp`() {
         val sykmelding =
-            lagSykmelding().leggTilStatus(
+            lagSykmelding().leggTilHendelse(
                 lagSykmeldingHendelse(opprettet = Instant.parse("2021-01-01T00:00:00Z")),
             )
         val dto = konverterer.konverter(sykmelding)
@@ -41,7 +41,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
             HendelseStatus.BEKREFTET_AVVIST to "BEKREFTET",
             HendelseStatus.UTGATT to "UTGATT",
         )) {
-            val sykmelding = lagSykmelding().leggTilStatus(SykmeldingHendelse(status = sykmeldingStatus, opprettet = Instant.now()))
+            val sykmelding = lagSykmelding().leggTilHendelse(SykmeldingHendelse(status = sykmeldingStatus, opprettet = Instant.now()))
             val dto = konverterer.konverter(sykmelding)
 
             dto.statusEvent `should be equal to` expectedDtoStatusEvent
@@ -53,7 +53,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
         val brukerSvarKonvertererSpy = spy(BrukerSvarKafkaDTOKonverterer())
 
         val konverterer = SykmeldingStatusKafkaDTOKonverterer(brukerSvarKonvertererSpy)
-        val sykmelding = lagSykmelding().leggTilStatus(lagSykmeldingHendelse(sporsmalSvar = emptyList()))
+        val sykmelding = lagSykmelding().leggTilHendelse(lagSykmeldingHendelse(sporsmalSvar = emptyList()))
         runCatching {
             konverterer.konverter(sykmelding)
         }
@@ -72,7 +72,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
         val sykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "id"),
-            ).leggTilStatus(lagSykmeldingHendelse(sporsmalSvar = sporsmal, arbeidstakerInfo = arbeidstakerInfo))
+            ).leggTilHendelse(lagSykmeldingHendelse(sporsmalSvar = sporsmal, arbeidstakerInfo = arbeidstakerInfo))
 
         konverterer.konverter(sykmelding)
 
