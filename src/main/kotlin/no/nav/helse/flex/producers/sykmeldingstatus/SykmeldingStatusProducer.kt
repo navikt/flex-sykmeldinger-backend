@@ -1,5 +1,6 @@
 package no.nav.helse.flex.producers.sykmeldingstatus
 
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
@@ -19,6 +20,7 @@ interface SykmeldingStatusProducer {
 @Component
 class SykmeldingStatusKafkaProducer(
     private val meldingProducer: Producer<String, String>,
+    private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {
     companion object {
         const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
@@ -31,6 +33,9 @@ class SykmeldingStatusKafkaProducer(
         fnr: String,
         sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
     ) {
+        if (environmentToggles.isProduction()) {
+            return
+        }
         val sykmeldingId = sykmelingstatusDTO.sykmeldingId
         logger.info(
             "Skriver statusendring ${sykmelingstatusDTO.statusEvent} for sykmelding med id $sykmeldingId til topic på aiven",
