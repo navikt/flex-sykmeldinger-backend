@@ -18,6 +18,9 @@ class FakesTestConfig {
     fun nowFactory(): NowFactoryFake = NowFactoryFake()
 
     @Bean
+    fun environmentToggles(): EnvironmentTogglesFake = EnvironmentTogglesFake()
+
+    @Bean
     fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
 
     @Bean
