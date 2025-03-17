@@ -35,7 +35,7 @@ class SykmeldingRepository(
     @Transactional
     override fun save(sykmelding: Sykmelding): Sykmelding {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
-        val statuser = sykmelding.statuser
+        val statuser = sykmelding.hendelser
 
         val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
         val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
@@ -87,7 +87,7 @@ class SykmeldingRepository(
             sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
             meldingsinformasjon = dbRecord.mapTilMeldingsinformasjon(),
             validation = dbRecord.mapTilValidation(),
-            statuser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
+            hendelser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
             opprettet = dbRecord.opprettet,
             oppdatert = dbRecord.oppdatert,
         )

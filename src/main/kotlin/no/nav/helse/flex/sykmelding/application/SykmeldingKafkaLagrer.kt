@@ -34,7 +34,7 @@ class SykmeldingKafkaLagrer(
             sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
             meldingsinformasjon = sykmeldingKafkaRecord.metadata,
             validation = sykmeldingKafkaRecord.validation,
-            statuser =
+            hendelser =
                 listOf(
                     SykmeldingHendelse(
                         status = HendelseStatus.APEN,

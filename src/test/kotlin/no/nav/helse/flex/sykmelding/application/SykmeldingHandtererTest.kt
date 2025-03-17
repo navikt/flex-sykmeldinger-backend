@@ -48,7 +48,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
-                .also { it.statuser shouldHaveSize 2 }
+                .also { it.hendelser shouldHaveSize 2 }
         }
 
         @Test
@@ -380,7 +380,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
-                .also { it.statuser shouldHaveSize 2 }
+                .also { it.hendelser shouldHaveSize 2 }
                 .also { it.sisteHendelse().status `should be equal to` HendelseStatus.AVBRUTT }
         }
 
@@ -425,7 +425,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingRepository
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
-                .also { it.statuser shouldHaveSize 2 }
+                .also { it.hendelser shouldHaveSize 2 }
                 .also { it.sisteHendelse().status `should be equal to` HendelseStatus.BEKREFTET_AVVIST }
         }
 

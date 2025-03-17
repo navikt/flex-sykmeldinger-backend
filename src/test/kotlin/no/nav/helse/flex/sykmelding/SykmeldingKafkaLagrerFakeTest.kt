@@ -59,8 +59,8 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding.shouldNotBeNull()
-        sykmelding.statuser.size `should be equal to` 1
-        val status = sykmelding.statuser[0]
+        sykmelding.hendelser.size `should be equal to` 1
+        val status = sykmelding.hendelser[0]
         status.status `should be equal to` HendelseStatus.APEN
     }
 

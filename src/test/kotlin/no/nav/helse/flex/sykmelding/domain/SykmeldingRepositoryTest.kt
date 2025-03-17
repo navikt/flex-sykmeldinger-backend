@@ -22,7 +22,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -44,7 +44,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -67,7 +67,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -107,7 +107,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -135,7 +135,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -161,7 +161,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.findBySykmeldingId("1").let {
             it.`should not be null`()
-            it.statuser.size == 2
+            it.hendelser.size == 2
         }
     }
 
@@ -207,7 +207,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -238,8 +238,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =
         this.copy(
             databaseId = null,
-            statuser =
-                this.statuser.map {
+            hendelser =
+                this.hendelser.map {
                     it.copy(databaseId = null)
                 },
         )

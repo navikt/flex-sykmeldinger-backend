@@ -21,7 +21,7 @@ fun lagSykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
         meldingsinformasjon = meldingsinformasjon,
         validation = validation,
-        statuser = statuser,
+        hendelser = statuser,
         opprettet = opprettet,
         oppdatert = oppdatert,
     )

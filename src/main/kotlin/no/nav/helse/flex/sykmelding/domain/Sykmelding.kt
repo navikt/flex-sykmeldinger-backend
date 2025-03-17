@@ -10,12 +10,12 @@ data class Sykmelding(
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
     val meldingsinformasjon: Meldingsinformasjon,
     val validation: ValidationResult,
-    val statuser: List<SykmeldingHendelse>,
+    val hendelser: List<SykmeldingHendelse>,
     val opprettet: Instant,
     val oppdatert: Instant,
 ) {
     init {
-        require(statuser.isNotEmpty()) { "Må ha en status" }
+        require(hendelser.isNotEmpty()) { "Må ha en status" }
         require(sykmeldingGrunnlag.aktivitet.isNotEmpty()) { "SykmeldingGrunnlag må ha minst én aktivitet" }
     }
 
@@ -37,11 +37,11 @@ data class Sykmelding(
     val erEgenmeldt: Boolean
         get() = meldingsinformasjon.type == MetadataType.EGENMELDT
 
-    fun sisteHendelse(): SykmeldingHendelse = statuser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
+    fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 
     fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
-            statuser = this.statuser + sykmeldingHendelse,
+            hendelser = this.hendelser + sykmeldingHendelse,
             oppdatert = sykmeldingHendelse.opprettet,
         )
 }
