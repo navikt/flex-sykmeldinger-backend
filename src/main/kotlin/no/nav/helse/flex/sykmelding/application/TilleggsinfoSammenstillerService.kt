@@ -14,13 +14,7 @@ class TilleggsinfoSammenstillerService(
         sporsmal: List<Sporsmal>,
         sykmelding: Sykmelding,
     ): Tilleggsinfo? {
-        val arbeidssituasjonSporsmal =
-            sporsmal.findByTag(SporsmalTag.ARBEIDSSITUASJON)
-
-        val arbeidssituasjonString =
-            arbeidssituasjonSporsmal.forsteSvarVerdi
-                ?: throw IllegalArgumentException("Mangler arbeidssituasjon svar")
-
+        val arbeidssituasjonString = sporsmal.findWithMal(SporsmalMaler.ARBEIDSSITUASJON).svar()
         val arbeidssituasjon = enumValueOf<Arbeidssituasjon>(arbeidssituasjonString)
 
         return when (arbeidssituasjon) {
@@ -47,12 +41,7 @@ class TilleggsinfoSammenstillerService(
         sykmelding: Sykmelding,
         sporsmal: List<Sporsmal>,
     ): Tilleggsinfo {
-        val arbeidsgiverOrgnummerSporsmal = sporsmal.findByTag(SporsmalTag.ARBEIDSGIVER_ORGNUMMER)
-
-        val arbeidsgiverOrgnummer =
-            arbeidsgiverOrgnummerSporsmal.forsteSvarVerdi
-                ?: throw IllegalArgumentException("Mangler arbeidsgiver orgnummer svar")
-
+        val arbeidsgiverOrgnummer = sporsmal.findWithMal(SporsmalMaler.ARBEIDSGIVER_ORGNUMMER).svar()
         val arbeidsgiver = finnArbeidsgiver(identer, sykmelding, arbeidsgiverOrgnummer)
 
         return ArbeidstakerTilleggsinfo(
