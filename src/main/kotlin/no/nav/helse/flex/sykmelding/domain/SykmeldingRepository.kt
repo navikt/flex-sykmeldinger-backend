@@ -30,18 +30,18 @@ interface ISykmeldingRepository {
 @Repository
 class SykmeldingRepository(
     private val sykmeldingDbRepository: SykmeldingDbRepository,
-    private val sykmeldingStatusDbRepository: SykmeldingStatusDbRepository,
+    private val sykmeldingHendelseDbRepository: SykmeldingHendelseDbRepository,
 ) : ISykmeldingRepository {
     @Transactional
     override fun save(sykmelding: Sykmelding): Sykmelding {
         val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag
-        val statuser = sykmelding.hendelser
+        val hendelser = sykmelding.hendelser
 
-        val statusDbRecords = SykmeldingStatusDbRecord.mapFraStatus(statuser, sykmelding.sykmeldingId)
+        val statusDbRecords = SykmeldingHendelseDbRecord.mapFraHendelser(hendelser, sykmelding.sykmeldingId)
         val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding, sykmeldingGrunnlag)
 
         val lagretSykmeldingDbRecord = sykmeldingDbRepository.save(sykmeldingDbRecord)
-        val lagredeStatusDbRecords = sykmeldingStatusDbRepository.saveAll(statusDbRecords)
+        val lagredeStatusDbRecords = sykmeldingHendelseDbRepository.saveAll(statusDbRecords)
         return mapTilSykmelding(lagretSykmeldingDbRecord, lagredeStatusDbRecords)
     }
 
@@ -50,14 +50,14 @@ class SykmeldingRepository(
         if (dbRecord == null) {
             return null
         }
-        val statusDbRecords = sykmeldingStatusDbRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
+        val statusDbRecords = sykmeldingHendelseDbRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
         return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
     override fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findAllByFnrIn(identer.alle())
         val statusDbRecords =
-            sykmeldingStatusDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
+            sykmeldingHendelseDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
         return dbRecords.map { dbRecord ->
             val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
             mapTilSykmelding(dbRecord, statusDbRecords)
@@ -66,7 +66,7 @@ class SykmeldingRepository(
 
     override fun findAll(): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findAll()
-        val statusDbRecords = sykmeldingStatusDbRepository.findAll()
+        val statusDbRecords = sykmeldingHendelseDbRepository.findAll()
         return dbRecords.map { dbRecord ->
             val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
             mapTilSykmelding(dbRecord, statusDbRecords)
@@ -74,20 +74,20 @@ class SykmeldingRepository(
     }
 
     override fun deleteAll() {
-        sykmeldingStatusDbRepository.deleteAll()
+        sykmeldingHendelseDbRepository.deleteAll()
         sykmeldingDbRepository.deleteAll()
     }
 
     private fun mapTilSykmelding(
         dbRecord: SykmeldingDbRecord,
-        statusDbRecords: Iterable<SykmeldingStatusDbRecord>,
+        statusDbRecords: Iterable<SykmeldingHendelseDbRecord>,
     ): Sykmelding =
         Sykmelding(
             databaseId = dbRecord.id,
             sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
             meldingsinformasjon = dbRecord.mapTilMeldingsinformasjon(),
             validation = dbRecord.mapTilValidation(),
-            hendelser = statusDbRecords.map(SykmeldingStatusDbRecord::mapTilStatus),
+            hendelser = statusDbRecords.map(SykmeldingHendelseDbRecord::mapTilHendelse),
             opprettet = dbRecord.opprettet,
             oppdatert = dbRecord.oppdatert,
         )
@@ -166,14 +166,14 @@ data class SykmeldingDbRecord(
     }
 }
 
-interface SykmeldingStatusDbRepository : CrudRepository<SykmeldingStatusDbRecord, String> {
-    fun findAllBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingStatusDbRecord>
+interface SykmeldingHendelseDbRepository : CrudRepository<SykmeldingHendelseDbRecord, String> {
+    fun findAllBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingHendelseDbRecord>
 
-    fun findAllBySykmeldingUuidIn(sykmeldingUuid: Collection<String>): List<SykmeldingStatusDbRecord>
+    fun findAllBySykmeldingUuidIn(sykmeldingUuid: Collection<String>): List<SykmeldingHendelseDbRecord>
 }
 
 @Table("sykmeldingstatus")
-data class SykmeldingStatusDbRecord(
+data class SykmeldingHendelseDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingUuid: String,
@@ -183,7 +183,7 @@ data class SykmeldingStatusDbRecord(
     val arbeidstakerInfo: PGobject?,
     val opprettet: Instant,
 ) {
-    fun mapTilStatus(): SykmeldingHendelse =
+    fun mapTilHendelse(): SykmeldingHendelse =
         SykmeldingHendelse(
             databaseId = this.id,
             status = this.status,
@@ -199,12 +199,12 @@ data class SykmeldingStatusDbRecord(
         )
 
     companion object {
-        fun mapFraStatus(
+        fun mapFraHendelser(
             statuser: List<SykmeldingHendelse>,
             sykmeldingId: String,
-        ): List<SykmeldingStatusDbRecord> =
+        ): List<SykmeldingHendelseDbRecord> =
             statuser.map { status ->
-                SykmeldingStatusDbRecord(
+                SykmeldingHendelseDbRecord(
                     id = status.databaseId,
                     sykmeldingUuid = sykmeldingId,
                     status = status.status,
