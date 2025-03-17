@@ -2,10 +2,11 @@ package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.fakes.SykmeldingProducerFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusProducerFake
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
@@ -18,12 +19,12 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
     lateinit var sykmeldingHandterer: SykmeldingHandterer
 
     @Autowired
-    lateinit var sykmeldingProducer: SykmeldingProducerFake
+    lateinit var sykmeldingStatusProducer: SykmeldingStatusProducerFake
 
     @AfterEach
     fun cleanUp() {
         slettDatabase()
-        sykmeldingProducer.reset()
+        sykmeldingStatusProducer.reset()
     }
 
     @Nested
@@ -68,7 +69,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 sporsmalSvar = null,
             )
 
-            sykmeldingProducer
+            sykmeldingStatusProducer
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
         }
@@ -397,12 +398,11 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 identer = PersonIdenter("fnr"),
             )
 
-            sykmeldingProducer
+            sykmeldingStatusProducer
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .sisteHendelse()
-                .status `should be equal to` HendelseStatus.AVBRUTT
+                .statusEvent `should be equal to` StatusEventKafkaDTO.AVBRUTT
         }
     }
 
@@ -443,12 +443,11 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 identer = PersonIdenter("fnr"),
             )
 
-            sykmeldingProducer
+            sykmeldingStatusProducer
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .sisteHendelse()
-                .status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
+                .statusEvent `should be equal to` StatusEventKafkaDTO.BEKREFTET
         }
     }
 }
