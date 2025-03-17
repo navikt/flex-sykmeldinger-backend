@@ -46,7 +46,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                 )
 
             endretSykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
 
@@ -148,7 +148,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                     sporsmalSvar = null,
                 )
 
-            val arbeidstakerInfo = endretSykmelding.sisteStatus().arbeidstakerInfo.shouldNotBeNull()
+            val arbeidstakerInfo = endretSykmelding.sisteHendelse().arbeidstakerInfo.shouldNotBeNull()
             arbeidstakerInfo.arbeidsgiver
                 .also { it.orgnummer `should be equal to` "orgnr" }
                 .also { it.juridiskOrgnummer `should be equal to` "jorgnr" }
@@ -181,7 +181,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                 )
 
             endretSykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.SENDT_TIL_NAV
         }
 
@@ -263,7 +263,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val endretSykmelding = sykmeldingStatusEndrer.endreStatusTilAvbrutt(sykmelding = sykmelding)
 
             endretSykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.AVBRUTT
         }
 
@@ -348,7 +348,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilBekreftetAvvist(sykmelding = sykmelding)
 
             oppdatertSykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
 

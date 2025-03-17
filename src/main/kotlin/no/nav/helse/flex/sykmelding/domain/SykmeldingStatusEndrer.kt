@@ -21,7 +21,7 @@ class SykmeldingStatusEndrer(
         arbeidsgiverOrgnummer: String? = null,
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -89,7 +89,7 @@ class SykmeldingStatusEndrer(
                 arbeidstakerInfo = arbeidstakerInfo,
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilSendtTilNav(
@@ -98,7 +98,7 @@ class SykmeldingStatusEndrer(
         arbeidsledigFraOrgnummer: String? = null,
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -133,11 +133,11 @@ class SykmeldingStatusEndrer(
                 // tidligereArbeidsgiver = tidligereArbeidsgiver,
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilBekreftetAvvist(sykmelding: Sykmelding): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -167,11 +167,11 @@ class SykmeldingStatusEndrer(
                 opprettet = nowFactory.get(),
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilAvbrutt(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         if (
             sisteHendelse.status !in
             setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT)
@@ -204,11 +204,11 @@ class SykmeldingStatusEndrer(
                 opprettet = nowFactory.get(),
             )
 
-        return sykmelding.leggTilStatus(hendelse)
+        return sykmelding.leggTilHendelse(hendelse)
     }
 
     fun endreStatusTilApen(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         require(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT),
@@ -216,7 +216,7 @@ class SykmeldingStatusEndrer(
         if (sisteHendelse.status == HendelseStatus.APEN) {
             return sykmelding
         }
-        sykmelding.leggTilStatus(
+        sykmelding.leggTilHendelse(
             SykmeldingHendelse(
                 status = HendelseStatus.APEN,
                 opprettet = nowFactory.get(),
@@ -226,12 +226,12 @@ class SykmeldingStatusEndrer(
     }
 
     fun endreStatusTilUtgatt(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         require(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.AVBRUTT),
         )
-        sykmelding.leggTilStatus(
+        sykmelding.leggTilHendelse(
             SykmeldingHendelse(
                 status = HendelseStatus.UTGATT,
                 opprettet = nowFactory.get(),

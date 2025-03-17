@@ -9,7 +9,7 @@ class SykmeldingStatusKafkaDTOKonverterer(
     private val sporsmalsKafkaDTOKonverterer: SporsmalsKafkaDTOKonverterer = SporsmalsKafkaDTOKonverterer(),
 ) {
     fun konverter(sykmelding: Sykmelding): SykmeldingStatusKafkaDTO {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         val brukerSvar = sisteHendelse.sporsmalSvar?.let(brukerSvarKonverterer::konverterTilBrukerSvar)
         val sporsmols =
             brukerSvar?.let {
@@ -22,7 +22,7 @@ class SykmeldingStatusKafkaDTOKonverterer(
         return SykmeldingStatusKafkaDTO(
             sykmeldingId = sykmelding.sykmeldingId,
             timestamp = sisteHendelse.opprettet.tilNorgeOffsetDateTime(),
-            statusEvent = konverterStatusEvent(sykmelding.sisteStatus().status),
+            statusEvent = konverterStatusEvent(sykmelding.sisteHendelse().status),
             arbeidsgiver = sisteHendelse.arbeidstakerInfo?.let(::konverterArbeidsgiver),
             // For bakoverkompatabilitet. Consumere burde bruke `brukerSvar`
             sporsmals = sporsmols,

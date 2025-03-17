@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
@@ -23,7 +22,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -45,7 +44,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -68,7 +67,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -108,7 +107,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -136,7 +135,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -154,7 +153,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1")
         val oppdatertSykmelding =
             hentetSykmelding
-                ?.leggTilStatus(
+                ?.leggTilHendelse(
                     SykmeldingHendelse(status = HendelseStatus.APEN, opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
                 ).`should not be null`()
 
@@ -162,7 +161,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.findBySykmeldingId("1").let {
             it.`should not be null`()
-            it.statuser.size == 2
+            it.hendelser.size == 2
         }
     }
 
@@ -190,7 +189,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
-        val arbeidstakerInfo = lagretSykmelding.sisteStatus().arbeidstakerInfo
+        val arbeidstakerInfo = lagretSykmelding.sisteHendelse().arbeidstakerInfo
         arbeidstakerInfo `should be equal to`
             ArbeidstakerInfo(
                 Arbeidsgiver(
@@ -208,7 +207,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             Sykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
+                hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
@@ -239,8 +238,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =
         this.copy(
             databaseId = null,
-            statuser =
-                this.statuser.map {
+            hendelser =
+                this.hendelser.map {
                     it.copy(databaseId = null)
                 },
         )

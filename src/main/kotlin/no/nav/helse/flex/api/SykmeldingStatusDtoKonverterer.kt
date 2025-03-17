@@ -14,21 +14,21 @@ import java.time.ZoneOffset
 
 @Component
 class SykmeldingStatusDtoKonverterer {
-    fun konverterSykmeldingStatus(status: SykmeldingHendelse): SykmeldingStatusDTO =
+    fun konverterSykmeldingStatus(hendelse: SykmeldingHendelse): SykmeldingStatusDTO =
         SykmeldingStatusDTO(
             // TODO
-            statusEvent = konverterHendelseStatus(status.status),
-            timestamp = status.opprettet.atOffset(ZoneOffset.UTC),
+            statusEvent = konverterHendelseStatus(hendelse.status),
+            timestamp = hendelse.opprettet.atOffset(ZoneOffset.UTC),
             sporsmalOgSvarListe = emptyList(),
             arbeidsgiver =
-                status.arbeidstakerInfo?.arbeidsgiver?.let { arbeidsgiver ->
+                hendelse.arbeidstakerInfo?.arbeidsgiver?.let { arbeidsgiver ->
                     ArbeidsgiverStatusDTO(
                         orgnummer = arbeidsgiver.orgnummer,
                         juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
                         orgNavn = arbeidsgiver.orgnavn,
                     )
                 },
-            brukerSvar = status.sporsmalSvar?.let { konverterSykmeldingSporsmal(it) },
+            brukerSvar = hendelse.sporsmalSvar?.let { konverterSykmeldingSporsmal(it) },
         )
 
     private fun konverterHendelseStatus(status: HendelseStatus): String =
