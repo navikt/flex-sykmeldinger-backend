@@ -418,7 +418,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
 
         @Test
@@ -503,7 +503,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
         }
 
         @Test
@@ -547,7 +547,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.AVBRUTT
+            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.AVBRUTT
         }
 
         @Test
@@ -567,7 +567,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             returnertSykmelding `should not be` null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteStatus()?.status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
+            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
 
         @Test

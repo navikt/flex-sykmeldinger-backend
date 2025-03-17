@@ -94,7 +94,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                     hendelse.sporsmalSvar.`should not be null`()
@@ -121,7 +121,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -148,7 +148,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -175,7 +175,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -208,7 +208,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                     hendelse.sporsmalSvar.`should not be null`()
@@ -241,7 +241,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                     hendelse.sporsmalSvar.`should not be null`()
@@ -272,7 +272,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -299,7 +299,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -326,7 +326,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -353,7 +353,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             sykmelding
-                .sisteStatus()
+                .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.sporsmalSvar.`should not be null`()
@@ -381,7 +381,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
                 .also { it.statuser shouldHaveSize 2 }
-                .also { it.sisteStatus().status `should be equal to` HendelseStatus.AVBRUTT }
+                .also { it.sisteHendelse().status `should be equal to` HendelseStatus.AVBRUTT }
         }
 
         @Test
@@ -401,7 +401,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.AVBRUTT
         }
     }
@@ -426,7 +426,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
                 .also { it.statuser shouldHaveSize 2 }
-                .also { it.sisteStatus().status `should be equal to` HendelseStatus.BEKREFTET_AVVIST }
+                .also { it.sisteHendelse().status `should be equal to` HendelseStatus.BEKREFTET_AVVIST }
         }
 
         @Test
@@ -447,7 +447,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .sisteStatus()
+                .sisteHendelse()
                 .status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
         }
     }

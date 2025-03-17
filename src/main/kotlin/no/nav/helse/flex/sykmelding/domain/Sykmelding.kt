@@ -37,7 +37,7 @@ data class Sykmelding(
     val erEgenmeldt: Boolean
         get() = meldingsinformasjon.type == MetadataType.EGENMELDT
 
-    fun sisteStatus(): SykmeldingHendelse = statuser.lastMaxBy { it.opprettet } ?: error("Ingen statuser. Skal ikke skje.")
+    fun sisteHendelse(): SykmeldingHendelse = statuser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 
     fun leggTilStatus(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(

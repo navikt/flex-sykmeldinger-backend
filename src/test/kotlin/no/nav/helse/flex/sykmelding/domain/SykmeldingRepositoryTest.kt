@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
@@ -190,7 +189,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
-        val arbeidstakerInfo = lagretSykmelding.sisteStatus().arbeidstakerInfo
+        val arbeidstakerInfo = lagretSykmelding.sisteHendelse().arbeidstakerInfo
         arbeidstakerInfo `should be equal to`
             ArbeidstakerInfo(
                 Arbeidsgiver(

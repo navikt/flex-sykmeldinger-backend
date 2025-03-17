@@ -21,7 +21,7 @@ class SykmeldingStatusEndrer(
         arbeidsgiverOrgnummer: String? = null,
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -98,7 +98,7 @@ class SykmeldingStatusEndrer(
         arbeidsledigFraOrgnummer: String? = null,
         sporsmalSvar: List<Sporsmal>? = null,
     ): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -137,7 +137,7 @@ class SykmeldingStatusEndrer(
     }
 
     fun endreStatusTilBekreftetAvvist(sykmelding: Sykmelding): Sykmelding {
-        val sisteStatus = sykmelding.sisteStatus()
+        val sisteStatus = sykmelding.sisteHendelse()
         if (
             sisteStatus.status !in
             setOf(
@@ -171,7 +171,7 @@ class SykmeldingStatusEndrer(
     }
 
     fun endreStatusTilAvbrutt(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         if (
             sisteHendelse.status !in
             setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT)
@@ -208,7 +208,7 @@ class SykmeldingStatusEndrer(
     }
 
     fun endreStatusTilApen(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         require(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_NAV, HendelseStatus.AVBRUTT),
@@ -226,7 +226,7 @@ class SykmeldingStatusEndrer(
     }
 
     fun endreStatusTilUtgatt(sykmelding: Sykmelding): Sykmelding {
-        val sisteHendelse = sykmelding.sisteStatus()
+        val sisteHendelse = sykmelding.sisteHendelse()
         require(
             sisteHendelse.status in
                 setOf(HendelseStatus.APEN, HendelseStatus.AVBRUTT),
