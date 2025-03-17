@@ -46,20 +46,20 @@ class SykmeldingRepository(
     }
 
     override fun findBySykmeldingId(id: String): Sykmelding? {
-        val dbRecord = sykmeldingDbRepository.findBySykmeldingUuid(id)
+        val dbRecord = sykmeldingDbRepository.findBySykmeldingId(id)
         if (dbRecord == null) {
             return null
         }
-        val statusDbRecords = sykmeldingHendelseDbRepository.findAllBySykmeldingUuid(dbRecord.sykmeldingUuid)
+        val statusDbRecords = sykmeldingHendelseDbRepository.findAllBySykmeldingId(dbRecord.sykmeldingId)
         return mapTilSykmelding(dbRecord, statusDbRecords)
     }
 
     override fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding> {
         val dbRecords = sykmeldingDbRepository.findAllByFnrIn(identer.alle())
         val statusDbRecords =
-            sykmeldingHendelseDbRepository.findAllBySykmeldingUuidIn(dbRecords.map { it.sykmeldingUuid })
+            sykmeldingHendelseDbRepository.findAllBySykmeldingIdIn(dbRecords.map { it.sykmeldingId })
         return dbRecords.map { dbRecord ->
-            val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
+            val statusDbRecords = statusDbRecords.filter { it.sykmeldingId == dbRecord.sykmeldingId }
             mapTilSykmelding(dbRecord, statusDbRecords)
         }
     }
@@ -68,7 +68,7 @@ class SykmeldingRepository(
         val dbRecords = sykmeldingDbRepository.findAll()
         val statusDbRecords = sykmeldingHendelseDbRepository.findAll()
         return dbRecords.map { dbRecord ->
-            val statusDbRecords = statusDbRecords.filter { it.sykmeldingUuid == dbRecord.sykmeldingUuid }
+            val statusDbRecords = statusDbRecords.filter { it.sykmeldingId == dbRecord.sykmeldingId }
             mapTilSykmelding(dbRecord, statusDbRecords)
         }
     }
@@ -97,14 +97,14 @@ class SykmeldingRepository(
 interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
     fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord>
 
-    fun findBySykmeldingUuid(sykmeldingUuid: String): SykmeldingDbRecord?
+    fun findBySykmeldingId(sykmeldingUuid: String): SykmeldingDbRecord?
 }
 
 @Table("sykmelding")
 data class SykmeldingDbRecord(
     @Id
     val id: String? = null,
-    val sykmeldingUuid: String,
+    val sykmeldingId: String,
     val fnr: String,
     val sykmelding: PGobject,
     val meldingsinformasjon: PGobject,
@@ -143,7 +143,7 @@ data class SykmeldingDbRecord(
         ): SykmeldingDbRecord =
             SykmeldingDbRecord(
                 id = sykmelding.databaseId,
-                sykmeldingUuid = sykmelding.sykmeldingId,
+                sykmeldingId = sykmelding.sykmeldingId,
                 fnr = sykmeldingGrunnlag.pasient.fnr,
                 sykmelding =
                     PGobject().apply {
@@ -167,16 +167,16 @@ data class SykmeldingDbRecord(
 }
 
 interface SykmeldingHendelseDbRepository : CrudRepository<SykmeldingHendelseDbRecord, String> {
-    fun findAllBySykmeldingUuid(sykmeldingUuid: String): List<SykmeldingHendelseDbRecord>
+    fun findAllBySykmeldingId(sykmeldingUuid: String): List<SykmeldingHendelseDbRecord>
 
-    fun findAllBySykmeldingUuidIn(sykmeldingUuid: Collection<String>): List<SykmeldingHendelseDbRecord>
+    fun findAllBySykmeldingIdIn(sykmeldingUuid: Collection<String>): List<SykmeldingHendelseDbRecord>
 }
 
-@Table("sykmeldingstatus")
+@Table("sykmeldinghendelse")
 data class SykmeldingHendelseDbRecord(
     @Id
     val id: String? = null,
-    val sykmeldingUuid: String,
+    val sykmeldingId: String,
     val status: HendelseStatus,
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
@@ -206,7 +206,7 @@ data class SykmeldingHendelseDbRecord(
             statuser.map { status ->
                 SykmeldingHendelseDbRecord(
                     id = status.databaseId,
-                    sykmeldingUuid = sykmeldingId,
+                    sykmeldingId = sykmeldingId,
                     status = status.status,
                     tidligereArbeidsgiver = null,
                     sporsmal =
