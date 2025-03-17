@@ -15,7 +15,7 @@ data class Sykmelding(
     val oppdatert: Instant,
 ) {
     init {
-        require(hendelser.isNotEmpty()) { "Må ha en status" }
+        require(hendelser.isNotEmpty()) { "Må ha minst én hendelse" }
         require(sykmeldingGrunnlag.aktivitet.isNotEmpty()) { "SykmeldingGrunnlag må ha minst én aktivitet" }
     }
 
