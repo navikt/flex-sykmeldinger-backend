@@ -102,7 +102,7 @@ class PdlClientTest {
     }
 
     @Nested
-    inner class HentFormattertNavn {
+    inner class HentFormattertMetadataNavn {
         @Test
         fun `burde produsere riktig request`() {
             var recordedRequest: RecordedRequest? = null

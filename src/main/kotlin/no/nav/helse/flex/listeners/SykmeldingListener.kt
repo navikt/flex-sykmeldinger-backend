@@ -2,20 +2,20 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
-@Profile("test") // TODO: Skru på når topic er prodsatt
 @Component
 class SykmeldingListener(
     private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -29,6 +29,9 @@ class SykmeldingListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
+        if (environmentToggles.isProduction()) {
+            return
+        }
         try {
             val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
                 objectMapper.readValue(cr.value())
@@ -44,5 +47,4 @@ class SykmeldingListener(
     }
 }
 
-// TODO: endre når tsm har klart topic
-const val SYKMELDING_TOPIC = "flex.sykmelding"
+const val SYKMELDING_TOPIC = "tsm.tsm-sykmeldinger"

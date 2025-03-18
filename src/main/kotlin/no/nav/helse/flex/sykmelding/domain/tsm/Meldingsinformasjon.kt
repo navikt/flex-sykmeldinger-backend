@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain.tsm
 
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Organisasjon
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
 import java.time.OffsetDateTime
 
 enum class MetadataType {
@@ -57,7 +56,7 @@ data class EDIEmottak(
     val msgInfo: MeldingMetadata,
     val sender: Organisasjon,
     val receiver: Organisasjon,
-    val pasient: Pasient?,
+    val pasient: MetadataPasient?,
     override val vedlegg: List<String>?,
 ) : Meldingsinformasjon {
     override val type = MetadataType.EMOTTAK
@@ -102,4 +101,40 @@ enum class AckType {
 
 data class Ack(
     val ackType: AckType,
+)
+
+data class MetadataPasient(
+    val ids: List<MetadataId>,
+    val navn: MetadataNavn,
+    val fodselsdato: String,
+    val kjonn: String,
+    val nasjonalitet: String?,
+    val adresse: MetadataAdresse,
+    val kontaktinfo: List<MetadataKontaktinfo>,
+)
+
+data class MetadataId(
+    val id: String,
+    val type: String,
+)
+
+data class MetadataNavn(
+    val fornavn: String,
+    val mellomnavn: String?,
+    val etternavn: String,
+)
+
+data class MetadataAdresse(
+    val type: String,
+    val gateadresse: String?,
+    val postnummer: String?,
+    val poststed: String?,
+    val postboks: String?,
+    val kommune: String?,
+    val land: String?,
+)
+
+data class MetadataKontaktinfo(
+    val type: String,
+    val value: String,
 )
