@@ -17,6 +17,12 @@ object SporsmalMaler {
             tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
             svarType = FritekstSvartype(),
         )
+
+    val ER_OPPLYSNINGENE_RIKTIGE =
+        SporsmalMal(
+            tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
+            svarType = JaNeiSvartype(),
+        )
 }
 
 fun <S> List<Sporsmal>.findWithMal(mal: SporsmalMal<S>): SporsmalMal<S> =
