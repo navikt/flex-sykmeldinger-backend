@@ -14,7 +14,7 @@ interface SykmeldingStatusProducer {
     fun produserSykmeldingStatus(
         fnr: String,
         sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    )
+    ): Boolean
 }
 
 @Component
@@ -32,9 +32,9 @@ class SykmeldingStatusKafkaProducer(
     override fun produserSykmeldingStatus(
         fnr: String,
         sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    ) {
+    ): Boolean {
         if (environmentToggles.isProduction()) {
-            return
+            return false
         }
         val sykmeldingId = sykmelingstatusDTO.sykmeldingId
         logger.info(
@@ -58,6 +58,7 @@ class SykmeldingStatusKafkaProducer(
                         sykmeldingStatusKafkaMessageDTO.serialisertTilString(),
                     ),
                 ).get()
+            return true
         } catch (ex: Exception) {
             logger.error(
                 "Failed to send sykmeldingStatus to kafkatopic, sykmelding: $sykmeldingId",

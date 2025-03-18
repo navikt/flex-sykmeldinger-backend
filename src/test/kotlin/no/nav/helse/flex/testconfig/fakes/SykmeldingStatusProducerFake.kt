@@ -15,7 +15,8 @@ class SykmeldingStatusProducerFake : SykmeldingStatusProducer {
     override fun produserSykmeldingStatus(
         fnr: String,
         sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    ) {
+    ): Boolean {
         sendteSykmeldinger.add(sykmelingstatusDTO)
+        return true
     }
 }
