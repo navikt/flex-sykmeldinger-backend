@@ -88,7 +88,9 @@ class SykmeldingRepository(
             validation = dbRecord.mapTilValidation(),
             hendelser = statusDbRecords.map(SykmeldingHendelseDbRecord::mapTilHendelse),
             opprettet = dbRecord.opprettet,
-            oppdatert = dbRecord.oppdatert,
+            sykmeldingGrunnlagOppdatert = dbRecord.oppdatert,
+            hendelseOppdatert = TODO(),
+            validationOppdatert = TODO(),
         )
 }
 
@@ -157,7 +159,7 @@ data class SykmeldingDbRecord(
                         value = sykmelding.validation.serialisertTilString()
                     },
                 opprettet = sykmelding.opprettet,
-                oppdatert = sykmelding.oppdatert,
+                oppdatert = sykmelding.sykmeldingGrunnlagOppdatert,
             )
     }
 }

@@ -30,7 +30,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )
@@ -52,7 +52,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )
@@ -75,7 +75,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )
@@ -90,7 +90,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         lagSykmeldingGrunnlag(id = "1").copy(
                             pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
                         ),
-                    oppdatert = Instant.parse("2022-02-02T00:00:00.00Z"),
+                    sykmeldingGrunnlagOppdatert = Instant.parse("2022-02-02T00:00:00.00Z"),
                 ).`should not be null`()
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -98,7 +98,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository.findBySykmeldingId("1").let {
             it.`should not be null`()
             it.sykmeldingGrunnlag.pasient.fnr `should be equal to` "nyttFnr"
-            it.oppdatert `should be equal to` Instant.parse("2022-02-02T00:00:00.00Z")
+            it.sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2022-02-02T00:00:00.00Z")
         }
     }
 
@@ -115,7 +115,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )
@@ -143,7 +143,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )
@@ -215,7 +215,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
                 meldingsinformasjon = lagMeldingsinformasjonEnkel(),
                 validation = lagValidation(),
             )

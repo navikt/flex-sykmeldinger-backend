@@ -23,7 +23,7 @@ fun lagSykmelding(
         validation = validation,
         hendelser = statuser,
         opprettet = opprettet,
-        oppdatert = oppdatert,
+        sykmeldingGrunnlagOppdatert = oppdatert,
     )
 
 fun lagSykmeldingHendelse(

@@ -6,17 +6,26 @@ import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.tsm.MetadataType
+import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
+    @Autowired
+    lateinit var nowFactoryFake: NowFactoryFake
+
     @Autowired
     private lateinit var sykmeldingKafkaLagrer: SykmeldingKafkaLagrer
 
@@ -42,14 +51,35 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde deduplisere sykmeldinger`() {
-        repeat(2) {
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
-                lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
-            )
-        }
+    fun `burde oppdatere sykmeldinger`() {
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr")),
+                validation = lagValidation(status = RuleType.PENDING),
+                metadata = lagMeldingsinformasjonEnkel(),
+            ),
+        )
+
+        nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("ny_fnr")),
+                validation = lagValidation(status = RuleType.OK),
+                metadata = lagMeldingsinformasjonEgenmeldt(),
+            ),
+        )
 
         sykmeldingRepository.findAll().size `should be equal to` 1
+        sykmeldingRepository
+            .findBySykmeldingId("1")
+            .`should not be null`()
+            .also {
+                it.sykmeldingGrunnlag.pasient.fnr shouldBeEqualTo "ny_fnr"
+                it.validation.status `should be equal to` RuleType.OK
+                it.meldingsinformasjon.type `should be equal to` MetadataType.EGENMELDT
+                it.sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
+            }
     }
 
     @Test
