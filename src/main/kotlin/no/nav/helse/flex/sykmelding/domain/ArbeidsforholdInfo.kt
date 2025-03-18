@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:filename")
+
 package no.nav.helse.flex.sykmelding.domain
 
 data class ArbeidstakerInfo(
