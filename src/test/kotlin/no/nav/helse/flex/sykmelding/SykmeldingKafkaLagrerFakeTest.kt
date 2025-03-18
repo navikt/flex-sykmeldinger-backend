@@ -17,6 +17,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     @Autowired
@@ -88,6 +89,30 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
             .also {
                 it.sykmeldingGrunnlag.pasient.fnr shouldBeEqualTo "ny_fnr"
                 it.sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
+            }
+    }
+
+    @Test
+    fun `burde ikke oppdatere dersom ny kafka melding er lik`() {
+        val kafkaMelding =
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+            )
+
+        val førsteMeldingTid = Instant.parse("2024-01-01T00:00:00Z")
+        nowFactoryFake.setNow(førsteMeldingTid)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+
+        val nyMeldingTid = førsteMeldingTid.plus(1, ChronoUnit.DAYS)
+        nowFactoryFake.setNow(nyMeldingTid)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding.copy())
+
+        sykmeldingRepository
+            .findBySykmeldingId("1")
+            .`should not be null`()
+            .also {
+                it.sykmeldingGrunnlagOppdatert `should be equal to` førsteMeldingTid
+                it.validationOppdatert `should be equal to` førsteMeldingTid
             }
     }
 
