@@ -14,7 +14,6 @@ import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 import java.time.LocalDate
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
@@ -26,15 +25,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         val sykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser =
-                    listOf(
-                        SykmeldingHendelse(
-                            status = HendelseStatus.APEN,
-                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                        ),
-                    ),
-                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                oppdatert = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
 
         val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
