@@ -33,6 +33,7 @@ class SykmeldingListener(
             return
         }
         try {
+            log.info(cr.value())
             val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
                 objectMapper.readValue(cr.value())
             sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
