@@ -4,10 +4,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class EnvironmentToggles(
+class DefaultEnvironmentToggles(
     @Value("\${NAIS_CLUSTER_NAME}") private val naisCluster: String,
-) {
-    fun isProduction() = "prod-gcp" == naisCluster
+) : EnvironmentToggles {
+    override fun isProduction() = "prod-gcp" == naisCluster
 
-    fun isDevelopment() = !isProduction()
+    override fun isDevelopment() = !isProduction()
+}
+
+interface EnvironmentToggles {
+    fun isProduction(): Boolean
+
+    fun isDevelopment(): Boolean
 }

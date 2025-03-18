@@ -172,7 +172,8 @@ class BrukerSvarKafkaDTOKonverterer {
     }
 
     private fun Sporsmal.konverterSporsmalstekst(): String {
-        requireNotNull(this.sporsmalstekst)
-        return this.sporsmalstekst
+        // TODO: kreves når vi får spørsmåltekst fra frontend
+//        requireNotNull(this.sporsmalstekst)
+        return this.sporsmalstekst ?: ""
     }
 }

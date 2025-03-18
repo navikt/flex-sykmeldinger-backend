@@ -32,7 +32,7 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @EnableMockOAuth2Server
 @SpringBootTest(
     classes = [
-        Application::class, KafkaTestConfig::class, MockWebServereConfig::class,
+        Application::class, KafkaTestConfig::class, MockWebServereConfig::class, EnvironmentConfig::class,
     ],
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)

@@ -18,6 +18,9 @@ class FakesTestConfig {
     fun nowFactory(): NowFactoryFake = NowFactoryFake()
 
     @Bean
+    fun environmentToggles(): EnvironmentTogglesFake = EnvironmentTogglesFake()
+
+    @Bean
     fun sykmeldingRepository(): ISykmeldingRepository = SykmeldingRepositoryFake()
 
     @Bean
@@ -36,7 +39,7 @@ class FakesTestConfig {
     fun eregClient(): EregClientFake = EregClientFake()
 
     @Bean
-    fun sykmeldingProducer(): SykmeldingProducerFake = SykmeldingProducerFake()
+    fun sykmeldingStatusProducer(): SykmeldingStatusProducerFake = SykmeldingStatusProducerFake()
 
     @Bean
     fun cacheManager(): CacheManager = NoOpCacheManager()
