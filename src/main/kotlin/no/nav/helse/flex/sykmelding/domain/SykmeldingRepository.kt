@@ -88,7 +88,9 @@ class SykmeldingRepository(
             validation = dbRecord.mapTilValidation(),
             hendelser = statusDbRecords.map(SykmeldingHendelseDbRecord::mapTilHendelse),
             opprettet = dbRecord.opprettet,
-            oppdatert = dbRecord.oppdatert,
+            sykmeldingGrunnlagOppdatert = dbRecord.sykmeldingGrunnlagOppdatert,
+            hendelseOppdatert = dbRecord.hendelseOppdatert,
+            validationOppdatert = dbRecord.validationOppdatert,
         )
 }
 
@@ -109,7 +111,9 @@ data class SykmeldingDbRecord(
     val meldingsinformasjon: PGobject,
     val validation: PGobject,
     val opprettet: Instant,
-    val oppdatert: Instant,
+    val hendelseOppdatert: Instant,
+    val sykmeldingGrunnlagOppdatert: Instant,
+    val validationOppdatert: Instant,
 ) {
     fun mapTilSykmelding(): ISykmeldingGrunnlag {
         val serialisertSykmelding = this.sykmelding
@@ -157,7 +161,9 @@ data class SykmeldingDbRecord(
                         value = sykmelding.validation.serialisertTilString()
                     },
                 opprettet = sykmelding.opprettet,
-                oppdatert = sykmelding.oppdatert,
+                hendelseOppdatert = sykmelding.hendelseOppdatert,
+                sykmeldingGrunnlagOppdatert = sykmelding.sykmeldingGrunnlagOppdatert,
+                validationOppdatert = sykmelding.validationOppdatert,
             )
     }
 }

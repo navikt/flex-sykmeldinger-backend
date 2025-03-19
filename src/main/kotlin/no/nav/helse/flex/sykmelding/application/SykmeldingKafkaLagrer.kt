@@ -19,18 +19,48 @@ class SykmeldingKafkaLagrer(
 
     @Transactional
     fun lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
-        if (sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id) != null) {
-            log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} finnes fra før")
+        val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
+        if (eksisterendeSykmelding != null) {
+            val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, sykmeldingKafkaRecord)
+            sykmeldingRepository.save(oppdatertSykmelding)
         } else {
-            val sykmelding = sykmeldingFactory(sykmeldingKafkaRecord)
+            val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
             log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} lagret")
         }
     }
 
-    private fun sykmeldingFactory(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding =
-        Sykmelding(
+    private fun oppdaterSykmelding(
+        eksisterendeSykmelding: Sykmelding,
+        sykmeldingKafkaRecord: SykmeldingKafkaRecord,
+    ): Sykmelding {
+        var oppdatertSykmelding = eksisterendeSykmelding
+        log.info("Sykmelding ${eksisterendeSykmelding.sykmeldingId} finnes fra før, oppdaterer den")
+        if (eksisterendeSykmelding.sykmeldingGrunnlag != sykmeldingKafkaRecord.sykmelding) {
+            oppdatertSykmelding =
+                oppdatertSykmelding.copy(
+                    sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
+                    sykmeldingGrunnlagOppdatert = nowFactory.get(),
+                )
+        }
+        if (eksisterendeSykmelding.validation != sykmeldingKafkaRecord.validation) {
+            oppdatertSykmelding =
+                oppdatertSykmelding.copy(
+                    validation = sykmeldingKafkaRecord.validation,
+                    validationOppdatert = nowFactory.get(),
+                )
+        }
+        if (eksisterendeSykmelding.meldingsinformasjon != sykmeldingKafkaRecord.metadata) {
+            log.error("Meldingsinformasjon kan ikke endres")
+            throw RuntimeException("Meldingsinformasjon kan ikke endres")
+        }
+        return oppdatertSykmelding
+    }
+
+    private fun opprettNySykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding {
+        val now = nowFactory.get()
+        return Sykmelding(
             sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
             meldingsinformasjon = sykmeldingKafkaRecord.metadata,
             validation = sykmeldingKafkaRecord.validation,
@@ -38,10 +68,13 @@ class SykmeldingKafkaLagrer(
                 listOf(
                     SykmeldingHendelse(
                         status = HendelseStatus.APEN,
-                        opprettet = nowFactory.get(),
+                        opprettet = now,
                     ),
                 ),
-            opprettet = nowFactory.get(),
-            oppdatert = nowFactory.get(),
+            opprettet = now,
+            sykmeldingGrunnlagOppdatert = now,
+            validationOppdatert = now,
+            hendelseOppdatert = now,
         )
+    }
 }

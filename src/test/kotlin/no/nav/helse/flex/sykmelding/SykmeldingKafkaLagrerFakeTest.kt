@@ -6,17 +6,23 @@ import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
+    @Autowired
+    lateinit var nowFactoryFake: NowFactoryFake
+
     @Autowired
     private lateinit var sykmeldingKafkaLagrer: SykmeldingKafkaLagrer
 
@@ -30,6 +36,7 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     fun tearDown() {
         slettDatabase()
         aaregClient.reset()
+        nowFactoryFake.reset()
     }
 
     @Test
@@ -42,14 +49,98 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde deduplisere sykmeldinger`() {
-        repeat(2) {
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
-                lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+    fun `burde ikke oppdatere meldingsinformasjon`() {
+        val kafkaMelding =
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                metadata = lagMeldingsinformasjonEnkel(),
             )
-        }
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+
+        invoking {
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+                kafkaMelding.copy(
+                    metadata = lagMeldingsinformasjonEgenmeldt(),
+                ),
+            )
+        }.shouldThrow(RuntimeException::class)
+    }
+
+    @Test
+    fun `burde oppdatere sykmelding grunnlag`() {
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
+        val kafkaMelding =
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr")),
+            )
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+
+        nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            kafkaMelding.copy(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("ny_fnr")),
+            ),
+        )
 
         sykmeldingRepository.findAll().size `should be equal to` 1
+        sykmeldingRepository
+            .findBySykmeldingId("1")
+            .`should not be null`()
+            .also {
+                it.sykmeldingGrunnlag.pasient.fnr shouldBeEqualTo "ny_fnr"
+                it.sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
+            }
+    }
+
+    @Test
+    fun `burde ikke oppdatere dersom ny kafka melding er lik`() {
+        val kafkaMelding =
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+            )
+
+        val førsteMeldingTid = Instant.parse("2024-01-01T00:00:00Z")
+        nowFactoryFake.setNow(førsteMeldingTid)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+
+        val nyMeldingTid = førsteMeldingTid.plus(1, ChronoUnit.DAYS)
+        nowFactoryFake.setNow(nyMeldingTid)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding.copy())
+
+        sykmeldingRepository
+            .findBySykmeldingId("1")
+            .`should not be null`()
+            .also {
+                it.sykmeldingGrunnlagOppdatert `should be equal to` førsteMeldingTid
+                it.validationOppdatert `should be equal to` førsteMeldingTid
+            }
+    }
+
+    @Test
+    fun `burde oppdatere validation`() {
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
+        val kafkaMelding =
+            lagSykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                validation = lagValidation(status = RuleType.PENDING),
+            )
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+
+        nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            kafkaMelding.copy(
+                validation = lagValidation(status = RuleType.OK),
+            ),
+        )
+
+        sykmeldingRepository.findAll().size `should be equal to` 1
+        sykmeldingRepository
+            .findBySykmeldingId("1")
+            .`should not be null`()
+            .also {
+                it.validation.status `should be equal to` RuleType.OK
+                it.validationOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
+            }
     }
 
     @Test

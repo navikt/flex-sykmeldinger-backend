@@ -12,7 +12,9 @@ data class Sykmelding(
     val validation: ValidationResult,
     val hendelser: List<SykmeldingHendelse>,
     val opprettet: Instant,
-    val oppdatert: Instant,
+    val hendelseOppdatert: Instant,
+    val sykmeldingGrunnlagOppdatert: Instant,
+    val validationOppdatert: Instant,
 ) {
     init {
         require(hendelser.isNotEmpty()) { "Må ha minst én hendelse" }
@@ -42,7 +44,7 @@ data class Sykmelding(
     fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
             hendelser = this.hendelser + sykmeldingHendelse,
-            oppdatert = sykmeldingHendelse.opprettet,
+            sykmeldingGrunnlagOppdatert = sykmeldingHendelse.opprettet,
         )
 }
 

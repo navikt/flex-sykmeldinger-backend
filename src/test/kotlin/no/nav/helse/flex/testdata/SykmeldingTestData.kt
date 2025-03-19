@@ -15,7 +15,9 @@ fun lagSykmelding(
             lagSykmeldingHendelse(),
         ),
     opprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
-    oppdatert: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    hendelseOppdatert: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    sykmeldingGrunnlagOppdatert: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    validationOppdatert: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
 ): Sykmelding =
     Sykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
@@ -23,7 +25,9 @@ fun lagSykmelding(
         validation = validation,
         hendelser = statuser,
         opprettet = opprettet,
-        oppdatert = oppdatert,
+        hendelseOppdatert = hendelseOppdatert,
+        sykmeldingGrunnlagOppdatert = sykmeldingGrunnlagOppdatert,
+        validationOppdatert = validationOppdatert,
     )
 
 fun lagSykmeldingHendelse(
