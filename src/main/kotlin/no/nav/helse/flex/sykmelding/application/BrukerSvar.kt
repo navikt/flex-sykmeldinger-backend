@@ -3,50 +3,55 @@ package no.nav.helse.flex.sykmelding.application
 import java.time.LocalDate
 
 sealed interface BrukerSvar {
-    val erOpplysningeneRiktige: Boolean
     val arbeidssituasjon: Arbeidssituasjon
-    val uriktigeOpplysninger: List<UriktigeOpplysning>?
+    val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>
+    val erOpplysningeneRiktige: SporsmalSvar<Boolean>
+    val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>?
 }
 
 data class ArbeidstakerBrukerSvar(
-    override val erOpplysningeneRiktige: Boolean,
-    val arbeidsgiverOrgnummer: String,
-    val riktigNarmesteLeder: Boolean,
-    val harEgenmeldingsdager: Boolean,
-    val egenmeldingsdager: List<LocalDate>? = null,
-    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
+    override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
+    val arbeidsgiverOrgnummer: SporsmalSvar<String>,
+    val riktigNarmesteLeder: SporsmalSvar<Boolean>,
+    val harEgenmeldingsdager: SporsmalSvar<Boolean>,
+    val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
+    override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER
 }
 
 data class ArbeidsledigBrukerSvar(
-    override val erOpplysningeneRiktige: Boolean,
-    val arbeidsledigFraOrgnummer: String? = null,
-    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
+    override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
+    val arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
+    override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG
 }
 
 data class PermittertBrukerSvar(
-    override val erOpplysningeneRiktige: Boolean,
-    val arbeidsledigFraOrgnummer: String? = null,
-    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
+    override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
+    val arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
+    override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.PERMITTERT
 }
 
 data class FiskerBrukerSvar(
-    override val erOpplysningeneRiktige: Boolean,
-    val lottOgHyre: FiskerLottOgHyre,
-    val blad: FiskerBlad,
-    val arbeidsgiverOrgnummer: String? = null,
-    val riktigNarmesteLeder: Boolean? = null,
-    val harEgenmeldingsdager: Boolean? = null,
-    val egenmeldingsdager: List<LocalDate>? = null,
-    val harBruktEgenmelding: Boolean? = null,
-    val egenmeldingsperioder: List<Egenmeldingsperiode>? = null,
-    val harForsikring: Boolean? = null,
-    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
+    override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
+    val lottOgHyre: SporsmalSvar<FiskerLottOgHyre>,
+    val blad: SporsmalSvar<FiskerBlad>,
+    val arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
+    val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
+    val harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
+    val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
+    val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
+    val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
+    val harForsikring: SporsmalSvar<Boolean>? = null,
+    override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.FISKER
 
@@ -86,6 +91,7 @@ data class FiskerBrukerSvar(
 
 data class FrilanserBrukerSvar(
     override val erOpplysningeneRiktige: Boolean,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: Boolean,
     val egenmeldingsperioder: List<Egenmeldingsperiode>? = null,
     val harForsikring: Boolean,
@@ -96,6 +102,7 @@ data class FrilanserBrukerSvar(
 
 data class JordbrukerBrukerSvar(
     override val erOpplysningeneRiktige: Boolean,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: Boolean,
     val egenmeldingsperioder: List<Egenmeldingsperiode>? = null,
     val harForsikring: Boolean,
@@ -106,6 +113,7 @@ data class JordbrukerBrukerSvar(
 
 data class NaringsdrivendeBrukerSvar(
     override val erOpplysningeneRiktige: Boolean,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: Boolean,
     val egenmeldingsperioder: List<Egenmeldingsperiode>? = null,
     val harForsikring: Boolean,
@@ -116,10 +124,16 @@ data class NaringsdrivendeBrukerSvar(
 
 data class AnnetArbeidssituasjonBrukerSvar(
     override val erOpplysningeneRiktige: Boolean,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.ANNET
 }
+
+data class SporsmalSvar<T>(
+    val sporsmaltekst: String = "<sporsmalstekst ikke tilgjenglig>",
+    val svar: T,
+)
 
 enum class FiskerBlad {
     A,
