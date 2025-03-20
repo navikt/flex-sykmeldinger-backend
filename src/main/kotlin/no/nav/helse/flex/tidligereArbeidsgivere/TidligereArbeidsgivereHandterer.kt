@@ -3,7 +3,6 @@ package no.nav.helse.flex.tidligereArbeidsgivere
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.tsm.Aktivitet
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -12,78 +11,71 @@ import java.time.temporal.ChronoUnit
 @Service
 class TidligereArbeidsgivereHandterer {
     companion object {
-        // tidligere arbeidsgiver brukes kun når bruker har valgt arbeidsledig/permittert, for de kan ha startet sykmeldingen når de var ansatt
-        // og kan så fortsette å være sykmeldt, og da skal det fortsatt være arbeisdtagersøknaded
-        // så da trenger de å finne en sykmelding som er sendt til arbeidsgiver tidligere i sykefraværstilfellet
-        // dette er en sykmelding der det er kant til kant ... en arbeidag imellom teller, om det er helg imellom "teller det ikke"
-        // lørdag og søndag tas med, de tar ikke med helligdager
         fun finnTidligereArbeidsgivere(
             alleSykmeldinger: List<Sykmelding>,
             gjeldendeSykmeldingId: String,
         ): List<TidligereArbeidsgiver> {
-            val gjeldendeSykmelding = alleSykmeldinger.first { it.sykmeldingId == gjeldendeSykmeldingId }
-            val sykmeldingerMedUnikeOrgnummer =
-                alleSykmeldinger
-                    .filterNot { it.sykmeldingId == gjeldendeSykmeldingId }
+            val sammenhengendeSykmeldinger = settSammenhengendeSykmeldinger(alleSykmeldinger)
+            val unikeArbeidsgivere =
+                sammenhengendeSykmeldinger
+                    .takeWhile { it.sykmeldingId != gjeldendeSykmeldingId }
                     .filter {
                         it.sisteHendelse().status == HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    }.filter {
-                        val forsteFom = finnForsteFom(gjeldendeSykmelding.sykmeldingGrunnlag.aktivitet)
-                        val tidligereArbeidsgiverType =
-                            finnTidligereArbeidsgiverType(forsteFom, it.sykmeldingGrunnlag.aktivitet)
-                        tidligereArbeidsgiverType != TidligereArbeidsgiverType.INGEN
                     }.distinctBy {
                         it
                             .sisteHendelse()
                             .arbeidstakerInfo
                             ?.arbeidsgiver
                             ?.orgnummer
+                    }.map { sykmelding ->
+                        val arbeidsgiverForSisteHendelse = sykmelding.sisteHendelse().arbeidstakerInfo?.arbeidsgiver
+                        TidligereArbeidsgiver(
+                            orgNavn = arbeidsgiverForSisteHendelse?.orgnavn ?: "Ukjent",
+                            orgnummer = arbeidsgiverForSisteHendelse?.orgnummer ?: "Ukjent",
+                        )
                     }
-            return sykmeldingerMedUnikeOrgnummer.map { sykmelding ->
-                val arbeidsgiverForSisteHendelse = sykmelding.sisteHendelse().arbeidstakerInfo?.arbeidsgiver
-                TidligereArbeidsgiver(
-                    orgNavn = arbeidsgiverForSisteHendelse?.orgnavn ?: "Ukjent",
-                    orgnummer = arbeidsgiverForSisteHendelse?.orgnummer ?: "Ukjent",
-                )
+
+            return unikeArbeidsgivere
+        }
+
+        private fun settSammenhengendeSykmeldinger(sykmeldinger: List<Sykmelding>): List<Sykmelding> {
+            val sammenhengendeSykmeldinger = mutableListOf<Sykmelding>()
+            var etterfolgendeSykmelding: Sykmelding? = null
+
+            sykmeldinger.sortedWith(compareByDescending<Sykmelding> { it.tom }.thenByDescending { it.fom }).forEach { sykmelding ->
+                etterfolgendeSykmelding?.let { etterfolgende ->
+                    if (sykmelding `er kant i kant med` etterfolgende || sykmelding `overlapper med` etterfolgende) {
+                        sammenhengendeSykmeldinger.add(sykmelding)
+                    }
+                }
+                etterfolgendeSykmelding = sykmelding
             }
+            return sammenhengendeSykmeldinger.sortedBy { it.tom }
         }
 
-        private fun finnTidligereArbeidsgiverType(
-            forsteFom: LocalDate,
-            sykmeldingsperioder: List<Aktivitet>,
-        ): TidligereArbeidsgiverType {
-            val kantTilKant = sisteTomIKantMedDag(sykmeldingsperioder, forsteFom)
-            if (kantTilKant) return TidligereArbeidsgiverType.KANT_TIL_KANT
-            val overlappende =
-                erOverlappende(
-                    tidligereSmTom = sykmeldingsperioder.maxOf { it.tom },
-                    tidligereSmFom = sykmeldingsperioder.minOf { it.fom },
-                    fom = forsteFom,
-                )
-            if (overlappende) return TidligereArbeidsgiverType.OVERLAPPENDE
-            return TidligereArbeidsgiverType.INGEN
+        @Suppress("ktlint:standard:function-naming")
+        private infix fun Sykmelding.`overlapper med`(other: Sykmelding): Boolean = this.fom..this.tom overlapper other.fom..other.tom
+
+        private infix fun ClosedRange<LocalDate>.overlapper(other: ClosedRange<LocalDate>): Boolean {
+            val symeldingDatoer = this.toList()
+            val etterfolgendeDatoer = other.toList()
+            return symeldingDatoer.any { date -> other.contains(date) } || etterfolgendeDatoer.any { date -> this.contains(date) }
         }
 
-        private fun erOverlappende(
-            tidligereSmTom: LocalDate,
-            tidligereSmFom: LocalDate,
-            fom: LocalDate,
-        ) = (
-            fom.isAfter(tidligereSmFom) &&
-                fom.isBefore(
-                    tidligereSmTom.plusDays(1),
-                )
-        )
+        private fun ClosedRange<LocalDate>.toList(): List<LocalDate> {
+            val list = mutableListOf<LocalDate>()
+            var currentDate = this.start
 
-        private fun sisteTomIKantMedDag(
-            perioder: List<Aktivitet>,
-            dag: LocalDate,
-        ): Boolean {
-            val sisteTom =
-                perioder.maxByOrNull { it.tom }?.tom
-                    ?: throw IllegalStateException("Skal ikke kunne ha periode uten tom")
-            return !erArbeidsDagIMellom(sisteTom, dag)
+            while (!currentDate.isAfter(this.endInclusive)) {
+                list.add(currentDate)
+                currentDate = currentDate.plusDays(1)
+            }
+
+            return list
         }
+
+        @Suppress("ktlint:standard:function-naming")
+        private infix fun Sykmelding.`er kant i kant med`(other: Sykmelding): Boolean = !erArbeidsDagIMellom(this.tom, other.fom)
 
         private fun erArbeidsDagIMellom(
             tom: LocalDate,
@@ -97,15 +89,5 @@ class TidligereArbeidsgivereHandterer {
                 else -> daysBetween > 1
             }
         }
-
-        private fun finnForsteFom(perioder: List<Aktivitet>): LocalDate =
-            perioder.minByOrNull { it.fom }?.fom
-                ?: throw IllegalStateException("Skal ikke kunne ha periode uten fom")
     }
-}
-
-enum class TidligereArbeidsgiverType {
-    KANT_TIL_KANT,
-    OVERLAPPENDE,
-    INGEN,
 }

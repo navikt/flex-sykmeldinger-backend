@@ -60,11 +60,7 @@ class SykmeldingController(
         val identer = tokenxValidering.hentIdenter()
 
         val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
-        val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
-                sykmeldinger,
-                sykmeldingId,
-            )
+        val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
 
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }

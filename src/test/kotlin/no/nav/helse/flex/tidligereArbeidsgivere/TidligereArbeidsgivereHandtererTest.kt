@@ -50,7 +50,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -106,7 +106,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -162,7 +162,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -218,7 +218,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -303,7 +303,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, gammelSykmeldingMedSammeArbeidsgiver, nySykmelding)
 
@@ -317,7 +317,250 @@ class TidligereArbeidsgivereHandtererTest {
     }
 
     @Test
-    fun `burde finne alle tidligere arbeidsgivere `() {
+    fun `burde finne alle tidligere arbeidsgivere`() {
+        val gammelSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-01"),
+                                    tom = LocalDate.parse("2025-01-10"),
+                                ),
+                            ),
+                    ),
+                statuser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            arbeidstakerInfo =
+                                lagArbeidstakerInfo(
+                                    lagArbeidsgiver(
+                                        orgnavn = "Gammel jobb",
+                                        orgnummer = "gammeltOrgnummer",
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val annenGammelSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "2",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-11"),
+                                    tom = LocalDate.parse("2025-01-20"),
+                                ),
+                            ),
+                    ),
+                statuser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            arbeidstakerInfo =
+                                lagArbeidstakerInfo(
+                                    lagArbeidsgiver(
+                                        orgnavn = "Annen gammel jobb",
+                                        orgnummer = "annetGammeltOrgnummer",
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val nySykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "3",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-17"),
+                                    tom = LocalDate.parse("2025-01-30"),
+                                ),
+                            ),
+                    ),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+            )
+        val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
+
+        val tidligereArbeidsgivere =
+            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+                alleSykmeldinger,
+                nySykmelding.sykmeldingId,
+            )
+
+        tidligereArbeidsgivere.size `should be equal to` 2
+    }
+
+    @Test
+    fun `burde ikke returnere _fremtidig_ arbeidsgiver`() {
+        val gammelSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-01"),
+                                    tom = LocalDate.parse("2025-01-10"),
+                                ),
+                            ),
+                    ),
+                statuser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            arbeidstakerInfo =
+                                lagArbeidstakerInfo(
+                                    lagArbeidsgiver(
+                                        orgnavn = "Gammel jobb",
+                                        orgnummer = "gammeltOrgnummer",
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val gjeldendeSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "2",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-11"),
+                                    tom = LocalDate.parse("2025-01-20"),
+                                ),
+                            ),
+                    ),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+            )
+
+        val fremtidigSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "3",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-17"),
+                                    tom = LocalDate.parse("2025-01-30"),
+                                ),
+                            ),
+                    ),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+            )
+        val alleSykmeldinger = listOf(gammelSykmelding, gjeldendeSykmelding, fremtidigSykmelding)
+
+        val tidligereArbeidsgivere =
+            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+                alleSykmeldinger,
+                gjeldendeSykmelding.sykmeldingId,
+            )
+
+        tidligereArbeidsgivere.size `should be equal to` 1
+    }
+
+    @Test
+    fun `burde returnere begge arbeidsgivere som er kant i kant med identiske datoer`() {
+        val gammelSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-01"),
+                                    tom = LocalDate.parse("2025-01-10"),
+                                ),
+                            ),
+                    ),
+                statuser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            arbeidstakerInfo =
+                                lagArbeidstakerInfo(
+                                    lagArbeidsgiver(
+                                        orgnavn = "Gammel jobb",
+                                        orgnummer = "gammeltOrgnummer",
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+
+        val annenGammelSykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "2",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-01"),
+                                    tom = LocalDate.parse("2025-01-10"),
+                                ),
+                            ),
+                    ),
+                statuser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            arbeidstakerInfo =
+                                lagArbeidstakerInfo(
+                                    lagArbeidsgiver(
+                                        orgnavn = "Annen gammel jobb",
+                                        orgnummer = "annetGammeltOrgnummer",
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val nySykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "3",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2025-01-11"),
+                                    tom = LocalDate.parse("2025-01-20"),
+                                ),
+                            ),
+                    ),
+                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+            )
+        val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
+
+        val tidligereArbeidsgivere =
+            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+                alleSykmeldinger,
+                nySykmelding.sykmeldingId,
+            )
+
+        tidligereArbeidsgivere.size `should be equal to` 2
+    }
+
+    @Test
+    fun `burde returnere begge arbeidsgivere der en sykmelding _omringer_ en annen`() {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -356,7 +599,7 @@ class TidligereArbeidsgivereHandtererTest {
                             listOf(
                                 lagAktivitetIkkeMulig(
                                     fom = LocalDate.parse("2025-01-05"),
-                                    tom = LocalDate.parse("2025-01-10"),
+                                    tom = LocalDate.parse("2025-01-07"),
                                 ),
                             ),
                     ),
@@ -384,7 +627,7 @@ class TidligereArbeidsgivereHandtererTest {
                             listOf(
                                 lagAktivitetIkkeMulig(
                                     fom = LocalDate.parse("2025-01-11"),
-                                    tom = LocalDate.parse("2025-01-30"),
+                                    tom = LocalDate.parse("2025-01-20"),
                                 ),
                             ),
                     ),
