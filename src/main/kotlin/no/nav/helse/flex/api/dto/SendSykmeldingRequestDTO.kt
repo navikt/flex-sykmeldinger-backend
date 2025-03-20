@@ -1,42 +1,144 @@
 package no.nav.helse.flex.api.dto
 
 import no.nav.helse.flex.sykmelding.application.*
+import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 
 data class SendSykmeldingRequestDTO(
-    val erOpplysningeneRiktige: YesOrNo,
+    val erOpplysningeneRiktige: YesOrNoDTO,
     val arbeidssituasjon: Arbeidssituasjon,
     val arbeidsgiverOrgnummer: String? = null,
-    val harEgenmeldingsdager: YesOrNo? = null,
-    val riktigNarmesteLeder: YesOrNo? = null,
-    val arbeidsledig: Arbeidsledig? = null,
+    val harEgenmeldingsdager: YesOrNoDTO? = null,
+    val riktigNarmesteLeder: YesOrNoDTO? = null,
+    val arbeidsledig: ArbeidsledigDTO? = null,
     val egenmeldingsdager: List<LocalDate>? = null,
     val egenmeldingsperioder: List<EgenmeldingsperiodeDTO>? = null,
-    val fisker: Fisker? = null,
-    val harBruktEgenmelding: YesOrNo? = null,
-    val harForsikring: YesOrNo? = null,
-    val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
+    val fisker: FiskerDTO? = null,
+    val harBruktEgenmelding: YesOrNoDTO? = null,
+    val harForsikring: YesOrNoDTO? = null,
+    val uriktigeOpplysninger: List<UriktigeOpplysningDTO>? = null,
 ) {
-    fun tilArbeidssituasjonBrukerInfo(): ArbeidssituasjonBrukerInfo =
+    fun tilBrukerSvar(): BrukerSvar =
         when (arbeidssituasjon) {
-            Arbeidssituasjon.ARBEIDSLEDIG -> {
-                ArbeidsledigBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
-            }
-            Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerBrukerInfo(arbeidsgiverOrgnummer = arbeidsgiverOrgnummer)
-            Arbeidssituasjon.PERMITTERT -> PermittertBrukerInfo(arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer)
-            Arbeidssituasjon.FISKER -> {
-                requireNotNull(fisker) { "Fisker må være satt for fisker" }
-                FiskerBrukerInfo(
-                    lottOgHyre = enumValueOf(fisker.lottOgHyre.name),
+            Arbeidssituasjon.ARBEIDSTAKER -> {
+                requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
+                requireNotNull(riktigNarmesteLeder) { "$arbeidssituasjon må ha satt riktigNarmesteLeder" }
+                requireNotNull(harEgenmeldingsdager) { "$arbeidssituasjon må ha satt harEgenmeldingsdager" }
+                ArbeidstakerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                    riktigNarmesteLeder = riktigNarmesteLeder.tilBoolean(),
+                    harEgenmeldingsdager = harEgenmeldingsdager.tilBoolean(),
+                    egenmeldingsdager = egenmeldingsdager,
                 )
             }
-            Arbeidssituasjon.FRILANSER -> FrilanserBrukerInfo
-            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerInfo
-            Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerInfo
-            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerInfo
+            Arbeidssituasjon.ARBEIDSLEDIG -> {
+                requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig" }
+                requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer) { "$arbeidssituasjon må ha satt arbeidsledigFraOrgnummer" }
+                ArbeidsledigBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer,
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                )
+            }
+            Arbeidssituasjon.PERMITTERT -> {
+                requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig" }
+                requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer) { "$arbeidssituasjon må ha satt arbeidsledigFraOrgnummer" }
+                PermittertBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer,
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                )
+            }
+            Arbeidssituasjon.FISKER -> {
+                requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
+                FiskerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    lottOgHyre = fisker.lottOgHyre.tilFiskerLottOgHyre(),
+                    blad = fisker.blad.tilFiskerBlad(),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                    riktigNarmesteLeder = riktigNarmesteLeder?.tilBoolean(),
+                    harEgenmeldingsdager = harEgenmeldingsdager?.tilBoolean(),
+                    egenmeldingsdager = egenmeldingsdager,
+                    harBruktEgenmelding = harBruktEgenmelding?.tilBoolean(),
+                    egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder(),
+                    harForsikring = harForsikring?.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                )
+            }
+            Arbeidssituasjon.FRILANSER -> {
+                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
+                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
+                FrilanserBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean(),
+                    egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder(),
+                    harForsikring = harForsikring.tilBoolean(),
+                )
+            }
+            Arbeidssituasjon.NAERINGSDRIVENDE -> {
+                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
+                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
+                NaringsdrivendeBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean(),
+                    egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder(),
+                    harForsikring = harForsikring.tilBoolean(),
+                )
+            }
+            Arbeidssituasjon.JORDBRUKER -> {
+                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
+                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
+                JordbrukerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean(),
+                    egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder(),
+                    harForsikring = harForsikring.tilBoolean(),
+                )
+            }
+            Arbeidssituasjon.ANNET -> {
+                AnnetArbeidssituasjonBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe(),
+                )
+            }
+        }
+
+    private fun List<UriktigeOpplysningDTO>.tilUriktigeOpplysningerListe(): List<UriktigeOpplysning> =
+        this.map { it.tilUriktigeOpplysninger() }
+
+    private fun UriktigeOpplysningDTO.tilUriktigeOpplysninger(): UriktigeOpplysning =
+        when (this) {
+            UriktigeOpplysningDTO.PERIODE -> UriktigeOpplysning.PERIODE
+            UriktigeOpplysningDTO.ANDRE_OPPLYSNINGER -> UriktigeOpplysning.ANDRE_OPPLYSNINGER
+            UriktigeOpplysningDTO.ARBEIDSGIVER -> UriktigeOpplysning.ARBEIDSGIVER
+            UriktigeOpplysningDTO.DIAGNOSE -> UriktigeOpplysning.DIAGNOSE
+            UriktigeOpplysningDTO.SYKMELDINGSGRAD_FOR_HOY -> UriktigeOpplysning.SYKMELDINGSGRAD_FOR_HOY
+            UriktigeOpplysningDTO.SYKMELDINGSGRAD_FOR_LAV -> UriktigeOpplysning.SYKMELDINGSGRAD_FOR_LAV
+        }
+
+    fun List<EgenmeldingsperiodeDTO>.tilEgenmeldingsperioder(): List<Egenmeldingsperiode> =
+        this.map { Egenmeldingsperiode(fom = it.fom, tom = it.tom) }
+
+    private fun YesOrNoDTO.tilBoolean(): Boolean = this == YesOrNoDTO.YES
+
+    private fun LottOgHyre.tilFiskerLottOgHyre(): FiskerLottOgHyre =
+        when (this) {
+            LottOgHyre.LOTT -> FiskerLottOgHyre.LOTT
+            LottOgHyre.HYRE -> FiskerLottOgHyre.HYRE
+            LottOgHyre.BEGGE -> FiskerLottOgHyre.BEGGE
+        }
+
+    private fun Blad.tilFiskerBlad(): FiskerBlad =
+        when (this) {
+            Blad.A -> FiskerBlad.A
+            Blad.B -> FiskerBlad.B
         }
 
     fun tilSporsmalListe(): List<Sporsmal> {
@@ -167,15 +269,15 @@ data class SendSykmeldingRequestDTO(
         return sporsmal
     }
 
-    private fun konverterJaNeiSvar(svar: YesOrNo?): List<Svar> =
+    private fun konverterJaNeiSvar(svar: YesOrNoDTO?): List<Svar> =
         when (svar) {
-            YesOrNo.YES -> listOf(Svar(verdi = "JA"))
-            YesOrNo.NO -> listOf(Svar(verdi = "NEI"))
+            YesOrNoDTO.YES -> listOf(Svar(verdi = "JA"))
+            YesOrNoDTO.NO -> listOf(Svar(verdi = "NEI"))
             else -> emptyList()
         }
 }
 
-enum class YesOrNo {
+enum class YesOrNoDTO {
     YES,
     NO,
 }
@@ -185,16 +287,16 @@ data class EgenmeldingsperiodeDTO(
     val tom: LocalDate?,
 )
 
-data class Arbeidsledig(
+data class ArbeidsledigDTO(
     val arbeidsledigFraOrgnummer: String? = null,
 )
 
-data class Fisker(
+data class FiskerDTO(
     val blad: Blad,
     val lottOgHyre: LottOgHyre,
 )
 
-enum class UriktigeOpplysning {
+enum class UriktigeOpplysningDTO {
     ANDRE_OPPLYSNINGER,
     ARBEIDSGIVER,
     DIAGNOSE,

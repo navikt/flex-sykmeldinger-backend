@@ -11,11 +11,11 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en arbeistaker`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
                 arbeidsgiverOrgnummer = "orgnr",
-                harEgenmeldingsdager = YesOrNo.YES,
-                riktigNarmesteLeder = YesOrNo.YES,
+                harEgenmeldingsdager = YesOrNoDTO.YES,
+                riktigNarmesteLeder = YesOrNoDTO.YES,
                 egenmeldingsdager = listOf(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-02")),
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()
@@ -31,7 +31,7 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en frilanser`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.FRILANSER,
                 egenmeldingsperioder =
                     listOf(
@@ -40,8 +40,8 @@ class SendSykmeldingRequestDTOTest {
                             tom = LocalDate.parse("2025-01-02"),
                         ),
                     ),
-                harBruktEgenmelding = YesOrNo.YES,
-                harForsikring = YesOrNo.YES,
+                harBruktEgenmelding = YesOrNoDTO.YES,
+                harForsikring = YesOrNoDTO.YES,
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()
         val eksisterendeSporsmalListe = lagSporsmalSvarFrilanser()
@@ -56,7 +56,7 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en selvstendig næringsdrivende`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
                 egenmeldingsperioder =
                     listOf(
@@ -65,8 +65,8 @@ class SendSykmeldingRequestDTOTest {
                             tom = LocalDate.parse("2025-01-02"),
                         ),
                     ),
-                harBruktEgenmelding = YesOrNo.YES,
-                harForsikring = YesOrNo.YES,
+                harBruktEgenmelding = YesOrNoDTO.YES,
+                harForsikring = YesOrNoDTO.YES,
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()
         val eksisterendeSporsmalListe = lagSporsmalSvarSelvstendigNaringsdrivende()
@@ -81,7 +81,7 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en fisker med lott`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.FISKER,
                 egenmeldingsperioder =
                     listOf(
@@ -91,12 +91,12 @@ class SendSykmeldingRequestDTOTest {
                         ),
                     ),
                 fisker =
-                    Fisker(
+                    FiskerDTO(
                         blad = Blad.A,
                         lottOgHyre = LottOgHyre.LOTT,
                     ),
-                harBruktEgenmelding = YesOrNo.YES,
-                harForsikring = YesOrNo.YES,
+                harBruktEgenmelding = YesOrNoDTO.YES,
+                harForsikring = YesOrNoDTO.YES,
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()
         val eksisterendeSporsmalListe = lagSporsmalSvarFiskerMedLott()
@@ -111,14 +111,14 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en fisker med hyre`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.FISKER,
                 arbeidsgiverOrgnummer = "orgnr",
-                harEgenmeldingsdager = YesOrNo.YES,
-                riktigNarmesteLeder = YesOrNo.YES,
+                harEgenmeldingsdager = YesOrNoDTO.YES,
+                riktigNarmesteLeder = YesOrNoDTO.YES,
                 egenmeldingsdager = listOf(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-02")),
                 fisker =
-                    Fisker(
+                    FiskerDTO(
                         blad = Blad.A,
                         lottOgHyre = LottOgHyre.HYRE,
                     ),
@@ -136,14 +136,14 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en fisker med lott og hyre`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.FISKER,
                 arbeidsgiverOrgnummer = "orgnr",
-                harEgenmeldingsdager = YesOrNo.YES,
-                riktigNarmesteLeder = YesOrNo.YES,
+                harEgenmeldingsdager = YesOrNoDTO.YES,
+                riktigNarmesteLeder = YesOrNoDTO.YES,
                 egenmeldingsdager = listOf(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-02")),
                 fisker =
-                    Fisker(
+                    FiskerDTO(
                         blad = Blad.A,
                         lottOgHyre = LottOgHyre.BEGGE,
                     ),
@@ -161,7 +161,7 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en jordbruker`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
                 egenmeldingsperioder =
                     listOf(
@@ -170,8 +170,8 @@ class SendSykmeldingRequestDTOTest {
                             tom = LocalDate.parse("2025-01-02"),
                         ),
                     ),
-                harBruktEgenmelding = YesOrNo.YES,
-                harForsikring = YesOrNo.YES,
+                harBruktEgenmelding = YesOrNoDTO.YES,
+                harForsikring = YesOrNoDTO.YES,
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()
         val eksisterendeSporsmalListe = lagSporsmalSvarJordbruker()
@@ -186,10 +186,10 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en arbeidsledig`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                 arbeidsledig =
-                    Arbeidsledig(
+                    ArbeidsledigDTO(
                         arbeidsledigFraOrgnummer = "orgnr",
                     ),
             )
@@ -206,10 +206,10 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe en permittert`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
                 arbeidsledig =
-                    Arbeidsledig(
+                    ArbeidsledigDTO(
                         arbeidsledigFraOrgnummer = "orgnr",
                     ),
             )
@@ -226,7 +226,7 @@ class SendSykmeldingRequestDTOTest {
     fun `burde mappe annet`() {
         val requestDTO =
             SendSykmeldingRequestDTO(
-                erOpplysningeneRiktige = YesOrNo.YES,
+                erOpplysningeneRiktige = YesOrNoDTO.YES,
                 arbeidssituasjon = Arbeidssituasjon.ANNET,
             )
         val konvertertSporsmalListe = requestDTO.tilSporsmalListe()

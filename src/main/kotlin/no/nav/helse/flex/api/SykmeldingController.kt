@@ -145,14 +145,14 @@ class SykmeldingController(
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
 
-        val arbeidssituasjonBrukerInfo = sendSykmeldingRequestDTO.tilArbeidssituasjonBrukerInfo()
+        val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
         val sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe()
 
         val sykmelding =
             sykmeldingHandterer.sendSykmelding(
                 sykmeldingId = sykmeldingId,
                 identer = identer,
-                arbeidssituasjonBrukerInfo = arbeidssituasjonBrukerInfo,
+                brukerSvar = brukerSvar,
                 sporsmalSvar = sporsmalSvar,
             )
 
