@@ -25,7 +25,7 @@ val testContainersVersion = "1.20.6"
 val tokenSupportVersion = "5.0.19"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
-val sykepengesoknadKafkaVersion = "2025.02.19-16.24-5e00417f"
+val sykepengesoknadKafkaVersion = "2025.03.19-11.12-e2640af0"
 val commonsTextVersion = "1.13.0"
 val mockitoKotlinVersion = "2.2.0"
 
