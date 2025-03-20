@@ -1,91 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
-object A {
-    val ER_OPPLYSNINGENE_RIKTIGE = JaNeiSporsmal(
-        tag=SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-        tekst="Er opplysningene riktige?",
-    )
-    val ARBEIDSITUASJON = EnkeltvalgSporsmal(
-        tekst="Jeg er sykmeldt som",
-        alternativer = listOf(
-            "ARBEIDSTAKER",
-            "ARBEIDSLEDIG",
-        )
-    )
-    val URIKTIGE_OPPLYSNINGER = FlervalgSporsmal(
-        visningskrav = Visningskrav(
-            sporsmal=ER_OPPLYSNINGENE_RIKTIGE,
-            svar=false,
-        ),
-        alternativer = listOf(
-            "Periode",
-            "Sykmeldingsgraden er for lav",
-            "Sykmeldingsgraden er for høy",
-            "Arbeidsgiver",
-            "Diagnose",
-            "Andre opplysninger",
-        )
-    )
-}
-
 object SporsmalMaler {
-
-    val sporsmal = listOf(
-        Sporsmal(
-            tekst="Er opplysningene riktige?",
-            svarType=SvarTypeJaNei(),
-
-            jaSporsmal=ValgSporsmal(
-                tekst="Arbeidssituasjon?",
-                validerAlternativer = listOf(
-                    "ARBEIDSTAKER",
-                    "ARBEIDSLEDIG",
-                )
-
-            )
-            neiSporsmal=Sporsmal(
-
-            )
-        ),
-
-        ValgSporsmal(
-            tekst="Arbeidssituasjon?",
-            visKriterie=Visningskriterie(),
-            validerAlternativer = listOf(
-                "ARBEIDSTAKER",
-                "ARBEIDSLEDIG",
-                "ANNET",
-            )
-        )
-    )
-
-    val ER_OPPLYSNINGENE_RIKTIGE =
-        SporsmalMal(
-            tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-            svarType = RadioSvartype(),
-            alternativer =
-                listOf(
-                    SporsmalMal(
-                        tag = SporsmalTag.ARBEIDSSITUASJON,
-                        sporsmalstekst = "Ja",
-                        svarType = RadioSvartype(),
-                        undersporsmal =
-                            listOf(),
-                    ),
-                    Svar(
-                        verdi = "NEI",
-                    ),
-                ),
-            undersporsmal =
-                listOf(
-                    SporsmalMal(
-                        visningskriterie = Visningskriterie.CHECKED,
-                        tag = SporsmalTag.ARBEIDSSITUASJON,
-                        svarType = RadioSvartype(),
-                    ),
-                ),
-        )
-
     val ARBEIDSGIVER_ORGNUMMER =
         SporsmalMal(
             tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
@@ -103,39 +18,11 @@ object SporsmalMaler {
             svarType = FritekstSvartype(),
         )
 
-    val FISKER__BLAD =
+    val ER_OPPLYSNINGENE_RIKTIGE =
         SporsmalMal(
-            tag = SporsmalTag.FISKER__BLAD,
-            svarType = RadioSvartype(),
-        )
-    val FISKER__LOTT_OG_HYRE =
-        SporsmalMal(
-            tag = SporsmalTag.FISKER__LOTT_OG_HYRE,
-            svarType = RadioSvartype(),
-        )
-
-    val FISKER =
-        SporsmalMal(
-            tag = SporsmalTag.FISKER,
+            tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
             svarType = JaNeiSvartype(),
-            undersporsmal =
-                listOf(
-                    FISKER__BLAD,
-                    FISKER__LOTT_OG_HYRE,
-                ),
         )
-
-    fun test() {
-        val sporsmal =
-            listOf(
-                ARBEIDSGIVER_ORGNUMMER.sporsmal,
-                ARBEIDSSITUASJON.sporsmal,
-                ARBEIDSLEDIG_FRA_ORGNUMMER.sporsmal,
-                ER_OPPLYSNINGENE_RIKTIGE.sporsmal,
-                FISKER.sporsmal,
-            )
-        sporsmal.findWithMal(FISKER).findUndersporsmal(FISKER__BLAD)
-    }
 }
 
 fun <S> List<Sporsmal>.findWithMal(mal: SporsmalMal<S>): SporsmalMal<S> =
