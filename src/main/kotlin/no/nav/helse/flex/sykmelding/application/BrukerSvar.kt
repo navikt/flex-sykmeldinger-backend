@@ -1,21 +1,6 @@
 package no.nav.helse.flex.sykmelding.application
 
-import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.api.dto.Egenmeldingsperiode
 import java.time.LocalDate
-
-// val erOpplysningeneRiktige: YesOrNo,
-// val arbeidssituasjon: Arbeidssituasjon,
-// val arbeidsgiverOrgnummer: String? = null,
-// val harEgenmeldingsdager: YesOrNo? = null,
-// val riktigNarmesteLeder: YesOrNo? = null,
-// val arbeidsledig: Arbeidsledig? = null,
-// val egenmeldingsdager: List<LocalDate>? = null,
-// val egenmeldingsperioder: List<EgenmeldingsperiodeDTO>? = null,
-// val fisker: Fisker? = null,
-// val harBruktEgenmelding: YesOrNo? = null,
-// val harForsikring: YesOrNo? = null,
-// val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 
 sealed interface BrukerSvar {
     val erOpplysningeneRiktige: Boolean
@@ -35,13 +20,17 @@ data class ArbeidstakerBrukerSvar(
 }
 
 data class ArbeidsledigBrukerSvar(
+    override val erOpplysningeneRiktige: Boolean,
     val arbeidsledigFraOrgnummer: String? = null,
+    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG
 }
 
 data class PermittertBrukerSvar(
+    override val erOpplysningeneRiktige: Boolean,
     val arbeidsledigFraOrgnummer: String? = null,
+    override val uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.PERMITTERT
 }
@@ -147,3 +136,12 @@ data class Egenmeldingsperiode(
     val fom: LocalDate?,
     val tom: LocalDate?,
 )
+
+enum class UriktigeOpplysning {
+    ANDRE_OPPLYSNINGER,
+    ARBEIDSGIVER,
+    DIAGNOSE,
+    PERIODE,
+    SYKMELDINGSGRAD_FOR_HOY,
+    SYKMELDINGSGRAD_FOR_LAV,
+}
