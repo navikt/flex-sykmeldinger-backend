@@ -15,6 +15,7 @@ class SykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
+    private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
 ) {
     private val logger = logger()
     private val sykmeldingStatusKafkaDTOKonverterer = SykmeldingStatusKafkaDTOKonverterer()
@@ -37,6 +38,12 @@ class SykmeldingHandterer(
         sporsmalSvar: List<Sporsmal>?,
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
+        val tilleggsinfo =
+            tilleggsinfoSammenstillerService.sammenstillTilleggsinfo(
+                identer = identer,
+                brukerSvar = brukerSvar,
+                sykmelding = sykmelding,
+            )
 
         val oppdatertSykmelding =
             when (brukerSvar) {
@@ -45,22 +52,6 @@ class SykmeldingHandterer(
                         sykmelding = sykmelding,
                         identer = identer,
                         arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
-                        sporsmalSvar = sporsmalSvar,
-                    )
-                }
-                is ArbeidsledigBrukerSvar -> {
-                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-                        sykmelding = sykmelding,
-                        identer = identer,
-                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
-                        sporsmalSvar = sporsmalSvar,
-                    )
-                }
-                is PermittertBrukerSvar -> {
-                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-                        sykmelding = sykmelding,
-                        identer = identer,
-                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
@@ -88,6 +79,8 @@ class SykmeldingHandterer(
                         }
                     }
                 }
+                is ArbeidsledigBrukerSvar,
+                is PermittertBrukerSvar,
                 is FrilanserBrukerSvar,
                 is JordbrukerBrukerSvar,
                 is NaringsdrivendeBrukerSvar,
