@@ -159,6 +159,7 @@ data class SykmeldingHendelseDbRecord(
     val tidligereArbeidsgiver: PGobject?,
     val sporsmal: PGobject?,
     val arbeidstakerInfo: PGobject?,
+    val tilleggsinfo: PGobject?,
     val opprettet: Instant,
 ) {
     fun mapTilHendelse(): SykmeldingHendelse =
@@ -167,6 +168,7 @@ data class SykmeldingHendelseDbRecord(
             status = this.status,
             sporsmalSvar = this.sporsmal?.fraPsqlJson(),
             arbeidstakerInfo = this.arbeidstakerInfo?.fraPsqlJson(),
+            tilleggsinfo = this.tilleggsinfo?.fraPsqlJson(),
             opprettet = opprettet,
         )
 
@@ -187,6 +189,7 @@ data class SykmeldingHendelseDbRecord(
                 tidligereArbeidsgiver = null,
                 sporsmal = hendelse.sporsmalSvar?.tilPsqlJson(),
                 arbeidstakerInfo = hendelse.arbeidstakerInfo?.tilPsqlJson(),
+                tilleggsinfo = hendelse.tilleggsinfo?.tilPsqlJson(),
                 opprettet = hendelse.opprettet,
             )
     }

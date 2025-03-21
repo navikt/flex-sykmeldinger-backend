@@ -1,9 +1,27 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
+import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
 sealed interface Tilleggsinfo {
     val arbeidssituasjon: Arbeidssituasjon
+
+    companion object {
+        val deserializerModule =
+            SimpleModule().addPolymorphicDeserializer<Tilleggsinfo, Arbeidssituasjon>(Tilleggsinfo::arbeidssituasjon) {
+                when (it) {
+                    Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerTilleggsinfo::class
+                    Arbeidssituasjon.FRILANSER -> FrilanserTilleggsinfo::class
+                    Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo::class
+                    Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidsledigTilleggsinfo::class
+                    Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonTilleggsinfo::class
+                    Arbeidssituasjon.PERMITTERT -> PermittertTilleggsinfo::class
+                    Arbeidssituasjon.FISKER -> FiskerTilleggsinfo::class
+                    Arbeidssituasjon.JORDBRUKER -> JordbrukerTilleggsinfo::class
+                }
+            }
+    }
 }
 
 data class ArbeidstakerTilleggsinfo(
