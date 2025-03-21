@@ -1,5 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
+import com.fasterxml.jackson.databind.module.SimpleModule
+import no.nav.helse.flex.utils.addPolymorphicDeserializer
 import java.time.LocalDate
 
 sealed interface BrukerSvar {
@@ -7,6 +9,23 @@ sealed interface BrukerSvar {
     val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>
     val erOpplysningeneRiktige: SporsmalSvar<Boolean>
     val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>?
+
+    companion object {
+        val deserializerModule =
+            SimpleModule()
+                .addPolymorphicDeserializer(BrukerSvar::arbeidssituasjon) {
+                    when (it) {
+                        Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerBrukerSvar::class
+                        Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidsledigBrukerSvar::class
+                        Arbeidssituasjon.PERMITTERT -> PermittertBrukerSvar::class
+                        Arbeidssituasjon.FISKER -> FiskerBrukerSvar::class
+                        Arbeidssituasjon.FRILANSER -> FrilanserBrukerSvar::class
+                        Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerSvar::class
+                        Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerSvar::class
+                        Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerSvar::class
+                    }
+                }
+    }
 }
 
 data class ArbeidstakerBrukerSvar(

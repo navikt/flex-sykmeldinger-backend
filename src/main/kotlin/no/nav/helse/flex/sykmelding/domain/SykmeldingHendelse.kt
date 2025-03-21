@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import java.time.Instant
 
 data class SykmeldingHendelse(
@@ -7,6 +8,7 @@ data class SykmeldingHendelse(
     val status: HendelseStatus,
     val sporsmalSvar: List<Sporsmal>? = null,
     val arbeidstakerInfo: ArbeidstakerInfo? = null,
+    val brukerSvar: BrukerSvar? = null,
     val tilleggsinfo: Tilleggsinfo? = null,
     val opprettet: Instant,
 )
