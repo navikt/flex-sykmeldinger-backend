@@ -5,7 +5,6 @@ import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -14,11 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 class SykmeldingStatusEndrerTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusEndrer: SykmeldingStatusEndrer
-
-    @AfterEach
-    fun cleanUp() {
-        slettDatabase()
-    }
 
     private val standardStatusEndringCaser =
         listOf(
