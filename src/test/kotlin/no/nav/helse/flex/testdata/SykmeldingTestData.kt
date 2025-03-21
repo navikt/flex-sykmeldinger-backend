@@ -1,7 +1,6 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import java.time.Instant
@@ -11,7 +10,7 @@ fun lagSykmelding(
     sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
     meldingsinformasjon: Meldingsinformasjon = lagMeldingsinformasjonEnkel(),
     validation: ValidationResult = lagValidation(),
-    statuser: List<SykmeldingHendelse> =
+    hendelser: List<SykmeldingHendelse> =
         listOf(
             lagSykmeldingHendelse(),
         ),
@@ -24,29 +23,14 @@ fun lagSykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
         meldingsinformasjon = meldingsinformasjon,
         validation = validation,
-        hendelser = statuser,
+        hendelser = hendelser,
         opprettet = opprettet,
         hendelseOppdatert = hendelseOppdatert,
         sykmeldingGrunnlagOppdatert = sykmeldingGrunnlagOppdatert,
         validationOppdatert = validationOppdatert,
     )
 
-fun lagSykmeldingHendelse(
-    status: HendelseStatus = HendelseStatus.APEN,
-    sporsmalSvar: List<Sporsmal>? = null,
-    arbeidstakerInfo: ArbeidstakerInfo? = null,
-    tilleggsinfo: Tilleggsinfo? = null,
-    brukerSvar: BrukerSvar? = null,
-    opprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
-) = SykmeldingHendelse(
-    status = status,
-    sporsmalSvar = sporsmalSvar,
-    tilleggsinfo = tilleggsinfo,
-    brukerSvar = brukerSvar,
-    opprettet = opprettet,
-    arbeidstakerInfo = arbeidstakerInfo,
-)
-
+// TODO: Flytt denne
 fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): SykmeldingSporsmalSvarDto =
     SykmeldingSporsmalSvarDto(
         erOpplysningeneRiktige =

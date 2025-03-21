@@ -22,7 +22,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -50,7 +50,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -78,7 +78,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -106,7 +106,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -134,7 +134,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -162,7 +162,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -190,7 +190,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -218,7 +218,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
@@ -246,7 +246,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -275,7 +275,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -303,7 +303,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, gammelSykmeldingMedSammeArbeidsgiver, nySykmelding)
 
@@ -331,7 +331,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -360,7 +360,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -388,7 +388,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
@@ -416,7 +416,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -445,7 +445,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
 
         val fremtidigSykmelding =
@@ -461,7 +461,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, gjeldendeSykmelding, fremtidigSykmelding)
 
@@ -489,7 +489,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -518,7 +518,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -546,7 +546,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
@@ -574,7 +574,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -603,7 +603,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser =
+                hendelser =
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -631,7 +631,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                statuser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
             )
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 

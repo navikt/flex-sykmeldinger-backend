@@ -135,7 +135,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                statuser = listOf(hendelse),
+                hendelser = listOf(hendelse),
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
@@ -173,7 +173,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 val sykmelding =
                     lagSykmelding(
                         sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
-                        statuser = listOf(hendelse),
+                        hendelser = listOf(hendelse),
                     )
 
                 sykmeldingRepository.save(sykmelding)
@@ -212,7 +212,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 val sykmelding =
                     lagSykmelding(
                         sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
-                        statuser = listOf(hendelse),
+                        hendelser = listOf(hendelse),
                     )
 
                 sykmeldingRepository.save(sykmelding)

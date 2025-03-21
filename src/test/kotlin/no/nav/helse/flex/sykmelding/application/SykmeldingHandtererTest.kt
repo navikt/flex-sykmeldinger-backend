@@ -98,8 +98,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 6
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -125,8 +124,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 3
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -152,8 +150,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 3
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -179,12 +176,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 6
-                    hendelse.sporsmalSvar
-                        ?.find { it.tag == SporsmalTag.FISKER }
-                        ?.undersporsmal
-                        ?.size `should be equal to` 2
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -212,12 +204,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 7
-                    hendelse.sporsmalSvar
-                        ?.find { it.tag == SporsmalTag.FISKER }
-                        ?.undersporsmal
-                        ?.size `should be equal to` 2
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -245,12 +232,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 7
-                    hendelse.sporsmalSvar
-                        ?.find { it.tag == SporsmalTag.FISKER }
-                        ?.undersporsmal
-                        ?.size `should be equal to` 2
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -276,8 +258,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -303,8 +284,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -330,8 +310,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 5
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
 
@@ -357,8 +336,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sisteHendelse()
                 .let { hendelse ->
                     hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.sporsmalSvar.`should not be null`()
-                    hendelse.sporsmalSvar?.size `should be equal to` 2
+                    hendelse.brukerSvar.`should not be null`()
                 }
         }
     }
