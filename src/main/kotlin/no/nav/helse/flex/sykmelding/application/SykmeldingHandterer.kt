@@ -9,6 +9,8 @@ import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.util.function.Supplier
 
 @Service
 class SykmeldingHandterer(
@@ -16,6 +18,7 @@ class SykmeldingHandterer(
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
+    private val nowFactory: Supplier<Instant>,
 ) {
     private val logger = logger()
     private val sykmeldingStatusKafkaDTOKonverterer = SykmeldingStatusKafkaDTOKonverterer()
@@ -45,37 +48,20 @@ class SykmeldingHandterer(
                 sykmelding = sykmelding,
             )
 
-        val oppdatertSykmelding =
+        val nyStatus =
             when (brukerSvar) {
                 is ArbeidstakerBrukerSvar -> {
-                    sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
-                        sykmelding = sykmelding,
-                        identer = identer,
-                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
-                        sporsmalSvar = sporsmalSvar,
-                    )
+                    HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                 }
                 is FiskerBrukerSvar -> {
                     when (brukerSvar.lottOgHyre.svar) {
                         FiskerLottOgHyre.HYRE,
                         FiskerLottOgHyre.BEGGE,
                         -> {
-                            val arbeidstaker = brukerSvar.somArbeidstaker()
-
-                            sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
-                                sykmelding = sykmelding,
-                                identer = identer,
-                                arbeidsgiverOrgnummer = arbeidstaker.arbeidsgiverOrgnummer.svar,
-                                sporsmalSvar = sporsmalSvar,
-                            )
+                            HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                         }
                         FiskerLottOgHyre.LOTT -> {
-                            sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-                                sykmelding = sykmelding,
-                                identer = identer,
-                                arbeidsledigFraOrgnummer = null,
-                                sporsmalSvar = sporsmalSvar,
-                            )
+                            HendelseStatus.SENDT_TIL_NAV
                         }
                     }
                 }
@@ -86,14 +72,14 @@ class SykmeldingHandterer(
                 is NaringsdrivendeBrukerSvar,
                 is AnnetArbeidssituasjonBrukerSvar,
                 -> {
-                    sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-                        sykmelding = sykmelding,
-                        identer = identer,
-                        arbeidsledigFraOrgnummer = null,
-                        sporsmalSvar = sporsmalSvar,
-                    )
+                    HendelseStatus.SENDT_TIL_NAV
                 }
             }
+
+        sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = nyStatus)
+
+        val oppdatertSykmelding =
+            leggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
@@ -106,8 +92,8 @@ class SykmeldingHandterer(
         identer: PersonIdenter,
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
-
-        val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilAvbrutt(sykmelding = sykmelding)
+        val oppdatertSykmelding =
+            leggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
@@ -121,11 +107,30 @@ class SykmeldingHandterer(
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
 
-        val oppdatertSykmelding = sykmeldingStatusEndrer.endreStatusTilBekreftetAvvist(sykmelding = sykmelding)
+        val oppdatertSykmelding =
+            leggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
         return lagretSykmelding
+    }
+
+    private fun leggTilHendelse(
+        sykmelding: Sykmelding,
+        status: HendelseStatus,
+        brukerSvar: BrukerSvar? = null,
+        tilleggsinfo: Tilleggsinfo? = null,
+    ): Sykmelding {
+        sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = status)
+
+        return sykmelding.leggTilHendelse(
+            SykmeldingHendelse(
+                status = status,
+                brukerSvar = brukerSvar,
+                tilleggsinfo = tilleggsinfo,
+                opprettet = nowFactory.get(),
+            ),
+        )
     }
 
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
