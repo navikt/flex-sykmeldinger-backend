@@ -44,7 +44,7 @@ class TidligereArbeidsgivereHandterer {
 
             sykmeldinger.sortedWith(compareByDescending<Sykmelding> { it.tom }.thenByDescending { it.fom }).forEach { sykmelding ->
                 etterfolgendeSykmelding?.let { etterfolgende ->
-                    if (sykmelding `er kant i kant med` etterfolgende || sykmelding `overlapper med` etterfolgende) {
+                    if (sykmelding erKantIKantMed etterfolgende || sykmelding overlapperMed etterfolgende) {
                         sammenhengendeSykmeldinger.add(sykmelding)
                     }
                 }
@@ -53,29 +53,12 @@ class TidligereArbeidsgivereHandterer {
             return sammenhengendeSykmeldinger.sortedBy { it.tom }
         }
 
-        @Suppress("ktlint:standard:function-naming")
-        private infix fun Sykmelding.`overlapper med`(other: Sykmelding): Boolean = this.fom..this.tom overlapper other.fom..other.tom
+        private infix fun Sykmelding.overlapperMed(other: Sykmelding): Boolean = this.fom..this.tom overlapper other.fom..other.tom
 
-        private infix fun ClosedRange<LocalDate>.overlapper(other: ClosedRange<LocalDate>): Boolean {
-            val symeldingDatoer = this.toList()
-            val etterfolgendeDatoer = other.toList()
-            return symeldingDatoer.any { date -> other.contains(date) } || etterfolgendeDatoer.any { date -> this.contains(date) }
-        }
+        private infix fun ClosedRange<LocalDate>.overlapper(other: ClosedRange<LocalDate>): Boolean =
+            this.start <= other.endInclusive && other.start <= this.endInclusive
 
-        private fun ClosedRange<LocalDate>.toList(): List<LocalDate> {
-            val list = mutableListOf<LocalDate>()
-            var currentDate = this.start
-
-            while (!currentDate.isAfter(this.endInclusive)) {
-                list.add(currentDate)
-                currentDate = currentDate.plusDays(1)
-            }
-
-            return list
-        }
-
-        @Suppress("ktlint:standard:function-naming")
-        private infix fun Sykmelding.`er kant i kant med`(other: Sykmelding): Boolean = !erArbeidsDagIMellom(this.tom, other.fom)
+        private infix fun Sykmelding.erKantIKantMed(other: Sykmelding): Boolean = !erArbeidsDagIMellom(this.tom, other.fom)
 
         private fun erArbeidsDagIMellom(
             tom: LocalDate,
