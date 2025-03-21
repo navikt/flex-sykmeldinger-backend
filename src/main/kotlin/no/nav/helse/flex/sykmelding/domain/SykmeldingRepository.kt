@@ -115,29 +115,17 @@ data class SykmeldingDbRecord(
     val sykmeldingGrunnlagOppdatert: Instant,
     val validationOppdatert: Instant,
 ) {
-    fun mapTilSykmelding(): ISykmeldingGrunnlag {
-        val serialisertSykmelding = this.sykmelding
-        check(serialisertSykmelding.value != null) {
-            "sykmelding kolonne burde ikke være null"
-        }
-        return objectMapper.readValue(serialisertSykmelding.value!!)
-    }
+    fun mapTilSykmelding(): ISykmeldingGrunnlag =
+        this.sykmelding.fraPsqlJson()
+            ?: error("sykmelding kolonne burde ikke være null")
 
-    fun mapTilMeldingsinformasjon(): Meldingsinformasjon {
-        val serialisertMeldingsinformasjon = this.meldingsinformasjon
-        check(serialisertMeldingsinformasjon.value != null) {
-            "meldingsinformasjon kolonne burde ikke være null"
-        }
-        return objectMapper.readValue(serialisertMeldingsinformasjon.value!!)
-    }
+    fun mapTilMeldingsinformasjon(): Meldingsinformasjon =
+        this.meldingsinformasjon.fraPsqlJson()
+            ?: error("meldingsinformasjon kolonne burde ikke være null")
 
-    fun mapTilValidation(): ValidationResult {
-        val serialisertValidation = this.validation
-        check(serialisertValidation.value != null) {
-            "validation kolonne burde ikke være null"
-        }
-        return objectMapper.readValue(serialisertValidation.value!!)
-    }
+    fun mapTilValidation(): ValidationResult =
+        this.validation.fraPsqlJson()
+            ?: error("validation kolonne burde ikke være null")
 
     companion object {
         fun mapFraSykmelding(sykmelding: Sykmelding): SykmeldingDbRecord =
@@ -145,21 +133,9 @@ data class SykmeldingDbRecord(
                 id = sykmelding.databaseId,
                 sykmeldingId = sykmelding.sykmeldingId,
                 fnr = sykmelding.pasientFnr,
-                sykmelding =
-                    PGobject().apply {
-                        type = "json"
-                        value = sykmelding.sykmeldingGrunnlag.serialisertTilString()
-                    },
-                meldingsinformasjon =
-                    PGobject().apply {
-                        type = "json"
-                        value = sykmelding.meldingsinformasjon.serialisertTilString()
-                    },
-                validation =
-                    PGobject().apply {
-                        type = "json"
-                        value = sykmelding.validation.serialisertTilString()
-                    },
+                sykmelding = sykmelding.sykmeldingGrunnlag.tilPsqlJson(),
+                meldingsinformasjon = sykmelding.meldingsinformasjon.tilPsqlJson(),
+                validation = sykmelding.validation.tilPsqlJson(),
                 opprettet = sykmelding.opprettet,
                 hendelseOppdatert = sykmelding.hendelseOppdatert,
                 sykmeldingGrunnlagOppdatert = sykmelding.sykmeldingGrunnlagOppdatert,
@@ -189,44 +165,41 @@ data class SykmeldingHendelseDbRecord(
         SykmeldingHendelse(
             databaseId = this.id,
             status = this.status,
-            sporsmalSvar =
-                this.sporsmal?.value?.let {
-                    objectMapper.readValue(it)
-                },
-            arbeidstakerInfo =
-                this.arbeidstakerInfo?.value?.let {
-                    objectMapper.readValue(it)
-                },
+            sporsmalSvar = this.sporsmal?.fraPsqlJson(),
+            arbeidstakerInfo = this.arbeidstakerInfo?.fraPsqlJson(),
             opprettet = opprettet,
         )
 
     companion object {
         fun mapFraHendelser(
-            statuser: List<SykmeldingHendelse>,
+            hendelser: List<SykmeldingHendelse>,
             sykmeldingId: String,
-        ): List<SykmeldingHendelseDbRecord> =
-            statuser.map { status ->
-                SykmeldingHendelseDbRecord(
-                    id = status.databaseId,
-                    sykmeldingId = sykmeldingId,
-                    status = status.status,
-                    tidligereArbeidsgiver = null,
-                    sporsmal =
-                        status.sporsmalSvar?.let { sp ->
-                            PGobject().apply {
-                                type = "json"
-                                value = sp.serialisertTilString()
-                            }
-                        },
-                    arbeidstakerInfo =
-                        status.arbeidstakerInfo?.let {
-                            PGobject().apply {
-                                type = "json"
-                                value = it.serialisertTilString()
-                            }
-                        },
-                    opprettet = status.opprettet,
-                )
-            }
+        ): List<SykmeldingHendelseDbRecord> = hendelser.map { mapFraHendelse(it, sykmeldingId) }
+
+        private fun mapFraHendelse(
+            hendelse: SykmeldingHendelse,
+            sykmeldingId: String,
+        ): SykmeldingHendelseDbRecord =
+            SykmeldingHendelseDbRecord(
+                id = hendelse.databaseId,
+                sykmeldingId = sykmeldingId,
+                status = hendelse.status,
+                tidligereArbeidsgiver = null,
+                sporsmal = hendelse.sporsmalSvar?.tilPsqlJson(),
+                arbeidstakerInfo = hendelse.arbeidstakerInfo?.tilPsqlJson(),
+                opprettet = hendelse.opprettet,
+            )
     }
 }
+
+private fun Any.tilPsqlJson(): PGobject {
+    val pgObject = PGobject()
+    pgObject.type = "json"
+    pgObject.value = this.serialisertTilString()
+    return pgObject
+}
+
+private inline fun <reified T> PGobject.fraPsqlJson(): T? =
+    this.value?.let {
+        objectMapper.readValue<T>(it)
+    }
