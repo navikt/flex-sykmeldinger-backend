@@ -44,7 +44,7 @@ class SykmeldingHandterer(
                     sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer,
+                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
@@ -52,7 +52,7 @@ class SykmeldingHandterer(
                     sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer,
+                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
@@ -60,12 +60,12 @@ class SykmeldingHandterer(
                     sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer,
+                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
                 is FiskerBrukerSvar -> {
-                    when (brukerSvar.lottOgHyre) {
+                    when (brukerSvar.lottOgHyre.svar) {
                         FiskerLottOgHyre.HYRE,
                         FiskerLottOgHyre.BEGGE,
                         -> {
@@ -74,7 +74,7 @@ class SykmeldingHandterer(
                             sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
                                 sykmelding = sykmelding,
                                 identer = identer,
-                                arbeidsgiverOrgnummer = arbeidstaker.arbeidsgiverOrgnummer,
+                                arbeidsgiverOrgnummer = arbeidstaker.arbeidsgiverOrgnummer.svar,
                                 sporsmalSvar = sporsmalSvar,
                             )
                         }

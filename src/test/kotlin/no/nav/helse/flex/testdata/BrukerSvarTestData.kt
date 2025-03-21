@@ -12,12 +12,13 @@ fun lagArbeidstakerBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): ArbeidstakerBrukerSvar =
     ArbeidstakerBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-        riktigNarmesteLeder = riktigNarmesteLeder,
-        harEgenmeldingsdager = harEgenmeldingsdager,
-        egenmeldingsdager = egenmeldingsdager,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.ARBEIDSTAKER.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.somUkjentSporsmal(),
+        riktigNarmesteLeder = riktigNarmesteLeder.somUkjentSporsmal(),
+        harEgenmeldingsdager = harEgenmeldingsdager.somUkjentSporsmal(),
+        egenmeldingsdager = egenmeldingsdager?.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagArbeidsledigBrukerSvar(
@@ -26,9 +27,10 @@ fun lagArbeidsledigBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): ArbeidsledigBrukerSvar =
     ArbeidsledigBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.ARBEIDSLEDIG.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer?.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagPermittertBrukerSvar(
@@ -37,9 +39,10 @@ fun lagPermittertBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): PermittertBrukerSvar =
     PermittertBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.PERMITTERT.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer?.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagFiskerHyreBrukerSvar(
@@ -53,14 +56,15 @@ fun lagFiskerHyreBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): FiskerBrukerSvar =
     FiskerBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        lottOgHyre = lottOgHyre,
-        blad = blad,
-        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-        riktigNarmesteLeder = riktigNarmesteLeder,
-        harEgenmeldingsdager = harEgenmeldingsdager,
-        egenmeldingsdager = egenmeldingsdager,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.FISKER.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        lottOgHyre = lottOgHyre.somUkjentSporsmal(),
+        blad = blad.somUkjentSporsmal(),
+        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.somUkjentSporsmal(),
+        riktigNarmesteLeder = riktigNarmesteLeder.somUkjentSporsmal(),
+        harEgenmeldingsdager = harEgenmeldingsdager.somUkjentSporsmal(),
+        egenmeldingsdager = egenmeldingsdager?.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagFiskerLottBrukerSvar(
@@ -73,13 +77,14 @@ fun lagFiskerLottBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): FiskerBrukerSvar =
     FiskerBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        lottOgHyre = lottOgHyre,
-        blad = blad,
-        harBruktEgenmelding = harBruktEgenmelding,
-        egenmeldingsperioder = egenmeldingsperioder,
-        harForsikring = harForsikring,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.FISKER.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        lottOgHyre = lottOgHyre.somUkjentSporsmal(),
+        blad = blad.somUkjentSporsmal(),
+        harBruktEgenmelding = harBruktEgenmelding.somUkjentSporsmal(),
+        egenmeldingsperioder = egenmeldingsperioder?.somUkjentSporsmal(),
+        harForsikring = harForsikring.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagFrilanserBrukerSvar(
@@ -90,11 +95,12 @@ fun lagFrilanserBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): FrilanserBrukerSvar =
     FrilanserBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        harBruktEgenmelding = harBruktEgenmelding,
-        egenmeldingsperioder = egenmeldingsperioder,
-        harForsikring = harForsikring,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.FRILANSER.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        harBruktEgenmelding = harBruktEgenmelding.somUkjentSporsmal(),
+        egenmeldingsperioder = egenmeldingsperioder?.somUkjentSporsmal(),
+        harForsikring = harForsikring.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagJordbrukerBrukerSvar(
@@ -105,11 +111,12 @@ fun lagJordbrukerBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): JordbrukerBrukerSvar =
     JordbrukerBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        harBruktEgenmelding = harBruktEgenmelding,
-        egenmeldingsperioder = egenmeldingsperioder,
-        harForsikring = harForsikring,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.JORDBRUKER.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        harBruktEgenmelding = harBruktEgenmelding.somUkjentSporsmal(),
+        egenmeldingsperioder = egenmeldingsperioder?.somUkjentSporsmal(),
+        harForsikring = harForsikring.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagNaringsdrivendeBrukerSvar(
@@ -120,11 +127,12 @@ fun lagNaringsdrivendeBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): NaringsdrivendeBrukerSvar =
     NaringsdrivendeBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        harBruktEgenmelding = harBruktEgenmelding,
-        egenmeldingsperioder = egenmeldingsperioder,
-        harForsikring = harForsikring,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.NAERINGSDRIVENDE.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        harBruktEgenmelding = harBruktEgenmelding.somUkjentSporsmal(),
+        egenmeldingsperioder = egenmeldingsperioder?.somUkjentSporsmal(),
+        harForsikring = harForsikring.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
 
 fun lagAnnetArbeidssituasjonBrukerSvar(
@@ -132,6 +140,9 @@ fun lagAnnetArbeidssituasjonBrukerSvar(
     uriktigeOpplysninger: List<UriktigeOpplysning>? = null,
 ): AnnetArbeidssituasjonBrukerSvar =
     AnnetArbeidssituasjonBrukerSvar(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidssituasjonSporsmal = Arbeidssituasjon.ANNET.somUkjentSporsmal(),
+        erOpplysningeneRiktige = erOpplysningeneRiktige.somUkjentSporsmal(),
+        uriktigeOpplysninger = uriktigeOpplysninger?.somUkjentSporsmal(),
     )
+
+private fun <T : Any> T.somUkjentSporsmal(): SporsmalSvar<T> = SporsmalSvar("<ukjent sporsmal>", this)
