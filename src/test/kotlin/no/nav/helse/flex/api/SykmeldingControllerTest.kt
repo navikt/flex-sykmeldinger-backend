@@ -394,6 +394,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ),
             )
 
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(orgnummer = "orgnummer", fnr = "fnr"),
+            )
+
             val result =
                 mockMvc
                     .perform(
@@ -408,7 +412,12 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 }",
                             ).contentType(MediaType.APPLICATION_JSON)
                             .content(
-                                lagSendSykmeldingRequestDTO().serialisertTilString(),
+                                lagSendSykmeldingRequestDTO(
+                                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+                                    arbeidsgiverOrgnummer = "orgnummer",
+                                    riktigNarmesteLeder = YesOrNoDTO.YES,
+                                    harEgenmeldingsdager = YesOrNoDTO.YES,
+                                ).serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn()
@@ -490,7 +499,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 lagSendSykmeldingRequestDTO(
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                                     arbeidsledig =
-                                        Arbeidsledig(
+                                        ArbeidsledigDTO(
                                             arbeidsledigFraOrgnummer = "orgnummer",
                                         ),
                                 ).serialisertTilString(),
@@ -776,16 +785,19 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 }
 
 fun lagSendSykmeldingRequestDTO(
-    arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+    erOpplysningeneRiktige: YesOrNoDTO = YesOrNoDTO.YES,
+    arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ANNET,
     arbeidsgiverOrgnummer: String? = null,
-    arbeidsledig: Arbeidsledig? = null,
+    harEgenmeldingsdager: YesOrNoDTO? = null,
+    riktigNarmesteLeder: YesOrNoDTO? = null,
+    arbeidsledig: ArbeidsledigDTO? = null,
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
-        erOpplysningeneRiktige = YesOrNo.YES,
+        erOpplysningeneRiktige = erOpplysningeneRiktige,
         arbeidssituasjon = arbeidssituasjon,
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-        riktigNarmesteLeder = null,
-        harEgenmeldingsdager = YesOrNo.NO,
+        riktigNarmesteLeder = riktigNarmesteLeder,
+        harEgenmeldingsdager = harEgenmeldingsdager,
         arbeidsledig = arbeidsledig,
         egenmeldingsdager = null,
         egenmeldingsperioder = null,

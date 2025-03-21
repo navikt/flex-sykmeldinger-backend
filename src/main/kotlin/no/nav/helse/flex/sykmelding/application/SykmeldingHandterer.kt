@@ -33,50 +33,48 @@ class SykmeldingHandterer(
     fun sendSykmelding(
         sykmeldingId: String,
         identer: PersonIdenter,
-        arbeidssituasjonBrukerInfo: ArbeidssituasjonBrukerInfo,
+        brukerSvar: BrukerSvar,
         sporsmalSvar: List<Sporsmal>?,
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
 
         val oppdatertSykmelding =
-            when (arbeidssituasjonBrukerInfo) {
-                is ArbeidstakerBrukerInfo -> {
+            when (brukerSvar) {
+                is ArbeidstakerBrukerSvar -> {
                     sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsgiverOrgnummer = arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
+                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
-                is ArbeidsledigBrukerInfo -> {
+                is ArbeidsledigBrukerSvar -> {
                     sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsledigFraOrgnummer = arbeidssituasjonBrukerInfo.arbeidsledigFraOrgnummer,
+                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
-                is PermittertBrukerInfo -> {
+                is PermittertBrukerSvar -> {
                     sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
                         sykmelding = sykmelding,
                         identer = identer,
-                        arbeidsledigFraOrgnummer = arbeidssituasjonBrukerInfo.arbeidsledigFraOrgnummer,
+                        arbeidsledigFraOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.svar,
                         sporsmalSvar = sporsmalSvar,
                     )
                 }
-                is FiskerBrukerInfo -> {
-                    when (arbeidssituasjonBrukerInfo.lottOgHyre) {
+                is FiskerBrukerSvar -> {
+                    when (brukerSvar.lottOgHyre.svar) {
                         FiskerLottOgHyre.HYRE,
                         FiskerLottOgHyre.BEGGE,
                         -> {
-                            requireNotNull(
-                                arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
-                            ) { "arbeidsgiverOrgnummer må være satt dersom fisker med LOTT" }
+                            val arbeidstaker = brukerSvar.somArbeidstaker()
 
                             sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
                                 sykmelding = sykmelding,
                                 identer = identer,
-                                arbeidsgiverOrgnummer = arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
+                                arbeidsgiverOrgnummer = arbeidstaker.arbeidsgiverOrgnummer.svar,
                                 sporsmalSvar = sporsmalSvar,
                             )
                         }
@@ -90,10 +88,10 @@ class SykmeldingHandterer(
                         }
                     }
                 }
-                is FrilanserBrukerInfo,
-                is JordbrukerBrukerInfo,
-                is NaringsdrivendeBrukerInfo,
-                is AnnetArbeidssituasjonBrukerInfo,
+                is FrilanserBrukerSvar,
+                is JordbrukerBrukerSvar,
+                is NaringsdrivendeBrukerSvar,
+                is AnnetArbeidssituasjonBrukerSvar,
                 -> {
                     sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
                         sykmelding = sykmelding,
