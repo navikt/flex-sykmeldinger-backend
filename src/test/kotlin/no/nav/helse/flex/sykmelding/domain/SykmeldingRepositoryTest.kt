@@ -91,7 +91,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde legge til en status i en sykmelding`() {
+    fun `burde legge til en hendelse i en sykmelding`() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
@@ -112,7 +112,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde lagre status med arbeidstaker info`() {
+    fun `burde lagre hendelse med arbeidstaker info`() {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
