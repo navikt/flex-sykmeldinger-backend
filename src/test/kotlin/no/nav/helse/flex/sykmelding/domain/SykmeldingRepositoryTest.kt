@@ -6,14 +6,17 @@ import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldHaveSize
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     @AfterEach
-    fun rensDatabase() {
+    fun afterEach() {
         super.slettDatabase()
     }
 
@@ -91,7 +94,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde legge til en status i en sykmelding`() {
+    fun `burde legge til en hendelse i en sykmelding`() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
@@ -112,7 +115,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde lagre status med arbeidstaker info`() {
+    fun `burde lagre hendelse med arbeidstaker info`() {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
@@ -147,6 +150,37 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 ),
             )
     }
+
+    @TestFactory
+    fun `burde lagre hendelse med tilleggsinfo`() =
+        listOf(
+            lagArbeidstakerTilleggsinfo(),
+            lagArbeidsledigTilleggsinfo(),
+            lagPermittertTilleggsinfo(),
+            lagFiskerTilleggsinfo(),
+            lagFrilanserTilleggsinfo(),
+            lagNaringsdrivendeTilleggsinfo(),
+            lagJordbrukerTilleggsinfo(),
+            lagAnnetArbeidssituasjonTilleggsinfo(),
+        ).map { tilleggsinfo ->
+            DynamicTest.dynamicTest("burde lagre hendelse med tilleggsinfo for ${tilleggsinfo.arbeidssituasjon}") {
+                val sykmeldingId = tilleggsinfo.arbeidssituasjon.name
+                val hendelse =
+                    lagSykmeldingHendelse(
+                        tilleggsinfo = tilleggsinfo,
+                    )
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        statuser = listOf(hendelse),
+                    )
+
+                sykmeldingRepository.save(sykmelding)
+                val lagretSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
+                val lagretTilleggsinfo = lagretSykmelding.sisteHendelse().tilleggsinfo
+                lagretTilleggsinfo `should be equal to` tilleggsinfo
+            }
+        }
 
     @Test
     fun `burde hente alle ved person identer`() {

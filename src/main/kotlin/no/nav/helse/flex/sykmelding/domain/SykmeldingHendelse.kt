@@ -7,6 +7,7 @@ data class SykmeldingHendelse(
     val status: HendelseStatus,
     val sporsmalSvar: List<Sporsmal>? = null,
     val arbeidstakerInfo: ArbeidstakerInfo? = null,
+    val tilleggsinfo: Tilleggsinfo? = null,
     val opprettet: Instant,
 )
 
