@@ -11,27 +11,24 @@ class TilleggsinfoSammenstillerService(
 ) {
     fun sammenstillTilleggsinfo(
         identer: PersonIdenter,
-        sporsmal: List<Sporsmal>,
         sykmelding: Sykmelding,
+        brukerSvar: BrukerSvar,
     ): Tilleggsinfo? {
-        val arbeidssituasjonString = sporsmal.findWithMal(SporsmalMaler.ARBEIDSSITUASJON).svar()
-        val arbeidssituasjon = enumValueOf<Arbeidssituasjon>(arbeidssituasjonString)
-
-        return when (arbeidssituasjon) {
-            Arbeidssituasjon.ARBEIDSTAKER -> {
+        return when (brukerSvar) {
+            is ArbeidstakerBrukerSvar -> {
                 return sammenstillArbeidstakerTilleggsinfo(
                     identer = identer,
                     sykmelding = sykmelding,
-                    sporsmal = sporsmal,
+                    brukerSvar = brukerSvar,
                 )
             }
-            Arbeidssituasjon.ARBEIDSLEDIG,
-            Arbeidssituasjon.PERMITTERT,
-            Arbeidssituasjon.FISKER,
-            Arbeidssituasjon.FRILANSER,
-            Arbeidssituasjon.JORDBRUKER,
-            Arbeidssituasjon.NAERINGSDRIVENDE,
-            Arbeidssituasjon.ANNET,
+            is ArbeidsledigBrukerSvar,
+            is PermittertBrukerSvar,
+            is FiskerBrukerSvar,
+            is FrilanserBrukerSvar,
+            is JordbrukerBrukerSvar,
+            is NaringsdrivendeBrukerSvar,
+            is AnnetArbeidssituasjonBrukerSvar,
             -> null
         }
     }
@@ -39,11 +36,15 @@ class TilleggsinfoSammenstillerService(
     fun sammenstillArbeidstakerTilleggsinfo(
         identer: PersonIdenter,
         sykmelding: Sykmelding,
-        sporsmal: List<Sporsmal>,
+        brukerSvar: ArbeidstakerBrukerSvar,
     ): Tilleggsinfo {
-        val arbeidsgiverOrgnummer = sporsmal.findWithMal(SporsmalMaler.ARBEIDSGIVER_ORGNUMMER).svar()
-        val arbeidsgiver = finnArbeidsgiver(identer, sykmelding, arbeidsgiverOrgnummer)
-
+        val arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar
+        val arbeidsgiver =
+            finnArbeidsgiver(
+                identer = identer,
+                sykmelding = sykmelding,
+                arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+            )
         return ArbeidstakerTilleggsinfo(
             arbeidsgiver = arbeidsgiver,
         )

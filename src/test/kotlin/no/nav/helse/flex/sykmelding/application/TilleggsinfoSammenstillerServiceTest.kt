@@ -4,8 +4,8 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
-import no.nav.helse.flex.sykmelding.domain.SporsmalMaler
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagArbeidstakerBrukerSvar
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
@@ -49,17 +49,17 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
-            val sporsmal =
-                listOf(
-                    SporsmalMaler.ARBEIDSSITUASJON.medSvar("ARBEIDSTAKER").sporsmal,
-                    SporsmalMaler.ARBEIDSGIVER_ORGNUMMER.medSvar("orgnr").sporsmal,
+
+            val brukerSvar =
+                lagArbeidstakerBrukerSvar(
+                    arbeidsgiverOrgnummer = "orgnr",
                 )
 
             val tilleggsinfo =
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
-                    sporsmal = sporsmal,
                     sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
                 )
 
             tilleggsinfo
@@ -92,17 +92,16 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
-            val sporsmal =
-                listOf(
-                    SporsmalMaler.ARBEIDSSITUASJON.medSvar("ARBEIDSTAKER").sporsmal,
-                    SporsmalMaler.ARBEIDSGIVER_ORGNUMMER.medSvar("orgnr").sporsmal,
+            val brukerSvar =
+                lagArbeidstakerBrukerSvar(
+                    arbeidsgiverOrgnummer = "orgnr",
                 )
 
             val tilleggsinfo =
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
-                    sporsmal = sporsmal,
                     sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
                 )
 
             tilleggsinfo
@@ -118,17 +117,13 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
 
-            val sporsmal =
-                listOf(
-                    SporsmalMaler.ARBEIDSSITUASJON.medSvar("ARBEIDSTAKER").sporsmal,
-                    SporsmalMaler.ARBEIDSGIVER_ORGNUMMER.medSvar("orgnr").sporsmal,
-                )
+            val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
 
             invoking {
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
-                    sporsmal = sporsmal,
                     sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
                 )
             } shouldThrow IllegalArgumentException::class
         }
