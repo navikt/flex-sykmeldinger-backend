@@ -154,17 +154,17 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     @TestFactory
     fun `burde lagre hendelse med tilleggsinfo`() =
         listOf(
-            byggArbeidstakerTilleggsinfo(),
-            byggArbeidsledigTilleggsinfo(),
-            byggPermittertTilleggsinfo(),
-            byggFiskerTilleggsinfo(),
-            byggFrilanserTilleggsinfo(),
-            byggNaringsdrivendeTilleggsinfo(),
-            byggJordbrukerTilleggsinfo(),
-            byggAnnetArbeidssituasjonTilleggsinfo(),
-        ).mapIndexed { i, tilleggsinfo ->
+            lagArbeidstakerTilleggsinfo(),
+            lagArbeidsledigTilleggsinfo(),
+            lagPermittertTilleggsinfo(),
+            lagFiskerTilleggsinfo(),
+            lagFrilanserTilleggsinfo(),
+            lagNaringsdrivendeTilleggsinfo(),
+            lagJordbrukerTilleggsinfo(),
+            lagAnnetArbeidssituasjonTilleggsinfo(),
+        ).map { tilleggsinfo ->
             DynamicTest.dynamicTest("burde lagre hendelse med tilleggsinfo for ${tilleggsinfo.arbeidssituasjon}") {
-                val sykmeldingId = "$i"
+                val sykmeldingId = tilleggsinfo.arbeidssituasjon.name
                 val hendelse =
                     lagSykmeldingHendelse(
                         tilleggsinfo = tilleggsinfo,
