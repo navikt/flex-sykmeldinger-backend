@@ -11,7 +11,7 @@ fun lagSykmelding(
     sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
     meldingsinformasjon: Meldingsinformasjon = lagMeldingsinformasjonEnkel(),
     validation: ValidationResult = lagValidation(),
-    statuser: List<SykmeldingHendelse> =
+    hendelser: List<SykmeldingHendelse> =
         listOf(
             lagSykmeldingHendelse(),
         ),
@@ -24,7 +24,7 @@ fun lagSykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
         meldingsinformasjon = meldingsinformasjon,
         validation = validation,
-        hendelser = statuser,
+        hendelser = hendelser,
         opprettet = opprettet,
         hendelseOppdatert = hendelseOppdatert,
         sykmeldingGrunnlagOppdatert = sykmeldingGrunnlagOppdatert,

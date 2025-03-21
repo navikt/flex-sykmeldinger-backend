@@ -32,7 +32,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
 
             arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
@@ -56,7 +56,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
 
             invoking {
@@ -169,7 +169,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
 
             val endretSykmelding =
@@ -191,7 +191,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
             invoking {
                 sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
@@ -257,7 +257,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
 
             val endretSykmelding = sykmeldingStatusEndrer.endreStatusTilAvbrutt(sykmelding = sykmelding)
@@ -273,7 +273,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                 )
 
             invoking {
@@ -341,7 +341,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                     validation = lagValidation(status = RuleType.INVALID),
                 )
 
@@ -358,7 +358,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-                    statuser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
+                    hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                     validation = lagValidation(status = RuleType.INVALID),
                 )
 
