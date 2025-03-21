@@ -10,6 +10,7 @@ import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
@@ -55,7 +56,14 @@ class SykmeldingController(
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<Any> = ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build()
+    ): ResponseEntity<List<TidligereArbeidsgiver>> {
+        val identer = tokenxValidering.hentIdenter()
+
+        val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
+        val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
+
+        return ResponseEntity.ok(tidligereArbeidsgivere)
+    }
 
     @ProtectedWithClaims(
         issuer = TOKENX,
