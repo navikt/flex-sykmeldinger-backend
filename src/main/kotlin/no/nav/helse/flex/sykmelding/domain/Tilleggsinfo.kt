@@ -9,7 +9,7 @@ sealed interface Tilleggsinfo {
 
     companion object {
         val deserializerModule =
-            SimpleModule().addPolymorphicDeserializer<Tilleggsinfo, Arbeidssituasjon>(Tilleggsinfo::arbeidssituasjon) {
+            SimpleModule().addPolymorphicDeserializer(Tilleggsinfo::arbeidssituasjon) {
                 when (it) {
                     Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerTilleggsinfo::class
                     Arbeidssituasjon.FRILANSER -> FrilanserTilleggsinfo::class
