@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
+import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import org.springframework.stereotype.Service
@@ -12,6 +13,7 @@ import java.util.function.Supplier
 class SykmeldingStatusEndrer(
     private val nowFactory: Supplier<Instant>,
     private val virksomhetHenterService: VirksomhetHenterService,
+    private val sykmeldingRepository: SykmeldingRepository,
 ) {
     private val log = logger()
 
@@ -124,13 +126,22 @@ class SykmeldingStatusEndrer(
             )
         }
 
-        // TODO: Hent tidligere arbeidsgivere
+        val tidligereArbeidsgivere =
+            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+                alleSykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer),
+                gjeldendeSykmeldingId = sykmelding.sykmeldingId,
+            )
+        val valgtTidligereArbeidsgiver = sporsmalSvar?.first { it.tag == SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER }?.forsteSvarVerdi
+        if (valgtTidligereArbeidsgiver == null) {
+            log.error("Fant ikke valgt tidligere arbeidsgiver")
+        }
+
         val hendelse =
             SykmeldingHendelse(
                 status = HendelseStatus.SENDT_TIL_NAV,
                 opprettet = nowFactory.get(),
                 sporsmalSvar = sporsmalSvar,
-                // tidligereArbeidsgiver = tidligereArbeidsgiver,
+                tidligereArbeidsgiver = tidligereArbeidsgivere.first { it.orgnummer == valgtTidligereArbeidsgiver },
             )
 
         return sykmelding.leggTilHendelse(hendelse)
