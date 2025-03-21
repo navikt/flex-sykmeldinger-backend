@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.domain.Tilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.tsm.SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE
 
@@ -22,6 +23,7 @@ val objectMapper: ObjectMapper =
         .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
         .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
         .addModule(SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE)
+        .addModule(BrukerSvar.deserializerModule)
         .addModule(Tilleggsinfo.deserializerModule)
         .build()
 

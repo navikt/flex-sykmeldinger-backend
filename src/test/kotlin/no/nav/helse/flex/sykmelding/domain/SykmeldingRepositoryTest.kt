@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
@@ -179,6 +180,45 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 val lagretSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
                 val lagretTilleggsinfo = lagretSykmelding.sisteHendelse().tilleggsinfo
                 lagretTilleggsinfo `should be equal to` tilleggsinfo
+            }
+        }
+
+    @TestFactory
+    fun `burde lagre hendelse med brukerSvar`() =
+        listOf(
+            lagArbeidstakerBrukerSvar(),
+            lagArbeidsledigBrukerSvar(),
+            lagPermittertBrukerSvar(),
+            lagFiskerHyreBrukerSvar(),
+            lagFiskerLottBrukerSvar(),
+            lagFrilanserBrukerSvar(),
+            lagNaringsdrivendeBrukerSvar(),
+            lagJordbrukerBrukerSvar(),
+            lagAnnetArbeidssituasjonBrukerSvar(),
+        ).map { brukerSvar ->
+            val caseId =
+                if (brukerSvar is FiskerBrukerSvar) {
+                    "${brukerSvar.arbeidssituasjon.name}-${brukerSvar.lottOgHyre.svar}"
+                } else {
+                    brukerSvar.arbeidssituasjon.name
+                }
+
+            DynamicTest.dynamicTest("burde lagre hendelse med brukerSvar for $caseId") {
+                val sykmeldingId = caseId
+                val hendelse =
+                    lagSykmeldingHendelse(
+                        brukerSvar = brukerSvar,
+                    )
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        statuser = listOf(hendelse),
+                    )
+
+                sykmeldingRepository.save(sykmelding)
+                val lagretSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
+                val lagretBrukerSvar = lagretSykmelding.sisteHendelse().brukerSvar
+                lagretBrukerSvar `should be equal to` brukerSvar
             }
         }
 
