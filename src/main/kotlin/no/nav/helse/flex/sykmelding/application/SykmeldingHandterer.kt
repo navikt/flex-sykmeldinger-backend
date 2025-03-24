@@ -79,7 +79,7 @@ class SykmeldingHandterer(
         sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = nyStatus)
 
         val oppdatertSykmelding =
-            leggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
+            sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
@@ -93,7 +93,7 @@ class SykmeldingHandterer(
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
         val oppdatertSykmelding =
-            leggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
+            sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
@@ -108,14 +108,14 @@ class SykmeldingHandterer(
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
 
         val oppdatertSykmelding =
-            leggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
+            sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
         sendSykmeldingKafka(lagretSykmelding)
         return lagretSykmelding
     }
 
-    private fun leggTilHendelse(
+    private fun sjekkStatusOgLeggTilHendelse(
         sykmelding: Sykmelding,
         status: HendelseStatus,
         brukerSvar: BrukerSvar? = null,
