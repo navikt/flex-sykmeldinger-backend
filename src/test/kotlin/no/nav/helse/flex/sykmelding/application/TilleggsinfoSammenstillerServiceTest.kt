@@ -124,7 +124,11 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
-            } shouldThrow IllegalArgumentException::class
+            }.shouldThrow(KunneIkkeFinneTilleggsinfoException::class)
+                .apply {
+                    exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
+                    exceptionMessage shouldContainIgnoringCase "sykmelding"
+                }
         }
     }
 
