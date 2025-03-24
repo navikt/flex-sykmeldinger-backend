@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.databind.module.SimpleModule
+import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
@@ -31,13 +32,13 @@ data class ArbeidstakerTilleggsinfo(
 }
 
 data class ArbeidsledigTilleggsinfo(
-    val tidligereArbeidsgiver: Arbeidsgiver? = null,
+    val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ) : Tilleggsinfo {
     override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG
 }
 
 data class PermittertTilleggsinfo(
-    val tidligereArbeidsgiver: Arbeidsgiver? = null,
+    val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ) : Tilleggsinfo {
     override val arbeidssituasjon = Arbeidssituasjon.PERMITTERT
 }

@@ -500,7 +500,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                                     arbeidsledig =
                                         ArbeidsledigDTO(
-                                            arbeidsledigFraOrgnummer = "orgnummer",
+                                            arbeidsledigFraOrgnummer = null,
                                         ),
                                 ).serialisertTilString(),
                             ),

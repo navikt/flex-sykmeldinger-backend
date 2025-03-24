@@ -1,6 +1,7 @@
 package no.nav.helse.flex.tidligereArbeidsgivere
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import org.springframework.stereotype.Service
@@ -15,42 +16,60 @@ class TidligereArbeidsgivereHandterer {
             alleSykmeldinger: List<Sykmelding>,
             gjeldendeSykmeldingId: String,
         ): List<TidligereArbeidsgiver> {
-            val sammenhengendeSykmeldinger = settSammenhengendeSykmeldinger(alleSykmeldinger)
+            val gjeldendeSykmelding =
+                alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
+                    ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
+
+            val innsendteSykmeldinger =
+                alleSykmeldinger
+                    .filter {
+                        it.sisteHendelse().status in
+                            setOf(HendelseStatus.SENDT_TIL_NAV, HendelseStatus.SENDT_TIL_ARBEIDSGIVER)
+                    }.filter { it.sykmeldingId != gjeldendeSykmeldingId }
+
+            val sammenhengendeSykmeldinger =
+                settSammenhengendeSykmeldinger(
+                    sykmeldinger = innsendteSykmeldinger,
+                    fremTilSykmelding = gjeldendeSykmelding,
+                )
+
             val unikeArbeidsgivere =
                 sammenhengendeSykmeldinger
-                    .takeWhile { it.sykmeldingId != gjeldendeSykmeldingId }
-                    .filter {
-                        it.sisteHendelse().status == HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    }.distinctBy {
-                        it
-                            .sisteHendelse()
-                            .arbeidstakerInfo
-                            ?.arbeidsgiver
-                            ?.orgnummer
-                    }.map { sykmelding ->
-                        val arbeidsgiverForSisteHendelse = sykmelding.sisteHendelse().arbeidstakerInfo?.arbeidsgiver
+                    .map { it.sisteHendelse().tilleggsinfo }
+                    .filterIsInstance<ArbeidstakerTilleggsinfo>()
+                    .distinctBy {
+                        it.arbeidsgiver.orgnummer
+                    }.map {
                         TidligereArbeidsgiver(
-                            orgNavn = arbeidsgiverForSisteHendelse?.orgnavn ?: "Ukjent",
-                            orgnummer = arbeidsgiverForSisteHendelse?.orgnummer ?: "Ukjent",
+                            orgNavn = it.arbeidsgiver.orgnavn,
+                            orgnummer = it.arbeidsgiver.orgnummer,
                         )
                     }
 
             return unikeArbeidsgivere
         }
 
-        private fun settSammenhengendeSykmeldinger(sykmeldinger: List<Sykmelding>): List<Sykmelding> {
+        private fun settSammenhengendeSykmeldinger(
+            sykmeldinger: List<Sykmelding>,
+            fremTilSykmelding: Sykmelding,
+        ): List<Sykmelding> {
             val sammenhengendeSykmeldinger = mutableListOf<Sykmelding>()
-            var etterfolgendeSykmelding: Sykmelding? = null
+            var etterfolgendeSykmelding: Sykmelding = fremTilSykmelding
 
-            sykmeldinger.sortedWith(compareByDescending<Sykmelding> { it.tom }.thenByDescending { it.fom }).forEach { sykmelding ->
-                etterfolgendeSykmelding?.let { etterfolgende ->
-                    if (sykmelding erKantIKantMed etterfolgende || sykmelding overlapperMed etterfolgende) {
+            val sorterteSykmeldingerDescending =
+                sykmeldinger
+                    .filter { it.fom <= fremTilSykmelding.fom }
+                    .sortedWith(
+                        compareByDescending<Sykmelding> { it.tom }.thenByDescending { it.fom },
+                    )
+            sorterteSykmeldingerDescending
+                .forEach { sykmelding ->
+                    if (sykmelding erKantIKantMed etterfolgendeSykmelding || sykmelding overlapperMed etterfolgendeSykmelding) {
                         sammenhengendeSykmeldinger.add(sykmelding)
                     }
+                    etterfolgendeSykmelding = sykmelding
                 }
-                etterfolgendeSykmelding = sykmelding
-            }
-            return sammenhengendeSykmeldinger.sortedBy { it.tom }
+            return sammenhengendeSykmeldinger.reversed()
         }
 
         private infix fun Sykmelding.overlapperMed(other: Sykmelding): Boolean = this.fom..this.tom overlapper other.fom..other.tom

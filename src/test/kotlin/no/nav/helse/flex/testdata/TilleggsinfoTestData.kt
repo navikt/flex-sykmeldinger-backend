@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testdata
 
+import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmelding.domain.*
 
 fun lagArbeidstakerTilleggsinfo(arbeidsgiver: Arbeidsgiver = lagArbeidsgiver()): ArbeidstakerTilleggsinfo =
@@ -7,12 +8,24 @@ fun lagArbeidstakerTilleggsinfo(arbeidsgiver: Arbeidsgiver = lagArbeidsgiver()):
         arbeidsgiver = arbeidsgiver,
     )
 
-fun lagArbeidsledigTilleggsinfo(tidligereArbeidsgiver: Arbeidsgiver? = lagArbeidsgiver()): ArbeidsledigTilleggsinfo =
+fun lagArbeidsledigTilleggsinfo(
+    tidligereArbeidsgiver: TidligereArbeidsgiver? =
+        TidligereArbeidsgiver(
+            orgNavn = "orgnavn",
+            orgnummer = "orgnr",
+        ),
+): ArbeidsledigTilleggsinfo =
     ArbeidsledigTilleggsinfo(
         tidligereArbeidsgiver = tidligereArbeidsgiver,
     )
 
-fun lagPermittertTilleggsinfo(tidligereArbeidsgiver: Arbeidsgiver? = lagArbeidsgiver()): PermittertTilleggsinfo =
+fun lagPermittertTilleggsinfo(
+    tidligereArbeidsgiver: TidligereArbeidsgiver? =
+        TidligereArbeidsgiver(
+            orgNavn = "orgnavn",
+            orgnummer = "orgnr",
+        ),
+): PermittertTilleggsinfo =
     PermittertTilleggsinfo(
         tidligereArbeidsgiver = tidligereArbeidsgiver,
     )

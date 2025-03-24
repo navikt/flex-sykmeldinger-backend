@@ -3,12 +3,12 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
+import no.nav.helse.flex.sykmelding.domain.ArbeidsledigTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.PermittertTilleggsinfo
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagArbeidstakerBrukerSvar
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -125,7 +125,209 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
-            } shouldThrow IllegalArgumentException::class
+            }.shouldThrow(KunneIkkeFinneTilleggsinfoException::class)
+                .apply {
+                    exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
+                    exceptionMessage shouldContainIgnoringCase "sykmelding"
+                }
+        }
+    }
+
+    @Nested
+    inner class Arbeidsledig {
+        @Test
+        fun `burde hente riktig tidligere arbeidsgiver`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ).leggTilHendelse(
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            tilleggsinfo = lagArbeidstakerTilleggsinfo(arbeidsgiver = lagArbeidsgiver(orgnummer = "orgnr")),
+                        ),
+                ),
+            )
+
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagArbeidsledigBrukerSvar(
+                    arbeidsledigFraOrgnummer = "orgnr",
+                )
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
+                    it.tidligereArbeidsgiver.`should not be null`()
+                    it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
+                }
+        }
+
+        @Test
+        fun `burde akseptere at valgt arbeidsgiver er null`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagArbeidsledigBrukerSvar(
+                    arbeidsledigFraOrgnummer = null,
+                )
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
+                    it.tidligereArbeidsgiver.`should be null`()
+                }
+        }
+
+        @Test
+        fun `burde feile dersom valgt tidligere arbeidsgiver ikke finnes`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagArbeidsledigBrukerSvar(
+                    arbeidsledigFraOrgnummer = "orgnr",
+                )
+
+            invoking {
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+            } `should throw` KunneIkkeFinneTilleggsinfoException::class
+        }
+    }
+
+    @Nested
+    inner class Permittert {
+        @Test
+        fun `burde hente riktig tidligere arbeidsgiver`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ).leggTilHendelse(
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            tilleggsinfo = lagArbeidstakerTilleggsinfo(arbeidsgiver = lagArbeidsgiver(orgnummer = "orgnr")),
+                        ),
+                ),
+            )
+
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagPermittertBrukerSvar(
+                    arbeidsledigFraOrgnummer = "orgnr",
+                )
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<PermittertTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.PERMITTERT
+                    it.tidligereArbeidsgiver.`should not be null`()
+                    it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
+                }
+        }
+
+        @Test
+        fun `burde akseptere at valgt arbeidsgiver er null`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagPermittertBrukerSvar(
+                    arbeidsledigFraOrgnummer = null,
+                )
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<PermittertTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.PERMITTERT
+                    it.tidligereArbeidsgiver.`should be null`()
+                }
+        }
+
+        @Test
+        fun `burde feile dersom valgt tidligere arbeidsgiver ikke finnes`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagPermittertBrukerSvar(
+                    arbeidsledigFraOrgnummer = "orgnr",
+                )
+
+            invoking {
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+            } `should throw` KunneIkkeFinneTilleggsinfoException::class
         }
     }
 }

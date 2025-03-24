@@ -26,13 +26,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -82,13 +83,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -138,13 +140,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -194,13 +197,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -250,13 +254,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -279,13 +284,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -335,13 +341,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -364,13 +371,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Annen gammel jobb",
-                                        orgnummer = "annetGammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Annen gammel jobb",
+                                            orgnummer = "annetGammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -420,13 +428,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -493,13 +502,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -522,13 +532,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Annen gammel jobb",
-                                        orgnummer = "annetGammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Annen gammel jobb",
+                                            orgnummer = "AnnetGammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -578,13 +589,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Gammel jobb",
-                                        orgnummer = "gammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Gammel jobb",
+                                            orgnummer = "gammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
@@ -607,13 +619,14 @@ class TidligereArbeidsgivereHandtererTest {
                     listOf(
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            arbeidstakerInfo =
-                                lagArbeidstakerInfo(
-                                    lagArbeidsgiver(
-                                        orgnavn = "Annen gammel jobb",
-                                        orgnummer = "annetGammeltOrgnummer",
-                                        erAktivtArbeidsforhold = false,
-                                    ),
+                            tilleggsinfo =
+                                lagArbeidstakerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnavn = "Annen gammel jobb",
+                                            orgnummer = "AnnetGammeltOrgnummer",
+                                            erAktivtArbeidsforhold = false,
+                                        ),
                                 ),
                         ),
                     ),
