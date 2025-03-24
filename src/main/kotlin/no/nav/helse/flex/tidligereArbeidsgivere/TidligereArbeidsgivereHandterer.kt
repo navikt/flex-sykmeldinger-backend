@@ -13,8 +13,11 @@ class TidligereArbeidsgivereHandterer {
     companion object {
         fun finnTidligereArbeidsgivere(
             alleSykmeldinger: List<Sykmelding>,
-            sykmelding: Sykmelding,
+            gjeldendeSykmeldingId: String,
         ): List<TidligereArbeidsgiver> {
+            val sykmelding =
+                alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
+                    ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
             val sammenhengendeSykmeldinger =
                 settSammenhengendeSykmeldinger(alleSykmeldinger, fremTilSykmelding = sykmelding)
                     .filter { it.sisteHendelse().status in setOf(HendelseStatus.SENDT_TIL_NAV, HendelseStatus.SENDT_TIL_ARBEIDSGIVER) }
