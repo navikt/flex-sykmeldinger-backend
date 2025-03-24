@@ -10,6 +10,8 @@ import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 
 class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
@@ -331,9 +333,10 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
     @Nested
     inner class Fisker {
         @Nested
-        inner class Hyre {
-            @Test
-            fun `burde hente riktig arbeidsgiver med narmeste leder`() {
+        inner class HyreOgBegge {
+            @ParameterizedTest
+            @EnumSource(FiskerLottOgHyre::class, names = ["HYRE", "BEGGE"])
+            fun `burde hente riktig arbeidsgiver med narmeste leder`(fiskerLottOgHyre: FiskerLottOgHyre) {
                 arbeidsforholdRepository.save(
                     lagArbeidsforhold(
                         fnr = "fnr",
@@ -359,6 +362,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 val brukerSvar =
                     lagFiskerHyreBrukerSvar(
                         arbeidsgiverOrgnummer = "orgnr",
+                        lottOgHyre = fiskerLottOgHyre,
                     )
 
                 val tilleggsinfo =
@@ -387,8 +391,9 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     }
             }
 
-            @Test
-            fun `burde akseptere at narmeste leder ikke finnes`() {
+            @ParameterizedTest
+            @EnumSource(FiskerLottOgHyre::class, names = ["HYRE", "BEGGE"])
+            fun `burde akseptere at narmeste leder ikke finnes`(fiskerLottOgHyre: FiskerLottOgHyre) {
                 arbeidsforholdRepository.save(
                     lagArbeidsforhold(
                         fnr = "fnr",
@@ -405,6 +410,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 val brukerSvar =
                     lagFiskerHyreBrukerSvar(
                         arbeidsgiverOrgnummer = "orgnr",
+                        lottOgHyre = fiskerLottOgHyre,
                     )
 
                 val tilleggsinfo =
@@ -422,14 +428,15 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldBeNull()
             }
 
-            @Test
-            fun `burde feile dersom arbeidsforhold ikke finnes`() {
+            @ParameterizedTest
+            @EnumSource(FiskerLottOgHyre::class, names = ["HYRE", "BEGGE"])
+            fun `burde feile dersom arbeidsforhold ikke finnes`(fiskerLottOgHyre: FiskerLottOgHyre) {
                 val sykmelding =
                     lagSykmelding(
                         sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
 
-                val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
+                val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = "orgnr", lottOgHyre = fiskerLottOgHyre)
 
                 invoking {
                     sammenstillerService.sammenstillTilleggsinfo(
@@ -441,6 +448,34 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .apply {
                         exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
                         exceptionMessage shouldContainIgnoringCase "sykmelding"
+                    }
+            }
+        }
+
+        @Nested
+        inner class Lott {
+            @Test
+            fun `burde returnere riktig tilleggsinfo`() {
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    )
+
+                val brukerSvar = lagFiskerLottBrukerSvar()
+
+                val tilleggsinfo =
+                    sammenstillerService.sammenstillTilleggsinfo(
+                        identer = PersonIdenter("fnr"),
+                        sykmelding = sykmelding,
+                        brukerSvar = brukerSvar,
+                    )
+
+                tilleggsinfo
+                    .shouldNotBeNull()
+                    .shouldBeInstanceOf<FiskerTilleggsinfo>()
+                    .also {
+                        it.arbeidssituasjon `should be equal to` Arbeidssituasjon.FISKER
+                        it.arbeidsgiver.`should be null`()
                     }
             }
         }
