@@ -3,10 +3,7 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import no.nav.helse.flex.sykmelding.domain.ArbeidsledigTilleggsinfo
-import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.PermittertTilleggsinfo
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
@@ -328,6 +325,236 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     brukerSvar = brukerSvar,
                 )
             } `should throw` KunneIkkeFinneTilleggsinfoException::class
+        }
+    }
+
+    @Nested
+    inner class Fisker {
+        @Nested
+        inner class Hyre {
+            @Test
+            fun `burde hente riktig arbeidsgiver med narmeste leder`() {
+                arbeidsforholdRepository.save(
+                    lagArbeidsforhold(
+                        fnr = "fnr",
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jorgnr",
+                        orgnavn = "Orgnavn",
+                    ),
+                )
+
+                narmesteLederRepository.save(
+                    lagNarmesteLeder(
+                        brukerFnr = "fnr",
+                        orgnummer = "orgnr",
+                        narmesteLederNavn = "Navn",
+                    ),
+                )
+
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    )
+
+                val brukerSvar =
+                    lagFiskerHyreBrukerSvar(
+                        arbeidsgiverOrgnummer = "orgnr",
+                    )
+
+                val tilleggsinfo =
+                    sammenstillerService.sammenstillTilleggsinfo(
+                        identer = PersonIdenter("fnr"),
+                        sykmelding = sykmelding,
+                        brukerSvar = brukerSvar,
+                    )
+
+                tilleggsinfo
+                    .shouldNotBeNull()
+                    .shouldBeInstanceOf<FiskerTilleggsinfo>()
+                    .run {
+                        arbeidssituasjon `should be equal to` Arbeidssituasjon.FISKER
+                        arbeidsgiver
+                            .`should not be null`()
+                            .run {
+                                orgnummer `should be equal to` "orgnr"
+                                juridiskOrgnummer `should be equal to` "jorgnr"
+                                orgnavn `should be equal to` "Orgnavn"
+                                erAktivtArbeidsforhold.`should be true`()
+                                narmesteLeder
+                                    .`should not be null`()
+                                    .navn `should be equal to` "Navn"
+                            }
+                    }
+            }
+
+            @Test
+            fun `burde akseptere at narmeste leder ikke finnes`() {
+                arbeidsforholdRepository.save(
+                    lagArbeidsforhold(
+                        fnr = "fnr",
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jorgnr",
+                        orgnavn = "Orgnavn",
+                    ),
+                )
+
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    )
+                val brukerSvar =
+                    lagFiskerHyreBrukerSvar(
+                        arbeidsgiverOrgnummer = "orgnr",
+                    )
+
+                val tilleggsinfo =
+                    sammenstillerService.sammenstillTilleggsinfo(
+                        identer = PersonIdenter("fnr"),
+                        sykmelding = sykmelding,
+                        brukerSvar = brukerSvar,
+                    )
+
+                tilleggsinfo
+                    .shouldBeInstanceOf<FiskerTilleggsinfo>()
+                    .arbeidsgiver
+                    .shouldNotBeNull()
+                    .narmesteLeder
+                    .shouldBeNull()
+            }
+
+            @Test
+            fun `burde feile dersom arbeidsforhold ikke finnes`() {
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    )
+
+                val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
+
+                invoking {
+                    sammenstillerService.sammenstillTilleggsinfo(
+                        identer = PersonIdenter("fnr"),
+                        sykmelding = sykmelding,
+                        brukerSvar = brukerSvar,
+                    )
+                }.shouldThrow(KunneIkkeFinneTilleggsinfoException::class)
+                    .apply {
+                        exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
+                        exceptionMessage shouldContainIgnoringCase "sykmelding"
+                    }
+            }
+        }
+    }
+
+    @Nested
+    inner class Frilanser {
+        @Test
+        fun `burde returnere riktig tilleggsinfo`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                )
+
+            val brukerSvar =
+                lagFrilanserBrukerSvar()
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<FrilanserTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.FRILANSER
+                }
+        }
+    }
+
+    @Nested
+    inner class Naringsdrivende {
+        @Test
+        fun `burde returnere riktig tilleggsinfo`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                )
+
+            val brukerSvar =
+                lagNaringsdrivendeBrukerSvar()
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<NaringsdrivendeTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.NAERINGSDRIVENDE
+                }
+        }
+    }
+
+    @Nested
+    inner class Jordbruker {
+        @Test
+        fun `burde returnere riktig tilleggsinfo`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                )
+
+            val brukerSvar =
+                lagJordbrukerBrukerSvar()
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<JordbrukerTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.JORDBRUKER
+                }
+        }
+    }
+
+    @Nested
+    inner class AnnetArbeidssituasjon {
+        @Test
+        fun `burde returnere riktig tilleggsinfo`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                )
+
+            val brukerSvar =
+                lagAnnetArbeidssituasjonBrukerSvar()
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<AnnetArbeidssituasjonTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ANNET
+                }
         }
     }
 }

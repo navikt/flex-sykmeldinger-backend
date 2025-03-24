@@ -19,37 +19,41 @@ class TilleggsinfoSammenstillerService(
         identer: PersonIdenter,
         sykmelding: Sykmelding,
         brukerSvar: BrukerSvar,
-    ): Tilleggsinfo? {
-        return when (brukerSvar) {
+    ): Tilleggsinfo =
+        when (brukerSvar) {
             is ArbeidstakerBrukerSvar -> {
-                return sammenstillArbeidstakerTilleggsinfo(
+                sammenstillArbeidstakerTilleggsinfo(
                     identer = identer,
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
             }
             is ArbeidsledigBrukerSvar -> {
-                return sammenstillArbeidsledigTilleggsinfo(
+                sammenstillArbeidsledigTilleggsinfo(
                     identer = identer,
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
             }
             is PermittertBrukerSvar -> {
-                return sammenstillPermittertTilleggsinfo(
+                sammenstillPermittertTilleggsinfo(
                     identer = identer,
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
             }
-            is FiskerBrukerSvar,
-            is FrilanserBrukerSvar,
-            is JordbrukerBrukerSvar,
-            is NaringsdrivendeBrukerSvar,
-            is AnnetArbeidssituasjonBrukerSvar,
-            -> null
+            is FiskerBrukerSvar -> {
+                sammenstillFiskerTilleggsinfo(
+                    identer = identer,
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+            }
+            is FrilanserBrukerSvar -> FrilanserTilleggsinfo
+            is JordbrukerBrukerSvar -> JordbrukerTilleggsinfo
+            is NaringsdrivendeBrukerSvar -> NaringsdrivendeTilleggsinfo
+            is AnnetArbeidssituasjonBrukerSvar -> AnnetArbeidssituasjonTilleggsinfo
         }
-    }
 
     fun sammenstillArbeidsledigTilleggsinfo(
         identer: PersonIdenter,
@@ -125,31 +129,33 @@ class TilleggsinfoSammenstillerService(
         )
     }
 
-    fun sammenstillFiskerTilleggsinfo() {
-//        when (arbeidssituasjonBrukerInfo.lottOgHyre) {
-//            FiskerLottOgHyre.HYRE,
-//            FiskerLottOgHyre.BEGGE,
-//                -> {
-//                requireNotNull(
-//                    arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
-//                ) { "arbeidsgiverOrgnummer må være satt dersom fisker med LOTT" }
-//
-//                sykmeldingStatusEndrer.endreStatusTilSendtTilArbeidsgiver(
-//                    sykmelding = sykmelding,
-//                    identer = identer,
-//                    arbeidsgiverOrgnummer = arbeidssituasjonBrukerInfo.arbeidsgiverOrgnummer,
-//                    sporsmalSvar = sporsmalSvar,
-//                )
-//            }
-//            FiskerLottOgHyre.LOTT -> {
-//                sykmeldingStatusEndrer.endreStatusTilSendtTilNav(
-//                    sykmelding = sykmelding,
-//                    identer = identer,
-//                    arbeidsledigFraOrgnummer = null,
-//                    sporsmalSvar = sporsmalSvar,
-//                )
-//            }
-//        }
+    fun sammenstillFiskerTilleggsinfo(
+        identer: PersonIdenter,
+        sykmelding: Sykmelding,
+        brukerSvar: FiskerBrukerSvar,
+    ): FiskerTilleggsinfo {
+        when (brukerSvar.lottOgHyre.svar) {
+            FiskerLottOgHyre.HYRE,
+            FiskerLottOgHyre.BEGGE,
+            -> {
+                requireNotNull(
+                    brukerSvar.arbeidsgiverOrgnummer,
+                ) { "arbeidsgiverOrgnummer må være satt dersom fisker med LOTT, for sykmelding: ${sykmelding.sykmeldingId}" }
+
+                val arbeidsgiver =
+                    finnArbeidsgiver(
+                        identer = identer,
+                        sykmelding = sykmelding,
+                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
+                    )
+                return FiskerTilleggsinfo(
+                    arbeidsgiver = arbeidsgiver,
+                )
+            }
+            FiskerLottOgHyre.LOTT -> {
+                return FiskerTilleggsinfo()
+            }
+        }
     }
 
     private fun finnArbeidsgiver(
