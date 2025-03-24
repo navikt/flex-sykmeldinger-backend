@@ -143,7 +143,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr"),
+                            tilleggsinfo = lagArbeidstakerTilleggsinfo(arbeidsgiver = lagArbeidsgiver(orgnummer = "orgnr")),
                         ),
                 ),
             )
@@ -171,7 +171,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
                     it.tidligereArbeidsgiver.`should not be null`()
                     it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
                 }
@@ -179,10 +179,55 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
         @Test
         fun `burde akseptere at valgt arbeidsgiver er null`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagArbeidsledigBrukerSvar(
+                    arbeidsledigFraOrgnummer = null,
+                )
+
+            val tilleggsinfo =
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+
+            tilleggsinfo
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
+                .also {
+                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
+                    it.tidligereArbeidsgiver.`should be null`()
+                }
         }
 
         @Test
         fun `burde feile dersom valgt tidligere arbeidsgiver ikke finnes`() {
+            val sykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
+                )
+
+            val brukerSvar =
+                lagArbeidsledigBrukerSvar(
+                    arbeidsledigFraOrgnummer = "orgnr",
+                )
+
+            invoking {
+                sammenstillerService.sammenstillTilleggsinfo(
+                    identer = PersonIdenter("fnr"),
+                    sykmelding = sykmelding,
+                    brukerSvar = brukerSvar,
+                )
+            } `should throw` KunneIkkeFinneTilleggsinfoException::class
         }
     }
 }

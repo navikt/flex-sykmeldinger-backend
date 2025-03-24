@@ -99,7 +99,7 @@ class TilleggsinfoSammenstillerService(
                 alleSykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer),
                 gjeldendeSykmeldingId = sykmelding.sykmeldingId,
             )
-        return tidligereArbeidsgivere.find { it.orgNavn == valgtArbeidsledigFraOrgnummer }
+        return tidligereArbeidsgivere.find { it.orgnummer == valgtArbeidsledigFraOrgnummer }
             ?: throw KunneIkkeFinneTilleggsinfoException(
                 "Fant ikke tidligere arbeidsgiver med orgnummer fra bruker svar: '$valgtArbeidsledigFraOrgnummer' " +
                     "for sykmeldingId ${sykmelding.sykmeldingId}",

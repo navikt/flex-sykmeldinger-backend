@@ -1,6 +1,7 @@
 package no.nav.helse.flex.tidligereArbeidsgivere
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import org.springframework.stereotype.Service
@@ -15,27 +16,33 @@ class TidligereArbeidsgivereHandterer {
             alleSykmeldinger: List<Sykmelding>,
             gjeldendeSykmeldingId: String,
         ): List<TidligereArbeidsgiver> {
-            val sykmelding =
+            val gjeldendeSykmelding =
                 alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
                     ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
+
+            val innsendteSykmeldinger =
+                alleSykmeldinger
+                    .filter {
+                        it.sisteHendelse().status in
+                            setOf(HendelseStatus.SENDT_TIL_NAV, HendelseStatus.SENDT_TIL_ARBEIDSGIVER)
+                    }.filter { it.sykmeldingId != gjeldendeSykmeldingId }
+
             val sammenhengendeSykmeldinger =
-                settSammenhengendeSykmeldinger(alleSykmeldinger, fremTilSykmelding = sykmelding)
-                    .filter { it.sisteHendelse().status in setOf(HendelseStatus.SENDT_TIL_NAV, HendelseStatus.SENDT_TIL_ARBEIDSGIVER) }
+                settSammenhengendeSykmeldinger(
+                    sykmeldinger = innsendteSykmeldinger,
+                    fremTilSykmelding = gjeldendeSykmelding,
+                )
+
             val unikeArbeidsgivere =
                 sammenhengendeSykmeldinger
-                    .filter {
-                        it.sisteHendelse().status == HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    }.distinctBy {
-                        it
-                            .sisteHendelse()
-                            .arbeidstakerInfo
-                            ?.arbeidsgiver
-                            ?.orgnummer
-                    }.map { sykmelding ->
-                        val arbeidsgiverForSisteHendelse = sykmelding.sisteHendelse().arbeidstakerInfo?.arbeidsgiver
+                    .map { it.sisteHendelse().tilleggsinfo }
+                    .filterIsInstance<ArbeidstakerTilleggsinfo>()
+                    .distinctBy {
+                        it.arbeidsgiver.orgnummer
+                    }.map {
                         TidligereArbeidsgiver(
-                            orgNavn = arbeidsgiverForSisteHendelse?.orgnavn ?: "Ukjent",
-                            orgnummer = arbeidsgiverForSisteHendelse?.orgnummer ?: "Ukjent",
+                            orgNavn = it.arbeidsgiver.orgnavn,
+                            orgnummer = it.arbeidsgiver.orgnummer,
                         )
                     }
 
