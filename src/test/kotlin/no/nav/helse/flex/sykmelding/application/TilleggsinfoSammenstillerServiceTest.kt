@@ -136,21 +136,23 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
     inner class Arbeidsledig {
         @Test
         fun `burde hente riktig tidligere arbeidsgiver`() {
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
-            ).leggTilHendelse(
-                sykmeldingHendelse =
-                    lagSykmeldingHendelse(
-                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                        brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr"),
-                    ),
-            ).also {
-                sykmeldingRepository.save(it)
-            }
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                ).leggTilHendelse(
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr"),
+                        ),
+                ),
+            )
 
             val sykmelding =
-                lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    ),
                 )
 
             val brukerSvar =

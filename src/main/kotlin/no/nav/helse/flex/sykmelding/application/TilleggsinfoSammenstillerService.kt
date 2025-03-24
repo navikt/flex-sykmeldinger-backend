@@ -101,7 +101,7 @@ class TilleggsinfoSammenstillerService(
             )
         return tidligereArbeidsgivere.find { it.orgNavn == valgtArbeidsledigFraOrgnummer }
             ?: throw KunneIkkeFinneTilleggsinfoException(
-                "Fant ikke valgt tidligere arbeidsgiver $valgtArbeidsledigFraOrgnummer " +
+                "Fant ikke tidligere arbeidsgiver med orgnummer fra bruker svar: '$valgtArbeidsledigFraOrgnummer' " +
                     "for sykmeldingId ${sykmelding.sykmeldingId}",
             ).also {
                 log.error(it.message)
