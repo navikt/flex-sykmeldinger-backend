@@ -110,7 +110,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            val brukerSvar = lagArbeidsledigBrukerSvar(arbeidsledigFraOrgnummer = "orgnr")
+            val brukerSvar = lagArbeidsledigBrukerSvar(arbeidsledigFraOrgnummer = null)
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmelding(
@@ -136,7 +136,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            val brukerSvar = lagPermittertBrukerSvar(arbeidsledigFraOrgnummer = "orgnr")
+            val brukerSvar = lagPermittertBrukerSvar(arbeidsledigFraOrgnummer = null)
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmelding(

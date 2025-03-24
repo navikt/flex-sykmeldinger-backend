@@ -38,21 +38,19 @@ data class SendSykmeldingRequestDTO(
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig" }
-                requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer) { "$arbeidssituasjon må ha satt arbeidsledigFraOrgnummer" }
                 ArbeidsledigBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
-                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer.somUkjentSporsmal(),
+                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer?.somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
                 )
             }
             Arbeidssituasjon.PERMITTERT -> {
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig" }
-                requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer) { "$arbeidssituasjon må ha satt arbeidsledigFraOrgnummer" }
                 PermittertBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
-                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer.somUkjentSporsmal(),
+                    arbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer?.somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
                 )
             }
