@@ -410,6 +410,21 @@ class TidligereArbeidsgivereHandtererTest {
     }
 
     @Test
+    fun `burde kun returnere arbeidsgiver fra tidligere valgt`() {
+        TODO()
+    }
+
+    @Test
+    fun `burde returnere arbeidsgivere fra to parallele sykmeldingsforløp`() {
+        TODO()
+    }
+
+    @Test
+    fun `burde ikke returnere når det er lik fom`() {
+        TODO()
+    }
+
+    @Test
     fun `burde ikke returnere _fremtidig_ arbeidsgiver`() {
         val gammelSykmelding =
             lagSykmelding(
