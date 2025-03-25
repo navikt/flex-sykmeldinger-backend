@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
     @Autowired
@@ -138,7 +139,18 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde hente riktig tidligere arbeidsgiver`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        LocalDate.parse("2021-01-01"),
+                                        LocalDate.parse("2021-01-10"),
+                                    ),
+                                ),
+                        ),
                 ).leggTilHendelse(
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
@@ -151,7 +163,18 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "2",
+                                lagPasient(fnr = "fnr"),
+                                aktiviteter =
+                                    listOf(
+                                        lagAktivitetIkkeMulig(
+                                            LocalDate.parse("2021-01-11"),
+                                            LocalDate.parse("2021-01-20"),
+                                        ),
+                                    ),
+                            ),
                     ),
                 )
 
@@ -237,7 +260,18 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde hente riktig tidligere arbeidsgiver`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        LocalDate.parse("2021-01-01"),
+                                        LocalDate.parse("2021-01-10"),
+                                    ),
+                                ),
+                        ),
                 ).leggTilHendelse(
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
@@ -250,7 +284,18 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "2",
+                                lagPasient(fnr = "fnr"),
+                                aktiviteter =
+                                    listOf(
+                                        lagAktivitetIkkeMulig(
+                                            LocalDate.parse("2021-01-11"),
+                                            LocalDate.parse("2021-01-20"),
+                                        ),
+                                    ),
+                            ),
                     ),
                 )
 
