@@ -28,21 +28,21 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -84,19 +84,18 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagPermittertTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagPermittertTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
         val nySykmelding =
@@ -112,8 +111,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelPermitertSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -140,21 +139,21 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -168,8 +167,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelPermitertSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -196,22 +195,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -225,8 +224,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -253,22 +252,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -282,8 +281,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -310,22 +309,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -339,8 +338,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -367,20 +366,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -397,22 +395,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -426,8 +424,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelSykmelding, gammelSykmeldingMedSammeArbeidsgiver, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -454,20 +452,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -484,22 +481,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val tidligereArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -513,21 +510,21 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
+
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -541,8 +538,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger =
             listOf(
                 sykmeldingForArbeidsgiver1,
@@ -579,20 +576,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -609,22 +605,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val tidligereArbeidsledigSykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -638,19 +634,18 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
 
@@ -667,21 +662,21 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                    ),
+                            ),
                     ),
             )
+
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -695,8 +690,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger =
             listOf(
                 sykmeldingForArbeidsgiver1,
@@ -730,20 +725,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -760,22 +754,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val tidligereArbeidsledigSykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -789,19 +783,18 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                    ),
+                            ),
                     ),
             )
 
@@ -818,21 +811,21 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_NAV,
-                            tilleggsinfo =
-                                lagArbeidsledigTilleggsinfo(
-                                    tidligereArbeidsgiver =
-                                        TidligereArbeidsgiver(
-                                            orgNavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        tilleggsinfo =
+                            lagArbeidsledigTilleggsinfo(
+                                tidligereArbeidsgiver =
+                                    TidligereArbeidsgiver(
+                                        orgNavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                    ),
+                            ),
                     ),
             )
+
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -846,8 +839,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger =
             listOf(
                 sykmeldingForArbeidsgiver1,
@@ -881,22 +874,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -910,8 +903,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
 
         val alleSykmeldinger = listOf(gammelSykmelding1, nySykmelding)
         val tidligereArbeidsgivere =
@@ -938,20 +930,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -968,8 +959,7 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
 
         val fremtidigSykmelding =
             lagSykmelding(
@@ -984,8 +974,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER))
+
         val alleSykmeldinger = listOf(gammelSykmelding, gjeldendeSykmelding, fremtidigSykmelding)
 
         val tidligereArbeidsgivere =
@@ -1012,20 +1002,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -1042,22 +1031,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -1071,8 +1060,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV))
+
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
@@ -1099,20 +1088,19 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver1,
-                                            orgnummer = arbeidsgiver1Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver1,
+                                        orgnummer = arbeidsgiver1Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
 
@@ -1129,22 +1117,22 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            tilleggsinfo =
-                                lagArbeidstakerTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnavn = arbeidsgiver2,
-                                            orgnummer = arbeidsgiver2Orgnummer,
-                                            erAktivtArbeidsforhold = false,
-                                        ),
-                                ),
-                        ),
+            ).leggTilHendelse(
+                sykmeldingHendelse =
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        tilleggsinfo =
+                            lagArbeidstakerTilleggsinfo(
+                                arbeidsgiver =
+                                    lagArbeidsgiver(
+                                        orgnavn = arbeidsgiver2,
+                                        orgnummer = arbeidsgiver2Orgnummer,
+                                        erAktivtArbeidsforhold = false,
+                                    ),
+                            ),
                     ),
             )
+
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
@@ -1158,8 +1146,8 @@ class TidligereArbeidsgivereHandtererTest {
                                 ),
                             ),
                     ),
-                hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
-            )
+            ).leggTilHendelse(sykmeldingHendelse = lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER))
+
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
