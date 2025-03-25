@@ -1,6 +1,7 @@
 package no.nav.helse.flex.tidligereArbeidsgivere
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
+import no.nav.helse.flex.sykmelding.domain.ArbeidsledigTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
@@ -33,6 +34,21 @@ class TidligereArbeidsgivereHandterer {
                     fremTilSykmelding = gjeldendeSykmelding,
                 )
 
+            val sistValgteArbeidsgivere =
+                sammenhengendeSykmeldinger
+                    .reversed()
+                    .groupBy { it.fom }
+                    .firstNotNullOfOrNull { it.value }
+                    ?.mapNotNull { it.sisteHendelse().tilleggsinfo }
+                    ?.filterIsInstance<ArbeidsledigTilleggsinfo>()
+                    ?: emptyList()
+
+            if (sistValgteArbeidsgivere.isNotEmpty()) {
+                return sistValgteArbeidsgivere.mapNotNull {
+                    it.tidligereArbeidsgiver
+                }
+            }
+
             val unikeArbeidsgivere =
                 sammenhengendeSykmeldinger
                     .map { it.sisteHendelse().tilleggsinfo }
@@ -58,7 +74,7 @@ class TidligereArbeidsgivereHandterer {
 
             val sorterteSykmeldingerDescending =
                 sykmeldinger
-                    .filter { it.fom <= fremTilSykmelding.fom }
+                    .filter { it.fom < fremTilSykmelding.fom }
                     .sortedWith(
                         compareByDescending<Sykmelding> { it.tom }.thenByDescending { it.fom },
                     )
