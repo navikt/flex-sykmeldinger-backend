@@ -4,60 +4,38 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.`should be equal to`
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer
 
-    @Test
-    fun `burde konvertere status APEN til APEN`() = testStatusMapping(HendelseStatus.APEN, "APEN")
+    @TestFactory
+    fun `burde konvertere fra hendelse status til sykmeldingstatus status event`() =
+        listOf(
+            HendelseStatus.APEN to "APEN",
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER to "SENDT",
+            HendelseStatus.SENDT_TIL_NAV to "BEKREFTET",
+            HendelseStatus.AVBRUTT to "AVBRUTT",
+            HendelseStatus.UTGATT to "UTGATT",
+            HendelseStatus.BEKREFTET_AVVIST to "BEKREFTET",
+        ).map { (originalStatus, forventetStatusEvent) ->
+            DynamicTest.dynamicTest("$originalStatus -> $forventetStatusEvent") {
+                val originalHendelse =
+                    lagSykmeldingHendelse(
+                        status = originalStatus,
+                    )
 
-    @Test
-    fun `burde konvertere status SENDT_TIL_ARBEIDSGIVER til SENDT`() =
-        testStatusMapping(
-            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-            "SENDT",
-        )
-
-    @Test
-    fun `burde konvertere status SENDT_TIL_NAV til BEKREFTET`() = testStatusMapping(HendelseStatus.SENDT_TIL_NAV, "BEKREFTET")
-
-    @Test
-    fun `burde konvertere status AVBRUTT til AVBRUTT`() = testStatusMapping(HendelseStatus.AVBRUTT, "AVBRUTT")
-
-    @Test
-    fun `burde konvertere status UTGATT til UTGATT`() = testStatusMapping(HendelseStatus.UTGATT, "UTGATT")
-
-    @Test
-    fun `burde konvertere status BEKREFTET_AVVIST til BEKREFTET`() = testStatusMapping(HendelseStatus.BEKREFTET_AVVIST, "BEKREFTET")
-
-    private fun testStatusMapping(
-        fra: HendelseStatus,
-        til: String,
-    ) {
-        val hendelse =
-            SykmeldingHendelse(
-                status = fra,
-                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-            )
-
-        val forventetStatus =
-            SykmeldingStatusDTO(
-                statusEvent = til,
-                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00.00Z"),
-                arbeidsgiver = null,
-                sporsmalOgSvarListe = emptyList(),
-                brukerSvar = null,
-            )
-
-        sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(hendelse) `should be equal to` forventetStatus
-    }
+                val konvertertStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(originalHendelse)
+                konvertertStatus.statusEvent `should be equal to` forventetStatusEvent
+            }
+        }
 
     @Test
     fun `burde konvertere liste med spørsmål til gammelt format`() {
