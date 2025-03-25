@@ -17,13 +17,14 @@ interface SykmeldingStatusProducer {
     ): Boolean
 }
 
+const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
+
 @Component
 class SykmeldingStatusKafkaProducer(
     private val meldingProducer: Producer<String, String>,
     private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {
     companion object {
-        const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
         const val SOURCE = "flex-sykmeldinger-backend"
     }
 
