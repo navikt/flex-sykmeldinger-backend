@@ -4,17 +4,17 @@ import java.time.LocalDate
 
 data class SykmeldingSporsmalSvarDto(
     val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
-    val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
     val arbeidssituasjon: FormSporsmalSvar<ArbeidssituasjonDTO>,
-    val arbeidsgiverOrgnummer: FormSporsmalSvar<String>?,
-    val arbeidsledig: ArbeidsledigFraOrgnummer?,
-    val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
-    val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>?,
-    val egenmeldingsperioder: FormSporsmalSvar<List<Egenmeldingsperiode>>?,
-    val harForsikring: FormSporsmalSvar<JaEllerNei>?,
-    val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>?,
-    val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>?,
-    val fisker: FiskerSvar?,
+    val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>? = null,
+    val arbeidsgiverOrgnummer: FormSporsmalSvar<String>? = null,
+    val arbeidsledig: ArbeidsledigFraOrgnummer? = null,
+    val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>? = null,
+    val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>? = null,
+    val egenmeldingsperioder: FormSporsmalSvar<List<Egenmeldingsperiode>>? = null,
+    val harForsikring: FormSporsmalSvar<JaEllerNei>? = null,
+    val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>? = null,
+    val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>? = null,
+    val fisker: FiskerSvar? = null,
 )
 
 data class FormSporsmalSvar<T>(
