@@ -1,10 +1,9 @@
 package no.nav.helse.flex.producers.sykmeldingstatus
 
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.hentProduserteRecords
+import no.nav.helse.flex.testdata.lagStatus
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
-import java.time.OffsetDateTime
 
 class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -35,12 +33,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
         sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
                 fnr = "fnr",
-                sykmelingstatusDTO =
-                    SykmeldingStatusKafkaDTO(
-                        sykmeldingId = "1",
-                        timestamp = OffsetDateTime.parse("2021-09-01T00:00:00Z"),
-                        statusEvent = HendelseStatus.SENDT_TIL_NAV.name,
-                    ),
+                sykmelingstatusDTO = lagStatus().event,
             ).`should be true`()
 
         sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
@@ -53,12 +46,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
         sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
                 fnr = "fnr",
-                sykmelingstatusDTO =
-                    SykmeldingStatusKafkaDTO(
-                        sykmeldingId = "1",
-                        timestamp = OffsetDateTime.parse("2021-09-01T00:00:00Z"),
-                        statusEvent = HendelseStatus.SENDT_TIL_NAV.name,
-                    ),
+                sykmelingstatusDTO = lagStatus().event,
             ).`should be false`()
     }
 }
