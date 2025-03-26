@@ -1,7 +1,6 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
 import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class StatusListener(
-    private val oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder,
     private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
 ) {
     @KafkaListener(
@@ -27,7 +25,7 @@ class StatusListener(
         acknowledgment: Acknowledgment,
     ) {
         val status: SykmeldingStatusKafkaMessageDTO = objectMapper.readValue(cr.value())
-        val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterSykmeldingSporsmalSvarDtoTilSporsmal(status)
+        val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status)
         acknowledgment.acknowledge()
     }
 }

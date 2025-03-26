@@ -2,6 +2,7 @@ package no.nav.helse.flex.listeners
 
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidssituasjonKafkaDTO.*
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.JaEllerNeiKafkaDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
@@ -34,17 +35,18 @@ class SykmeldingHendelseKonverterer {
                             narmesteLeder = TODO(),
                         ),
                 ),
-            brukerSvar = TODO(),
+            brukerSvar =
+                konverterBrukerSvarKafkaDtoTilBrukerSvar(
+                    status.event.brukerSvar
+                        ?: throw IllegalStateException("BrukerSvar er ikke satt"),
+                ),
             tilleggsinfo = TODO(),
             opprettet = TODO(),
         )
 
-    internal fun konverterSykmeldingSporsmalSvarDtoTilBrukerSvar(sykmeldingSporsmalSvarDto: SykmeldingStatusKafkaMessageDTO): BrukerSvar {
-        val brukerSvar = sykmeldingSporsmalSvarDto.event.brukerSvar
-        checkNotNull(brukerSvar)
-
+    internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {
         val erOpplysningeneRiktige =
-            brukerSvar.erOpplysningeneRiktige.let {
+            brukerSvarKafkaDTO.erOpplysningeneRiktige.let {
                 SporsmalSvar(
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
@@ -56,7 +58,7 @@ class SykmeldingHendelseKonverterer {
             }
 
         val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> =
-            brukerSvar.arbeidssituasjon.let { arbeidssituasjon ->
+            brukerSvarKafkaDTO.arbeidssituasjon.let { arbeidssituasjon ->
                 SporsmalSvar(
                     sporsmaltekst = arbeidssituasjon.sporsmaltekst,
                     svar =
@@ -72,63 +74,183 @@ class SykmeldingHendelseKonverterer {
                 )
             }
 
-        when (sykmeldingSporsmalSvarDto.event.brukerSvar.arbeidssituasjon.svar) {
-            ARBEIDSTAKER -> {
-                return ArbeidstakerBrukerSvar(
-                    erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
-                    arbeidsgiverOrgnummer =
-                        brukerSvar.arbeidsgiverOrgnummer.let {
-                            checkNotNull(it) { "Arbeidsgiver orgnummer er påkrevd" }
-                            SporsmalSvar(
-                                sporsmaltekst = it.sporsmaltekst,
-                                svar = it.svar,
-                            )
+        val uriktigeOpplysninger =
+            brukerSvarKafkaDTO.uriktigeOpplysninger.let { uriktigeOpplysninger ->
+                checkNotNull(uriktigeOpplysninger) { "Uriktige opplysninger er påkrevd" }
+                SporsmalSvar(
+                    sporsmaltekst = uriktigeOpplysninger.sporsmaltekst,
+                    svar =
+                        uriktigeOpplysninger.svar.map {
+                            UriktigeOpplysning.valueOf(it.name)
                         },
-                    riktigNarmesteLeder =
-                        brukerSvar.riktigNarmesteLeder.let {
-                            checkNotNull(it) { "Riktig nærmeste leder er påkrevd" }
-                            SporsmalSvar(
-                                sporsmaltekst = it.sporsmaltekst,
-                                svar =
-                                    when (it.svar) {
-                                        JaEllerNeiKafkaDTO.JA -> true
-                                        JaEllerNeiKafkaDTO.NEI -> false
-                                    },
-                            )
-                        },
-                    harEgenmeldingsdager =
-                        brukerSvar.harBruktEgenmeldingsdager.let {
-                            checkNotNull(it) { "Har brukt egenmeldingsdager er påkrevd" }
-                            SporsmalSvar(
-                                sporsmaltekst = it.sporsmaltekst,
-                                svar =
-                                    when (it.svar) {
-                                        JaEllerNeiKafkaDTO.JA -> true
-                                        JaEllerNeiKafkaDTO.NEI -> false
-                                    },
-                            )
-                        },
-                    egenmeldingsdager =
-                        brukerSvar.egenmeldingsdager.let {
-                            checkNotNull(it) { "Egenmeldingsdager er påkrevd" }
-                            SporsmalSvar(
-                                sporsmaltekst = it.sporsmaltekst,
-                                svar = it.svar,
-                            )
-                        },
-                    uriktigeOpplysninger = TODO(),
                 )
             }
 
-            FRILANSER,
-            NAERINGSDRIVENDE,
-            FISKER,
-            JORDBRUKER,
-            ARBEIDSLEDIG,
-            ANNET,
-            -> {
-                TODO()
+        val arbeidsgiverOrgnummer =
+            brukerSvarKafkaDTO.arbeidsgiverOrgnummer?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar = it.svar,
+                )
+            }
+
+        val riktigNarmesteLeder =
+            brukerSvarKafkaDTO.riktigNarmesteLeder?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar =
+                        when (it.svar) {
+                            JaEllerNeiKafkaDTO.JA -> true
+                            JaEllerNeiKafkaDTO.NEI -> false
+                        },
+                )
+            }
+        val harEgenmeldingsdager =
+            brukerSvarKafkaDTO.harBruktEgenmeldingsdager?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar =
+                        when (it.svar) {
+                            JaEllerNeiKafkaDTO.JA -> true
+                            JaEllerNeiKafkaDTO.NEI -> false
+                        },
+                )
+            }
+        val egenmeldingsdager =
+            brukerSvarKafkaDTO.egenmeldingsdager?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar = it.svar,
+                )
+            }
+
+        val harBruktEgenmelding =
+            brukerSvarKafkaDTO.harBruktEgenmelding?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar =
+                        when (it.svar) {
+                            JaEllerNeiKafkaDTO.JA -> true
+                            JaEllerNeiKafkaDTO.NEI -> false
+                        },
+                )
+            }
+
+        val egenmeldingsperioder =
+            brukerSvarKafkaDTO.egenmeldingsperioder?.let { perioder ->
+                SporsmalSvar(
+                    sporsmaltekst = perioder.sporsmaltekst,
+                    svar =
+                        perioder.svar.map {
+                            Egenmeldingsperiode(
+                                fom = it.fom,
+                                tom = it.tom,
+                            )
+                        },
+                )
+            }
+
+        val harForsikring =
+            brukerSvarKafkaDTO.harForsikring?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar =
+                        when (it.svar) {
+                            JaEllerNeiKafkaDTO.JA -> true
+                            JaEllerNeiKafkaDTO.NEI -> false
+                        },
+                )
+            }
+
+        val lottOgHyre =
+            brukerSvarKafkaDTO.fisker?.lottOgHyre?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar = FiskerLottOgHyre.valueOf(it.svar.name),
+                )
+            }
+
+        val blad =
+            brukerSvarKafkaDTO.fisker?.blad?.let {
+                SporsmalSvar(
+                    sporsmaltekst = it.sporsmaltekst,
+                    svar = FiskerBlad.valueOf(it.svar.name),
+                )
+            }
+
+        return when (brukerSvarKafkaDTO.arbeidssituasjon.svar) {
+            ARBEIDSTAKER -> {
+                ArbeidstakerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer ?: throw IllegalStateException("Arbeidsgiver orgnummer er påkrevd"),
+                    riktigNarmesteLeder = riktigNarmesteLeder ?: throw IllegalStateException("Riktig nærmeste leder er påkrevd"),
+                    harEgenmeldingsdager = harEgenmeldingsdager ?: throw IllegalStateException("Har egenmeldingsdager er påkrevd"),
+                    egenmeldingsdager = egenmeldingsdager,
+                )
+            }
+            FISKER -> {
+                FiskerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    lottOgHyre = lottOgHyre ?: throw IllegalStateException("Lott eller hyre er påkrevd"),
+                    blad = blad ?: throw IllegalStateException("Blad er påkrevd"),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                    riktigNarmesteLeder = riktigNarmesteLeder,
+                    harEgenmeldingsdager = harEgenmeldingsdager,
+                    egenmeldingsdager = egenmeldingsdager,
+                    harBruktEgenmelding = harBruktEgenmelding,
+                    egenmeldingsperioder = egenmeldingsperioder,
+                    harForsikring = harForsikring,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
+            }
+
+            FRILANSER -> {
+                FrilanserBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    egenmeldingsperioder = egenmeldingsperioder,
+                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
+            }
+            NAERINGSDRIVENDE -> {
+                NaringsdrivendeBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    egenmeldingsperioder = egenmeldingsperioder,
+                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
+            }
+            JORDBRUKER -> {
+                JordbrukerBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    egenmeldingsperioder = egenmeldingsperioder,
+                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                )
+            }
+            ARBEIDSLEDIG -> {
+                ArbeidsledigBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidsledigFraOrgnummer = arbeidsgiverOrgnummer,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
+            }
+            ANNET -> {
+                AnnetArbeidssituasjonBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
             }
         }
     }
