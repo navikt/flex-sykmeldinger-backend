@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingHendelseKonverterer {
-    fun konverterStatusTilSykmeldingHendelse(status: SykmeldingStatusKafkaMessageDTO): SykmeldingHendelse =
-        SykmeldingHendelse(
+    fun konverterStatusTilSykmeldingHendelse(status: SykmeldingStatusKafkaMessageDTO): SykmeldingHendelse {
+        checkNotNull(status.event.brukerSvar) { "Brukersvar er påkrevd" }
+        return SykmeldingHendelse(
             status =
                 when (status.event.statusEvent) {
                     "APEN" -> HendelseStatus.APEN
@@ -19,20 +20,18 @@ class SykmeldingHendelseKonverterer {
                         HendelseStatus.SENDT_TIL_NAV
                         // todo HendelseStatus.BEKREFTET_AVVIST
                     }
+
                     "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                     "UTGATT" -> HendelseStatus.UTGATT
                     else -> throw IllegalArgumentException("Ukjent status")
                 },
             sporsmalSvar = emptyList(),
             arbeidstakerInfo = null,
-            brukerSvar =
-                konverterBrukerSvarKafkaDtoTilBrukerSvar(
-                    status.event.brukerSvar
-                        ?: throw IllegalStateException("BrukerSvar er ikke satt"),
-                ),
+            brukerSvar = konverterBrukerSvarKafkaDtoTilBrukerSvar(status.event.brukerSvar),
             tilleggsinfo = null,
             opprettet = status.event.timestamp.toInstant(),
         )
+    }
 
     internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {
         val erOpplysningeneRiktige =

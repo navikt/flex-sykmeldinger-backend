@@ -17,6 +17,10 @@ class StatusHandterer(
     fun handterStatus(status: SykmeldingStatusKafkaMessageDTO) {
         val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status)
         if (status.kafkaMetadata.source != STATUS_LEESAH_SOURCE) {
+            log.info(
+                "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
+                    "fra source ${status.kafkaMetadata.source}",
+            )
             sykmeldingRepository
                 .findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
                 ?.let { sykmeldingRepository.save(it.leggTilHendelse(hendelse)) }
@@ -26,6 +30,8 @@ class StatusHandterer(
                             "publiserer hendelse på retry topic",
                     )
                 }
+        } else {
+            log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
         }
     }
 
