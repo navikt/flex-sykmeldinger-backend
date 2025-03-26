@@ -2,13 +2,15 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testconfig.hentProduserteRecords
+import no.nav.helse.flex.testconfig.lesFraTopics
+import no.nav.helse.flex.testconfig.subscribeHvisIkkeSubscribed
+import no.nav.helse.flex.testconfig.ventPåRecords
 import no.nav.helse.flex.testdata.lagStatus
-import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
@@ -23,9 +25,10 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusConsumer: KafkaConsumer<String, String>
 
+    @BeforeAll
     @AfterEach
     fun cleanUp() {
-        sykmeldingStatusConsumer.hentProduserteRecords(Duration.ZERO)
+        sykmeldingStatusConsumer.lesFraTopics(SYKMELDINGSTATUS_TOPIC, ventetid = Duration.ZERO)
     }
 
     @Test
@@ -36,8 +39,8 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
                 sykmelingstatusDTO = lagStatus().event,
             ).`should be true`()
 
-        sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
-        sykmeldingStatusConsumer.poll(Duration.ofSeconds(5)).count() `should be equal to` 1
+        sykmeldingStatusConsumer.subscribeHvisIkkeSubscribed(SYKMELDINGSTATUS_TOPIC)
+        sykmeldingStatusConsumer.ventPåRecords(antall = 1, duration = Duration.ofSeconds(5))
     }
 
     @Test
