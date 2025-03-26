@@ -3,6 +3,7 @@ package no.nav.helse.flex.listeners
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.Assertions.*
@@ -24,74 +25,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     @ParameterizedTest
     @EnumSource(ArbeidssituasjonKafkaDTO::class)
     fun `burde konvertere bruker svar kafka dto til bruker svar`(arbeidssituasjonKafkaDTO: ArbeidssituasjonKafkaDTO) {
-        val brukerSvarKafkaDTO =
-            BrukerSvarKafkaDTO(
-                erOpplysningeneRiktige =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Er opplysningene riktige?",
-                        svar = JaEllerNeiKafkaDTO.JA,
-                    ),
-                uriktigeOpplysninger =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Er det noen uriktige opplysninger?",
-                        svar = listOf(UriktigeOpplysningerTypeKafkaDTO.PERIODE),
-                    ),
-                arbeidssituasjon =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Hva er din arbeidssituasjon?",
-                        svar = arbeidssituasjonKafkaDTO,
-                    ),
-                arbeidsgiverOrgnummer =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
-                        svar = "123456789",
-                    ),
-                riktigNarmesteLeder =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Er dette riktig nærmeste leder?",
-                        svar = JaEllerNeiKafkaDTO.JA,
-                    ),
-                harBruktEgenmelding =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Har du brukt egenmelding?",
-                        svar = JaEllerNeiKafkaDTO.JA,
-                    ),
-                egenmeldingsperioder =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Hvilke egenmeldingsperioder har du hatt?",
-                        svar =
-                            listOf(
-                                EgenmeldingsperiodeKafkaDTO(
-                                    fom = LocalDate.parse("2025-01-01"),
-                                    tom = LocalDate.parse("2025-01-05"),
-                                ),
-                                EgenmeldingsperiodeKafkaDTO(
-                                    fom = LocalDate.parse("2025-01-10"),
-                                    tom = LocalDate.parse("2025-01-15"),
-                                ),
-                            ),
-                    ),
-                harForsikring =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Har du forsikring?",
-                        svar = JaEllerNeiKafkaDTO.JA,
-                    ),
-                egenmeldingsdager =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Hvilke egenmeldingsdager har du hatt?",
-                        svar = listOf(LocalDate.parse("2021-01-01")),
-                    ),
-                harBruktEgenmeldingsdager =
-                    SporsmalSvarKafkaDTO(
-                        sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                        svar = JaEllerNeiKafkaDTO.JA,
-                    ),
-                fisker =
-                    FiskereSvarKafkaDTO(
-                        blad = SporsmalSvarKafkaDTO("Hvilket blad?", BladKafkaDTO.A),
-                        lottOgHyre = SporsmalSvarKafkaDTO("Lott eller Hyre?", LottOgHyreKafkaDTO.LOTT),
-                    ),
-            )
+        val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO)
 
         val konvertert = sykmeldingHendelseKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
         konvertert.uriktigeOpplysninger?.svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
