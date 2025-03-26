@@ -1,7 +1,6 @@
-package no.nav.helse.flex.listeners
+package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
-import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import org.amshove.kluent.`should be equal to`

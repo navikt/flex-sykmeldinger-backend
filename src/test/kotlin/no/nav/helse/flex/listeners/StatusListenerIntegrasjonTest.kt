@@ -1,85 +1,36 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
+import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagMeldingsinformasjonEgenmeldt
+import no.nav.helse.flex.testdata.lagStatus
+import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
-import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be empty`
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.shouldBeEqualTo
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
 class StatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
-    @Autowired
-    lateinit var environmentToggles: EnvironmentTogglesFake
-
-    @AfterEach
-    fun afterEach() {
-        slettDatabase()
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = [TEST_SYKMELDING_TOPIC, SYKMELDING_TOPIC])
-    fun `burde lagre sykmelding fra kafka`(topic: String) {
-        environmentToggles.setEnvironment("dev")
-
-        val kafkaMelding =
-            SykmeldingKafkaRecord(
-                metadata = lagMeldingsinformasjonEgenmeldt(),
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                validation = lagValidation(),
-            )
-
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    topic,
-                    null,
-                    "1",
-                    kafkaMelding.serialisertTilString(),
-                ),
-            ).get()
-
-        await().atMost(Duration.ofSeconds(2)).until {
-            sykmeldingRepository.findBySykmeldingId("1") != null
-        }
-
-        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
-    }
-
     @Test
-    fun `burde ikke lagre sykmelding i prod`() {
-        environmentToggles.setEnvironment("prod")
-
-        val kafkaMelding =
-            SykmeldingKafkaRecord(
-                metadata = lagMeldingsinformasjonEgenmeldt(),
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                validation = lagValidation(),
-            )
+    fun `burde lagre hendelse fra kafka`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        val kafkamelding = lagStatus(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
 
         kafkaProducer
             .send(
                 ProducerRecord(
-                    SYKMELDING_TOPIC,
+                    SYKMELDINGSTATUS_TOPIC,
                     null,
                     "1",
-                    kafkaMelding.serialisertTilString(),
+                    kafkamelding.serialisertTilString(),
                 ),
             ).get()
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted {
-            sykmeldingRepository.findAll().`should be empty`()
+            sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
     }
 }
