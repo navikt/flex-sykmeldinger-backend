@@ -10,7 +10,7 @@ data class SykmeldingSporsmalSvarDto(
     val arbeidsledig: ArbeidsledigFraOrgnummer? = null,
     val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>? = null,
     val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>? = null,
-    val egenmeldingsperioder: FormSporsmalSvar<List<Egenmeldingsperiode>>? = null,
+    val egenmeldingsperioder: FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>? = null,
     val harForsikring: FormSporsmalSvar<JaEllerNei>? = null,
     val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>? = null,
     val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>? = null,
@@ -42,10 +42,12 @@ enum class LottOgHyre {
     BEGGE,
 }
 
-data class Egenmeldingsperiode(
+data class EgenmeldingsperiodeFormDTO(
     val fom: LocalDate,
     val tom: LocalDate,
-)
+) {
+    constructor(periode: Pair<LocalDate, LocalDate>) : this(fom = periode.first, tom = periode.second)
+}
 
 enum class JaEllerNei {
     JA,

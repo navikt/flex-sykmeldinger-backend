@@ -2,17 +2,16 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykmelding.application.SporsmalSvar
-import no.nav.helse.flex.sykmelding.application.UriktigeOpplysning
+import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagArbeidstakerBrukerSvar
+import no.nav.helse.flex.testdata.lagSporsmalSvar
 import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +20,14 @@ import java.time.LocalDate
 class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer
+
+    companion object {
+        private fun dato(dato: String) =
+            mapOf(
+                "01.01.2025" to LocalDate.parse("2025-01-01"),
+                "02.01.2025" to LocalDate.parse("2025-01-02"),
+            ).getValue(dato)
+    }
 
     @TestFactory
     fun `burde konvertere fra hendelse status til sykmeldingstatus status event`() =
@@ -43,340 +50,826 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             }
         }
 
-    @Test
-    @Disabled
-    fun `burde konvertere ArbeidstakerBrukerSvar til SporsmalSvarDTO`() {
-        val brukerSvar =
-            lagArbeidstakerBrukerSvar(
-                erOpplysningeneRiktige =
-                    SporsmalSvar(
-                        sporsmaltekst = "Er opplysningene riktige?",
-                        svar = true,
-                    ),
-                arbeidsgiverOrgnummer =
-                    SporsmalSvar(
-                        sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
-                        svar = "123456789",
-                    ),
-                riktigNarmesteLeder =
-                    SporsmalSvar(
-                        sporsmaltekst = "Er dette riktig nærmeste leder?",
-                        svar = true,
-                    ),
-                harEgenmeldingsdager =
-                    SporsmalSvar(
-                        sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                        svar = false,
-                    ),
-                egenmeldingsdager =
-                    SporsmalSvar(
-                        sporsmaltekst = "Egenmeldingsdager",
-                        svar = listOf(LocalDate.parse("2021-01-03")),
-                    ),
-                uriktigeOpplysninger =
-                    SporsmalSvar(
-                        sporsmaltekst = "Hvilke opplysninger er uriktige?",
-                        svar = listOf(UriktigeOpplysning.PERIODE),
-                    ),
-            )
+    @Nested
+    inner class KonverterSykmeldingSporsmalSvar {
+        @Test
+        fun `Arbeidstaker med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                ArbeidstakerBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.ARBEIDSTAKER,
+                        ),
+                    arbeidsgiverOrgnummer =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
+                            svar = "123456789",
+                        ),
+                    riktigNarmesteLeder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = true,
+                        ),
+                    harEgenmeldingsdager =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmeldingsdager?",
+                            svar = true,
+                        ),
+                    egenmeldingsdager =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsdager",
+                            svar = listOf(dato("01.01.2025")),
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
 
-        val konvertertStatus: SykmeldingSporsmalSvarDto = sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmal(brukerSvar)
-        konvertertStatus.run {
-            erOpplysningeneRiktige.run {
-                svar `should be equal to` true
-                sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSTAKER
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                arbeidsgiverOrgnummer.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hva er arbeidsgiverens orgnummer?"
+                    svar `should be equal to` "123456789"
+                }
+                riktigNarmesteLeder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Er dette riktig nærmeste leder?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                harBruktEgenmeldingsdager.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmeldingsdager?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsdager.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsdager"
+                    svar `should be equal to` listOf(dato("01.01.2025"))
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                arbeidsledig.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
             }
-            arbeidssituasjon.run {
-                svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSTAKER
-                sporsmaltekst `should be equal to` "tekst"
-            }
-            arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Hva er arbeidsgiverens orgnummer?"
-                svar `should be equal to` "123456789"
-            }
-            riktigNarmesteLeder.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Er dette riktig nærmeste leder?"
-                svar `should be equal to` true
-            }
-            harBruktEgenmeldingsdager.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Har du brukt egenmeldingsdager?"
-                svar `should be equal to` true
-            }
-            egenmeldingsdager.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Egenmeldingsdager"
-                svar `should be equal to` listOf(LocalDate.parse("2021-01-03"))
-            }
-            uriktigeOpplysninger.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
-            }
-            arbeidsledig.shouldBeNull()
         }
-        konvertertStatus.harBruktEgenmelding `should be equal to` forventetSporsmalSvarDto.harBruktEgenmelding
-        konvertertStatus.egenmeldingsperioder `should be equal to` forventetSporsmalSvarDto.egenmeldingsperioder
-        konvertertStatus.harForsikring `should be equal to` forventetSporsmalSvarDto.harForsikring
-        konvertertStatus.egenmeldingsdager `should be equal to` forventetSporsmalSvarDto.egenmeldingsdager
-        konvertertStatus.harBruktEgenmeldingsdager `should be equal to` forventetSporsmalSvarDto.harBruktEgenmeldingsdager
-        konvertertStatus.fisker `should be equal to` forventetSporsmalSvarDto.fisker
-    }
 
-    @Test
-    fun `burde konvertere BrukerSvar til SykmeldingSporsmalSvarDto`() {
-    }
+        @Test
+        fun `Arbeidstaker med nei svar`() {
+            val brukerSvar =
+                ArbeidstakerBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
+                    arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
+                    riktigNarmesteLeder = lagSporsmalSvar(false),
+                    harEgenmeldingsdager = lagSporsmalSvar(false),
+                    egenmeldingsdager = null,
+                    uriktigeOpplysninger = null,
+                )
 
-//    @Test
-//    fun `burde konvertere liste med spørsmål til gammelt format`() {
-//        val sporsmalOgSvarListe =
-//            listOf(
-//                Sporsmal(
-//                    tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-//                    sporsmalstekst = "tekst",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "JA",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.URIKTIGE_OPPLYSNINGER,
-//                    sporsmalstekst = "Hvilke opplysninger er uriktige?",
-//                    svartype = Svartype.RADIO,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "PERIODE",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.ARBEIDSSITUASJON,
-//                    sporsmalstekst = "tekst",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "ARBEIDSTAKER",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
-//                    sporsmalstekst = "Hva er arbeidsgiverens orgnummer?",
-//                    svartype = Svartype.FRITEKST,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "123456789",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
-//                    sporsmalstekst = "Arbeidsledig fra orgnummer?",
-//                    svartype = Svartype.FRITEKST,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "123456789",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
-//                    sporsmalstekst = "Er dette riktig nærmeste leder?",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "NEI",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
-//                    sporsmalstekst = "Har du brukt egenmelding?",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "NEI",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.EGENMELDINGSPERIODER,
-//                    sporsmalstekst = "Egenmeldingsperioder",
-//                    svartype = Svartype.PERIODER,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = """{"fom": "2021-01-01", "tom": "2021-01-05"}""",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.HAR_FORSIKRING,
-//                    sporsmalstekst = "Har du forsikring?",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "NEI",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.EGENMELDINGSDAGER,
-//                    sporsmalstekst = "Egenmeldingsdager",
-//                    svartype = Svartype.DATOER,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "2021-01-03",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
-//                    sporsmalstekst = "Har du brukt egenmeldingsdager?",
-//                    svartype = Svartype.JA_NEI,
-//                    svar =
-//                        listOf(
-//                            Svar(
-//                                verdi = "NEI",
-//                            ),
-//                        ),
-//                ),
-//                Sporsmal(
-//                    tag = SporsmalTag.FISKER,
-//                    sporsmalstekst = "Er du fisker?",
-//                    svartype = Svartype.GRUPPE_AV_UNDERSPORSMAL,
-//                    undersporsmal =
-//                        listOf(
-//                            Sporsmal(
-//                                tag = SporsmalTag.FISKER__BLAD,
-//                                sporsmalstekst = "Hvilket blad?",
-//                                svartype = Svartype.RADIO,
-//                                svar =
-//                                    listOf(
-//                                        Svar(
-//                                            verdi = "A",
-//                                        ),
-//                                    ),
-//                            ),
-//                            Sporsmal(
-//                                tag = SporsmalTag.FISKER__LOTT_OG_HYRE,
-//                                sporsmalstekst = "Lott og hyre?",
-//                                svartype = Svartype.RADIO,
-//                                svar =
-//                                    listOf(
-//                                        Svar(
-//                                            verdi = "LOTT",
-//                                        ),
-//                                    ),
-//                            ),
-//                        ),
-//                ),
-//            )
-//
-//        val forventetSporsmalSvarDto =
-//            SykmeldingSporsmalSvarDto(
-//                erOpplysningeneRiktige =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "tekst",
-//                        svar = JaEllerNei.JA,
-//                    ),
-//                arbeidssituasjon =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "tekst",
-//                        svar = ArbeidssituasjonDTO.ARBEIDSTAKER,
-//                    ),
-//                uriktigeOpplysninger =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Hvilke opplysninger er uriktige?",
-//                        svar = listOf(UriktigeOpplysningerType.PERIODE),
-//                    ),
-//                arbeidsgiverOrgnummer =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
-//                        svar = "123456789",
-//                    ),
-//                arbeidsledig =
-//                    ArbeidsledigFraOrgnummer(
-//                        arbeidsledigFraOrgnummer =
-//                            FormSporsmalSvar(
-//                                sporsmaltekst = "Arbeidsledig fra orgnummer?",
-//                                svar = "123456789",
-//                            ),
-//                    ),
-//                riktigNarmesteLeder =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Er dette riktig nærmeste leder?",
-//                        svar = JaEllerNei.NEI,
-//                    ),
-//                harBruktEgenmelding =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Har du brukt egenmelding?",
-//                        svar = JaEllerNei.NEI,
-//                    ),
-//                egenmeldingsperioder =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Egenmeldingsperioder",
-//                        svar =
-//                            listOf(
-//                                Egenmeldingsperiode(
-//                                    fom =
-//                                        LocalDate.parse(
-//                                            "2021-01-01",
-//                                        ),
-//                                    tom = LocalDate.parse("2021-01-05"),
-//                                ),
-//                            ),
-//                    ),
-//                harForsikring =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Har du forsikring?",
-//                        svar = JaEllerNei.NEI,
-//                    ),
-//                egenmeldingsdager =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Egenmeldingsdager",
-//                        svar = listOf(LocalDate.parse("2021-01-03")),
-//                    ),
-//                harBruktEgenmeldingsdager =
-//                    FormSporsmalSvar(
-//                        sporsmaltekst = "Har du brukt egenmeldingsdager?",
-//                        svar = JaEllerNei.NEI,
-//                    ),
-//                fisker =
-//                    FiskerSvar(
-//                        blad =
-//                            FormSporsmalSvar(
-//                                sporsmaltekst = "Hvilket blad?",
-//                                svar = Blad.A,
-//                            ),
-//                        lottOgHyre =
-//                            FormSporsmalSvar(
-//                                sporsmaltekst = "Lott og hyre?",
-//                                svar = LottOgHyre.LOTT,
-//                            ),
-//                    ),
-//            )
-//
-//        val konvertertStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmal(sporsmalOgSvarListe)
-//        konvertertStatus.erOpplysningeneRiktige `should be equal to` forventetSporsmalSvarDto.erOpplysningeneRiktige
-//        konvertertStatus.arbeidssituasjon `should be equal to` forventetSporsmalSvarDto.arbeidssituasjon
-//        konvertertStatus.uriktigeOpplysninger `should be equal to` forventetSporsmalSvarDto.uriktigeOpplysninger
-//        konvertertStatus.arbeidsgiverOrgnummer `should be equal to` forventetSporsmalSvarDto.arbeidsgiverOrgnummer
-//        konvertertStatus.arbeidsledig `should be equal to` forventetSporsmalSvarDto.arbeidsledig
-//        konvertertStatus.riktigNarmesteLeder `should be equal to` forventetSporsmalSvarDto.riktigNarmesteLeder
-//        konvertertStatus.harBruktEgenmelding `should be equal to` forventetSporsmalSvarDto.harBruktEgenmelding
-//        konvertertStatus.egenmeldingsperioder `should be equal to` forventetSporsmalSvarDto.egenmeldingsperioder
-//        konvertertStatus.harForsikring `should be equal to` forventetSporsmalSvarDto.harForsikring
-//        konvertertStatus.egenmeldingsdager `should be equal to` forventetSporsmalSvarDto.egenmeldingsdager
-//        konvertertStatus.harBruktEgenmeldingsdager `should be equal to` forventetSporsmalSvarDto.harBruktEgenmeldingsdager
-//        konvertertStatus.fisker `should be equal to` forventetSporsmalSvarDto.fisker
-//    }
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSTAKER
+                arbeidsgiverOrgnummer.shouldNotBeNull().svar `should be equal to` "orgnr"
+                riktigNarmesteLeder.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harBruktEgenmeldingsdager.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsdager.shouldBeNull()
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Arbeidsledig med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                ArbeidsledigBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.ARBEIDSLEDIG,
+                        ),
+                    arbeidsledigFraOrgnummer =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hva er orgnummeret du er arbeidsledig fra?",
+                            svar = "987654321",
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSLEDIG
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                arbeidsgiverOrgnummer.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hva er orgnummeret du er arbeidsledig fra?"
+                    svar `should be equal to` "987654321"
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Arbeidsledig med nei svar`() {
+            val brukerSvar =
+                ArbeidsledigBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSLEDIG),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSLEDIG
+                arbeidsgiverOrgnummer.shouldBeNull()
+                uriktigeOpplysninger.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Permittert med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                PermittertBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.PERMITTERT,
+                        ),
+                    arbeidsledigFraOrgnummer =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hva er orgnummeret du er permittert fra?",
+                            svar = "123456789",
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.PERMITTERT
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                arbeidsgiverOrgnummer.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hva er orgnummeret du er permittert fra?"
+                    svar `should be equal to` "123456789"
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Permittert med nei svar`() {
+            val brukerSvar =
+                PermittertBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.PERMITTERT),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.PERMITTERT
+                arbeidsgiverOrgnummer.shouldBeNull()
+                uriktigeOpplysninger.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Fisker med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                FiskerBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.FISKER,
+                        ),
+                    lottOgHyre =
+                        SporsmalSvar(
+                            sporsmaltekst = "Lott og hyre?",
+                            svar = FiskerLottOgHyre.HYRE,
+                        ),
+                    blad =
+                        SporsmalSvar(
+                            sporsmaltekst = "Blad?",
+                            svar = FiskerBlad.A,
+                        ),
+                    arbeidsgiverOrgnummer =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hva er arbeidsgiverens orgnummer?",
+                            svar = "123456789",
+                        ),
+                    riktigNarmesteLeder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = true,
+                        ),
+                    harEgenmeldingsdager =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmeldingsdager?",
+                            svar = true,
+                        ),
+                    egenmeldingsdager =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsdager",
+                            svar = listOf(dato("01.01.2025")),
+                        ),
+                    harBruktEgenmelding =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmelding?",
+                            svar = true,
+                        ),
+                    egenmeldingsperioder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsperioder",
+                            svar =
+                                listOf(
+                                    Egenmeldingsperiode(
+                                        dato("01.01.2025") to dato("02.01.2025"),
+                                    ),
+                                ),
+                        ),
+                    harForsikring =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du forsikring?",
+                            svar = true,
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.FISKER
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                arbeidsgiverOrgnummer.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hva er arbeidsgiverens orgnummer?"
+                    svar `should be equal to` "123456789"
+                }
+                riktigNarmesteLeder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Er dette riktig nærmeste leder?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                harBruktEgenmeldingsdager.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmeldingsdager?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsdager.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsdager"
+                    svar `should be equal to` listOf(dato("01.01.2025"))
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                harBruktEgenmelding.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsperioder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
+                    svar `should be equal to`
+                        listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                }
+                harForsikring.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du forsikring?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                fisker.shouldNotBeNull().run {
+                    blad.run {
+                        sporsmaltekst `should be equal to` "Blad?"
+                        svar `should be equal to` Blad.A
+                    }
+                    lottOgHyre.run {
+                        sporsmaltekst `should be equal to` "Lott og hyre?"
+                        svar `should be equal to` LottOgHyre.HYRE
+                    }
+                }
+                arbeidsledig.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Fisker med nei svar`() {
+            val brukerSvar =
+                FiskerBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.FISKER),
+                    arbeidsgiverOrgnummer = null,
+                    riktigNarmesteLeder = lagSporsmalSvar(false),
+                    harEgenmeldingsdager = lagSporsmalSvar(false),
+                    egenmeldingsdager = null,
+                    harBruktEgenmelding = lagSporsmalSvar(false),
+                    egenmeldingsperioder = null,
+                    harForsikring = lagSporsmalSvar(false),
+                    uriktigeOpplysninger = null,
+                    blad = lagSporsmalSvar(FiskerBlad.B),
+                    lottOgHyre = lagSporsmalSvar(FiskerLottOgHyre.LOTT),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FISKER
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harBruktEgenmeldingsdager.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                uriktigeOpplysninger.shouldBeNull()
+                fisker.shouldNotBeNull().run {
+                    blad.svar `should be equal to` Blad.B
+                    lottOgHyre.svar `should be equal to` LottOgHyre.LOTT
+                }
+                arbeidsledig.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Frilanser med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                FrilanserBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.FRILANSER,
+                        ),
+                    harBruktEgenmelding =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmelding?",
+                            svar = true,
+                        ),
+                    egenmeldingsperioder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsperioder",
+                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                        ),
+                    harForsikring =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du forsikring?",
+                            svar = true,
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                harBruktEgenmelding.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsperioder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
+                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                }
+                harForsikring.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du forsikring?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Frilanser med nei svar`() {
+            val brukerSvar =
+                FrilanserBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
+                    harBruktEgenmelding = lagSporsmalSvar(false),
+                    egenmeldingsperioder = null,
+                    harForsikring = lagSporsmalSvar(false),
+                    uriktigeOpplysninger = null,
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
+                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Jordbruker med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                JordbrukerBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.JORDBRUKER,
+                        ),
+                    harBruktEgenmelding =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmelding?",
+                            svar = true,
+                        ),
+                    egenmeldingsperioder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsperioder",
+                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                        ),
+                    harForsikring =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du forsikring?",
+                            svar = true,
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                harBruktEgenmelding.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsperioder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
+                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                }
+                harForsikring.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du forsikring?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Jordbruker med nei svar`() {
+            val brukerSvar =
+                JordbrukerBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
+                    harBruktEgenmelding = lagSporsmalSvar(false),
+                    egenmeldingsperioder = null,
+                    harForsikring = lagSporsmalSvar(false),
+                    uriktigeOpplysninger = null,
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
+                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Naringsdrivende med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                NaringsdrivendeBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.NAERINGSDRIVENDE,
+                        ),
+                    harBruktEgenmelding =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du brukt egenmelding?",
+                            svar = true,
+                        ),
+                    egenmeldingsperioder =
+                        SporsmalSvar(
+                            sporsmaltekst = "Egenmeldingsperioder",
+                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                        ),
+                    harForsikring =
+                        SporsmalSvar(
+                            sporsmaltekst = "Har du forsikring?",
+                            svar = true,
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                harBruktEgenmelding.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                egenmeldingsperioder.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
+                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                }
+                harForsikring.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Har du forsikring?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Naringsdrivende med nei svar`() {
+            val brukerSvar =
+                NaringsdrivendeBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
+                    harBruktEgenmelding = lagSporsmalSvar(false),
+                    egenmeldingsperioder = null,
+                    harForsikring = lagSporsmalSvar(false),
+                    uriktigeOpplysninger = null,
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Annet arbeidssituasjon med alle svar og sporsmalstekst`() {
+            val brukerSvar =
+                AnnetArbeidssituasjonBrukerSvar(
+                    erOpplysningeneRiktige =
+                        SporsmalSvar(
+                            sporsmaltekst = "Er opplysningene riktige?",
+                            svar = true,
+                        ),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilken arbeidssituasjon?",
+                            svar = Arbeidssituasjon.ANNET,
+                        ),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            sporsmaltekst = "Hvilke opplysninger er uriktige?",
+                            svar = listOf(UriktigeOpplysning.PERIODE),
+                        ),
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.run {
+                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                }
+                arbeidssituasjon.run {
+                    svar `should be equal to` ArbeidssituasjonDTO.ANNET
+                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                uriktigeOpplysninger.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
+                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Annet arbeidssituasjon med nei svar`() {
+            val brukerSvar =
+                AnnetArbeidssituasjonBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ANNET),
+                    uriktigeOpplysninger = null,
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ANNET
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                harBruktEgenmelding.shouldBeNull()
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+    }
 }

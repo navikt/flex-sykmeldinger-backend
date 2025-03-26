@@ -26,8 +26,7 @@ class SykmeldingStatusDtoKonverterer {
                         orgNavn = arbeidsgiver.orgnavn,
                     )
                 },
-            // TODO
-            brukerSvar = null, // hendelse.sporsmalSvar?.let { konverterSykmeldingSporsmal(it) },
+            brukerSvar = hendelse.brukerSvar?.let { konverterSykmeldingSporsmalSvar(it) },
         )
 
     private fun konverterHendelseStatus(status: HendelseStatus): String =
@@ -42,58 +41,83 @@ class SykmeldingStatusDtoKonverterer {
 
     internal fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
         when (brukerSvar) {
-            is ArbeidstakerBrukerSvar -> SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-                arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.tilFritekstFormSvar(),
-                riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder.tilJaEllerNeiFormSvar(),
-                egenmeldingsdager = brukerSvar.egenmeldingsdager?.tilDatolisteFormSvar(),
-                harBruktEgenmeldingsdager = brukerSvar.harEgenmeldingsdager.tilJaEllerNeiFormSvar(),
-            )
+            is ArbeidstakerBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.tilFritekstFormSvar(),
+                    riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder.tilJaEllerNeiFormSvar(),
+                    egenmeldingsdager = brukerSvar.egenmeldingsdager?.tilDatolisteFormSvar(),
+                    harBruktEgenmeldingsdager = brukerSvar.harEgenmeldingsdager.tilJaEllerNeiFormSvar(),
+                )
 
-            is AnnetArbeidssituasjonBrukerSvar -> SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-            )
-            is ArbeidsledigBrukerSvar -> TODO()
-            is FiskerBrukerSvar -> TODO()
-            is FrilanserBrukerSvar -> SykmeldingSporsmalSvarDto(
-                erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-                harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
-                egenmeldingsperioder =  : SporsmalSvar<List<Egenmeldingsperiode>>? = null,
-            val harForsikring: SporsmalSvar<Boolean>,
-        override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
-            )
-            is JordbrukerBrukerSvar -> SykmeldingSporsmalSvarDto(
-//                erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-//                uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-//                arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-            )
-            is NaringsdrivendeBrukerSvar -> SykmeldingSporsmalSvarDto(
-//                erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-//                uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-//                arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-            )
-            is PermittertBrukerSvar -> TODO()
+            is AnnetArbeidssituasjonBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                )
+            is ArbeidsledigBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidsgiverOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.tilFritekstFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                )
+            is PermittertBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidsgiverOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.tilFritekstFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                )
+            is FiskerBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer?.tilFritekstFormSvar(),
+                    riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.tilJaEllerNeiFormSvar(),
+                    egenmeldingsdager = brukerSvar.egenmeldingsdager?.tilDatolisteFormSvar(),
+                    harBruktEgenmeldingsdager = brukerSvar.harEgenmeldingsdager?.tilJaEllerNeiFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
+                    egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
+                    harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
+                    fisker =
+                        FiskerSvar(
+                            blad = brukerSvar.blad.tilFiskerBladFormSvar(),
+                            lottOgHyre = brukerSvar.lottOgHyre.tilFiskerLottOgHyreFormSvar(),
+                        ),
+                )
+            is FrilanserBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
+                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                )
+            is JordbrukerBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
+                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                )
+            is NaringsdrivendeBrukerSvar ->
+                SykmeldingSporsmalSvarDto(
+                    erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
+                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                )
         }
-        SykmeldingSporsmalSvarDto(
-            erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-            uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-            arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-            arbeidsgiverOrgnummer = brukerSvar.ar,
-            arbeidsledig = TODO(),
-            riktigNarmesteLeder = TODO(),
-            harBruktEgenmelding = TODO(),
-            egenmeldingsperioder = TODO(),
-            harForsikring = TODO(),
-            egenmeldingsdager = TODO(),
-            harBruktEgenmeldingsdager = TODO(),
-            fisker = TODO(),
-        )
 
     private fun SporsmalSvar<Boolean>.tilJaEllerNeiFormSvar(): FormSporsmalSvar<JaEllerNei> =
         FormSporsmalSvar(
@@ -108,19 +132,19 @@ class SykmeldingStatusDtoKonverterer {
     private fun SporsmalSvar<String>.tilFritekstFormSvar(): FormSporsmalSvar<String> =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
-            svar = svar
+            svar = svar,
         )
 
     private fun SporsmalSvar<List<LocalDate>>.tilDatolisteFormSvar(): FormSporsmalSvar<List<LocalDate>> =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
-            svar = svar
+            svar = svar,
         )
 
-    private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<List<EgenmeldingsperiodeDTO>> =
+    private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>> =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
-            svar = svar.map { EgenmeldingsperiodeDTO(it.fom, it.tom) }
+            svar = svar.map { EgenmeldingsperiodeFormDTO(it.fom, it.tom) },
         )
 
     private fun SporsmalSvar<Arbeidssituasjon>.tilArbeidssituasjonFormSvar(): FormSporsmalSvar<ArbeidssituasjonDTO> =
@@ -155,14 +179,24 @@ class SykmeldingStatusDtoKonverterer {
                 },
         )
 
-    private fun Boolean.tilJaEllerNei() =
-        when (this) {
-            true -> JaEllerNei.JA
-            false -> JaEllerNei.NEI
-        }
+    private fun SporsmalSvar<FiskerBlad>.tilFiskerBladFormSvar(): FormSporsmalSvar<Blad> =
+        FormSporsmalSvar(
+            sporsmaltekst = sporsmaltekst,
+            svar =
+                when (svar) {
+                    FiskerBlad.A -> Blad.A
+                    FiskerBlad.B -> Blad.B
+                },
+        )
 
-    data class Periode(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
+    private fun SporsmalSvar<FiskerLottOgHyre>.tilFiskerLottOgHyreFormSvar(): FormSporsmalSvar<LottOgHyre> =
+        FormSporsmalSvar(
+            sporsmaltekst = sporsmaltekst,
+            svar =
+                when (svar) {
+                    FiskerLottOgHyre.LOTT -> LottOgHyre.LOTT
+                    FiskerLottOgHyre.HYRE -> LottOgHyre.HYRE
+                    FiskerLottOgHyre.BEGGE -> LottOgHyre.BEGGE
+                },
+        )
 }

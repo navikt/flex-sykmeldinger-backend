@@ -76,6 +76,14 @@ data class FiskerBrukerSvar(
 
     private val erArbeidstaker = lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)
 
+    init {
+        val erArbeidstaker = runCatching { somArbeidstaker() }.isSuccess
+        val erNaringsdrivende = runCatching { somNaringsdrivende() }.isSuccess
+        if (!erArbeidstaker && !erNaringsdrivende) {
+            throw IllegalArgumentException("Fisker må ha satt felter tilknyttet arbeidsgiver eller næringsdrivende")
+        }
+    }
+
     fun somArbeidstaker(): ArbeidstakerBrukerSvar {
         require(erArbeidstaker) { "Fisker er ikke arbeidstaker" }
         return ArbeidstakerBrukerSvar(
@@ -99,14 +107,6 @@ data class FiskerBrukerSvar(
             harForsikring = requireNotNull(harForsikring) { "Fisker som er næringsdrivende må ha satt harForsikring" },
             uriktigeOpplysninger = uriktigeOpplysninger,
         )
-    }
-
-    init {
-        val erArbeidstaker = runCatching { somArbeidstaker() }.isSuccess
-        val erNaringsdrivende = runCatching { somNaringsdrivende() }.isSuccess
-        if (!erArbeidstaker && !erNaringsdrivende) {
-            throw IllegalArgumentException("Fisker må ha satt felter tilknyttet arbeidsgiver eller næringsdrivende")
-        }
     }
 }
 
@@ -168,9 +168,11 @@ enum class FiskerLottOgHyre {
 }
 
 data class Egenmeldingsperiode(
-    val fom: LocalDate?,
-    val tom: LocalDate?,
-)
+    val fom: LocalDate,
+    val tom: LocalDate,
+) {
+    constructor(periode: Pair<LocalDate, LocalDate>) : this(fom = periode.first, tom = periode.second)
+}
 
 enum class UriktigeOpplysning {
     ANDRE_OPPLYSNINGER,

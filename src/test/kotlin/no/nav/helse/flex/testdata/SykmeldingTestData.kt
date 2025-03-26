@@ -80,7 +80,7 @@ fun lagSykmeldingSporsmalSvarDto(arbeidsgiverOrgnummer: String = "123456789"): S
                 sporsmaltekst = "Hvilke egenmeldingsperioder har du hatt?",
                 svar =
                     listOf(
-                        Egenmeldingsperiode(
+                        EgenmeldingsperiodeFormDTO(
                             fom = LocalDate.parse("2023-01-01"),
                             tom = LocalDate.parse("2023-01-05"),
                         ),
