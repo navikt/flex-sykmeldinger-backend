@@ -18,12 +18,12 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
-        assertTrue(true)
+        TODO()
     }
 
     @ParameterizedTest
     @EnumSource(ArbeidssituasjonKafkaDTO::class)
-    fun `burde konvertere bruker svar kafka dto til bruker svar`(arbeidssituasjonKafkaDTO: ArbeidssituasjonKafkaDTO) {
+    fun `burde konvertere BrukerSvarKafkaDto til BrukerSvar`(arbeidssituasjonKafkaDTO: ArbeidssituasjonKafkaDTO) {
         val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO)
 
         val konvertert = sykmeldingHendelseKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
@@ -67,7 +67,6 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                 fiskerBrukerSvar.`should not be null`()
                 fiskerBrukerSvar.lottOgHyre.svar `should be equal to` FiskerLottOgHyre.LOTT
                 fiskerBrukerSvar.blad.svar `should be equal to` FiskerBlad.A
-                // Add more assertions specific to FiskerBrukerSvar
             }
             ArbeidssituasjonKafkaDTO.JORDBRUKER -> {
                 val jordbrukerBrukerSvar = konvertert as? JordbrukerBrukerSvar

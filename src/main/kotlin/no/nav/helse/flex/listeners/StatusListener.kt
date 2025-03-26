@@ -27,11 +27,11 @@ class StatusListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) = try {
-        log.info("Mottatt statusendring for sykmelding ${cr.key()}")
+        log.info("Mottatt status for sykmelding ${cr.key()}")
         val status: SykmeldingStatusKafkaMessageDTO = objectMapper.readValue(cr.value())
         statusHandterer.handterStatus(status)
     } catch (e: Exception) {
-        log.warn("Feil ved håndtering av statusendring for sykmelding ${cr.key()}", e)
+        log.warn("Feil ved håndtering av status for sykmelding ${cr.key()}", e)
     } finally {
         acknowledgment.acknowledge()
     }
