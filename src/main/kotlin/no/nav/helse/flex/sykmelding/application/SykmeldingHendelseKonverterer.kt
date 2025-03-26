@@ -1,10 +1,9 @@
-package no.nav.helse.flex.listeners
+package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidssituasjonKafkaDTO.*
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.JaEllerNeiKafkaDTO
-import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import org.springframework.stereotype.Component
 
@@ -16,32 +15,23 @@ class SykmeldingHendelseKonverterer {
                 when (status.event.statusEvent) {
                     "APEN" -> HendelseStatus.APEN
                     "AVBRUTT" -> HendelseStatus.AVBRUTT
-                    "BEKREFTET" -> HendelseStatus.SENDT_TIL_NAV
+                    "BEKREFTET" -> {
+                        HendelseStatus.SENDT_TIL_NAV
+                        // todo HendelseStatus.BEKREFTET_AVVIST
+                    }
                     "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    // todo: håndter bekreftet avvist
-                    // "BEKREFTET_AVVIST" -> HendelseStatus.BEKREFTET_AVVIST
                     "UTGATT" -> HendelseStatus.UTGATT
                     else -> throw IllegalArgumentException("Ukjent status")
                 },
             sporsmalSvar = emptyList(),
-            arbeidstakerInfo =
-                ArbeidstakerInfo(
-                    arbeidsgiver =
-                        Arbeidsgiver(
-                            orgnummer = TODO(),
-                            juridiskOrgnummer = TODO(),
-                            orgnavn = TODO(),
-                            erAktivtArbeidsforhold = TODO(),
-                            narmesteLeder = TODO(),
-                        ),
-                ),
+            arbeidstakerInfo = null,
             brukerSvar =
                 konverterBrukerSvarKafkaDtoTilBrukerSvar(
                     status.event.brukerSvar
                         ?: throw IllegalStateException("BrukerSvar er ikke satt"),
                 ),
-            tilleggsinfo = TODO(),
-            opprettet = TODO(),
+            tilleggsinfo = null,
+            opprettet = status.event.timestamp.toInstant(),
         )
 
     internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {

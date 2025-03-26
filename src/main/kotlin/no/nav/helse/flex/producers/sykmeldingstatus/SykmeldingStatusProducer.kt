@@ -18,16 +18,13 @@ interface SykmeldingStatusProducer {
 }
 
 const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
+const val STATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 
 @Component
 class SykmeldingStatusKafkaProducer(
     private val meldingProducer: Producer<String, String>,
     private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {
-    companion object {
-        const val SOURCE = "flex-sykmeldinger-backend"
-    }
-
     private val logger = logger()
 
     override fun produserSykmeldingStatus(
@@ -46,7 +43,7 @@ class SykmeldingStatusKafkaProducer(
                 sykmeldingId = sykmeldingId,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
                 fnr = fnr,
-                source = SOURCE,
+                source = STATUS_LEESAH_SOURCE,
             )
         val sykmeldingStatusKafkaMessageDTO =
             SykmeldingStatusKafkaMessageDTO(metadataDTO, sykmelingstatusDTO)
