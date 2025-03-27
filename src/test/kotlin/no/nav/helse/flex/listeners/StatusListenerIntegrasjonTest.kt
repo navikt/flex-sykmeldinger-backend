@@ -33,4 +33,23 @@ class StatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
             sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
     }
+
+    @Test
+    fun `burde ikke lagre hendelse fra kafka dersom sykmelding ikke finnes`() {
+        val kafkamelding = lagStatus(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    SYKMELDINGSTATUS_TOPIC,
+                    null,
+                    "1",
+                    kafkamelding.serialisertTilString(),
+                ),
+            ).get()
+
+        await().atMost(Duration.ofSeconds(2)).untilAsserted {
+            sykmeldingRepository.findBySykmeldingId("1") shouldBeEqualTo null
+        }
+    }
 }
