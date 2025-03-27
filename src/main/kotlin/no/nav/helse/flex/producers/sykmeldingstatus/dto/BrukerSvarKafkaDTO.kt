@@ -1,18 +1,19 @@
 package no.nav.helse.flex.producers.sykmeldingstatus.dto
 
+import no.nav.helse.flex.api.dto.*
 import java.time.LocalDate
 
 data class BrukerSvarKafkaDTO(
-    val erOpplysningeneRiktige: SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO>,
-    val uriktigeOpplysninger: SporsmalSvarKafkaDTO<List<UriktigeOpplysningerTypeKafkaDTO>>?,
-    val arbeidssituasjon: SporsmalSvarKafkaDTO<ArbeidssituasjonKafkaDTO>,
-    val arbeidsgiverOrgnummer: SporsmalSvarKafkaDTO<String>?,
-    val riktigNarmesteLeder: SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO>?,
-    val harBruktEgenmelding: SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO>?,
-    val egenmeldingsperioder: SporsmalSvarKafkaDTO<List<EgenmeldingsperiodeKafkaDTO>>?,
-    val harForsikring: SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO>?,
-    val egenmeldingsdager: SporsmalSvarKafkaDTO<List<LocalDate>>?,
-    val harBruktEgenmeldingsdager: SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO>?,
+    val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
+    val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
+    val arbeidssituasjon: FormSporsmalSvar<ArbeidssituasjonDTO>,
+    val arbeidsgiverOrgnummer: FormSporsmalSvar<String>?,
+    val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
+    val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>?,
+    val egenmeldingsperioder: FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>?,
+    val harForsikring: FormSporsmalSvar<JaEllerNei>?,
+    val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>?,
+    val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>?,
     val fisker: FiskereSvarKafkaDTO?,
 )
 
@@ -51,17 +52,6 @@ data class EgenmeldingsperiodeKafkaDTO(
 )
 
 data class FiskereSvarKafkaDTO(
-    val blad: SporsmalSvarKafkaDTO<BladKafkaDTO>,
-    val lottOgHyre: SporsmalSvarKafkaDTO<LottOgHyreKafkaDTO>,
+    val blad: FormSporsmalSvar<Blad>,
+    val lottOgHyre: FormSporsmalSvar<LottOgHyre>,
 )
-
-enum class BladKafkaDTO {
-    A,
-    B,
-}
-
-enum class LottOgHyreKafkaDTO {
-    LOTT,
-    HYRE,
-    BEGGE,
-}

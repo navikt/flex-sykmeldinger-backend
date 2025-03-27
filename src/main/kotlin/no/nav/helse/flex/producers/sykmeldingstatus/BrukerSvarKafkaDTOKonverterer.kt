@@ -1,5 +1,6 @@
 package no.nav.helse.flex.producers.sykmeldingstatus
 
+import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.domain.Sporsmal
@@ -12,7 +13,7 @@ class BrukerSvarKafkaDTOKonverterer {
         BrukerSvarKafkaDTO(
             erOpplysningeneRiktige =
                 sporsmal.find { it.tag == SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE }?.let { s ->
-                    SporsmalSvarKafkaDTO(
+                    FormSporsmalSvar(
                         sporsmaltekst = s.konverterSporsmalstekst(),
                         svar = s.konverterTilJaEllerNei(),
                     )
@@ -42,18 +43,18 @@ class BrukerSvarKafkaDTOKonverterer {
 
     private fun Iterable<Sporsmal>.findByTag(tag: SporsmalTag): Sporsmal? = this.find { it.tag == tag }
 
-    private fun Sporsmal.konverterTilJaEllerNei(): JaEllerNeiKafkaDTO {
+    private fun Sporsmal.konverterTilJaEllerNei(): JaEllerNei {
         require(this.svartype == Svartype.JA_NEI) { "Kan kun konvertere JA_NEI spørsmål" }
         val svarVerdi = this.forsteSvarVerdi
         requireNotNull(svarVerdi) { "Må ha et svar" }
         return when (svarVerdi) {
-            "JA" -> JaEllerNeiKafkaDTO.JA
-            "NEI" -> JaEllerNeiKafkaDTO.NEI
+            "JA" -> JaEllerNei.JA
+            "NEI" -> JaEllerNei.NEI
             else -> throw IllegalArgumentException("Ukjent JA_NEI svar: $svarVerdi")
         }
     }
 
-    private fun konverterArbeidssituasjon(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<ArbeidssituasjonKafkaDTO> {
+    private fun konverterArbeidssituasjon(sporsmal: Sporsmal): FormSporsmalSvar<ArbeidssituasjonDTO> {
         val svarVerdi = sporsmal.forsteSvarVerdi
         requireNotNull(svarVerdi) { "Må ha et svar" }
 
@@ -65,88 +66,88 @@ class BrukerSvarKafkaDTOKonverterer {
             }
         val arbeidssituasjon =
             when (svarArbeidssituasjon) {
-                Arbeidssituasjon.ARBEIDSTAKER -> ArbeidssituasjonKafkaDTO.ARBEIDSTAKER
-                Arbeidssituasjon.FRILANSER -> ArbeidssituasjonKafkaDTO.FRILANSER
-                Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidssituasjonKafkaDTO.ARBEIDSLEDIG
-                Arbeidssituasjon.ANNET -> ArbeidssituasjonKafkaDTO.ANNET
+                Arbeidssituasjon.ARBEIDSTAKER -> ArbeidssituasjonDTO.ARBEIDSTAKER
+                Arbeidssituasjon.FRILANSER -> ArbeidssituasjonDTO.FRILANSER
+                Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidssituasjonDTO.ARBEIDSLEDIG
+                Arbeidssituasjon.ANNET -> ArbeidssituasjonDTO.ANNET
                 // TODO: Skal vi støtte PERMITTERT?
-                Arbeidssituasjon.PERMITTERT -> ArbeidssituasjonKafkaDTO.ARBEIDSLEDIG
-                Arbeidssituasjon.FISKER -> ArbeidssituasjonKafkaDTO.FISKER
-                Arbeidssituasjon.NAERINGSDRIVENDE -> ArbeidssituasjonKafkaDTO.NAERINGSDRIVENDE
-                Arbeidssituasjon.JORDBRUKER -> ArbeidssituasjonKafkaDTO.JORDBRUKER
+                Arbeidssituasjon.PERMITTERT -> ArbeidssituasjonDTO.ARBEIDSLEDIG
+                Arbeidssituasjon.FISKER -> ArbeidssituasjonDTO.FISKER
+                Arbeidssituasjon.NAERINGSDRIVENDE -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                Arbeidssituasjon.JORDBRUKER -> ArbeidssituasjonDTO.JORDBRUKER
             }
 
-        return SporsmalSvarKafkaDTO(
+        return FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = arbeidssituasjon,
         )
     }
 
-    private fun konverterUriktigeOpplysninger(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<List<UriktigeOpplysningerTypeKafkaDTO>> {
+    private fun konverterUriktigeOpplysninger(sporsmal: Sporsmal): FormSporsmalSvar<List<UriktigeOpplysningerType>> {
         val svar =
             if (sporsmal.svar.isEmpty()) {
                 emptyList()
             } else {
                 sporsmal.svar.map { s ->
                     try {
-                        enumValueOf<UriktigeOpplysningerTypeKafkaDTO>(s.verdi)
+                        enumValueOf<UriktigeOpplysningerType>(s.verdi)
                     } catch (e: IllegalArgumentException) {
                         throw IllegalArgumentException("Ukjent Uriktig Opplysning: ${s.verdi}")
                     }
                 }
             }
 
-        return SporsmalSvarKafkaDTO(
+        return FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = svar,
         )
     }
 
-    private fun konverterArbeidsgiverOrgnummer(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<String> {
+    private fun konverterArbeidsgiverOrgnummer(sporsmal: Sporsmal): FormSporsmalSvar<String> {
         val svarVerdi = sporsmal.forsteSvarVerdi
         requireNotNull(svarVerdi) { "Må ha et svar" }
-        return SporsmalSvarKafkaDTO(
+        return FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = svarVerdi,
         )
     }
 
-    private fun konverterRiktigNarmesteLeder(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO> =
-        SporsmalSvarKafkaDTO(
+    private fun konverterRiktigNarmesteLeder(sporsmal: Sporsmal): FormSporsmalSvar<JaEllerNei> =
+        FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = sporsmal.konverterTilJaEllerNei(),
         )
 
-    private fun konverterHarBruktEgenmelding(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO> =
-        SporsmalSvarKafkaDTO(
+    private fun konverterHarBruktEgenmelding(sporsmal: Sporsmal): FormSporsmalSvar<JaEllerNei> =
+        FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = sporsmal.konverterTilJaEllerNei(),
         )
 
-    private fun konverterEgenmeldingsperioder(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<List<EgenmeldingsperiodeKafkaDTO>> {
-        val perioder = sporsmal.perioderSvar().map { EgenmeldingsperiodeKafkaDTO(it.fom, it.tom) }
-        return SporsmalSvarKafkaDTO(
+    private fun konverterEgenmeldingsperioder(sporsmal: Sporsmal): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>> {
+        val perioder = sporsmal.perioderSvar().map { EgenmeldingsperiodeFormDTO(it.fom, it.tom) }
+        return FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = perioder,
         )
     }
 
-    private fun konverterHarForsikring(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO> =
-        SporsmalSvarKafkaDTO(
+    private fun konverterHarForsikring(sporsmal: Sporsmal): FormSporsmalSvar<JaEllerNei> =
+        FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = sporsmal.konverterTilJaEllerNei(),
         )
 
-    private fun konverterEgenmeldingsdager(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<List<LocalDate>> {
+    private fun konverterEgenmeldingsdager(sporsmal: Sporsmal): FormSporsmalSvar<List<LocalDate>> {
         val dager = sporsmal.svar.map { LocalDate.parse(it.verdi) }
-        return SporsmalSvarKafkaDTO(
+        return FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = dager,
         )
     }
 
-    private fun konverterHarBruktEgenmeldingsdager(sporsmal: Sporsmal): SporsmalSvarKafkaDTO<JaEllerNeiKafkaDTO> =
-        SporsmalSvarKafkaDTO(
+    private fun konverterHarBruktEgenmeldingsdager(sporsmal: Sporsmal): FormSporsmalSvar<JaEllerNei> =
+        FormSporsmalSvar(
             sporsmaltekst = sporsmal.konverterSporsmalstekst(),
             svar = sporsmal.konverterTilJaEllerNei(),
         )
@@ -154,17 +155,17 @@ class BrukerSvarKafkaDTOKonverterer {
     private fun konverterFisker(sporsmal: Sporsmal): FiskereSvarKafkaDTO {
         val blad =
             sporsmal.undersporsmal.findByTag(SporsmalTag.FISKER__BLAD)?.let { s ->
-                SporsmalSvarKafkaDTO(
+                FormSporsmalSvar(
                     sporsmaltekst = s.konverterSporsmalstekst(),
-                    svar = enumValueOf<BladKafkaDTO>(s.forsteSvarVerdi!!),
+                    svar = enumValueOf<Blad>(s.forsteSvarVerdi!!),
                 )
             } ?: throw IllegalArgumentException("Mangler spørsmål om blad")
 
         val lottOgHyre =
             sporsmal.undersporsmal.findByTag(SporsmalTag.FISKER__LOTT_OG_HYRE)?.let { s ->
-                SporsmalSvarKafkaDTO(
+                FormSporsmalSvar(
                     sporsmaltekst = s.konverterSporsmalstekst(),
-                    svar = enumValueOf<LottOgHyreKafkaDTO>(s.forsteSvarVerdi!!),
+                    svar = enumValueOf<LottOgHyre>(s.forsteSvarVerdi!!),
                 )
             } ?: throw IllegalArgumentException("Mangler spørsmål om lott og hyre")
 

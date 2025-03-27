@@ -39,7 +39,7 @@ class SykmeldingStatusDtoKonverterer {
             HendelseStatus.BEKREFTET_AVVIST -> "BEKREFTET"
         }
 
-    internal fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
+    fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
         when (brukerSvar) {
             is ArbeidstakerBrukerSvar ->
                 SykmeldingSporsmalSvarDto(

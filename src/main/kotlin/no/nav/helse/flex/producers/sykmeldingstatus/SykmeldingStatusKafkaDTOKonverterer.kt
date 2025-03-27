@@ -6,31 +6,20 @@ import no.nav.helse.flex.sykmelding.domain.*
 
 class SykmeldingStatusKafkaDTOKonverterer(
     private val brukerSvarKonverterer: BrukerSvarKafkaDTOKonverterer = BrukerSvarKafkaDTOKonverterer(),
-    private val sporsmalsKafkaDTOKonverterer: SporsmalsKafkaDTOKonverterer = SporsmalsKafkaDTOKonverterer(),
 ) {
     fun konverter(sykmelding: Sykmelding): SykmeldingStatusKafkaDTO {
         val sisteHendelse = sykmelding.sisteHendelse()
-        val brukerSvar = sisteHendelse.sporsmalSvar?.let(brukerSvarKonverterer::konverterTilBrukerSvar)
-        val sporsmols =
-            brukerSvar?.let {
-                sporsmalsKafkaDTOKonverterer.konverterTilSporsmals(
-                    brukerSvar = it,
-                    arbeidstakerInfo = sisteHendelse.arbeidstakerInfo,
-                    sykmeldingId = sykmelding.sykmeldingId,
-                )
-            }
+
         return SykmeldingStatusKafkaDTO(
             sykmeldingId = sykmelding.sykmeldingId,
             timestamp = sisteHendelse.opprettet.tilNorgeOffsetDateTime(),
             statusEvent = konverterStatusEvent(sykmelding.sisteHendelse().status),
             arbeidsgiver = sisteHendelse.arbeidstakerInfo?.let(::konverterArbeidsgiver),
             // For bakoverkompatabilitet. Consumere burde bruke `brukerSvar`
-            sporsmals = sporsmols,
-            brukerSvar = brukerSvar,
+            sporsmals = emptyList(),
+            brukerSvar = sisteHendelse.sporsmalSvar?.let(brukerSvarKonverterer::konverterTilBrukerSvar),
             // TODO: Legg til når tidligereArbeidsgiver ligger i sykmeldingHendelse
             tidligereArbeidsgiver = null,
-            // Dette ser ut til å bli ignorert
-            erSvarOppdatering = null,
         )
     }
 
