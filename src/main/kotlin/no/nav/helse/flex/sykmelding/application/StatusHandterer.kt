@@ -14,7 +14,7 @@ class StatusHandterer(
 ) {
     private val log = logger()
 
-    fun handterStatus(status: SykmeldingStatusKafkaMessageDTO) {
+    fun handterStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status)
         if (status.kafkaMetadata.source != STATUS_LEESAH_SOURCE) {
             log.info(
@@ -29,9 +29,13 @@ class StatusHandterer(
                         "Fant ikke sykmelding med id ${status.kafkaMetadata.sykmeldingId}, " +
                             "publiserer hendelse på retry topic",
                     )
+                    return false
                 }
+            log.info("Hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId} lagret")
+            return true
         } else {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
+            return false
         }
     }
 
