@@ -1,11 +1,14 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
+import no.nav.helse.flex.testdata.lagStatus
+import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
-import org.junit.jupiter.api.Assertions.*
+import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -18,7 +21,37 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
-        TODO()
+        val status =
+            lagStatus(
+                sykmeldingId = "1",
+                fnr = "fnr",
+                brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
+                statusEvent = "APEN",
+                source = "tsm",
+            )
+        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status).`should not be null`()
+    }
+
+    @Test
+    fun `burde feile uten brukerSvar`() {
+        val status =
+            lagStatus(
+                sykmeldingId = "1",
+                fnr = "fnr",
+                brukerSvarKafkaDTO = null,
+                statusEvent = "APEN",
+                source = "tsm",
+            )
+        invoking { sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status) } `should throw` IllegalStateException::class
+    }
+
+    @Test
+    fun `burde konvertere status til hendelse status`() {
+        sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus("APEN") `should be equal to` HendelseStatus.APEN
+        sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus("BEKREFTET") `should be equal to` HendelseStatus.SENDT_TIL_NAV
+        sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus("SENDT") `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+        sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus("AVBRUTT") `should be equal to` HendelseStatus.AVBRUTT
+        sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus("UTGATT") `should be equal to` HendelseStatus.UTGATT
     }
 
     @ParameterizedTest

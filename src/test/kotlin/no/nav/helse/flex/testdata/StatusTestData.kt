@@ -9,7 +9,7 @@ import java.time.OffsetDateTime
 fun lagStatus(
     sykmeldingId: String = "1",
     fnr: String = "fnr",
-    brukerSvarKafkaDTO: BrukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
+    brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
     statusEvent: String = "SENDT",
     source: String = "syfosmaltinn",
 ): SykmeldingStatusKafkaMessageDTO =
