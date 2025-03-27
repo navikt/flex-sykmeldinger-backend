@@ -12,19 +12,7 @@ class SykmeldingHendelseKonverterer {
     fun konverterStatusTilSykmeldingHendelse(status: SykmeldingStatusKafkaMessageDTO): SykmeldingHendelse {
         checkNotNull(status.event.brukerSvar) { "Brukersvar er påkrevd" }
         return SykmeldingHendelse(
-            status =
-                when (status.event.statusEvent) {
-                    "APEN" -> HendelseStatus.APEN
-                    "AVBRUTT" -> HendelseStatus.AVBRUTT
-                    "BEKREFTET" -> {
-                        HendelseStatus.SENDT_TIL_NAV
-                        // todo HendelseStatus.BEKREFTET_AVVIST
-                    }
-
-                    "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    "UTGATT" -> HendelseStatus.UTGATT
-                    else -> throw IllegalArgumentException("Ukjent status")
-                },
+            status = konverterStatusTilHendelseStatus(status.event.statusEvent),
             sporsmalSvar = emptyList(),
             arbeidstakerInfo = null,
             brukerSvar = konverterBrukerSvarKafkaDtoTilBrukerSvar(status.event.brukerSvar),
@@ -32,6 +20,19 @@ class SykmeldingHendelseKonverterer {
             opprettet = status.event.timestamp.toInstant(),
         )
     }
+
+    internal fun konverterStatusTilHendelseStatus(status: String): HendelseStatus =
+        when (status) {
+            "APEN" -> HendelseStatus.APEN
+            "AVBRUTT" -> HendelseStatus.AVBRUTT
+            "BEKREFTET" -> {
+                HendelseStatus.SENDT_TIL_NAV
+                // todo HendelseStatus.BEKREFTET_AVVIST
+            }
+            "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+            "UTGATT" -> HendelseStatus.UTGATT
+            else -> throw IllegalArgumentException("Ukjent status")
+        }
 
     internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {
         val erOpplysningeneRiktige =
