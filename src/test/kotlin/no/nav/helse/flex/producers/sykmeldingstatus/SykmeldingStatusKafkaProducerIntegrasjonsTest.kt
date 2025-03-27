@@ -32,14 +32,19 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde produsere sykmeldingstatus`() {
+        sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
+        val antallForProdusert = sykmeldingStatusConsumer.poll(Duration.ofSeconds(1)).count()
+
         sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
                 fnr = "fnr",
                 sykmelingstatusDTO = lagStatus().event,
             ).`should be true`()
 
-        sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
-        sykmeldingStatusConsumer.poll(Duration.ofSeconds(5)).count() `should be equal to` 1
+        antallForProdusert +
+            sykmeldingStatusConsumer
+                .poll(Duration.ofSeconds(1))
+                .count() `should be equal to` antallForProdusert + 1
     }
 
     @Test
