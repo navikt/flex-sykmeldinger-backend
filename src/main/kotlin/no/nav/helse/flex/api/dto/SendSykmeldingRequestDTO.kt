@@ -129,8 +129,12 @@ data class SendSykmeldingRequestDTO(
             UriktigeOpplysningDTO.SYKMELDINGSGRAD_FOR_LAV -> UriktigeOpplysning.SYKMELDINGSGRAD_FOR_LAV
         }
 
-    fun List<EgenmeldingsperiodeDTO>.tilEgenmeldingsperioder(): List<Egenmeldingsperiode> =
-        this.map { Egenmeldingsperiode(fom = it.fom, tom = it.tom) }
+    private fun List<EgenmeldingsperiodeDTO>.tilEgenmeldingsperioder(): List<Egenmeldingsperiode> =
+        this.map {
+            requireNotNull(it.fom) { "Fom (fra og med) er ikke satt på egenmeldingsperiode: $it" }
+            requireNotNull(it.tom) { "Tom (til og med) er ikke satt på egenmeldingsperiode: $it" }
+            Egenmeldingsperiode(fom = it.fom, tom = it.tom)
+        }
 
     private fun YesOrNoDTO.tilBoolean(): Boolean = this == YesOrNoDTO.YES
 

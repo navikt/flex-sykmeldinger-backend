@@ -9,9 +9,11 @@ data class SykmeldingStatusKafkaDTO(
     val arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
     val sporsmals: List<SporsmalKafkaDTO>? = null,
     val brukerSvar: BrukerSvarKafkaDTO? = null,
-    val erSvarOppdatering: Boolean? = null,
     val tidligereArbeidsgiver: TidligereArbeidsgiverKafkaDTO? = null,
-)
+) {
+    // Denne står antagelig for bakoverkompatabilitet
+    val erSvarOppdatering: Boolean? = null
+}
 
 object StatusEventKafkaDTO {
     const val APEN = "APEN"

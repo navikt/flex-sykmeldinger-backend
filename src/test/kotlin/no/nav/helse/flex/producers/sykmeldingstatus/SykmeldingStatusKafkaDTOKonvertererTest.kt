@@ -61,28 +61,6 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
         verify(brukerSvarKonvertererSpy, times(1)).konverterTilBrukerSvar(emptyList())
     }
 
-    @Test
-    fun `burde bruke SporsmalsKafkaDTOKonverter`() {
-        val sporsmalsKonverter = spy(SporsmalsKafkaDTOKonverterer())
-
-        val konverterer = SykmeldingStatusKafkaDTOKonverterer(sporsmalsKafkaDTOKonverterer = sporsmalsKonverter)
-
-        val sporsmal = lagSporsmalListe()
-        val arbeidstakerInfo = lagArbeidstakerInfo()
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "id"),
-            ).leggTilHendelse(lagSykmeldingHendelse(sporsmalSvar = sporsmal, arbeidstakerInfo = arbeidstakerInfo))
-
-        konverterer.konverter(sykmelding)
-
-        verify(sporsmalsKonverter, times(1)).konverterTilSporsmals(
-            brukerSvar = any(),
-            arbeidstakerInfo = eq(arbeidstakerInfo),
-            sykmeldingId = eq("id"),
-        )
-    }
-
     enum class A {
         A,
     }

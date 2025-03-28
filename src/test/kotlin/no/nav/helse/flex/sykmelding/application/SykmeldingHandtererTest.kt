@@ -84,7 +84,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
 
             arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
 
-            val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
+            val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmelding(
@@ -190,7 +190,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
 
             arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
 
-            val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
+            val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmelding(
@@ -218,7 +218,11 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
 
             arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "fnr", orgnummer = "orgnr"))
 
-            val brukerSvar = lagFiskerHyreBrukerSvar(lottOgHyre = FiskerLottOgHyre.BEGGE, arbeidsgiverOrgnummer = "orgnr")
+            val brukerSvar =
+                lagFiskerHyreBrukerSvar(
+                    lottOgHyre = lagSporsmalSvar(FiskerLottOgHyre.BEGGE),
+                    arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
+                )
 
             val sykmelding =
                 sykmeldingHandterer.sendSykmelding(
