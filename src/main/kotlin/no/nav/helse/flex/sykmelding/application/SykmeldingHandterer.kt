@@ -7,6 +7,7 @@ import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -127,7 +128,9 @@ class SykmeldingHandterer(
                 brukerSvar = brukerSvar,
                 tilleggsinfo = tilleggsinfo,
                 opprettet = nowFactory.get(),
-            ),
+            ).also {
+                logger.info("Legger til hendelse ${it.serialisertTilString()} på sykmelding ${sykmelding.sykmeldingId}")
+            },
         )
     }
 
