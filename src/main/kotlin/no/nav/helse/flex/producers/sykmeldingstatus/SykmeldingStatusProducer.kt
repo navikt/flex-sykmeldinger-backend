@@ -47,6 +47,7 @@ class SykmeldingStatusKafkaProducer(
             )
         val sykmeldingStatusKafkaMessageDTO =
             SykmeldingStatusKafkaMessageDTO(metadataDTO, sykmelingstatusDTO)
+        logger.info("Sender statusendring ${sykmeldingStatusKafkaMessageDTO.serialisertTilString()}")
         try {
             meldingProducer
                 .send(
