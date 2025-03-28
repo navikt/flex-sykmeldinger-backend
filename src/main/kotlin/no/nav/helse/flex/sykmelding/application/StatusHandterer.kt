@@ -1,12 +1,17 @@
 package no.nav.helse.flex.sykmelding.application
 
+import no.nav.helse.flex.producers.sykmeldingstatus.KafkaMetadataDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.STATUS_LEESAH_SOURCE
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Service
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @Service
 class StatusHandterer(
@@ -46,5 +51,22 @@ class StatusHandterer(
 
     fun publiserPaRetryTopic(hendelse: SykmeldingHendelse) {
         // TODO
+    }
+
+    fun sammenstillSykmeldingStatusKafkaMessageDTO(
+        fnr: String,
+        sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO,
+    ): SykmeldingStatusKafkaMessageDTO {
+        val sykmeldingId = sykmeldingStatusKafkaDTO.sykmeldingId
+        val metadataDTO =
+            KafkaMetadataDTO(
+                sykmeldingId = sykmeldingId,
+                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                fnr = fnr,
+                source = STATUS_LEESAH_SOURCE,
+            )
+        return SykmeldingStatusKafkaMessageDTO(kafkaMetadata = metadataDTO, event = sykmeldingStatusKafkaDTO).also {
+            log.info("Sender statusendring ${it.serialisertTilString()}")
+        }
     }
 }

@@ -372,7 +372,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .statusEvent `should be equal to` StatusEventKafkaDTO.AVBRUTT
+                .event.statusEvent `should be equal to` StatusEventKafkaDTO.AVBRUTT
         }
     }
 
@@ -417,7 +417,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldinger()
                 .shouldHaveSize(1)
                 .first()
-                .statusEvent `should be equal to` StatusEventKafkaDTO.BEKREFTET
+                .event.statusEvent `should be equal to` StatusEventKafkaDTO.BEKREFTET
         }
     }
 }

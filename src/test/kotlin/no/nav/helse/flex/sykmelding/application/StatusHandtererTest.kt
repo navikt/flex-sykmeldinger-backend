@@ -1,12 +1,13 @@
 package no.nav.helse.flex.sykmelding.application
 
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagStatus
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingHendelse
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
@@ -25,7 +26,7 @@ class StatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde lagre hendelse på sykmelding`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-        val status = lagStatus(sykmeldingId = "1")
+        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
         statusHandterer.handterStatus(status).`should be true`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should not be null`()
@@ -35,7 +36,7 @@ class StatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ikke lagre hendelse dersom sykmelding ikke finnes`() {
-        val status = lagStatus(sykmeldingId = "1")
+        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
         statusHandterer.handterStatus(status).`should be false`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should be null`()
@@ -51,16 +52,28 @@ class StatusHandtererTest : FakesTestOppsett() {
                     ),
                 ),
         )
-        val status = lagStatus(sykmeldingId = "1", statusEvent = "SENDT")
+        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", statusEvent = "SENDT")
         invoking {
             statusHandterer.handterStatus(status).`should be false`()
         } `should throw` UgyldigSykmeldingStatusException::class
     }
 
+    @Test
+    fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
+        val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
+        val sammenstillSykmeldingStatusKafkaMessageDTO =
+            statusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
+                fnr = "fnr",
+                sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
+            )
+        sammenstillSykmeldingStatusKafkaMessageDTO.kafkaMetadata.`should not be null`()
+        sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.`should not be null`()
+    }
+
     @Disabled
     @Test
     fun `burde publisere på retry dersom sykmelding ikke finnes`() {
-        val status = lagStatus(sykmeldingId = "1")
+        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
         statusHandterer.handterStatus(status)
     }
 }

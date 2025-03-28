@@ -6,7 +6,7 @@ import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-fun lagStatus(
+fun lagSykmeldingStatusKafkaMessageDTO(
     sykmeldingId: String = "1",
     fnr: String = "fnr",
     brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),

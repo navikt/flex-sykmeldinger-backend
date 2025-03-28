@@ -8,13 +8,9 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 interface SykmeldingStatusProducer {
-    fun produserSykmeldingStatus(
-        fnr: String,
-        sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    ): Boolean
+    fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean
 }
 
 const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
@@ -25,42 +21,29 @@ class SykmeldingStatusKafkaProducer(
     private val meldingProducer: Producer<String, String>,
     private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {
-    private val logger = logger()
+    private val log = logger()
 
-    override fun produserSykmeldingStatus(
-        fnr: String,
-        sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    ): Boolean {
+    override fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (environmentToggles.isProduction()) {
             return false
         }
-        val sykmeldingId = sykmelingstatusDTO.sykmeldingId
-        logger.info(
-            "Skriver statusendring ${sykmelingstatusDTO.statusEvent} for sykmelding med id $sykmeldingId til topic på aiven",
+        log.info(
+            "Skriver statusendring ${sykmeldingStatusKafkaMessageDTO.event.statusEvent} " +
+                "for sykmelding med id ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId} til topic $SYKMELDINGSTATUS_TOPIC",
         )
-        val metadataDTO =
-            KafkaMetadataDTO(
-                sykmeldingId = sykmeldingId,
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                fnr = fnr,
-                source = STATUS_LEESAH_SOURCE,
-            )
-        val sykmeldingStatusKafkaMessageDTO =
-            SykmeldingStatusKafkaMessageDTO(metadataDTO, sykmelingstatusDTO)
-        logger.info("Sender statusendring ${sykmeldingStatusKafkaMessageDTO.serialisertTilString()}")
         try {
             meldingProducer
                 .send(
                     ProducerRecord(
                         SYKMELDINGSTATUS_TOPIC,
-                        sykmeldingId,
+                        sykmeldingStatusKafkaMessageDTO.event.sykmeldingId,
                         sykmeldingStatusKafkaMessageDTO.serialisertTilString(),
                     ),
                 ).get()
             return true
         } catch (ex: Exception) {
-            logger.error(
-                "Failed to send sykmeldingStatus to kafkatopic, sykmelding: $sykmeldingId",
+            log.error(
+                "Failed to send sykmeldingStatus to kafkatopic, sykmelding: ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId}",
             )
             throw ex
         }

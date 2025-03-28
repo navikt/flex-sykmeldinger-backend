@@ -3,7 +3,7 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics
-import no.nav.helse.flex.testdata.lagStatus
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
@@ -37,8 +37,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
 
         sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
-                fnr = "fnr",
-                sykmelingstatusDTO = lagStatus().event,
+                sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
             ).`should be true`()
 
         antallForProdusert +
@@ -52,8 +51,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
         environmentToggles.setEnvironment("prod")
         sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
-                fnr = "fnr",
-                sykmelingstatusDTO = lagStatus().event,
+                sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
             ).`should be false`()
     }
 }

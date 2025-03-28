@@ -4,7 +4,7 @@ import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
-import no.nav.helse.flex.testdata.lagStatus
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
@@ -22,7 +22,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
         val status =
-            lagStatus(
+            lagSykmeldingStatusKafkaMessageDTO(
                 sykmeldingId = "1",
                 fnr = "fnr",
                 brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
@@ -35,7 +35,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde feile uten brukerSvar`() {
         val status =
-            lagStatus(
+            lagSykmeldingStatusKafkaMessageDTO(
                 sykmeldingId = "1",
                 fnr = "fnr",
                 brukerSvarKafkaDTO = null,
