@@ -3,9 +3,9 @@ package no.nav.helse.flex.listeners
 import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testdata.lagStatus
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeEqualTo
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -17,7 +17,7 @@ class StatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde lagre hendelse fra kafka`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-        val kafkamelding = lagStatus(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+        val kafkamelding = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
 
         kafkaProducer
             .send(
@@ -36,7 +36,7 @@ class StatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde ikke lagre hendelse fra kafka dersom sykmelding ikke finnes`() {
-        val kafkamelding = lagStatus(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+        val kafkamelding = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
 
         kafkaProducer
             .send(
