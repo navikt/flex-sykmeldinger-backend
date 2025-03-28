@@ -36,7 +36,6 @@ class SykmeldingListener(
             val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
                 objectMapper.readValue(cr.value())
             sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
-            acknowledgment.acknowledge()
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}")
             throw e
@@ -44,6 +43,7 @@ class SykmeldingListener(
             log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}")
             throw e
         }
+        acknowledgment.acknowledge()
     }
 }
 
