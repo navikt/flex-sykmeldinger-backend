@@ -1,6 +1,7 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.producers.sykmeldingstatus.STATUS_LEESAH_SOURCE
 import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.sykmelding.application.StatusHandterer
@@ -29,7 +30,11 @@ class StatusListener(
     ) = try {
         log.info("Mottatt status for sykmelding ${cr.key()}")
         val status: SykmeldingStatusKafkaMessageDTO = objectMapper.readValue(cr.value())
-        statusHandterer.handterStatus(status)
+        if (status.kafkaMetadata.source != STATUS_LEESAH_SOURCE) {
+            statusHandterer.handterStatus(status)
+        } else {
+            log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
+        }
     } catch (e: Exception) {
         log.warn("Feil ved håndtering av status for sykmelding ${cr.key()}", e)
     } finally {
