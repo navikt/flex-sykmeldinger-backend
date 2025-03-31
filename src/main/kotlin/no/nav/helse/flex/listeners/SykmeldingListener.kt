@@ -23,10 +23,13 @@ class SykmeldingListener(
         topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
         // TODO: Hvordan offset?
-        properties = ["auto.offset.reset = latest"],
+        properties = [
+            "auto.offset.reset = latest",
+            "value.deserializer = org.apache.kafka.common.serialization.ByteArrayDeserializer",
+        ],
     )
     fun listen(
-        cr: ConsumerRecord<String, String>,
+        cr: ConsumerRecord<String, ByteArray>,
         acknowledgment: Acknowledgment,
     ) {
         if (environmentToggles.isProduction()) {
