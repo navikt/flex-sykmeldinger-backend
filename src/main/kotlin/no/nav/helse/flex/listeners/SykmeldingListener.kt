@@ -46,8 +46,9 @@ class SykmeldingListener(
         } catch (e: Exception) {
             log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}")
             throw e
+        } finally {
+            acknowledgment.acknowledge()
         }
-        acknowledgment.acknowledge()
     }
 }
 
