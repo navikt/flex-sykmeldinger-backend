@@ -71,8 +71,7 @@ class SykmeldingHendelseKonverterer {
             }
 
         val uriktigeOpplysninger =
-            brukerSvarKafkaDTO.uriktigeOpplysninger.let { uriktigeOpplysninger ->
-                checkNotNull(uriktigeOpplysninger) { "Uriktige opplysninger er påkrevd" }
+            brukerSvarKafkaDTO.uriktigeOpplysninger?.let { uriktigeOpplysninger ->
                 SporsmalSvar(
                     sporsmaltekst = uriktigeOpplysninger.sporsmaltekst,
                     svar =
