@@ -5,17 +5,23 @@ import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidssituasjonKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.JaEllerNeiKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingHendelseKonverterer {
+    private val log = logger()
+
     fun konverterStatusTilSykmeldingHendelse(status: SykmeldingStatusKafkaMessageDTO): SykmeldingHendelse {
-        checkNotNull(status.event.brukerSvar) { "Brukersvar er påkrevd" }
+        if (status.event.brukerSvar == null) {
+            log.warn("Brukersvar er påkrevd, men er null i status: ${status.serialisertTilString()}")
+        }
         return SykmeldingHendelse(
             status = konverterStatusTilHendelseStatus(status.event.statusEvent),
             sporsmalSvar = emptyList(),
             arbeidstakerInfo = null,
-            brukerSvar = konverterBrukerSvarKafkaDtoTilBrukerSvar(status.event.brukerSvar),
+            brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = null,
             opprettet = status.event.timestamp.toInstant(),
         )
