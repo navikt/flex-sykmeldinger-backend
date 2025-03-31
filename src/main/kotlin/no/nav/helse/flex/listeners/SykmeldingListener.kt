@@ -36,9 +36,15 @@ class SykmeldingListener(
             return
         }
         try {
-            log.info("Mottok sykmelding ${cr.value()}")
+            val value = cr.value()
+            if (value == null) {
+                log.warn("Mottok sykmelding med null value, key: ${cr.key()}")
+                return
+            }
+
+            log.info("Mottok sykmelding ${String(value)}")
             val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
-                objectMapper.readValue(cr.value())
+                objectMapper.readValue(value)
             sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}")
