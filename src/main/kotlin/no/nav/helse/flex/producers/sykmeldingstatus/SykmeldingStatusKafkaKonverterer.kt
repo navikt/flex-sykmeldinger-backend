@@ -3,12 +3,6 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 import no.nav.helse.flex.api.SykmeldingStatusDtoKonverterer
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.arbeidssituasjonSporsmalBuilder
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.egenmeldingsdagerBuilder
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.forsikringSporsmalBuilder
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.fravarSporsmalBuilder
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.periodeSporsmalBuilder
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer.riktigNarmesteLederSporsmalBuilder
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
@@ -124,8 +118,8 @@ object SykmeldingStatusKafkaKonverterer {
     ): List<SporsmalKafkaDTO> =
         listOfNotNull(
             sporsmalSvarDto.arbeidssituasjonSporsmalBuilder(),
-            sporsmalSvarDto.fravarSporsmalBuilder(),
-            sporsmalSvarDto.periodeSporsmalBuilder(),
+            sporsmalSvarDto.harBruktEgenmeldingSporsmalBuilder(),
+            sporsmalSvarDto.egenmeldingsPeriodeSporsmalBuilder(),
             sporsmalSvarDto.riktigNarmesteLederSporsmalBuilder(
                 sykmeldingId = sykmeldingId,
                 erAktivtArbidsforhold = harAktivtArbeidsforhold,
@@ -206,7 +200,7 @@ object SykmeldingStatusKafkaKonverterer {
         )
     }
 
-    private fun SykmeldingSporsmalSvarDto.fravarSporsmalBuilder(): SporsmalKafkaDTO? {
+    private fun SykmeldingSporsmalSvarDto.harBruktEgenmeldingSporsmalBuilder(): SporsmalKafkaDTO? {
         if (harBruktEgenmelding != null) {
             return SporsmalKafkaDTO(
                 tekst = harBruktEgenmelding.sporsmaltekst,
@@ -218,7 +212,7 @@ object SykmeldingStatusKafkaKonverterer {
         return null
     }
 
-    private fun SykmeldingSporsmalSvarDto.periodeSporsmalBuilder(): SporsmalKafkaDTO? {
+    private fun SykmeldingSporsmalSvarDto.egenmeldingsPeriodeSporsmalBuilder(): SporsmalKafkaDTO? {
         if (egenmeldingsperioder != null) {
             return SporsmalKafkaDTO(
                 tekst = egenmeldingsperioder.sporsmaltekst,

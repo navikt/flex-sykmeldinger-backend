@@ -263,6 +263,7 @@ class SykmeldingStatusKafkaMessageMapperSpek {
         fun `burde konvertere alle svar`() {
             val sprosmalSvarDto =
                 SykmeldingSporsmalSvarDto(
+                    // Brukes ikke for gammelt sykmeldingsformat
                     erOpplysningeneRiktige =
                         FormSporsmalSvar(
                             sporsmaltekst = "Er opplysningene riktige?",
@@ -272,16 +273,6 @@ class SykmeldingStatusKafkaMessageMapperSpek {
                         FormSporsmalSvar(
                             sporsmaltekst = "Hva er din arbeidssituasjon?",
                             svar = ArbeidssituasjonDTO.ARBEIDSTAKER,
-                        ),
-                    uriktigeOpplysninger =
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Er det noen uriktige opplysninger?",
-                            svar = listOf(UriktigeOpplysningerType.PERIODE),
-                        ),
-                    arbeidsgiverOrgnummer =
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
-                            svar = "123456789",
                         ),
                     riktigNarmesteLeder =
                         FormSporsmalSvar(
@@ -311,24 +302,10 @@ class SykmeldingStatusKafkaMessageMapperSpek {
                             sporsmaltekst = "Hvilke egenmeldingsdager har du hatt?",
                             svar = listOf(LocalDate.parse("2021-01-01")),
                         ),
-                    harBruktEgenmeldingsdager =
-                        FormSporsmalSvar(
-                            sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                            svar = JaEllerNei.JA,
-                        ),
-                    fisker =
-                        FiskerSvar(
-                            blad =
-                                FormSporsmalSvar(
-                                    sporsmaltekst = "Hvilket blad?",
-                                    svar = Blad.A,
-                                ),
-                            lottOgHyre =
-                                FormSporsmalSvar(
-                                    sporsmaltekst = "Lott eller Hyre?",
-                                    svar = LottOgHyre.LOTT,
-                                ),
-                        ),
+                    arbeidsgiverOrgnummer = null,
+                    uriktigeOpplysninger = null,
+                    harBruktEgenmeldingsdager = null,
+                    fisker = null,
                 )
 
             val sporsmals =
@@ -336,7 +313,7 @@ class SykmeldingStatusKafkaMessageMapperSpek {
                     sporsmalSvarDto = sprosmalSvarDto,
                     harAktivtArbeidsforhold = null,
                 )
-            sporsmals shouldHaveSize 5
+            sporsmals shouldHaveSize 6
 
             sporsmals.finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON).shouldNotBeNull().run {
                 tekst shouldBeEqualTo "Hva er din arbeidssituasjon?"
