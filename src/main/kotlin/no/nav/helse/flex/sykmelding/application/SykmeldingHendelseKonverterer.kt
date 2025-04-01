@@ -1,9 +1,9 @@
 package no.nav.helse.flex.sykmelding.application
 
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
+import no.nav.helse.flex.api.dto.JaEllerNei
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidssituasjonKafkaDTO.*
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.JaEllerNeiKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
@@ -19,7 +19,6 @@ class SykmeldingHendelseKonverterer {
         }
         return SykmeldingHendelse(
             status = konverterStatusTilHendelseStatus(status.event.statusEvent),
-            sporsmalSvar = null,
             arbeidstakerInfo = null,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = null,
@@ -47,8 +46,8 @@ class SykmeldingHendelseKonverterer {
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
                         when (it.svar) {
-                            JaEllerNeiKafkaDTO.JA -> true
-                            JaEllerNeiKafkaDTO.NEI -> false
+                            JaEllerNei.JA -> true
+                            JaEllerNei.NEI -> false
                         },
                 )
             }
@@ -66,6 +65,7 @@ class SykmeldingHendelseKonverterer {
                             JORDBRUKER -> Arbeidssituasjon.JORDBRUKER
                             ARBEIDSLEDIG -> Arbeidssituasjon.ARBEIDSLEDIG
                             ANNET -> Arbeidssituasjon.ANNET
+                            PERMITTERT -> Arbeidssituasjon.PERMITTERT
                         },
                 )
             }
@@ -95,8 +95,8 @@ class SykmeldingHendelseKonverterer {
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
                         when (it.svar) {
-                            JaEllerNeiKafkaDTO.JA -> true
-                            JaEllerNeiKafkaDTO.NEI -> false
+                            JaEllerNei.JA -> true
+                            JaEllerNei.NEI -> false
                         },
                 )
             }
@@ -106,8 +106,8 @@ class SykmeldingHendelseKonverterer {
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
                         when (it.svar) {
-                            JaEllerNeiKafkaDTO.JA -> true
-                            JaEllerNeiKafkaDTO.NEI -> false
+                            JaEllerNei.JA -> true
+                            JaEllerNei.NEI -> false
                         },
                 )
             }
@@ -125,8 +125,8 @@ class SykmeldingHendelseKonverterer {
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
                         when (it.svar) {
-                            JaEllerNeiKafkaDTO.JA -> true
-                            JaEllerNeiKafkaDTO.NEI -> false
+                            JaEllerNei.JA -> true
+                            JaEllerNei.NEI -> false
                         },
                 )
             }
@@ -151,8 +151,8 @@ class SykmeldingHendelseKonverterer {
                     sporsmaltekst = it.sporsmaltekst,
                     svar =
                         when (it.svar) {
-                            JaEllerNeiKafkaDTO.JA -> true
-                            JaEllerNeiKafkaDTO.NEI -> false
+                            JaEllerNei.JA -> true
+                            JaEllerNei.NEI -> false
                         },
                 )
             }
@@ -234,6 +234,14 @@ class SykmeldingHendelseKonverterer {
             }
             ARBEIDSLEDIG -> {
                 ArbeidsledigBrukerSvar(
+                    erOpplysningeneRiktige = erOpplysningeneRiktige,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidsledigFraOrgnummer = arbeidsgiverOrgnummer,
+                    uriktigeOpplysninger = uriktigeOpplysninger,
+                )
+            }
+            PERMITTERT -> {
+                PermittertBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     arbeidsledigFraOrgnummer = arbeidsgiverOrgnummer,

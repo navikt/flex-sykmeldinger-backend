@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testdata
 
+import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.producers.sykmeldingstatus.KafkaMetadataDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
@@ -9,7 +10,7 @@ import java.time.OffsetDateTime
 fun lagSykmeldingStatusKafkaMessageDTO(
     sykmeldingId: String = "1",
     fnr: String = "fnr",
-    brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
+    brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
     statusEvent: String = "SENDT",
     source: String = "syfosmaltinn",
 ): SykmeldingStatusKafkaMessageDTO =
@@ -29,76 +30,75 @@ fun lagSykmeldingStatusKafkaMessageDTO(
                 arbeidsgiver = null,
                 sporsmals = null,
                 brukerSvar = brukerSvarKafkaDTO,
-                erSvarOppdatering = false,
                 tidligereArbeidsgiver = null,
             ),
     )
 
-fun lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO: ArbeidssituasjonKafkaDTO) =
+fun lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO: ArbeidssituasjonDTO) =
     BrukerSvarKafkaDTO(
         erOpplysningeneRiktige =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Er opplysningene riktige?",
-                svar = JaEllerNeiKafkaDTO.JA,
+                svar = JaEllerNei.JA,
             ),
         uriktigeOpplysninger =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Er det noen uriktige opplysninger?",
-                svar = listOf(UriktigeOpplysningerTypeKafkaDTO.PERIODE),
+                svar = listOf(UriktigeOpplysningerType.PERIODE),
             ),
         arbeidssituasjon =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Hva er din arbeidssituasjon?",
                 svar = arbeidssituasjonKafkaDTO,
             ),
         arbeidsgiverOrgnummer =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
                 svar = "123456789",
             ),
         riktigNarmesteLeder =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Er dette riktig nærmeste leder?",
-                svar = JaEllerNeiKafkaDTO.JA,
+                svar = JaEllerNei.JA,
             ),
         harBruktEgenmelding =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Har du brukt egenmelding?",
-                svar = JaEllerNeiKafkaDTO.JA,
+                svar = JaEllerNei.JA,
             ),
         egenmeldingsperioder =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Hvilke egenmeldingsperioder har du hatt?",
                 svar =
                     listOf(
-                        EgenmeldingsperiodeKafkaDTO(
+                        EgenmeldingsperiodeFormDTO(
                             fom = LocalDate.parse("2025-01-01"),
                             tom = LocalDate.parse("2025-01-05"),
                         ),
-                        EgenmeldingsperiodeKafkaDTO(
+                        EgenmeldingsperiodeFormDTO(
                             fom = LocalDate.parse("2025-01-10"),
                             tom = LocalDate.parse("2025-01-15"),
                         ),
                     ),
             ),
         harForsikring =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Har du forsikring?",
-                svar = JaEllerNeiKafkaDTO.JA,
+                svar = JaEllerNei.JA,
             ),
         egenmeldingsdager =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Hvilke egenmeldingsdager har du hatt?",
                 svar = listOf(LocalDate.parse("2021-01-01")),
             ),
         harBruktEgenmeldingsdager =
-            SporsmalSvarKafkaDTO(
+            FormSporsmalSvar(
                 sporsmaltekst = "Har du brukt egenmeldingsdager?",
-                svar = JaEllerNeiKafkaDTO.JA,
+                svar = JaEllerNei.JA,
             ),
         fisker =
             FiskereSvarKafkaDTO(
-                blad = SporsmalSvarKafkaDTO("Hvilket blad?", BladKafkaDTO.A),
-                lottOgHyre = SporsmalSvarKafkaDTO("Lott eller Hyre?", LottOgHyreKafkaDTO.LOTT),
+                blad = FormSporsmalSvar("Hvilket blad?", Blad.A),
+                lottOgHyre = FormSporsmalSvar("Lott eller Hyre?", LottOgHyre.LOTT),
             ),
     )

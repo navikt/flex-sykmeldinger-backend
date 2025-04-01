@@ -1,6 +1,6 @@
 package no.nav.helse.flex.sykmelding.application
 
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
@@ -26,7 +26,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 sykmeldingId = "1",
                 fnr = "fnr",
-                brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonKafkaDTO.ARBEIDSTAKER),
+                brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
                 statusEvent = "APEN",
                 source = "tsm",
             )
@@ -60,17 +60,17 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     }
 
     @ParameterizedTest
-    @EnumSource(ArbeidssituasjonKafkaDTO::class)
-    fun `burde konvertere BrukerSvarKafkaDto til BrukerSvar`(arbeidssituasjonKafkaDTO: ArbeidssituasjonKafkaDTO) {
-        val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO)
+    @EnumSource(ArbeidssituasjonDTO::class)
+    fun `burde konvertere BrukerSvarKafkaDto til BrukerSvar`(arbeidssituasjonDTO: ArbeidssituasjonDTO) {
+        val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonDTO)
 
         val konvertert = sykmeldingHendelseKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
         konvertert.uriktigeOpplysninger?.svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
         konvertert.erOpplysningeneRiktige.svar `should be equal to` true
-        konvertert.arbeidssituasjonSporsmal.svar.name `should be equal to` arbeidssituasjonKafkaDTO.name
+        konvertert.arbeidssituasjonSporsmal.svar.name `should be equal to` arbeidssituasjonDTO.name
 
-        when (arbeidssituasjonKafkaDTO) {
-            ArbeidssituasjonKafkaDTO.ARBEIDSTAKER -> {
+        when (arbeidssituasjonDTO) {
+            ArbeidssituasjonDTO.ARBEIDSTAKER -> {
                 val arbeidstakerBrukerSvar = konvertert as? ArbeidstakerBrukerSvar
                 arbeidstakerBrukerSvar.`should not be null`()
                 arbeidstakerBrukerSvar.arbeidsgiverOrgnummer.svar `should be equal to` "123456789"
@@ -78,7 +78,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                 arbeidstakerBrukerSvar.harEgenmeldingsdager.svar `should be equal to` true
                 arbeidstakerBrukerSvar.egenmeldingsdager?.svar `should be equal to` listOf(LocalDate.parse("2021-01-01"))
             }
-            ArbeidssituasjonKafkaDTO.FRILANSER -> {
+            ArbeidssituasjonDTO.FRILANSER -> {
                 val frilanserBrukerSvar = konvertert as? FrilanserBrukerSvar
                 frilanserBrukerSvar.`should not be null`()
                 frilanserBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
@@ -89,7 +89,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                     )
                 frilanserBrukerSvar.harForsikring.svar `should be equal to` true
             }
-            ArbeidssituasjonKafkaDTO.NAERINGSDRIVENDE -> {
+            ArbeidssituasjonDTO.NAERINGSDRIVENDE -> {
                 val naeringsdrivendeBrukerSvar = konvertert as? NaringsdrivendeBrukerSvar
                 naeringsdrivendeBrukerSvar.`should not be null`()
                 naeringsdrivendeBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
@@ -100,13 +100,13 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                     )
                 naeringsdrivendeBrukerSvar.harForsikring.svar `should be equal to` true
             }
-            ArbeidssituasjonKafkaDTO.FISKER -> {
+            ArbeidssituasjonDTO.FISKER -> {
                 val fiskerBrukerSvar = konvertert as? FiskerBrukerSvar
                 fiskerBrukerSvar.`should not be null`()
                 fiskerBrukerSvar.lottOgHyre.svar `should be equal to` FiskerLottOgHyre.LOTT
                 fiskerBrukerSvar.blad.svar `should be equal to` FiskerBlad.A
             }
-            ArbeidssituasjonKafkaDTO.JORDBRUKER -> {
+            ArbeidssituasjonDTO.JORDBRUKER -> {
                 val jordbrukerBrukerSvar = konvertert as? JordbrukerBrukerSvar
                 jordbrukerBrukerSvar.`should not be null`()
                 jordbrukerBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
@@ -117,12 +117,17 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                     )
                 jordbrukerBrukerSvar.harForsikring.svar `should be equal to` true
             }
-            ArbeidssituasjonKafkaDTO.ARBEIDSLEDIG -> {
+            ArbeidssituasjonDTO.ARBEIDSLEDIG -> {
                 val arbeidsledigBrukerSvar = konvertert as? ArbeidsledigBrukerSvar
                 arbeidsledigBrukerSvar.`should not be null`()
                 arbeidsledigBrukerSvar.arbeidsledigFraOrgnummer?.svar `should be equal to` "123456789"
             }
-            ArbeidssituasjonKafkaDTO.ANNET -> {
+            ArbeidssituasjonDTO.PERMITTERT -> {
+                val permittertBrukerSvar = konvertert as? PermittertBrukerSvar
+                permittertBrukerSvar.`should not be null`()
+                permittertBrukerSvar.arbeidsledigFraOrgnummer?.svar `should be equal to` "123456789"
+            }
+            ArbeidssituasjonDTO.ANNET -> {
                 val annetBrukerSvar = konvertert as? AnnetArbeidssituasjonBrukerSvar
                 annetBrukerSvar.`should not be null`()
             }
