@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
 
-class SykmeldingStatusKafkaMessageMapperSpek {
+class SykmeldingStatusKafkaKonvertererTest {
     @Test
     fun `Mapper status BEKREFT_AVVIST riktig`() {
         val hendelse =

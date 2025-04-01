@@ -141,6 +141,7 @@ class SykmeldingStatusDtoKonverterer {
             svar = svar,
         )
 
+    @Suppress("ktlint:standard:max-line-length")
     private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>> =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
