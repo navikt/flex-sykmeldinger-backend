@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaDTOKonverterer
+import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusProducer
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
@@ -21,7 +21,6 @@ class SykmeldingHandterer(
     private val nowFactory: Supplier<Instant>,
 ) {
     private val logger = logger()
-    private val sykmeldingStatusKafkaDTOKonverterer = SykmeldingStatusKafkaDTOKonverterer()
 
     fun hentSykmelding(
         sykmeldingId: String,
@@ -136,7 +135,11 @@ class SykmeldingHandterer(
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
         sykmeldingStatusProducer.produserSykmeldingStatus(
             fnr = sykmelding.pasientFnr,
-            sykmelingstatusDTO = sykmeldingStatusKafkaDTOKonverterer.konverter(sykmelding),
+            sykmelingstatusDTO =
+                SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+                    sykmeldingId = sykmelding.sykmeldingId,
+                    sykmeldingHendelse = sykmelding.sisteHendelse(),
+                ),
         )
     }
 
