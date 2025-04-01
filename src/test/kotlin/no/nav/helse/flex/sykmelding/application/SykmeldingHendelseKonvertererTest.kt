@@ -30,7 +30,10 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                 statusEvent = "APEN",
                 source = "tsm",
             )
-        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status).`should not be null`()
+        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status).let {
+            it.brukerSvar.`should not be null`()
+            it.status `should be equal to` HendelseStatus.APEN
+        }
     }
 
     @Disabled

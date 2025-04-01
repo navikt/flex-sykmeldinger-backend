@@ -19,7 +19,7 @@ class SykmeldingHendelseKonverterer {
         }
         return SykmeldingHendelse(
             status = konverterStatusTilHendelseStatus(status.event.statusEvent),
-            sporsmalSvar = emptyList(),
+            sporsmalSvar = null,
             arbeidstakerInfo = null,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = null,
