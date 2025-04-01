@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
 
-class SykmeldingStatusKafkaKonvertererTest {
+class SykmeldingStatusKafkaDTOKonvertererTest {
     @Test
     fun `Mapper status BEKREFT_AVVIST riktig`() {
         val hendelse =
@@ -22,7 +22,7 @@ class SykmeldingStatusKafkaKonvertererTest {
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
         val sykmeldingStatusKafkaDTO =
-            SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+            SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
                 sykmeldingId = "1",
                 sykmeldingHendelse = hendelse,
             )
@@ -38,7 +38,7 @@ class SykmeldingStatusKafkaKonvertererTest {
     @Test
     fun `Mapper status AVBRUTT riktig`() {
         val sykmeldingStatusKafkaDTO =
-            SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+            SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
                 sykmeldingId = "1",
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
@@ -58,7 +58,7 @@ class SykmeldingStatusKafkaKonvertererTest {
     @Test
     fun `Mapper status APEN riktig`() {
         val sykmeldingStatusKafkaDTO =
-            SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+            SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
                 sykmeldingId = "1",
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
@@ -80,7 +80,7 @@ class SykmeldingStatusKafkaKonvertererTest {
         @Test
         fun `Mapper arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
-                SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+                SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
                     sykmeldingId = "1",
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
@@ -187,7 +187,7 @@ class SykmeldingStatusKafkaKonvertererTest {
                         ),
                 )
 
-            val brukerSvar = SykmeldingStatusKafkaKonverterer.konverterTilBrukerSvarKafkaDTO(sykmeldingSporsmalSvarDto = sprosmalSvarDto)
+            val brukerSvar = SykmeldingStatusKafkaDTOKonverterer.konverterTilBrukerSvarKafkaDTO(sykmeldingSporsmalSvarDto = sprosmalSvarDto)
 
             brukerSvar.erOpplysningeneRiktige.run {
                 sporsmaltekst shouldBeEqualTo "Er opplysningene riktige?"
@@ -309,7 +309,7 @@ class SykmeldingStatusKafkaKonvertererTest {
                 )
 
             val sporsmals =
-                SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
                     sporsmalSvarDto = sprosmalSvarDto,
                     harAktivtArbeidsforhold = null,
                 )
@@ -353,7 +353,11 @@ class SykmeldingStatusKafkaKonvertererTest {
                         ),
                 )
 
-            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+            val sporsmalListe =
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = null,
+                )
 
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
@@ -373,7 +377,11 @@ class SykmeldingStatusKafkaKonvertererTest {
                         ),
                 )
 
-            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+            val sporsmalListe =
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = null,
+                )
 
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
@@ -388,7 +396,11 @@ class SykmeldingStatusKafkaKonvertererTest {
                     arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.JORDBRUKER),
                 )
 
-            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+            val sporsmalListe =
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = null,
+                )
 
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
@@ -407,7 +419,11 @@ class SykmeldingStatusKafkaKonvertererTest {
                         ),
                 )
 
-            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+            val sporsmalListe =
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = null,
+                )
 
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
@@ -428,7 +444,7 @@ class SykmeldingStatusKafkaKonvertererTest {
                 )
 
             val sporsmalListe =
-                SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
                     sporsmalSvar,
                     harAktivtArbeidsforhold = false,
                 )
@@ -451,7 +467,7 @@ class SykmeldingStatusKafkaKonvertererTest {
                 )
 
             val sporsmalListe =
-                SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                SykmeldingStatusKafkaDTOKonverterer.konverterTilSporsmalsKafkaDto(
                     sporsmalSvar,
                     harAktivtArbeidsforhold = false,
                 )

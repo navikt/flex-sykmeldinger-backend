@@ -11,10 +11,10 @@ import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 
-object SykmeldingStatusKafkaKonverterer {
+object SykmeldingStatusKafkaDTOKonverterer {
     private val logger = this.logger()
 
-    fun fraSykmeldingStatus(
+    fun fraSykmeldingHendelse(
         sykmeldingId: String,
         sykmeldingHendelse: SykmeldingHendelse,
     ): SykmeldingStatusKafkaDTO =
@@ -90,7 +90,7 @@ object SykmeldingStatusKafkaKonverterer {
             )
         }
 
-    fun konverterTilBrukerSvarKafkaDTO(sykmeldingSporsmalSvarDto: SykmeldingSporsmalSvarDto): BrukerSvarKafkaDTO =
+    internal fun konverterTilBrukerSvarKafkaDTO(sykmeldingSporsmalSvarDto: SykmeldingSporsmalSvarDto): BrukerSvarKafkaDTO =
         BrukerSvarKafkaDTO(
             erOpplysningeneRiktige = sykmeldingSporsmalSvarDto.erOpplysningeneRiktige,
             uriktigeOpplysninger = sykmeldingSporsmalSvarDto.uriktigeOpplysninger,
@@ -111,7 +111,7 @@ object SykmeldingStatusKafkaKonverterer {
                 },
         )
 
-    fun konverterTilSporsmalsKafkaDto(
+    internal fun konverterTilSporsmalsKafkaDto(
         sporsmalSvarDto: SykmeldingSporsmalSvarDto,
         harAktivtArbeidsforhold: Boolean? = null,
         sykmeldingId: String? = null,
@@ -184,9 +184,10 @@ object SykmeldingStatusKafkaKonverterer {
         val normalisertSituasjon: ArbeidssituasjonDTO =
             when (arbeidssituasjon.svar) {
                 ArbeidssituasjonDTO.FISKER -> {
-                    val isHyre = fisker?.lottOgHyre?.svar == LottOgHyre.HYRE
-
-                    if (isHyre) ArbeidssituasjonDTO.ARBEIDSTAKER else ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                    when (fisker?.lottOgHyre?.svar) {
+                        LottOgHyre.HYRE -> ArbeidssituasjonDTO.ARBEIDSTAKER
+                        else -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                    }
                 }
                 ArbeidssituasjonDTO.JORDBRUKER -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
                 else -> arbeidssituasjon.svar

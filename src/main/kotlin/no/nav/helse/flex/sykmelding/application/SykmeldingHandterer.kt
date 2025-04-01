@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaKonverterer
+import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaDTOKonverterer
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusProducer
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
@@ -135,7 +135,7 @@ class SykmeldingHandterer(
         sykmeldingStatusProducer.produserSykmeldingStatus(
             fnr = sykmelding.pasientFnr,
             sykmelingstatusDTO =
-                SykmeldingStatusKafkaKonverterer.fraSykmeldingStatus(
+                SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
                     sykmeldingId = sykmelding.sykmeldingId,
                     sykmeldingHendelse = sykmelding.sisteHendelse(),
                 ),
