@@ -37,7 +37,6 @@ class SykmeldingHandterer(
         sykmeldingId: String,
         identer: PersonIdenter,
         brukerSvar: BrukerSvar,
-        sporsmalSvar: List<Sporsmal>?,
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
         val tilleggsinfo =

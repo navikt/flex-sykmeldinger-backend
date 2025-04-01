@@ -43,7 +43,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
                 brukerSvar = vilkarligBrukerSvar,
-                sporsmalSvar = null,
             )
 
             sykmeldingRepository
@@ -66,7 +65,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
                 brukerSvar = vilkarligBrukerSvar,
-                sporsmalSvar = null,
             )
 
             sykmeldingStatusProducer
@@ -91,7 +89,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarArbeidstaker(),
                 )
 
             sykmelding
@@ -117,7 +114,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarArbeidsledig(),
                 )
 
             sykmelding
@@ -143,7 +139,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarPermittert(),
                 )
 
             sykmelding
@@ -169,7 +164,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarFiskerMedLott(),
                 )
 
             sykmelding
@@ -197,7 +191,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarFiskerMedHyre(),
                 )
 
             sykmelding
@@ -229,7 +222,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarFiskerMedLottOgHyre(),
                 )
 
             sykmelding
@@ -255,7 +247,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarJordbruker(),
                 )
 
             sykmelding
@@ -281,7 +272,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarSelvstendigNaringsdrivende(),
                 )
 
             sykmelding
@@ -307,7 +297,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarFrilanser(),
                 )
 
             sykmelding
@@ -333,7 +322,6 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
-                    sporsmalSvar = lagSporsmalSvarAnnet(),
                 )
 
             sykmelding

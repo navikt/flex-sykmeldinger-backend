@@ -6,7 +6,6 @@ import java.time.Instant
 
 fun lagSykmeldingHendelse(
     status: HendelseStatus = HendelseStatus.APEN,
-    sporsmalSvar: List<Sporsmal>? = null,
     arbeidstakerInfo: ArbeidstakerInfo? = null,
     tilleggsinfo: Tilleggsinfo? = null,
     brukerSvar: BrukerSvar? = null,

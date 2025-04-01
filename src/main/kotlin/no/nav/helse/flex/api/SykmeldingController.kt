@@ -154,14 +154,12 @@ class SykmeldingController(
         val identer = tokenxValidering.hentIdenter()
 
         val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
-        val sporsmalSvar = sendSykmeldingRequestDTO.tilSporsmalListe()
 
         val sykmelding =
             sykmeldingHandterer.sendSykmelding(
                 sykmeldingId = sykmeldingId,
                 identer = identer,
                 brukerSvar = brukerSvar,
-                sporsmalSvar = sporsmalSvar,
             )
 
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
