@@ -406,22 +406,82 @@ class SykmeldingStatusKafkaMessageMapperSpek {
 
         @Test
         fun `arbeidssituasjon JORDBRUKER burde alltid bli NAERINGSDRIVENDE`() {
-            TODO()
+            val sporsmalSvar =
+                lagSykmeldingSporsmalSvarDto(
+                    arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.JORDBRUKER),
+                )
+
+            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+
+            sporsmalListe
+                .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
+                .shouldNotBeNull()
+                .svar shouldBeEqualTo "NAERINGSDRIVENDE"
         }
 
         @Test
         fun `riktigNarmesteLeder svar burde ha motsatt svar`() {
-            TODO()
+            val sporsmalSvar =
+                lagSykmeldingSporsmalSvarDto(
+                    riktigNarmesteLeder =
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = JaEllerNei.JA,
+                        ),
+                )
+
+            val sporsmalListe = SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(sporsmalSvar, harAktivtArbeidsforhold = null)
+
+            sporsmalListe
+                .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
+                .shouldNotBeNull()
+                .svar shouldBeEqualTo "NEI"
         }
 
         @Test
         fun `riktigNarmesteLeder blir alltid satt dersom ikke harAktivtArbeidsforhold`() {
-            TODO()
+            val sporsmalSvar =
+                lagSykmeldingSporsmalSvarDto(
+                    arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.ARBEIDSTAKER),
+                    riktigNarmesteLeder =
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = JaEllerNei.NEI,
+                        ),
+                )
+
+            val sporsmalListe =
+                SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = false,
+                )
+            sporsmalListe
+                .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
+                .shouldNotBeNull()
+                .svar shouldBeEqualTo "NEI"
         }
 
         @Test
-        fun `riktigNarmesteLeder burde være riktig dersom ikke harAktivtArbeidsforhold`() {
-            TODO()
+        fun `riktigNarmesteLeder spørsmål blir ignorert dersom ikke harAktivtArbeidsforhold`() {
+            val sporsmalSvar =
+                lagSykmeldingSporsmalSvarDto(
+                    arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.ARBEIDSTAKER),
+                    riktigNarmesteLeder =
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Er dette riktig nærmeste leder?",
+                            svar = JaEllerNei.JA,
+                        ),
+                )
+
+            val sporsmalListe =
+                SykmeldingStatusKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = false,
+                )
+            sporsmalListe
+                .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
+                .shouldNotBeNull()
+                .svar shouldBeEqualTo "NEI"
         }
 
         private fun List<SporsmalKafkaDTO>.finnSporsmal(shortName: ShortNameKafkaDTO): SporsmalKafkaDTO? =
