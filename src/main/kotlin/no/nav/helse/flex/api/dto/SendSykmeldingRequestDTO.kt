@@ -2,8 +2,6 @@ package no.nav.helse.flex.api.dto
 
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 
 data class SendSykmeldingRequestDTO(
@@ -129,8 +127,12 @@ data class SendSykmeldingRequestDTO(
             UriktigeOpplysningDTO.SYKMELDINGSGRAD_FOR_LAV -> UriktigeOpplysning.SYKMELDINGSGRAD_FOR_LAV
         }
 
-    fun List<EgenmeldingsperiodeDTO>.tilEgenmeldingsperioder(): List<Egenmeldingsperiode> =
-        this.map { Egenmeldingsperiode(fom = it.fom, tom = it.tom) }
+    private fun List<EgenmeldingsperiodeDTO>.tilEgenmeldingsperioder(): List<Egenmeldingsperiode> =
+        this.map {
+            requireNotNull(it.fom) { "Fom (fra og med) er ikke satt på egenmeldingsperiode: $it" }
+            requireNotNull(it.tom) { "Tom (til og med) er ikke satt på egenmeldingsperiode: $it" }
+            Egenmeldingsperiode(fom = it.fom, tom = it.tom)
+        }
 
     private fun YesOrNoDTO.tilBoolean(): Boolean = this == YesOrNoDTO.YES
 
@@ -148,141 +150,6 @@ data class SendSykmeldingRequestDTO(
         }
 
     private fun <T : Any> T.somUkjentSporsmal(): SporsmalSvar<T> = SporsmalSvar("<ukjent sporsmal>", this)
-
-    fun tilSporsmalListe(): List<Sporsmal> {
-        val sporsmal = mutableListOf<Sporsmal>()
-        erOpplysningeneRiktige.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ER_OPPLYSNINGENE_RIKTIGE,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
-        arbeidsgiverOrgnummer?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSGIVER_ORGNUMMER,
-                    svartype = Svartype.RADIO,
-                    svar = listOf(Svar(verdi = it)),
-                ),
-            )
-        }
-        arbeidssituasjon.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSSITUASJON,
-                    svartype = Svartype.RADIO,
-                    svar = listOf(Svar(verdi = it.name)),
-                ),
-            )
-        }
-        riktigNarmesteLeder?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.RIKTIG_NARMESTE_LEDER,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
-        arbeidsledig?.arbeidsledigFraOrgnummer?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.ARBEIDSLEDIG_FRA_ORGNUMMER,
-                    svartype = Svartype.RADIO,
-                    svar = listOf(Svar(verdi = it)),
-                ),
-            )
-        }
-        // Brukes for arbeidstaker og fisker på hyre
-        egenmeldingsdager?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.EGENMELDINGSDAGER,
-                    svartype = Svartype.DATOER,
-                    svar = it.map { dag -> Svar(verdi = dag.toString()) },
-                ),
-            )
-        }
-        // Brukes for selvstendig næringsdrivende, frilanser, jordbruker og fisker på lott
-        egenmeldingsperioder?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.EGENMELDINGSPERIODER,
-                    svartype = Svartype.PERIODER,
-                    svar = it.map { periode -> Svar(verdi = objectMapper.writeValueAsString(periode)) },
-                ),
-            )
-        }
-        fisker?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.FISKER,
-                    svartype = Svartype.GRUPPE_AV_UNDERSPORSMAL,
-                    svar = emptyList(),
-                    undersporsmal =
-                        listOf(
-                            Sporsmal(
-                                tag = SporsmalTag.FISKER__BLAD,
-                                svartype = Svartype.RADIO,
-                                svar = listOf(Svar(verdi = it.blad.name)),
-                            ),
-                            Sporsmal(
-                                tag = SporsmalTag.FISKER__LOTT_OG_HYRE,
-                                svartype = Svartype.RADIO,
-                                svar = listOf(Svar(verdi = it.lottOgHyre.name)),
-                            ),
-                        ),
-                ),
-            )
-        }
-        harBruktEgenmelding?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELDING,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
-        harEgenmeldingsdager?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.HAR_BRUKT_EGENMELDINGSDAGER,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
-        harForsikring?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.HAR_FORSIKRING,
-                    svartype = Svartype.JA_NEI,
-                    svar = konverterJaNeiSvar(it),
-                ),
-            )
-        }
-        uriktigeOpplysninger?.let {
-            sporsmal.add(
-                Sporsmal(
-                    tag = SporsmalTag.URIKTIGE_OPPLYSNINGER,
-                    svartype = Svartype.CHECKBOX_GRUPPE,
-                    svar = it.map { opplysning -> Svar(verdi = opplysning.name) },
-                ),
-            )
-        }
-        return sporsmal
-    }
-
-    private fun konverterJaNeiSvar(svar: YesOrNoDTO?): List<Svar> =
-        when (svar) {
-            YesOrNoDTO.YES -> listOf(Svar(verdi = "JA"))
-            YesOrNoDTO.NO -> listOf(Svar(verdi = "NEI"))
-            else -> emptyList()
-        }
 }
 
 enum class YesOrNoDTO {

@@ -8,7 +8,6 @@ data class SykmeldingStatusDTO(
     val arbeidsgiver: ArbeidsgiverStatusDTO?,
     // TODO: Remove this, use "brukerSvar" istedet
     val sporsmalOgSvarListe: List<SporsmalDTO>,
-    // TODO: make this not nullable
     val brukerSvar: SykmeldingSporsmalSvarDto?,
 )
 

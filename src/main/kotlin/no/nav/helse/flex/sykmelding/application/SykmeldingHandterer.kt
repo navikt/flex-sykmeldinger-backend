@@ -21,7 +21,6 @@ class SykmeldingHandterer(
     private val nowFactory: Supplier<Instant>,
 ) {
     private val logger = logger()
-    private val sykmeldingStatusKafkaDTOKonverterer = SykmeldingStatusKafkaDTOKonverterer()
 
     fun hentSykmelding(
         sykmeldingId: String,
@@ -38,7 +37,6 @@ class SykmeldingHandterer(
         sykmeldingId: String,
         identer: PersonIdenter,
         brukerSvar: BrukerSvar,
-        sporsmalSvar: List<Sporsmal>?,
     ): Sykmelding {
         val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
         val tilleggsinfo =
@@ -136,7 +134,11 @@ class SykmeldingHandterer(
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
         sykmeldingStatusProducer.produserSykmeldingStatus(
             fnr = sykmelding.pasientFnr,
-            sykmelingstatusDTO = sykmeldingStatusKafkaDTOKonverterer.konverter(sykmelding),
+            sykmelingstatusDTO =
+                SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
+                    sykmeldingId = sykmelding.sykmeldingId,
+                    sykmeldingHendelse = sykmelding.sisteHendelse(),
+                ),
         )
     }
 

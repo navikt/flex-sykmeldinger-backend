@@ -157,7 +157,6 @@ data class SykmeldingHendelseDbRecord(
     val sykmeldingId: String,
     val status: HendelseStatus,
     val tidligereArbeidsgiver: PGobject?,
-    val sporsmal: PGobject?,
     val arbeidstakerInfo: PGobject?,
     val tilleggsinfo: PGobject?,
     val brukerSvar: PGobject?,
@@ -167,7 +166,6 @@ data class SykmeldingHendelseDbRecord(
         SykmeldingHendelse(
             databaseId = this.id,
             status = this.status,
-            sporsmalSvar = this.sporsmal?.fraPsqlJson(),
             arbeidstakerInfo = this.arbeidstakerInfo?.fraPsqlJson(),
             tilleggsinfo = this.tilleggsinfo?.fraPsqlJson(),
             brukerSvar = this.brukerSvar?.fraPsqlJson(),
@@ -189,7 +187,6 @@ data class SykmeldingHendelseDbRecord(
                 sykmeldingId = sykmeldingId,
                 status = hendelse.status,
                 tidligereArbeidsgiver = null,
-                sporsmal = hendelse.sporsmalSvar?.tilPsqlJson(),
                 arbeidstakerInfo = hendelse.arbeidstakerInfo?.tilPsqlJson(),
                 tilleggsinfo = hendelse.tilleggsinfo?.tilPsqlJson(),
                 brukerSvar = hendelse.brukerSvar?.tilPsqlJson(),

@@ -6,7 +6,6 @@ import java.time.Instant
 data class SykmeldingHendelse(
     internal val databaseId: String? = null,
     val status: HendelseStatus,
-    val sporsmalSvar: List<Sporsmal>? = null,
     val arbeidstakerInfo: ArbeidstakerInfo? = null,
     val brukerSvar: BrukerSvar? = null,
     val tilleggsinfo: Tilleggsinfo? = null,

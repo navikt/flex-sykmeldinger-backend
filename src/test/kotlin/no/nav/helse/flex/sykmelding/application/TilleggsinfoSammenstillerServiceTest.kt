@@ -52,7 +52,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar =
                 lagArbeidstakerBrukerSvar(
-                    arbeidsgiverOrgnummer = "orgnr",
+                    arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             val tilleggsinfo =
@@ -94,7 +94,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 )
             val brukerSvar =
                 lagArbeidstakerBrukerSvar(
-                    arbeidsgiverOrgnummer = "orgnr",
+                    arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             val tilleggsinfo =
@@ -117,7 +117,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
 
-            val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = "orgnr")
+            val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
             invoking {
                 sammenstillerService.sammenstillTilleggsinfo(
@@ -180,7 +180,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar =
                 lagArbeidsledigBrukerSvar(
-                    arbeidsledigFraOrgnummer = "orgnr",
+                    arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             val tilleggsinfo =
@@ -241,7 +241,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar =
                 lagArbeidsledigBrukerSvar(
-                    arbeidsledigFraOrgnummer = "orgnr",
+                    arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             invoking {
@@ -301,7 +301,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar =
                 lagPermittertBrukerSvar(
-                    arbeidsledigFraOrgnummer = "orgnr",
+                    arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             val tilleggsinfo =
@@ -362,7 +362,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar =
                 lagPermittertBrukerSvar(
-                    arbeidsledigFraOrgnummer = "orgnr",
+                    arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
             invoking {
@@ -406,8 +406,8 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
                 val brukerSvar =
                     lagFiskerHyreBrukerSvar(
-                        arbeidsgiverOrgnummer = "orgnr",
-                        lottOgHyre = fiskerLottOgHyre,
+                        arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
+                        lottOgHyre = lagSporsmalSvar(fiskerLottOgHyre),
                     )
 
                 val tilleggsinfo =
@@ -454,8 +454,8 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     )
                 val brukerSvar =
                     lagFiskerHyreBrukerSvar(
-                        arbeidsgiverOrgnummer = "orgnr",
-                        lottOgHyre = fiskerLottOgHyre,
+                        arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
+                        lottOgHyre = lagSporsmalSvar(fiskerLottOgHyre),
                     )
 
                 val tilleggsinfo =
@@ -481,7 +481,11 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                         sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
 
-                val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = "orgnr", lottOgHyre = fiskerLottOgHyre)
+                val brukerSvar =
+                    lagFiskerHyreBrukerSvar(
+                        arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
+                        lottOgHyre = lagSporsmalSvar(fiskerLottOgHyre),
+                    )
 
                 invoking {
                     sammenstillerService.sammenstillTilleggsinfo(
