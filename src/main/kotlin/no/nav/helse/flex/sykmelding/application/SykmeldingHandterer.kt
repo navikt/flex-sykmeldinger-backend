@@ -139,10 +139,11 @@ class SykmeldingHandterer(
         val status =
             statusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = sykmelding.pasientFnr,
-                sykmeldingStatusKafkaDTO = SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
-                    sykmeldingId = sykmelding.sykmeldingId,
-                    sykmeldingHendelse = sykmelding.sisteHendelse(),
-                )
+                sykmeldingStatusKafkaDTO =
+                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
+                        sykmeldingId = sykmelding.sykmeldingId,
+                        sykmeldingHendelse = sykmelding.sisteHendelse(),
+                    ),
             )
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
