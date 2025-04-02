@@ -33,8 +33,14 @@ class SykmeldingListener(
             return
         }
         try {
-            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
-                objectMapper.readValue(cr.value())
+            val value = cr.value()
+            if (value == null) {
+                log.warn("Mottok sykmelding med null value, key: ${cr.key()}")
+                return
+            }
+
+            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord = objectMapper.readValue(value)
+            log.info("Mottok sykmelding med id ${sykmeldingMedBehandlingsutfall.sykmelding.id} fra topic $SYKMELDING_TOPIC")
             sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
             acknowledgment.acknowledge()
         } catch (e: JacksonException) {

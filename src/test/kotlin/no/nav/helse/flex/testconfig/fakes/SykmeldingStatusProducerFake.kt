@@ -1,22 +1,19 @@
 package no.nav.helse.flex.testconfig.fakes
 
+import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusProducer
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 
 class SykmeldingStatusProducerFake : SykmeldingStatusProducer {
-    private var sendteSykmeldinger: MutableList<SykmeldingStatusKafkaDTO> = mutableListOf()
+    private var sendteStatuser: MutableList<SykmeldingStatusKafkaMessageDTO> = mutableListOf()
 
-    fun sendteSykmeldinger(): List<SykmeldingStatusKafkaDTO> = sendteSykmeldinger
+    fun sendteSykmeldinger(): List<SykmeldingStatusKafkaMessageDTO> = sendteStatuser
 
     fun reset() {
-        sendteSykmeldinger.clear()
+        sendteStatuser.clear()
     }
 
-    override fun produserSykmeldingStatus(
-        fnr: String,
-        sykmelingstatusDTO: SykmeldingStatusKafkaDTO,
-    ): Boolean {
-        sendteSykmeldinger.add(sykmelingstatusDTO)
+    override fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean {
+        sendteStatuser.add(sykmeldingStatusKafkaMessageDTO)
         return true
     }
 }
