@@ -2,6 +2,7 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
+import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 import org.apache.kafka.clients.producer.Producer
@@ -13,11 +14,8 @@ interface SykmeldingStatusProducer {
     fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean
 }
 
-const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
-const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
-
 @Component
-class SykmeldingStatusKafkaProducer(
+class SykmeldingStatusProducerKafka(
     private val meldingProducer: Producer<String, String>,
     private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {

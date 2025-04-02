@@ -1,13 +1,10 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaDTOKonverterer
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusProducer
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -17,7 +14,6 @@ import java.util.function.Supplier
 class SykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
-    private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
     private val nowFactory: Supplier<Instant>,
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
@@ -82,7 +78,7 @@ class SykmeldingHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sendSykmeldingKafka(lagretSykmelding)
+        sykmeldingStatusHandterer.sendSykmeldingStatusPaKafka(lagretSykmelding)
         return lagretSykmelding
     }
 
@@ -96,7 +92,7 @@ class SykmeldingHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sendSykmeldingKafka(lagretSykmelding)
+        sykmeldingStatusHandterer.sendSykmeldingStatusPaKafka(lagretSykmelding)
         return lagretSykmelding
     }
 
@@ -111,7 +107,7 @@ class SykmeldingHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sendSykmeldingKafka(lagretSykmelding)
+        sykmeldingStatusHandterer.sendSykmeldingStatusPaKafka(lagretSykmelding)
         return lagretSykmelding
     }
 
@@ -130,22 +126,9 @@ class SykmeldingHandterer(
                 tilleggsinfo = tilleggsinfo,
                 opprettet = nowFactory.get(),
             ).also {
-                logger.info("Legger til hendelse ${it.serialisertTilString()} på sykmelding ${sykmelding.sykmeldingId}")
+                logger.info("Legger til hendelse ${it.status} på sykmelding ${sykmelding.sykmeldingId}")
             },
         )
-    }
-
-    private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
-        val status =
-            sykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = sykmelding.pasientFnr,
-                sykmeldingStatusKafkaDTO =
-                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
-                        sykmeldingId = sykmelding.sykmeldingId,
-                        sykmeldingHendelse = sykmelding.sisteHendelse(),
-                    ),
-            )
-        sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
 
     private fun finnValidertSykmelding(

@@ -1,6 +1,6 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
+import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.lagSykmelding

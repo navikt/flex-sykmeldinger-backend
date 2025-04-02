@@ -1,9 +1,9 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_LEESAH_SOURCE
-import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_LEESAH_SOURCE
+import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.sykmelding.application.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper

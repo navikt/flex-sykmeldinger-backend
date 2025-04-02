@@ -1,14 +1,12 @@
 package no.nav.helse.flex.sykmelding.application
 
-import no.nav.helse.flex.producers.sykmeldingstatus.KafkaMetadataDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.SYKMELDINGSTATUS_LEESAH_SOURCE
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.sykmeldingstatus.*
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
@@ -18,6 +16,7 @@ class SykmeldingStatusHandterer(
     private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
+    private val sykmeldingStatusProducer: SykmeldingStatusProducer,
 ) {
     private val log = logger()
 
@@ -44,12 +43,25 @@ class SykmeldingStatusHandterer(
         return true
     }
 
+    fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
+        val status =
+            sammenstillSykmeldingStatusKafkaMessageDTO(
+                fnr = sykmelding.pasientFnr,
+                sykmeldingStatusKafkaDTO =
+                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
+                        sykmeldingId = sykmelding.sykmeldingId,
+                        sykmeldingHendelse = sykmelding.sisteHendelse(),
+                    ),
+            )
+        sykmeldingStatusProducer.produserSykmeldingStatus(status)
+    }
+
     // TODO
-    fun publiserPaRetryTopic(hendelse: SykmeldingHendelse) {
+    private fun publiserPaRetryTopic(hendelse: SykmeldingHendelse) {
         log.warn("Retry topic er ikke implementert")
     }
 
-    fun sammenstillSykmeldingStatusKafkaMessageDTO(
+    internal fun sammenstillSykmeldingStatusKafkaMessageDTO(
         fnr: String,
         sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO,
     ): SykmeldingStatusKafkaMessageDTO {
@@ -61,8 +73,9 @@ class SykmeldingStatusHandterer(
                 fnr = fnr,
                 source = SYKMELDINGSTATUS_LEESAH_SOURCE,
             )
-        return SykmeldingStatusKafkaMessageDTO(kafkaMetadata = metadataDTO, event = sykmeldingStatusKafkaDTO).also {
-            log.info("Sender statusendring ${it.serialisertTilString()}")
-        }
+        return SykmeldingStatusKafkaMessageDTO(kafkaMetadata = metadataDTO, event = sykmeldingStatusKafkaDTO)
     }
 }
+
+const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
+const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"

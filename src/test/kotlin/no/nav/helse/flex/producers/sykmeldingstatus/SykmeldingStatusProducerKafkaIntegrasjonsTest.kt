@@ -1,5 +1,6 @@
 package no.nav.helse.flex.producers.sykmeldingstatus
 
+import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics
@@ -14,12 +15,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
-class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
+class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var environmentToggles: EnvironmentTogglesFake
 
     @Autowired
-    lateinit var sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducer
+    lateinit var sykmeldingStatusProducerKafka: SykmeldingStatusProducerKafka
 
     @Autowired
     lateinit var sykmeldingStatusConsumer: KafkaConsumer<String, String>
@@ -35,7 +36,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
         sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
         val antallForProdusert = sykmeldingStatusConsumer.poll(Duration.ofSeconds(1)).count()
 
-        sykmeldingStatusKafkaProducer
+        sykmeldingStatusProducerKafka
             .produserSykmeldingStatus(
                 sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
             ).`should be true`()
@@ -49,7 +50,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde ikke produsere meldinger til kafka i prod`() {
         environmentToggles.setEnvironment("prod")
-        sykmeldingStatusKafkaProducer
+        sykmeldingStatusProducerKafka
             .produserSykmeldingStatus(
                 sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
             ).`should be false`()
