@@ -21,6 +21,10 @@ class SykmeldingStatusHandterer(
     private val log = logger()
 
     fun handterSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+        if (status.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE) {
+            log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
+            return false
+        }
         val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status)
         log.info(
             "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
