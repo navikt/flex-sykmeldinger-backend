@@ -57,18 +57,27 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     }
 
     @TestFactory
-    fun `burde konvertere status til hendelse status`() =
+    fun `burde konvertere status til hendelse status - erAvvist = false`() =
         listOf(
-            ("APEN" to false) to HendelseStatus.APEN,
-            ("SENDT" to false) to HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-            ("BEKREFTET" to false) to HendelseStatus.SENDT_TIL_NAV,
-            ("BEKREFTET" to true) to HendelseStatus.BEKREFTET_AVVIST,
-            ("AVBRUTT" to false) to HendelseStatus.AVBRUTT,
-            ("UTGATT" to false) to HendelseStatus.UTGATT,
-        ).map { (statusPair, forventetStatusEvent) ->
-            val (originalStatus, erAvvist) = statusPair
+            "APEN" to HendelseStatus.APEN,
+            "SENDT" to HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+            "BEKREFTET" to HendelseStatus.SENDT_TIL_NAV,
+            "AVBRUTT" to HendelseStatus.AVBRUTT,
+            "UTGATT" to HendelseStatus.UTGATT,
+        ).map { (originalStatus, forventetStatusEvent) ->
             DynamicTest.dynamicTest("$originalStatus -> $forventetStatusEvent") {
-                sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus(originalStatus, erAvvist) `should be equal to`
+                sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus(originalStatus, false) `should be equal to`
+                    forventetStatusEvent
+            }
+        }
+
+    @TestFactory
+    fun `burde konvertere status til hendelse status - erAvvist = true`() =
+        listOf(
+            "BEKREFTET" to HendelseStatus.BEKREFTET_AVVIST,
+        ).map { (originalStatus, forventetStatusEvent) ->
+            DynamicTest.dynamicTest("$originalStatus -> $forventetStatusEvent") {
+                sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus(originalStatus, true) `should be equal to`
                     forventetStatusEvent
             }
         }
