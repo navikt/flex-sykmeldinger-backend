@@ -23,13 +23,10 @@ class SykmeldingListener(
         topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
         // TODO: Hvordan offset?
-        properties = [
-            "auto.offset.reset = latest",
-            "value.deserializer = org.apache.kafka.common.serialization.ByteArrayDeserializer",
-        ],
+        properties = ["auto.offset.reset = latest"],
     )
     fun listen(
-        cr: ConsumerRecord<String, ByteArray>,
+        cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
         if (environmentToggles.isProduction()) {
@@ -42,18 +39,16 @@ class SykmeldingListener(
                 return
             }
 
-            log.info("Mottok sykmelding ${String(value)}")
-            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
-                objectMapper.readValue(value)
+            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord = objectMapper.readValue(value)
+            log.info("Mottok sykmelding med id ${sykmeldingMedBehandlingsutfall.sykmelding.id} fra topic $SYKMELDING_TOPIC")
             sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+            acknowledgment.acknowledge()
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}")
             throw e
         } catch (e: Exception) {
             log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}")
             throw e
-        } finally {
-            acknowledgment.acknowledge()
         }
     }
 }
