@@ -152,10 +152,7 @@ class SykmeldingController(
         @RequestBody sendSykmeldingRequestDTO: SendSykmeldingRequestDTO,
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
-
         val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
-
-        logger.info("Sender sykmelding $sykmeldingId med brukersvar: $brukerSvar")
 
         val sykmelding =
             sykmeldingHandterer.sendSykmelding(
@@ -163,9 +160,9 @@ class SykmeldingController(
                 identer = identer,
                 brukerSvar = brukerSvar,
             )
+        logger.info("Sender sykmelding ${sykmelding.sykmeldingId} med status ${sykmelding.sisteHendelse().status}")
 
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
-
         return ResponseEntity.ok(konvertertSykmelding)
     }
 

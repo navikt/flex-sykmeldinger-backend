@@ -44,8 +44,9 @@ class SykmeldingStatusHandterer(
         return true
     }
 
+    // TODO
     fun publiserPaRetryTopic(hendelse: SykmeldingHendelse) {
-        // TODO
+        log.warn("Retry topic er ikke implementert")
     }
 
     fun sammenstillSykmeldingStatusKafkaMessageDTO(
