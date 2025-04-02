@@ -20,7 +20,7 @@ class SykmeldingHandterer(
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
     private val nowFactory: Supplier<Instant>,
-    private val statusHandterer: StatusHandterer,
+    private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
 ) {
     private val logger = logger()
 
@@ -137,7 +137,7 @@ class SykmeldingHandterer(
 
     private fun sendSykmeldingKafka(sykmelding: Sykmelding) {
         val status =
-            statusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
+            sykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = sykmelding.pasientFnr,
                 sykmeldingStatusKafkaDTO =
                     SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(

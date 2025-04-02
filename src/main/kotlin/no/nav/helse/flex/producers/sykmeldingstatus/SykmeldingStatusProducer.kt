@@ -14,7 +14,7 @@ interface SykmeldingStatusProducer {
 }
 
 const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
-const val STATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
+const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 
 @Component
 class SykmeldingStatusKafkaProducer(

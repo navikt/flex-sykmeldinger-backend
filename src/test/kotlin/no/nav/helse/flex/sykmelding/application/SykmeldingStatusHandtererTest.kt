@@ -14,9 +14,9 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class StatusHandtererTest : FakesTestOppsett() {
+class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Autowired
-    lateinit var statusHandterer: StatusHandterer
+    lateinit var sykmeldingStatusHandterer: SykmeldingStatusHandterer
 
     @AfterEach
     fun cleanUp() {
@@ -27,7 +27,7 @@ class StatusHandtererTest : FakesTestOppsett() {
     fun `burde lagre hendelse på sykmelding`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
-        statusHandterer.handterStatus(status).`should be true`()
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should not be null`()
         sykmelding.hendelser.size shouldBeEqualTo 2
@@ -37,7 +37,7 @@ class StatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde ikke lagre hendelse dersom sykmelding ikke finnes`() {
         val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
-        statusHandterer.handterStatus(status).`should be false`()
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should be null`()
     }
@@ -54,7 +54,7 @@ class StatusHandtererTest : FakesTestOppsett() {
         )
         val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", statusEvent = "SENDT")
         invoking {
-            statusHandterer.handterStatus(status).`should be false`()
+            sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
         } `should throw` UgyldigSykmeldingStatusException::class
     }
 
@@ -62,7 +62,7 @@ class StatusHandtererTest : FakesTestOppsett() {
     fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
         val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
         val sammenstillSykmeldingStatusKafkaMessageDTO =
-            statusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
+            sykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = "fnr",
                 sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
             )
@@ -74,6 +74,6 @@ class StatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde publisere på retry dersom sykmelding ikke finnes`() {
         val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
-        statusHandterer.handterStatus(status)
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
     }
 }

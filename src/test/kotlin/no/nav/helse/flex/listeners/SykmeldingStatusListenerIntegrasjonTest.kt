@@ -13,7 +13,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-class StatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde lagre hendelse fra kafka`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
