@@ -25,17 +25,19 @@ class SykmeldingStatusHandterer(
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
         }
-        val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(status)
-        log.info(
-            "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
-                "fra source ${status.kafkaMetadata.source}",
-        )
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
+
         if (sykmelding != null) {
+            val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+            log.info(
+                "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
+                    "fra source ${status.kafkaMetadata.source}",
+            )
             sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = hendelse.status)
             sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
+            log.info("Hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId} lagret")
         } else {
-            publiserPaRetryTopic(hendelse).also {
+            publiserPaRetryTopic(status).also {
                 log.info(
                     "Fant ikke sykmelding med id ${status.kafkaMetadata.sykmeldingId}, " +
                         "publiserer hendelse på retry topic",
@@ -43,7 +45,6 @@ class SykmeldingStatusHandterer(
                 return false
             }
         }
-        log.info("Hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId} lagret")
         return true
     }
 
@@ -61,7 +62,7 @@ class SykmeldingStatusHandterer(
     }
 
     // TODO
-    private fun publiserPaRetryTopic(hendelse: SykmeldingHendelse) {
+    private fun publiserPaRetryTopic(hendelse: SykmeldingStatusKafkaMessageDTO) {
         log.warn("Retry topic er ikke implementert")
     }
 

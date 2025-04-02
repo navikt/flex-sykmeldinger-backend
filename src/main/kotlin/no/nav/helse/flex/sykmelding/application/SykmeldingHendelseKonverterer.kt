@@ -13,12 +13,26 @@ import org.springframework.stereotype.Component
 class SykmeldingHendelseKonverterer {
     private val log = logger()
 
-    fun konverterStatusTilSykmeldingHendelse(status: SykmeldingStatusKafkaMessageDTO): SykmeldingHendelse {
-        if (status.event.brukerSvar == null) {
-            log.warn("Brukersvar er påkrevd, men er null i status: ${status.serialisertTilString()}")
+    fun konverterStatusTilSykmeldingHendelse(
+        sykmelding: Sykmelding,
+        status: SykmeldingStatusKafkaMessageDTO,
+    ): SykmeldingHendelse {
+        val hendelseStatus = konverterStatusTilHendelseStatus(status.event.statusEvent, sykmelding.erAvvist)
+        when (hendelseStatus) {
+            HendelseStatus.SENDT_TIL_NAV,
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+            -> {
+                if (status.event.brukerSvar == null) {
+                    throw IllegalStateException("Brukersvar er påkrevd, men er null i status: ${status.serialisertTilString()}")
+                        .also {
+                            log.error(it.message)
+                        }
+                }
+            }
+            else -> {}
         }
         return SykmeldingHendelse(
-            status = konverterStatusTilHendelseStatus(status.event.statusEvent),
+            status = hendelseStatus,
             arbeidstakerInfo = null,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = null,
@@ -26,13 +40,18 @@ class SykmeldingHendelseKonverterer {
         )
     }
 
-    internal fun konverterStatusTilHendelseStatus(status: String): HendelseStatus =
+    internal fun konverterStatusTilHendelseStatus(
+        status: String,
+        erAvvist: Boolean,
+    ): HendelseStatus =
         when (status) {
             "APEN" -> HendelseStatus.APEN
             "AVBRUTT" -> HendelseStatus.AVBRUTT
             "BEKREFTET" -> {
-                HendelseStatus.SENDT_TIL_NAV
-                // todo HendelseStatus.BEKREFTET_AVVIST
+                when (erAvvist) {
+                    true -> HendelseStatus.BEKREFTET_AVVIST
+                    false -> HendelseStatus.SENDT_TIL_NAV
+                }
             }
             "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
             "UTGATT" -> HendelseStatus.UTGATT
