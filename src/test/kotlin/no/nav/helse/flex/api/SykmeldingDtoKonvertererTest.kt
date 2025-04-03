@@ -46,9 +46,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
         val pasientDto =
             sykmeldingDtoKonverterer.konverterPasient(
-                pasient,
-                meldingsinformasjon,
-                LocalDate.parse("1999-01-01"),
+                pasient = pasient,
+                meldingsinformasjon = meldingsinformasjon,
+                fom = LocalDate.parse("2025-01-01"),
             )
 
         pasientDto `should be equal to`
@@ -58,6 +58,36 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 mellomnavn = "mellomnavn",
                 etternavn = "etternavn",
                 overSyttiAar = false,
+            )
+    }
+
+    @Test
+    fun `burde konvertere pasient som er over 70 år`() {
+        val pasient =
+            Pasient(
+                navn = Navn("fornavn", "mellomnavn", "etternavn"),
+                navKontor = null,
+                navnFastlege = null,
+                fnr = "fnr",
+                kontaktinfo = emptyList(),
+            )
+
+        val meldingsinformasjon = lagMeldingsinformasjonEDIEmottak(foedselsDato = "1909-01-01")
+
+        val pasientDto =
+            sykmeldingDtoKonverterer.konverterPasient(
+                pasient = pasient,
+                meldingsinformasjon = meldingsinformasjon,
+                fom = LocalDate.parse("2025-01-01"),
+            )
+
+        pasientDto `should be equal to`
+            PasientDTO(
+                fnr = "fnr",
+                fornavn = "fornavn",
+                mellomnavn = "mellomnavn",
+                etternavn = "etternavn",
+                overSyttiAar = true,
             )
     }
 

@@ -50,7 +50,7 @@ fun lagMeldingsinformasjonEgenmeldt(): Egenmeldt =
             ),
     )
 
-fun lagMeldingsinformasjonEDIEmottak(): EDIEmottak =
+fun lagMeldingsinformasjonEDIEmottak(foedselsDato: String = "1999-01-01"): EDIEmottak =
     EDIEmottak(
         mottakenhetBlokk =
             MottakenhetBlokk(
@@ -110,7 +110,7 @@ fun lagMeldingsinformasjonEDIEmottak(): EDIEmottak =
                         mellomnavn = "mellomnavn",
                         etternavn = "etternavn",
                     ),
-                fodselsdato = "1990-01-01",
+                fodselsdato = foedselsDato,
                 kjonn = "M",
                 nasjonalitet = "NO",
                 adresse =
