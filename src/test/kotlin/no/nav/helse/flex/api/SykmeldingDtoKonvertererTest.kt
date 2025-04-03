@@ -4,6 +4,7 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagMeldingsinformasjonEDIEmottak
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
@@ -334,32 +335,19 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere harRedusertArbeidsgiverperiode`() {
+    fun `burde konvertere harRedusertArbeidsgiverperiode innenfor covid periode`() {
         val medisinskVurdering =
-            MedisinskVurderingDTO(
-                hovedDiagnose =
-                    DiagnoseDTO(
-                        kode = "R991",
-                        system = "ICD10",
-                        tekst = null,
+            sykmeldingDtoKonverterer
+                .konverterMedisinskVurdering(
+                    lagMedisinskVurdering(
+                        hovedDiagnoseKode = "R991",
+                        annenFraverArsak =
+                            AnnenFraverArsak(
+                                beskrivelse = "beskrivelse",
+                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
+                            ),
                     ),
-                biDiagnoser =
-                    listOf(
-                        DiagnoseDTO(
-                            kode = "bi diagnose",
-                            system = "ICPC2",
-                            tekst = null,
-                        ),
-                    ),
-                annenFraversArsak =
-                    AnnenFraversArsakDTO(
-                        beskrivelse = "beskrivelse",
-                        grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
-                    ),
-                svangerskap = true,
-                yrkesskade = true,
-                yrkesskadeDato = LocalDate.parse("2021-01-01"),
-            )
+                )
 
         sykmeldingDtoKonverterer
             .harRedusertArbeidsgiverperiode(
@@ -380,6 +368,42 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
             ).`should be true`()
+    }
+
+    @Test
+    fun `burde konvertere harRedusertArbeidsgiverperiode utenfor covid periode`() {
+        val medisinskVurdering =
+            sykmeldingDtoKonverterer
+                .konverterMedisinskVurdering(
+                    lagMedisinskVurdering(
+                        hovedDiagnoseKode = "R991",
+                        annenFraverArsak =
+                            AnnenFraverArsak(
+                                beskrivelse = "beskrivelse",
+                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
+                            ),
+                    ),
+                )
+
+        sykmeldingDtoKonverterer
+            .harRedusertArbeidsgiverperiode(
+                hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                biDiagnoser = medisinskVurdering.biDiagnoser,
+                sykmeldingsperioder =
+                    listOf(
+                        SykmeldingsperiodeDTO(
+                            fom = LocalDate.parse("2024-01-01"),
+                            tom = LocalDate.parse("2024-01-31"),
+                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
+                            reisetilskudd = false,
+                            gradert = null,
+                            behandlingsdager = null,
+                            innspillTilArbeidsgiver = null,
+                            aktivitetIkkeMulig = null,
+                        ),
+                    ),
+                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+            ).`should be false`()
     }
 
     @Nested
