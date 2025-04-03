@@ -1,10 +1,10 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagMeldingsinformasjonEDIEmottak
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.`should be`
@@ -42,14 +42,22 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 kontaktinfo = emptyList(),
             )
 
-        val pasientDto = sykmeldingDtoKonverterer.konverterPasient(pasient)
+        val meldingsinformasjon = lagMeldingsinformasjonEDIEmottak()
+
+        val pasientDto =
+            sykmeldingDtoKonverterer.konverterPasient(
+                pasient,
+                meldingsinformasjon,
+                LocalDate.parse("1999-01-01"),
+            )
+
         pasientDto `should be equal to`
             PasientDTO(
                 fnr = "fnr",
                 fornavn = "fornavn",
                 mellomnavn = "mellomnavn",
                 etternavn = "etternavn",
-                overSyttiAar = null,
+                overSyttiAar = false,
             )
     }
 

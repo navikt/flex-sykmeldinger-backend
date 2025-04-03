@@ -9,6 +9,7 @@ import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.domain.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
 class SykmeldingDtoKonverterer(
@@ -22,9 +23,16 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is SykmeldingGrunnlag)
+        val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
-            pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
+            pasient =
+                konverterPasient(
+                    pasient = sykmelding.sykmeldingGrunnlag.pasient,
+                    meldingsinformasjon = sykmelding.meldingsinformasjon,
+                    fom = sykmeldingsperioder.minBy { it.fom }.fom,
+                ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
             // TODO
@@ -33,7 +41,7 @@ class SykmeldingDtoKonverterer(
                 konverterArbeidsgiver(
                     sykmelding.sykmeldingGrunnlag.arbeidsgiver,
                 ),
-            sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
+            sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
@@ -56,8 +64,10 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
+            // todo: antar dette er fra covid? I så fall alltid null
             egenmeldt = null,
             papirsykmelding = false,
+            // todo
             harRedusertArbeidsgiverperiode = null,
             merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
@@ -67,14 +77,21 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
+        val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
-            pasient = konverterPasient(sykmelding.sykmeldingGrunnlag.pasient),
+            pasient =
+                konverterPasient(
+                    pasient = sykmelding.sykmeldingGrunnlag.pasient,
+                    meldingsinformasjon = sykmelding.meldingsinformasjon,
+                    fom = sykmeldingsperioder.minBy { it.fom }.fom,
+                ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
-            sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) },
+            sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
@@ -98,7 +115,7 @@ class SykmeldingDtoKonverterer(
                     mellomnavn = null,
                     etternavn = "Etternavn",
                     adresse =
-                        no.nav.helse.flex.api.dto.AdresseDTO(
+                        AdresseDTO(
                             gate = null,
                             postnummer = null,
                             kommune = null,
@@ -117,20 +134,31 @@ class SykmeldingDtoKonverterer(
             merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding =
-                no.nav.helse.flex.api.dto.UtenlandskSykmelding(
+                UtenlandskSykmelding(
                     land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                 ),
         )
     }
 
-    internal fun konverterPasient(pasient: Pasient): PasientDTO =
+    internal fun konverterPasient(
+        pasient: Pasient,
+        meldingsinformasjon: Meldingsinformasjon,
+        fom: LocalDate,
+    ): PasientDTO =
         PasientDTO(
             fnr = pasient.fnr,
             fornavn = pasient.navn?.fornavn,
             mellomnavn = pasient.navn?.mellomnavn,
             etternavn = pasient.navn?.etternavn,
-            // TODO
-            overSyttiAar = null,
+            overSyttiAar =
+                when (meldingsinformasjon) {
+                    is EDIEmottak -> {
+                        meldingsinformasjon.pasient?.fodselsdato?.let {
+                            LocalDate.parse(it).isBefore(fom.minusYears(70))
+                        }
+                    }
+                    else -> null
+                },
         )
 
     internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
