@@ -7,10 +7,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagMeldingsinformasjonEDIEmottak
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import org.amshove.kluent.`should be`
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be null`
-import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -334,6 +331,55 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 kontaktDato = null,
                 begrunnelseIkkeKontakt = null,
             )
+    }
+
+    @Test
+    fun `burde konvertere harRedusertArbeidsgiverperiode`() {
+        val medisinskVurdering =
+            MedisinskVurderingDTO(
+                hovedDiagnose =
+                    DiagnoseDTO(
+                        kode = "R991",
+                        system = "ICD10",
+                        tekst = null,
+                    ),
+                biDiagnoser =
+                    listOf(
+                        DiagnoseDTO(
+                            kode = "bi diagnose",
+                            system = "ICPC2",
+                            tekst = null,
+                        ),
+                    ),
+                annenFraversArsak =
+                    AnnenFraversArsakDTO(
+                        beskrivelse = "beskrivelse",
+                        grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
+                    ),
+                svangerskap = true,
+                yrkesskade = true,
+                yrkesskadeDato = LocalDate.parse("2021-01-01"),
+            )
+
+        sykmeldingDtoKonverterer
+            .harRedusertArbeidsgiverperiode(
+                hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                biDiagnoser = medisinskVurdering.biDiagnoser,
+                sykmeldingsperioder =
+                    listOf(
+                        SykmeldingsperiodeDTO(
+                            fom = LocalDate.parse("2021-01-01"),
+                            tom = LocalDate.parse("2021-01-31"),
+                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
+                            reisetilskudd = false,
+                            gradert = null,
+                            behandlingsdager = null,
+                            innspillTilArbeidsgiver = null,
+                            aktivitetIkkeMulig = null,
+                        ),
+                    ),
+                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+            ).`should be true`()
     }
 
     @Nested

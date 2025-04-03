@@ -422,7 +422,7 @@ class SykmeldingDtoKonverterer(
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
 
-    private fun harRedusertArbeidsgiverperiode(
+    internal fun harRedusertArbeidsgiverperiode(
         hovedDiagnose: DiagnoseDTO?,
         biDiagnoser: List<DiagnoseDTO>,
         sykmeldingsperioder: List<SykmeldingsperiodeDTO>,
