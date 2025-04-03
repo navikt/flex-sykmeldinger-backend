@@ -10,6 +10,7 @@ import no.nav.helse.flex.sykmelding.domain.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.Month
 
 @Component
 class SykmeldingDtoKonverterer(
@@ -24,6 +25,7 @@ class SykmeldingDtoKonverterer(
     internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is SykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+        val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -35,7 +37,7 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
-            // TODO
+            // TODO, muligens reciever eller sender fra meldingsinformasjon
             legekontorOrgnummer = null,
             arbeidsgiver =
                 konverterArbeidsgiver(
@@ -43,7 +45,7 @@ class SykmeldingDtoKonverterer(
                 ),
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
-            medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
+            medisinskVurdering = medisinskVurdering,
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
@@ -66,9 +68,16 @@ class SykmeldingDtoKonverterer(
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             // todo: antar dette er fra covid? I så fall alltid null
             egenmeldt = null,
-            papirsykmelding = false,
+            // todo: stemmer dette?
+            papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
             // todo
-            harRedusertArbeidsgiverperiode = null,
+            harRedusertArbeidsgiverperiode =
+                harRedusertArbeidsgiverperiode(
+                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                    biDiagnoser = medisinskVurdering.biDiagnoser,
+                    sykmeldingsperioder = sykmeldingsperioder,
+                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+                ),
             merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding = null,
@@ -78,6 +87,7 @@ class SykmeldingDtoKonverterer(
     internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+        val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -93,7 +103,7 @@ class SykmeldingDtoKonverterer(
             arbeidsgiver = null,
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
-            medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering),
+            medisinskVurdering = medisinskVurdering,
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             prognose = null,
             utdypendeOpplysninger = emptyMap(),
@@ -129,8 +139,14 @@ class SykmeldingDtoKonverterer(
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = null,
-            papirsykmelding = false,
-            harRedusertArbeidsgiverperiode = null,
+            papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
+            harRedusertArbeidsgiverperiode =
+                harRedusertArbeidsgiverperiode(
+                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                    biDiagnoser = medisinskVurdering.biDiagnoser,
+                    sykmeldingsperioder = sykmeldingsperioder,
+                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+                ),
             merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding =
@@ -180,21 +196,21 @@ class SykmeldingDtoKonverterer(
             if (aktivitet is AktivitetIkkeMulig) {
                 val medisinskArsakDto =
                     if (aktivitet.medisinskArsak != null) {
-                        no.nav.helse.flex.api.dto.MedisinskArsakDTO(
+                        MedisinskArsakDTO(
                             beskrivelse = aktivitet.medisinskArsak.beskrivelse,
                             arsak =
                                 listOf(
                                     when (aktivitet.medisinskArsak.arsak) {
                                         MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
-                                            no.nav.helse.flex.api.dto.MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
+                                            MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
 
                                         MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND ->
-                                            no.nav.helse.flex.api.dto.MedisinskArsakTypeDTO.AKTIVITET_FORVERRER_TILSTAND
+                                            MedisinskArsakTypeDTO.AKTIVITET_FORVERRER_TILSTAND
 
                                         MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING ->
-                                            no.nav.helse.flex.api.dto.MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING
+                                            MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING
 
-                                        MedisinskArsakType.ANNET -> no.nav.helse.flex.api.dto.MedisinskArsakTypeDTO.ANNET
+                                        MedisinskArsakType.ANNET -> MedisinskArsakTypeDTO.ANNET
                                     },
                                 ),
                         )
@@ -203,7 +219,7 @@ class SykmeldingDtoKonverterer(
                     }
                 val arbeidsrelatertArsakDto =
                     if (aktivitet.arbeidsrelatertArsak != null) {
-                        no.nav.helse.flex.api.dto.ArbeidsrelatertArsakDTO(
+                        ArbeidsrelatertArsakDTO(
                             beskrivelse = aktivitet.arbeidsrelatertArsak.beskrivelse,
                             arsak =
                                 listOf(
@@ -218,7 +234,7 @@ class SykmeldingDtoKonverterer(
                     } else {
                         null
                     }
-                no.nav.helse.flex.api.dto.AktivitetIkkeMuligDTO(
+                AktivitetIkkeMuligDTO(
                     medisinskArsak = medisinskArsakDto,
                     arbeidsrelatertArsak = arbeidsrelatertArsakDto,
                 )
@@ -405,4 +421,50 @@ class SykmeldingDtoKonverterer(
             SvarRestriksjon.SKJERMET_FOR_NAV ->
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
+
+    private fun harRedusertArbeidsgiverperiode(
+        hovedDiagnose: DiagnoseDTO?,
+        biDiagnoser: List<DiagnoseDTO>,
+        sykmeldingsperioder: List<SykmeldingsperiodeDTO>,
+        annenFraversArsakDTO: AnnenFraversArsakDTO?,
+    ): Boolean {
+        val diagnoserSomGirRedusertArbgiverPeriode = listOf("R991", "U071", "U072", "A23", "R992")
+
+        val sykmeldingsperioderInnenforKoronaregler =
+            sykmeldingsperioder.filter { periodeErInnenforKoronaregler(it.fom, it.tom) }
+        if (sykmeldingsperioderInnenforKoronaregler.isEmpty()) {
+            return false
+        }
+        if (
+            hovedDiagnose != null &&
+            diagnoserSomGirRedusertArbgiverPeriode.contains(hovedDiagnose.kode)
+        ) {
+            return true
+        } else if (
+            biDiagnoser.isNotEmpty() &&
+            biDiagnoser.find { diagnoserSomGirRedusertArbgiverPeriode.contains(it.kode) } !=
+            null
+        ) {
+            return true
+        }
+        return checkSmittefare(annenFraversArsakDTO)
+    }
+
+    private fun checkSmittefare(annenFraversArsakDTO: AnnenFraversArsakDTO?) =
+        annenFraversArsakDTO?.grunn?.any { annenFraverGrunn ->
+            annenFraverGrunn == AnnenFraverGrunnDTO.SMITTEFARE
+        } == true
+
+    private fun periodeErInnenforKoronaregler(
+        fom: LocalDate,
+        tom: LocalDate,
+    ): Boolean {
+        val koronaForsteFraDato = LocalDate.of(2020, Month.MARCH, 15)
+        val koronaForsteTilDato = LocalDate.of(2021, Month.OCTOBER, 1)
+        val koronaAndreFraDato = LocalDate.of(2021, Month.NOVEMBER, 30)
+        val koronaAndreTilDato = LocalDate.of(2022, Month.JULY, 1)
+
+        return (fom.isAfter(koronaAndreFraDato) && fom.isBefore(koronaAndreTilDato)) ||
+            (fom.isBefore(koronaForsteTilDato) && tom.isAfter(koronaForsteFraDato))
+    }
 }
