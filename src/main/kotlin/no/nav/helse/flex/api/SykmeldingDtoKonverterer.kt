@@ -66,8 +66,7 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            // todo: antar dette er fra covid? I så fall alltid null
-            egenmeldt = null,
+            egenmeldt = sykmelding.meldingsinformasjon is Egenmeldt,
             // todo: stemmer dette?
             papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
             // todo
@@ -138,7 +137,7 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = null,
+            egenmeldt = sykmelding.meldingsinformasjon is Egenmeldt,
             papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
