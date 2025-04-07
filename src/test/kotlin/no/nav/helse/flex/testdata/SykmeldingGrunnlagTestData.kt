@@ -117,12 +117,15 @@ fun lagPasient(fnr: String = "01010112345"): Pasient =
         navnFastlege = null,
     )
 
-fun lagMedisinskVurdering(): MedisinskVurdering =
+fun lagMedisinskVurdering(
+    hovedDiagnoseKode: String = "R51",
+    annenFraverArsak: AnnenFraverArsak? = null,
+): MedisinskVurdering =
     MedisinskVurdering(
         hovedDiagnose =
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
-                kode = "R51",
+                kode = hovedDiagnoseKode,
             ),
         biDiagnoser =
             listOf(
@@ -132,7 +135,7 @@ fun lagMedisinskVurdering(): MedisinskVurdering =
                 ),
             ),
         svangerskap = false,
-        annenFraversArsak = null,
+        annenFraversArsak = annenFraverArsak,
         yrkesskade = null,
         skjermetForPasient = false,
         syketilfelletStartDato = null,
