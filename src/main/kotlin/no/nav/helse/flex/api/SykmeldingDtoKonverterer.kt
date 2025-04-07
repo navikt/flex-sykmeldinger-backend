@@ -29,6 +29,7 @@ class SykmeldingDtoKonverterer(
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
+            // TODO: Hvordan beregnes overSøttiÅr?
             pasient =
                 konverterPasient(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
@@ -37,8 +38,9 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding),
-            // TODO, muligens reciever eller sender fra meldingsinformasjon
+            // TODO: muligens reciever eller sender fra meldingsinformasjon
             legekontorOrgnummer = null,
+            // TODO: Er dette arbeidsgiver fra sykmeldingGrunnlag eller basert på brukers svar?
             arbeidsgiver =
                 konverterArbeidsgiver(
                     sykmelding.sykmeldingGrunnlag.arbeidsgiver,
@@ -59,17 +61,19 @@ class SykmeldingDtoKonverterer(
                     is FlereArbeidsgivere -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
                     is IngenArbeidsgiver -> null
                 },
+            // TODO: Hvor er kontakt med pasient?
             kontaktMedPasient = konverterKontaktMedPasient(),
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
             behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
+            // TODO: Er dette riktig?
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.meldingsinformasjon is Egenmeldt,
-            // todo: stemmer dette?
+            // TODO: stemmer dette?
             papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
-            // todo
+            // TODO: gjelder dette bare for covid?
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
@@ -77,6 +81,7 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
+            // TODO: Brukes disse?
             merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding = null,
@@ -421,7 +426,6 @@ class SykmeldingDtoKonverterer(
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
 
-    // todo: gjelder dette bare for covid?
     internal fun harRedusertArbeidsgiverperiode(
         hovedDiagnose: DiagnoseDTO?,
         biDiagnoser: List<DiagnoseDTO>,
