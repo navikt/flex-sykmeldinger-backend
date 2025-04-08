@@ -30,6 +30,7 @@ class SykmeldingStatusListener(
         acknowledgment: Acknowledgment,
     ) {
         if (environmentToggles.isProduction()) {
+            log.info("SykmeldingStatus listener er skrudd av i prod. Hopper over melding med key: ${cr.key()}")
             return
         }
         try {
