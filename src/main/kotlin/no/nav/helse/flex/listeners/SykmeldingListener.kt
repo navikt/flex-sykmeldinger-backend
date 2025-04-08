@@ -2,7 +2,6 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.logger
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component
 @Component
 class SykmeldingListener(
     private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
