@@ -23,6 +23,7 @@ class SykmeldingStatusProducerKafka(
 
     override fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (environmentToggles.isProduction()) {
+            log.warn("Sykmeldingstatus producer er skrudd av i prod. SykmeldingId: ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId}")
             return false
         }
         log.info(
