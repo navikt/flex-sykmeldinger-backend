@@ -24,15 +24,12 @@ class SykmeldingListener(
         containerFactory = "aivenKafkaListenerContainerFactory",
         // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
+        groupId = "flex-sykmeldinger-backend-1",
     )
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        if (environmentToggles.isProduction()) {
-            log.info("Sykmelding listener er skrudd av i prod. Hopper over melding med key: ${cr.key()}")
-            return
-        }
         try {
             val value = cr.value()
             if (value == null) {
