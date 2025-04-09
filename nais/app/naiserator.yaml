@@ -55,6 +55,8 @@ spec:
     inbound:
       rules:
         - application: ditt-sykefravaer
+  secureLogs:
+    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
