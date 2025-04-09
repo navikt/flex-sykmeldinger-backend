@@ -79,7 +79,7 @@ class VirksomhetHenterService(
                         tom = arbeidsforhold.tom,
                         naermesteLeder = filtrerNarmesteLedereForArbeidsforhold(narmesteLedere, arbeidsforhold),
                     )
-                }
+                }.filter { it.naermesteLeder != null }
         }
 
         fun Iterable<Arbeidsforhold>.filtrerInnenPeriode(periode: Pair<LocalDate, LocalDate>): List<Arbeidsforhold> =
