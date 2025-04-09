@@ -6,10 +6,7 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.virksomhet.VirksomhetHenterService.Companion.filtrerInnenPeriode
 import no.nav.helse.flex.virksomhet.domain.Virksomhet
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should be true`
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -262,6 +259,24 @@ class VirksomhetHenterServiceTest {
                 .naermesteLeder
                 .shouldNotBeNull()
                 .`should be equal to`(narmesteLeder)
+        }
+
+        @Test
+        fun `burde ikke inkludere narmeste leder med manglende navn`() {
+            var narmesteLeder = lagNarmesteLeder(orgnummer = "org1", narmesteLederNavn = null)
+
+            val virksomheter =
+                VirksomhetHenterService.sammenstillVirksomheter(
+                    arbeidsforhold = listOf(lagArbeidsforhold(orgnummer = "org1")),
+                    narmesteLedere = listOf(narmesteLeder),
+                    idagProvider = { HVILKENSOMHELST_DAG },
+                )
+
+            virksomheter.size `should be equal to` 1
+            virksomheter
+                .first()
+                .naermesteLeder
+                .shouldBeNull()
         }
 
         @Test

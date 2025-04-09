@@ -105,6 +105,7 @@ class VirksomhetHenterService(
         ): NarmesteLeder? =
             narmesteLedere
                 .filter { it.orgnummer == arbeidsforhold.orgnummer }
+                .filter { it.narmesteLederNavn != null }
                 .sortedBy { it.aktivFom }
                 .lastOrNull()
 
