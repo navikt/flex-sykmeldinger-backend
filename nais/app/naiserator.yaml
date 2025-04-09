@@ -65,6 +65,7 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+        - id: secure_logs
   gcp:
     sqlInstances:
       - type: POSTGRES_16
