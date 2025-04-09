@@ -265,6 +265,24 @@ class VirksomhetHenterServiceTest {
         }
 
         @Test
+        fun `burde ikke inkludere narmeste leder med manglende navn`() {
+            var narmesteLeder = lagNarmesteLeder(orgnummer = "org1", narmesteLederNavn = null)
+
+            val virksomheter =
+                VirksomhetHenterService.sammenstillVirksomheter(
+                    arbeidsforhold = listOf(lagArbeidsforhold(orgnummer = "org1")),
+                    narmesteLedere = listOf(narmesteLeder),
+                    idagProvider = { HVILKENSOMHELST_DAG },
+                )
+
+            virksomheter.size `should be equal to` 1
+            virksomheter
+                .first()
+                .naermesteLeder
+                .shouldBeNull()
+        }
+
+        @Test
         fun `burde ikke inkludere narmeste leder dersom finnes i annet arbeidsforhold`() {
             val narmesteLeder = lagNarmesteLeder(orgnummer = "org1")
             val virksomheter =

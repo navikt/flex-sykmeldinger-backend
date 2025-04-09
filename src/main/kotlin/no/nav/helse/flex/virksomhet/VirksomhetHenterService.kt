@@ -79,7 +79,7 @@ class VirksomhetHenterService(
                         tom = arbeidsforhold.tom,
                         naermesteLeder = filtrerNarmesteLedereForArbeidsforhold(narmesteLedere, arbeidsforhold),
                     )
-                }.filter { it.naermesteLeder == null || it.naermesteLeder.narmesteLederNavn != null }
+                }
         }
 
         fun Iterable<Arbeidsforhold>.filtrerInnenPeriode(periode: Pair<LocalDate, LocalDate>): List<Arbeidsforhold> =
@@ -105,6 +105,7 @@ class VirksomhetHenterService(
         ): NarmesteLeder? =
             narmesteLedere
                 .filter { it.orgnummer == arbeidsforhold.orgnummer }
+                .filter { it.narmesteLederNavn != null }
                 .sortedBy { it.aktivFom }
                 .lastOrNull()
 
