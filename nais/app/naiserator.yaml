@@ -55,6 +55,8 @@ spec:
     inbound:
       rules:
         - application: ditt-sykefravaer
+  secureLogs:
+    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -63,6 +65,7 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+        - id: secure_logs
   gcp:
     sqlInstances:
       - type: POSTGRES_16
