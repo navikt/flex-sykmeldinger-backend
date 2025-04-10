@@ -26,6 +26,6 @@ class AfterInit : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
         logger.info("Logger til secure logs")
-        logger.info(LogMarker.SECURE_LOGS, "Secure Log melding")
+        logger.info(LogMarker.SECURE_LOGS, "Secure Log melding til secure logs")
     }
 }
