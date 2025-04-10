@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain.tsm
 
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Organisasjon
+import no.nav.helse.flex.sykmelding.domain.tsm.values.*
+import java.time.LocalDate
 import java.time.OffsetDateTime
 
 enum class MetadataType {
@@ -104,24 +105,13 @@ data class Ack(
 )
 
 data class MetadataPasient(
-    val ids: List<MetadataId>,
-    val navn: MetadataNavn,
-    val fodselsdato: String,
-    val kjonn: String,
+    val ids: List<PersonId>,
+    val navn: Navn?,
+    val fodselsdato: LocalDate?,
+    val kjonn: Kjonn?,
     val nasjonalitet: String?,
-    val adresse: MetadataAdresse,
-    val kontaktinfo: List<MetadataKontaktinfo>,
-)
-
-data class MetadataId(
-    val id: String,
-    val type: String,
-)
-
-data class MetadataNavn(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
+    val adresse: MetadataAdresse?,
+    val kontaktinfo: List<Kontaktinfo>,
 )
 
 data class MetadataAdresse(
@@ -132,9 +122,4 @@ data class MetadataAdresse(
     val postboks: String?,
     val kommune: String?,
     val land: String?,
-)
-
-data class MetadataKontaktinfo(
-    val type: String,
-    val value: String,
 )
