@@ -5,6 +5,7 @@ import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -38,6 +39,7 @@ class EksternArbeidsforholdHenter(
                 aaregClient.getArbeidsforholdoversikt(fnr)
             } catch (e: Exception) {
                 if (environmentToggles.isProduction()) {
+                    log.errorSecure("Feil ved getArbeidsforholdoversikt i AaregClient", secureThrowable = e)
                     throw e
                 } else {
                     log.warn("AAREG er midlertidig nede i dev. Returnerer tom liste.", e)
