@@ -16,10 +16,13 @@ class AaregEksternClient(
 
     @Retryable
     override fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
-        val uri = aaregRestClient.post().uri { uriBuilder -> uriBuilder.path("/api/v2/arbeidstaker/arbeidsforholdoversikt").build() }
         val res =
-            uri
-                .body(
+            aaregRestClient
+                .post()
+                .uri { uriBuilder -> uriBuilder.path("/api/v2/arbeidstaker/arbeidsforholdoversikt").build() }
+                .headers {
+                    it.contentType = MediaType.APPLICATION_JSON
+                }.body(
                     ArbeidsforholdRequest(
                         arbeidstakerId = fnr,
                         arbeidsforholdtyper = listOf("ordinaertArbeidsforhold"),

@@ -9,9 +9,8 @@ import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should not be`
-import org.amshove.kluent.`should throw`
+import okhttp3.mockwebserver.RecordedRequest
+import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,6 +68,23 @@ class AaregClientTest {
         invoking {
             aaregEksternClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
         } `should throw` RuntimeException::class
+    }
+
+    @Test
+    fun `burde ha riktig headers`() {
+        var recordedReq: RecordedRequest? = null
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher { req ->
+                recordedReq = req
+                MockResponse()
+                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        aaregEksternClient.getArbeidsforholdoversikt("_")
+        recordedReq.shouldNotBeNull().run {
+            headers["Content-Type"] `should be equal to` "application/json"
+        }
     }
 }
 
