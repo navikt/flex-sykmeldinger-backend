@@ -1,0 +1,1 @@
+CREATE PUBLICATION flex_sykmeldinger_backend_db_publication FOR ALL TABLES;
