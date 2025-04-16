@@ -2,9 +2,9 @@ DO
 $$
     BEGIN
         IF EXISTS
-            (SELECT 1 from pg_roles where rolname = 'flex-sykmeldinger-backend-db')
+            (SELECT 1 from pg_roles where rolname = 'flex-sykmeldinger-backend')
         THEN
-            ALTER USER "flex-sykmeldinger-backend-db" WITH REPLICATION;
+            ALTER USER "flex-sykmeldinger-backend" WITH REPLICATION;
         END IF;
     END
 $$;

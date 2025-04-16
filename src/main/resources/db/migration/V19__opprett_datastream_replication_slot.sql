@@ -1,1 +1,1 @@
-SELECT PG_CREATE_LOGICAL_REPLICATION_SLOT ('flex_sykmeldinger_backend_db_replication', 'pgoutput');
+SELECT PG_CREATE_LOGICAL_REPLICATION_SLOT ('flex_sykmeldinger_backend_replication', 'pgoutput');
