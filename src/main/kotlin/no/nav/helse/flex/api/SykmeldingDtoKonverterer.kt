@@ -37,7 +37,7 @@ class SykmeldingDtoKonverterer(
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
-            behandlingsutfall = konverterBehandlingsutfall(sykmelding),
+            behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
             // TODO: muligens reciever eller sender fra meldingsinformasjon
             legekontorOrgnummer = null,
             // TODO: Er dette arbeidsgiver fra sykmeldingGrunnlag eller basert på brukers svar?
@@ -102,7 +102,7 @@ class SykmeldingDtoKonverterer(
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
-            behandlingsutfall = konverterBehandlingsutfall(sykmelding),
+            behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
             sykmeldingsperioder = sykmeldingsperioder,
@@ -188,12 +188,27 @@ class SykmeldingDtoKonverterer(
             is IngenArbeidsgiver -> null
         }
 
-    internal fun konverterBehandlingsutfall(sykmelding: Sykmelding): BehandlingsutfallDTO =
-        BehandlingsutfallDTO(
-            // TODO: benytt behandlingsutfall fra tsm kafka melding
-            status = RegelStatusDTO.OK,
-            ruleHits = emptyList(),
+    internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO {
+        val status =
+            when (validationResult.status) {
+                RuleType.OK -> RegelStatusDTO.OK
+                RuleType.PENDING -> RegelStatusDTO.MANUAL_PROCESSING
+                RuleType.INVALID -> RegelStatusDTO.INVALID
+            }
+        return BehandlingsutfallDTO(
+            status = status,
+            ruleHits =
+                validationResult.rules.map {
+                    // TODO: blir det riktig å bruke description her?
+                    RegelinfoDTO(
+                        messageForSender = it.description,
+                        messageForUser = it.description,
+                        ruleName = it.name,
+                        ruleStatus = status,
+                    )
+                },
         )
+    }
 
     internal fun konverterSykmeldingsperiode(aktivitet: Aktivitet): SykmeldingsperiodeDTO {
         val aktivitetIkkeMuligDto =

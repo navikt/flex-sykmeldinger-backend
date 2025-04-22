@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -404,6 +405,39 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
             ).`should be false`()
+    }
+
+    @Test
+    fun `burde konvertere behandlingsutfall`() {
+        val validationResult =
+            ValidationResult(
+                status = RuleType.OK,
+                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                rules =
+                    listOf(
+                        OKRule(
+                            name = "name",
+                            description = "description",
+                            timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                        ),
+                    ),
+            )
+
+        val konvertertBehandlingsutfall =
+            sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
+        konvertertBehandlingsutfall `should be equal to`
+            BehandlingsutfallDTO(
+                status = RegelStatusDTO.OK,
+                ruleHits =
+                    listOf(
+                        RegelinfoDTO(
+                            messageForSender = "description",
+                            messageForUser = "description",
+                            ruleName = "name",
+                            ruleStatus = RegelStatusDTO.OK,
+                        ),
+                    ),
+            )
     }
 
     @Nested
