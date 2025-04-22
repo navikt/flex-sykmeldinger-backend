@@ -33,7 +33,6 @@ class SykmeldingDtoKonverterer(
             pasient =
                 konverterPasient(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
-                    meldingsinformasjon = sykmelding.meldingsinformasjon,
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
@@ -70,9 +69,8 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.meldingsinformasjon is Egenmeldt,
-            // TODO: stemmer dette?
-            papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
+            egenmeldt = sykmelding.erEgenmeldt,
+            papirsykmelding = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == "Papirsykmelding",
             // TODO: gjelder dette bare for covid?
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
@@ -98,7 +96,6 @@ class SykmeldingDtoKonverterer(
             pasient =
                 konverterPasient(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
-                    meldingsinformasjon = sykmelding.meldingsinformasjon,
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
@@ -142,8 +139,8 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.meldingsinformasjon is Egenmeldt,
-            papirsykmelding = sykmelding.meldingsinformasjon is Papirsykmelding,
+            egenmeldt = sykmelding.erEgenmeldt,
+            papirsykmelding = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == "Papirsykmelding",
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
@@ -162,7 +159,6 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterPasient(
         pasient: Pasient,
-        meldingsinformasjon: Meldingsinformasjon,
         fom: LocalDate,
     ): PasientDTO =
         PasientDTO(
@@ -170,16 +166,13 @@ class SykmeldingDtoKonverterer(
             fornavn = pasient.navn?.fornavn,
             mellomnavn = pasient.navn?.mellomnavn,
             etternavn = pasient.navn?.etternavn,
-            overSyttiAar =
-                when (meldingsinformasjon) {
-                    is EDIEmottak -> {
-                        meldingsinformasjon.pasient?.fodselsdato?.let {
-                            LocalDate.parse(it).isBefore(fom.minusYears(70))
-                        }
-                    }
-                    else -> null
-                },
+            overSyttiAar = erOverSyttiAar(fom),
         )
+
+    internal fun erOverSyttiAar(fom: LocalDate): Boolean {
+        // TODO: kall pdl
+        return false
+    }
 
     internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
         when (arbeidsgiver) {

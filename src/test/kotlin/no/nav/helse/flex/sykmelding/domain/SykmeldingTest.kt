@@ -1,8 +1,10 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
-import no.nav.helse.flex.testdata.lagMeldingsinformasjonEgenmeldt
 import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingMetadata
 import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
@@ -28,7 +30,19 @@ class SykmeldingTest {
 
     @Test
     fun `burde være egenmeldt ved meldingsinformasjon type EGENMELDT`() {
-        val sykmelding = lagSykmelding(meldingsinformasjon = lagMeldingsinformasjonEgenmeldt())
+        val sykmelding =
+            lagSykmelding(
+                lagSykmeldingGrunnlag(
+                    metadata =
+                        lagSykmeldingMetadata(
+                            avsenderSystem =
+                                AvsenderSystem(
+                                    navn = "Egenmeldt",
+                                    versjon = "1.0",
+                                ),
+                        ),
+                ),
+            )
         sykmelding.erEgenmeldt `should be equal to` true
     }
 

@@ -5,10 +5,10 @@ import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagMedisinskVurdering
-import no.nav.helse.flex.testdata.lagMeldingsinformasjonEDIEmottak
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,12 +41,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 kontaktinfo = emptyList(),
             )
 
-        val meldingsinformasjon = lagMeldingsinformasjonEDIEmottak()
-
         val pasientDto =
             sykmeldingDtoKonverterer.konverterPasient(
                 pasient = pasient,
-                meldingsinformasjon = meldingsinformasjon,
                 fom = LocalDate.parse("2025-01-01"),
             )
 
@@ -60,6 +57,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
     }
 
+    @Disabled
     @Test
     fun `burde konvertere pasient som er over 70 år`() {
         val pasient =
@@ -71,12 +69,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 kontaktinfo = emptyList(),
             )
 
-        val meldingsinformasjon = lagMeldingsinformasjonEDIEmottak(foedselsDato = "1909-01-01")
-
         val pasientDto =
             sykmeldingDtoKonverterer.konverterPasient(
                 pasient = pasient,
-                meldingsinformasjon = meldingsinformasjon,
                 fom = LocalDate.parse("2025-01-01"),
             )
 

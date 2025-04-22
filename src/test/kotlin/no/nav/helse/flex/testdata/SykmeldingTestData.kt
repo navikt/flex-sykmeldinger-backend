@@ -7,7 +7,6 @@ import java.time.Instant
 
 fun lagSykmelding(
     sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-    meldingsinformasjon: Meldingsinformasjon = lagMeldingsinformasjonEnkel(),
     validation: ValidationResult = lagValidation(),
     hendelser: List<SykmeldingHendelse> =
         listOf(
@@ -20,7 +19,6 @@ fun lagSykmelding(
 ): Sykmelding =
     Sykmelding(
         sykmeldingGrunnlag = sykmeldingGrunnlag,
-        meldingsinformasjon = meldingsinformasjon,
         validation = validation,
         hendelser = hendelser,
         opprettet = opprettet,

@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmelding.domain
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.domain.tsm.Meldingsinformasjon
 import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -84,7 +83,6 @@ class SykmeldingRepository(
         Sykmelding(
             databaseId = dbRecord.id,
             sykmeldingGrunnlag = dbRecord.mapTilSykmelding(),
-            meldingsinformasjon = dbRecord.mapTilMeldingsinformasjon(),
             validation = dbRecord.mapTilValidation(),
             hendelser = statusDbRecords.map(SykmeldingHendelseDbRecord::mapTilHendelse),
             opprettet = dbRecord.opprettet,
@@ -108,7 +106,6 @@ data class SykmeldingDbRecord(
     val sykmeldingId: String,
     val fnr: String,
     val sykmelding: PGobject,
-    val meldingsinformasjon: PGobject,
     val validation: PGobject,
     val opprettet: Instant,
     val hendelseOppdatert: Instant,
@@ -118,10 +115,6 @@ data class SykmeldingDbRecord(
     fun mapTilSykmelding(): ISykmeldingGrunnlag =
         this.sykmelding.fraPsqlJson()
             ?: error("sykmelding kolonne burde ikke være null")
-
-    fun mapTilMeldingsinformasjon(): Meldingsinformasjon =
-        this.meldingsinformasjon.fraPsqlJson()
-            ?: error("meldingsinformasjon kolonne burde ikke være null")
 
     fun mapTilValidation(): ValidationResult =
         this.validation.fraPsqlJson()
@@ -134,7 +127,6 @@ data class SykmeldingDbRecord(
                 sykmeldingId = sykmelding.sykmeldingId,
                 fnr = sykmelding.pasientFnr,
                 sykmelding = sykmelding.sykmeldingGrunnlag.tilPsqlJson(),
-                meldingsinformasjon = sykmelding.meldingsinformasjon.tilPsqlJson(),
                 validation = sykmelding.validation.tilPsqlJson(),
                 opprettet = sykmelding.opprettet,
                 hendelseOppdatert = sykmelding.hendelseOppdatert,
