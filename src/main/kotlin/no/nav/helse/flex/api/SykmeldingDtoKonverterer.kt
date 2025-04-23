@@ -37,7 +37,7 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            // TODO: muligens reciever eller sender fra meldingsinformasjon
+            // TODO: muligens reciever eller sender fra meldingsinformasjon. tror vi skal ignorere
             legekontorOrgnummer = null,
             // TODO: Er dette arbeidsgiver fra sykmeldingGrunnlag eller basert på brukers svar?
             arbeidsgiver =

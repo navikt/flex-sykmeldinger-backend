@@ -31,7 +31,7 @@ class SykmeldingTest {
     }
 
     @Test
-    fun `burde være egenmeldt ved meldingsinformasjon type EGENMELDT`() {
+    fun `burde være egenmeldt ved avsendersystem type EGENMELDT`() {
         val sykmelding =
             lagSykmelding(
                 lagSykmeldingGrunnlag(
