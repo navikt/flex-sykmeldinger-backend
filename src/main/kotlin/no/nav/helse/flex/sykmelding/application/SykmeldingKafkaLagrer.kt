@@ -51,10 +51,6 @@ class SykmeldingKafkaLagrer(
                     validationOppdatert = nowFactory.get(),
                 )
         }
-//        if (eksisterendeSykmelding.meldingsinformasjon != sykmeldingKafkaRecord.metadata) {
-//            log.error("Meldingsinformasjon kan ikke endres")
-//            throw RuntimeException("Meldingsinformasjon kan ikke endres")
-//        }
         return oppdatertSykmelding
     }
 

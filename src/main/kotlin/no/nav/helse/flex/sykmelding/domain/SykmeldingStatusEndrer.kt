@@ -10,7 +10,7 @@ class SykmeldingStatusEndrer {
         sykmelding: Sykmelding,
         nyStatus: HendelseStatus,
     ) {
-        if (sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == AvsenderSystemNavn.EGENMELDT) {
+        if (sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT) {
             throw UgyldigSykmeldingStatusException(
                 "Kan ikke endre status til $nyStatus fordi sykmelding er egenmeldt",
             )

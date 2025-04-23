@@ -35,6 +35,9 @@ data class Sykmelding(
     val erAvvist: Boolean
         get() = validation.status == RuleType.INVALID
 
+    val avsenderSystemNavn: AvsenderSystemNavn
+        get() = sykmeldingGrunnlag.metadata.avsenderSystem.navn
+
     fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 
     fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
