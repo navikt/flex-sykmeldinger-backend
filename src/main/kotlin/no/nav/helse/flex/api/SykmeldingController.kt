@@ -206,15 +206,13 @@ internal fun Virksomhet.konverterTilDto(): VirksomhetDTO =
         naermesteLeder = this.naermesteLeder?.konverterTilDto(),
     )
 
-internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO? =
-    if (this.narmesteLederNavn == null) {
-        null
-    } else {
-        NarmesteLederDTO(
-            navn = this.narmesteLederNavn,
-            orgnummer = this.orgnummer,
-        )
-    }
+internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO {
+    requireNotNull(this.narmesteLederNavn) { "Narmeste leder navn må være satt" }
+    return NarmesteLederDTO(
+        navn = this.narmesteLederNavn,
+        orgnummer = this.orgnummer,
+    )
+}
 
 enum class SykmeldingChangeStatus {
     AVBRYT,
