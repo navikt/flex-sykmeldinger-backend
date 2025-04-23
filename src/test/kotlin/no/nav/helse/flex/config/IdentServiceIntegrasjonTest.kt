@@ -1,6 +1,5 @@
 package no.nav.helse.flex.config
 
-import com.nhaarman.mockitokotlin2.*
 import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.clients.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
