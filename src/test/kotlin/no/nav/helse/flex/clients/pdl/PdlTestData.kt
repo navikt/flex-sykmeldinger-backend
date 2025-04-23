@@ -16,6 +16,7 @@ fun lagGetPersonResponseData(
     fornavn: String = "Ole",
     mellomnavn: String? = null,
     etternavn: String = "Gunnar",
+    foedselsdato: String? = "2000-01-01",
 ): GetPersonResponseData =
     GetPersonResponseData(
         hentPerson =
@@ -24,6 +25,7 @@ fun lagGetPersonResponseData(
                     listOf(
                         Navn(fornavn = fornavn, mellomnavn = mellomnavn, etternavn = etternavn),
                     ),
+                foedselsdato = listOf(Foedsel(foedselsdato = foedselsdato)),
             ),
     )
 

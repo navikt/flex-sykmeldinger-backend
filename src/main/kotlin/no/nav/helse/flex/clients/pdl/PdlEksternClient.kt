@@ -3,6 +3,7 @@ package no.nav.helse.flex.clients.pdl
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
+import java.time.LocalDate
 import java.util.*
 
 private const val HEADER_TEMA = "Tema"
@@ -90,5 +91,43 @@ class PdlEksternClient(
                 ?.formatert()
                 ?: throw PdlManglerNavnError("Fant ikke navn i pdl response. ${response.errorsTilString()}")
         return navn
+    }
+
+    @Retryable(exclude = [FunctionalPdlError::class])
+    override fun hentFoedselsdato(fnr: String): LocalDate {
+        val response: GraphQlResponse<GetPersonResponseData> =
+            pdlGraphQlCLient.exchange(
+                req =
+                    GraphQlRequest(
+                        query =
+                            """
+                            query(${"$"}ident: ID!) {
+                              hentPerson(ident: ${"$"}ident) {
+                                foedselsdato {
+                                  foedselsdato
+                                }
+                              }
+                            }
+                            """.trimIndent(),
+                        variables = Collections.singletonMap("ident", fnr),
+                    ),
+                headers =
+                    mapOf(
+                        HEADER_TEMA to TEMA_SYK,
+                        HEADER_BEHANDLINGSNUMMER to BEHANDLINGSKODE_MOTTA_OG_BEHANDLE_SYKMELDING,
+                    ),
+            )
+
+        val data =
+            response.data
+                ?: throw FunctionalPdlError("Fant ikke person, ingen body eller data. ${response.errorsTilString()}")
+
+        val foedselsdato =
+            data.hentPerson
+                ?.foedselsdato
+                ?.firstOrNull()
+                ?.tilLocalDate()
+                ?: throw PdlManglerFoedselsdatoError("Fant ikke fødselsdato i pdl response. ${response.errorsTilString()}")
+        return foedselsdato
     }
 }

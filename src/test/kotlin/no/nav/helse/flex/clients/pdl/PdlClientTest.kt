@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import java.time.LocalDate
 
 @RestClientOppsett
 @Import(PdlEksternClient::class)
@@ -45,10 +46,10 @@ class PdlClientTest {
             pdlClient.hentIdenterMedHistorikk(ident = "ident")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest!!.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest!!.body.readUtf8())
+            recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
+            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query(${"$"}ident: ID!) {
@@ -62,7 +63,7 @@ class PdlClientTest {
                 """
             parsedBody.variables `should be equal to` mapOf("ident" to "ident")
 
-            recordedRequest!!.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
@@ -116,10 +117,10 @@ class PdlClientTest {
             pdlClient.hentFormattertNavn("fnr")
 
             recordedRequest.shouldNotBeNull()
-            recordedRequest!!.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest!!.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest!!.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest!!.body.readUtf8())
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
+            recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
             query(${'$'}ident: ID!) {
@@ -134,7 +135,7 @@ class PdlClientTest {
             """
             parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
 
-            recordedRequest!!.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
@@ -176,6 +177,56 @@ class PdlClientTest {
             responseData `should be equal to` "Åge Roger Åæøå"
         }
     }
+
+    @Nested
+    inner class HentFoedselsdato {
+        @Test
+        fun `burde produsere riktig request`() {
+            var recordedRequest: RecordedRequest? = null
+
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher { request ->
+                    recordedRequest = request
+                    lagGraphQlResponse(lagGetPersonResponseData())
+                }
+
+            pdlClient.hentFoedselsdato("fnr")
+
+            recordedRequest.shouldNotBeNull()
+            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
+            recordedRequest.headers["Tema"] `should be equal to` "SYK"
+            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
+            parsedBody.query shouldBeGraphQlQueryEqualTo
+                """
+                query(${"$"}ident: ID!) {
+                  hentPerson(ident: ${"$"}ident) {
+                    foedselsdato {
+                      foedselsdato
+                    }
+                  }
+                }
+            """
+            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
+
+            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+        }
+
+        @Test
+        fun `burde svare med riktig fødselsdato`() {
+            pdlMockWebServer.dispatcher =
+                simpleDispatcher {
+                    lagGraphQlResponse(
+                        lagGetPersonResponseData(
+                            foedselsdato = "2000-01-01",
+                        ),
+                    )
+                }
+
+            val responseData = pdlClient.hentFoedselsdato("fnr")
+            responseData `should be equal to` LocalDate.parse("2000-01-01")
+        }
+    }
 }
 
 private infix fun String.shouldBeGraphQlQueryEqualTo(expected: String) {
@@ -186,5 +237,4 @@ private fun String.standariserGraphQlQuery() =
     this
         .split("\n")
         .filter { it.isNotBlank() }
-        .map { it.trim() }
-        .joinToString("\n")
+        .joinToString("\n") { it.trim() }
