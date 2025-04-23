@@ -1,12 +1,14 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingMetadata
 import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be equal to`
 import org.junit.jupiter.api.Test
 
 class SykmeldingTest {
@@ -37,18 +39,18 @@ class SykmeldingTest {
                         lagSykmeldingMetadata(
                             avsenderSystem =
                                 AvsenderSystem(
-                                    navn = "Egenmeldt",
+                                    navn = AvsenderSystemNavn.EGENMELDT,
                                     versjon = "1.0",
                                 ),
                         ),
                 ),
             )
-        sykmelding.erEgenmeldt `should be equal to` true
+        sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn `should be equal to` AvsenderSystemNavn.EGENMELDT
     }
 
     @Test
     fun `burde ikke være egenmeldt vanligvis`() {
         val sykmelding = lagSykmelding()
-        sykmelding.erEgenmeldt `should be equal to` false
+        sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn `should not be equal to` AvsenderSystemNavn.EGENMELDT
     }
 }

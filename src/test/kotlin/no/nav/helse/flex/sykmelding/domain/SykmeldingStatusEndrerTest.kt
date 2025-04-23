@@ -2,6 +2,7 @@ package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
@@ -157,7 +158,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                                 lagSykmeldingMetadata(
                                     avsenderSystem =
                                         AvsenderSystem(
-                                            navn = "Egenmeldt",
+                                            navn = AvsenderSystemNavn.EGENMELDT,
                                             versjon = "1.0.0",
                                         ),
                                 ),

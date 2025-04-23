@@ -90,7 +90,7 @@ fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
 fun lagSykmeldingMetadata(
     avsenderSystem: AvsenderSystem =
         AvsenderSystem(
-            navn = "EPJSystem",
+            navn = AvsenderSystemNavn.PRIDOK_EPJ,
             versjon = "2.1.0",
         ),
 ): SykmeldingMetadata {

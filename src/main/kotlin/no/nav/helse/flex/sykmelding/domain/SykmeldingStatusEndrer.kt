@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
 import org.springframework.stereotype.Service
 
 @Service
@@ -9,7 +10,7 @@ class SykmeldingStatusEndrer {
         sykmelding: Sykmelding,
         nyStatus: HendelseStatus,
     ) {
-        if (sykmelding.erEgenmeldt) {
+        if (sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == AvsenderSystemNavn.EGENMELDT) {
             throw UgyldigSykmeldingStatusException(
                 "Kan ikke endre status til $nyStatus fordi sykmelding er egenmeldt",
             )

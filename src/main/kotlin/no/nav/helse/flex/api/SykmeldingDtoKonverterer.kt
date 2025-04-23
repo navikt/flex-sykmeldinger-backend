@@ -26,6 +26,7 @@ class SykmeldingDtoKonverterer(
         require(sykmelding.sykmeldingGrunnlag is SykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        val avsenderSystem = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -69,8 +70,8 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.erEgenmeldt,
-            papirsykmelding = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == "Papirsykmelding",
+            egenmeldt = avsenderSystem == AvsenderSystemNavn.EGENMELDT,
+            papirsykmelding = avsenderSystem == AvsenderSystemNavn.PAPIRSYKMELDING,
             // TODO: gjelder dette bare for covid?
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
@@ -90,6 +91,7 @@ class SykmeldingDtoKonverterer(
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        val avsenderSystem = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -139,8 +141,8 @@ class SykmeldingDtoKonverterer(
                 sykmelding.sykmeldingGrunnlag.metadata.genDate
                     .toLocalDate(),
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.erEgenmeldt,
-            papirsykmelding = sykmelding.sykmeldingGrunnlag.metadata.avsenderSystem.navn == "Papirsykmelding",
+            egenmeldt = avsenderSystem == AvsenderSystemNavn.EGENMELDT,
+            papirsykmelding = avsenderSystem == AvsenderSystemNavn.PAPIRSYKMELDING,
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
