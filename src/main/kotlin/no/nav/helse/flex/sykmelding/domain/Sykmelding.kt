@@ -8,7 +8,6 @@ import kotlin.collections.plus
 data class Sykmelding(
     internal val databaseId: String? = null,
     val sykmeldingGrunnlag: ISykmeldingGrunnlag,
-    val meldingsinformasjon: Meldingsinformasjon,
     val validation: ValidationResult,
     val hendelser: List<SykmeldingHendelse>,
     val opprettet: Instant,
@@ -36,8 +35,8 @@ data class Sykmelding(
     val erAvvist: Boolean
         get() = validation.status == RuleType.INVALID
 
-    val erEgenmeldt: Boolean
-        get() = meldingsinformasjon.type == MetadataType.EGENMELDT
+    val avsenderSystemNavn: AvsenderSystemNavn
+        get() = sykmeldingGrunnlag.metadata.avsenderSystem.navn
 
     fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 

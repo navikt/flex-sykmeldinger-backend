@@ -35,12 +35,4 @@ val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE =
                 RuleType.PENDING -> PendingRule::class
                 RuleType.OK -> OKRule::class
             }
-        }.addPolymorphicDeserializer(Meldingsinformasjon::type) {
-            when (it) {
-                MetadataType.ENKEL -> EmottakEnkel::class
-                MetadataType.EMOTTAK -> EDIEmottak::class
-                MetadataType.UTENLANDSK_SYKMELDING -> Utenlandsk::class
-                MetadataType.PAPIRSYKMELDING -> Papirsykmelding::class
-                MetadataType.EGENMELDT -> Egenmeldt::class
-            }
-        }
+        }.addDeserializer(AvsenderSystem::class.java, AvsenderSystem.AvsenderSystemDeserializer())

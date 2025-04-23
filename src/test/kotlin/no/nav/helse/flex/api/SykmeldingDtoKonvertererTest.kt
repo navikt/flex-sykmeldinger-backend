@@ -1,20 +1,19 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import org.amshove.kluent.`should be`
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be null`
-import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -42,14 +41,47 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 kontaktinfo = emptyList(),
             )
 
-        val pasientDto = sykmeldingDtoKonverterer.konverterPasient(pasient)
+        val pasientDto =
+            sykmeldingDtoKonverterer.konverterPasient(
+                pasient = pasient,
+                fom = LocalDate.parse("2025-01-01"),
+            )
+
         pasientDto `should be equal to`
             PasientDTO(
                 fnr = "fnr",
                 fornavn = "fornavn",
                 mellomnavn = "mellomnavn",
                 etternavn = "etternavn",
-                overSyttiAar = null,
+                overSyttiAar = false,
+            )
+    }
+
+    @Disabled
+    @Test
+    fun `burde konvertere pasient som er over 70 år`() {
+        val pasient =
+            Pasient(
+                navn = Navn("fornavn", "mellomnavn", "etternavn"),
+                navKontor = null,
+                navnFastlege = null,
+                fnr = "fnr",
+                kontaktinfo = emptyList(),
+            )
+
+        val pasientDto =
+            sykmeldingDtoKonverterer.konverterPasient(
+                pasient = pasient,
+                fom = LocalDate.parse("2025-01-01"),
+            )
+
+        pasientDto `should be equal to`
+            PasientDTO(
+                fnr = "fnr",
+                fornavn = "fornavn",
+                mellomnavn = "mellomnavn",
+                etternavn = "etternavn",
+                overSyttiAar = true,
             )
     }
 
@@ -295,6 +327,111 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             KontaktMedPasientDTO(
                 kontaktDato = null,
                 begrunnelseIkkeKontakt = null,
+            )
+    }
+
+    @Test
+    fun `burde konvertere harRedusertArbeidsgiverperiode innenfor covid periode`() {
+        val medisinskVurdering =
+            sykmeldingDtoKonverterer
+                .konverterMedisinskVurdering(
+                    lagMedisinskVurdering(
+                        hovedDiagnoseKode = "R991",
+                        annenFraverArsak =
+                            AnnenFraverArsak(
+                                beskrivelse = "beskrivelse",
+                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
+                            ),
+                    ),
+                )
+
+        sykmeldingDtoKonverterer
+            .harRedusertArbeidsgiverperiode(
+                hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                biDiagnoser = medisinskVurdering.biDiagnoser,
+                sykmeldingsperioder =
+                    listOf(
+                        SykmeldingsperiodeDTO(
+                            fom = LocalDate.parse("2021-01-01"),
+                            tom = LocalDate.parse("2021-01-31"),
+                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
+                            reisetilskudd = false,
+                            gradert = null,
+                            behandlingsdager = null,
+                            innspillTilArbeidsgiver = null,
+                            aktivitetIkkeMulig = null,
+                        ),
+                    ),
+                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+            ).`should be true`()
+    }
+
+    @Test
+    fun `burde konvertere harRedusertArbeidsgiverperiode utenfor covid periode`() {
+        val medisinskVurdering =
+            sykmeldingDtoKonverterer
+                .konverterMedisinskVurdering(
+                    lagMedisinskVurdering(
+                        hovedDiagnoseKode = "R991",
+                        annenFraverArsak =
+                            AnnenFraverArsak(
+                                beskrivelse = "beskrivelse",
+                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
+                            ),
+                    ),
+                )
+
+        sykmeldingDtoKonverterer
+            .harRedusertArbeidsgiverperiode(
+                hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                biDiagnoser = medisinskVurdering.biDiagnoser,
+                sykmeldingsperioder =
+                    listOf(
+                        SykmeldingsperiodeDTO(
+                            fom = LocalDate.parse("2024-01-01"),
+                            tom = LocalDate.parse("2024-01-31"),
+                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
+                            reisetilskudd = false,
+                            gradert = null,
+                            behandlingsdager = null,
+                            innspillTilArbeidsgiver = null,
+                            aktivitetIkkeMulig = null,
+                        ),
+                    ),
+                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+            ).`should be false`()
+    }
+
+    @Test
+    fun `burde konvertere behandlingsutfall`() {
+        val validationResult =
+            ValidationResult(
+                status = RuleType.OK,
+                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                rules =
+                    listOf(
+                        OKRule(
+                            name = "name",
+                            description = "description",
+                            timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                        ),
+                    ),
+            )
+
+        val konvertertBehandlingsutfall =
+            sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
+        konvertertBehandlingsutfall `should be equal to`
+            BehandlingsutfallDTO(
+                status = RegelStatusDTO.OK,
+                ruleHits =
+                    listOf(
+                        RegelinfoDTO(
+                            messageForSender = "description",
+                            messageForUser = "description",
+                            ruleName = "name",
+                            ruleStatus = RegelStatusDTO.OK,
+                        ),
+                    ),
             )
     }
 

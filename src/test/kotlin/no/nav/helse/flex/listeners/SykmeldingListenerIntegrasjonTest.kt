@@ -3,7 +3,6 @@ package no.nav.helse.flex.listeners
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagMeldingsinformasjonEgenmeldt
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
@@ -33,7 +32,6 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val kafkaMelding =
             SykmeldingKafkaRecord(
-                metadata = lagMeldingsinformasjonEgenmeldt(),
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )

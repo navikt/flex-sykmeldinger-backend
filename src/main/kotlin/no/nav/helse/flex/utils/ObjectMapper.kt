@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.domain.Tilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.tsm.SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE
+import no.nav.helse.flex.sykmelding.domain.tsm.SYKMELDING_GRUNNLAG_SERIALIZER
 
 val objectMapper: ObjectMapper =
     JsonMapper
@@ -23,6 +24,7 @@ val objectMapper: ObjectMapper =
         .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
         .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
         .addModule(SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE)
+        .addModule(SYKMELDING_GRUNNLAG_SERIALIZER)
         .addModule(BrukerSvar.deserializerModule)
         .addModule(Tilleggsinfo.deserializerModule)
         .build()

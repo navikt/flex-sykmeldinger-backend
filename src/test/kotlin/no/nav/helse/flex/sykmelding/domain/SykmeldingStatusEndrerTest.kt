@@ -1,6 +1,8 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
+import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
@@ -146,11 +148,21 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
 
     @Test
     fun `burde aldri endre status dersom sykmelding er egenmeldt`() {
-        HendelseStatus.values().forEach { tilStatus ->
+        HendelseStatus.entries.forEach { tilStatus ->
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                    meldingsinformasjon = lagMeldingsinformasjonEgenmeldt(),
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            metadata =
+                                lagSykmeldingMetadata(
+                                    avsenderSystem =
+                                        AvsenderSystem(
+                                            navn = AvsenderSystemNavn.EGENMELDT,
+                                            versjon = "1.0.0",
+                                        ),
+                                ),
+                        ),
                 )
             invoking {
                 sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding, nyStatus = tilStatus)

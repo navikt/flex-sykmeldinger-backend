@@ -49,24 +49,6 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde ikke oppdatere meldingsinformasjon`() {
-        val kafkaMelding =
-            lagSykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                metadata = lagMeldingsinformasjonEnkel(),
-            )
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
-
-        invoking {
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
-                kafkaMelding.copy(
-                    metadata = lagMeldingsinformasjonEgenmeldt(),
-                ),
-            )
-        }.shouldThrow(RuntimeException::class)
-    }
-
-    @Test
     fun `burde oppdatere sykmelding grunnlag`() {
         nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
         val kafkaMelding =
@@ -168,7 +150,6 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
             SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
                 validation = lagValidation(),
-                metadata = lagMeldingsinformasjonEgenmeldt(),
             )
 
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)

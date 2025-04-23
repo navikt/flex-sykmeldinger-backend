@@ -1,5 +1,12 @@
 package no.nav.helse.flex.sykmelding.domain.tsm
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
 import no.nav.helse.flex.sykmelding.domain.tsm.values.SignerendeBehandler
@@ -50,9 +57,80 @@ data class SykmeldingGrunnlag(
 }
 
 data class AvsenderSystem(
-    val navn: String,
+    val navn: AvsenderSystemNavn,
     val versjon: String,
-)
+) {
+    internal class AvsenderSystemSerializer : JsonSerializer<AvsenderSystem>() {
+        override fun serialize(
+            value: AvsenderSystem?,
+            gen: JsonGenerator?,
+            serializers: SerializerProvider?,
+        ) {
+            if (value != null) {
+                gen?.writeStartObject()
+                gen?.writeStringField("navn", value.navn.displayName)
+                gen?.writeStringField("versjon", value.versjon)
+                gen?.writeEndObject()
+            }
+        }
+    }
+
+    internal class AvsenderSystemDeserializer : JsonDeserializer<AvsenderSystem>() {
+        override fun deserialize(
+            p: JsonParser,
+            ctxt: DeserializationContext,
+        ): AvsenderSystem {
+            val node: JsonNode = p.codec.readTree(p)
+            val navnString = node.get("navn")?.asText()
+            val versjon = node.get("versjon")?.asText() ?: ""
+
+            val navn = navnString.let { AvsenderSystemNavn.fraDisplayName(it) }
+
+            return AvsenderSystem(navn, versjon)
+        }
+    }
+}
+
+enum class AvsenderSystemNavn(
+    val displayName: String,
+) {
+    AD_CURIS("Ad Curis"),
+    ANITA_EPJ("Anita EPJ"),
+    APERTURA_EYE("Apertura-Eye"),
+    CGM_JOURNAL("CGM Journal"),
+    CGM_VISION("CGM Vision"),
+    DIPS_ARENA("DIPS Arena"),
+    DIPS_CLASSIC("DIPS Classic"),
+    EGENMELDT("Egenmeldt"),
+    EIA("EIA"),
+    EPIC("Epic"),
+    EXTENSOR_V2("Extensor V2"),
+    HANO("HANO"),
+    INFODOC_PLENARIO("Infodoc Plenario"),
+    METODIKA_EPM("Metodika EPM"),
+    OPUS_DENTAL("Opus Dental"),
+    PAPIRSYKMELDING("Papirsykmelding"),
+    PASIENT_SKY("PasientSky"),
+    PHYSICA("Physica"),
+    PRIDOK_EPJ("Pridok EPJ"),
+    PROMED("ProMed"),
+    PSYKBASE("PsykBase"),
+    SKALPELL("Skalpell"),
+    SOLV_IT_JOURNAL("SolvIT Journal"),
+    SYFOSERVICE("SYFOSERVICE"),
+    SYK_DIG("syk-dig"),
+    SYSTEM_X("System X"),
+    VELFERD("Velferd"),
+    WEBMED("WebMed"),
+
+    UKJENT("Ukjent"),
+    ;
+
+    companion object {
+        fun fraDisplayName(displayName: String?): AvsenderSystemNavn =
+            entries.find { it.displayName.equals(displayName, ignoreCase = true) } ?: UKJENT
+    }
+}
 
 data class SykmeldingMetadata(
     val mottattDato: OffsetDateTime,

@@ -15,10 +15,11 @@ fun lagSykmeldingGrunnlag(
                 LocalDate.parse("2021-01-10"),
             ),
         ),
+    metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
 ): SykmeldingGrunnlag =
     SykmeldingGrunnlag(
         id = id,
-        metadata = lagSykmeldingMetadata(),
+        metadata = metadata,
         pasient = pasient,
         medisinskVurdering = lagMedisinskVurdering(),
         aktivitet = aktiviteter,
@@ -86,19 +87,23 @@ fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
             ),
     )
 
-fun lagSykmeldingMetadata(): SykmeldingMetadata =
-    SykmeldingMetadata(
+fun lagSykmeldingMetadata(
+    avsenderSystem: AvsenderSystem =
+        AvsenderSystem(
+            navn = AvsenderSystemNavn.PRIDOK_EPJ,
+            versjon = "2.1.0",
+        ),
+): SykmeldingMetadata {
+    val avsenderSystem = avsenderSystem
+    return SykmeldingMetadata(
         mottattDato = OffsetDateTime.now(),
         genDate = OffsetDateTime.now().minusDays(1),
         behandletTidspunkt = OffsetDateTime.now().minusHours(2),
         regelsettVersjon = "1.0",
-        avsenderSystem =
-            AvsenderSystem(
-                navn = "EPJSystem",
-                versjon = "2.1.0",
-            ),
+        avsenderSystem = avsenderSystem,
         strekkode = "ABC12345",
     )
+}
 
 fun lagPasient(fnr: String = "01010112345"): Pasient =
     Pasient(
@@ -117,12 +122,15 @@ fun lagPasient(fnr: String = "01010112345"): Pasient =
         navnFastlege = null,
     )
 
-fun lagMedisinskVurdering(): MedisinskVurdering =
+fun lagMedisinskVurdering(
+    hovedDiagnoseKode: String = "R51",
+    annenFraverArsak: AnnenFraverArsak? = null,
+): MedisinskVurdering =
     MedisinskVurdering(
         hovedDiagnose =
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
-                kode = "R51",
+                kode = hovedDiagnoseKode,
             ),
         biDiagnoser =
             listOf(
@@ -132,7 +140,7 @@ fun lagMedisinskVurdering(): MedisinskVurdering =
                 ),
             ),
         svangerskap = false,
-        annenFraversArsak = null,
+        annenFraversArsak = annenFraverArsak,
         yrkesskade = null,
         skjermetForPasient = false,
         syketilfelletStartDato = null,
