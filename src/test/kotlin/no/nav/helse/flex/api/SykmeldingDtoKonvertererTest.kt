@@ -4,11 +4,12 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.*
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,14 @@ import java.time.OffsetDateTime
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingDtoKonverterer: SykmeldingDtoKonverterer
+
+    @Autowired
+    lateinit var pdlClient: PdlClientFake
+
+    @BeforeEach
+    fun setup() {
+        pdlClient.reset()
+    }
 
     @Test
     fun `burde konvertere med riktig id`() {
@@ -57,9 +66,10 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
     }
 
-    @Disabled
     @Test
     fun `burde konvertere pasient som er over 70 år`() {
+        pdlClient.setFoedselsdato(LocalDate.parse("1950-01-01"), "fnr")
+
         val pasient =
             Pasient(
                 navn = Navn("fornavn", "mellomnavn", "etternavn"),

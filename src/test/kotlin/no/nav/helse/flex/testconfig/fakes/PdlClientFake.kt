@@ -46,6 +46,7 @@ class PdlClientFake : PdlClient {
     fun reset() {
         identerMedHistorikk.clear()
         formaterteNavn.clear()
+        foedselsdato.clear()
     }
 
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {

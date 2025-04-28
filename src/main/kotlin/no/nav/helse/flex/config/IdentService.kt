@@ -25,7 +25,7 @@ class IdentService(
     }
 
     @Cacheable("flex-foedselsdato")
-    fun hentFoedselsdato(fnr: String): LocalDate? = pdlClient.hentFoedselsdato(fnr)
+    fun hentFoedselsdato(fnr: String): LocalDate = pdlClient.hentFoedselsdato(fnr)
 
     private fun List<PdlIdent>.folkeregisteridenter(): List<String> = this.filter { it.gruppe == FOLKEREGISTERIDENT }.map { it.ident }
 }
