@@ -1,7 +1,6 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.SporsmalSvar
@@ -16,7 +15,7 @@ import java.time.Month
 @Component
 class SykmeldingDtoKonverterer(
     private val sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer,
-    private val identService: IdentService,
+    private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
 ) {
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
@@ -167,16 +166,8 @@ class SykmeldingDtoKonverterer(
             fornavn = pasient.navn?.fornavn,
             mellomnavn = pasient.navn?.mellomnavn,
             etternavn = pasient.navn?.etternavn,
-            overSyttiAar = erOverSyttiAar(pasient.fnr, fom),
+            overSyttiAar = sykmeldingRegelAvklaringer.erOverSyttiAar(pasientFnr = pasient.fnr, fom = fom),
         )
-
-    internal fun erOverSyttiAar(
-        pasientFnr: String,
-        fom: LocalDate,
-    ): Boolean {
-        val foedselsdato = identService.hentFoedselsdato(pasientFnr)
-        return foedselsdato.plusYears(70).isBefore(fom)
-    }
 
     internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
         when (arbeidsgiver) {
