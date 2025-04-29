@@ -467,7 +467,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
-            returnertSykmelding.arbeidsgiver.shouldNotBeNull()
+            returnertSykmelding.arbeidsgiver.`should be null`()
         }
 
         @Test

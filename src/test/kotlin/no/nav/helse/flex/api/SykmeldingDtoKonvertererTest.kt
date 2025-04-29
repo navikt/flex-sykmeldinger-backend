@@ -97,17 +97,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(
-            arbeidsgiverInfo =
-                EnArbeidsgiver(
-                    meldingTilArbeidsgiver = "_",
-                    tiltakArbeidsplassen = "_",
-                ),
-        ) `should be equal to`
-            ArbeidsgiverDTO(
-                navn = null,
-                stillingsprosent = null,
-            )
+        sykmeldingDtoKonverterer
+            .konverterArbeidsgiver(
+                arbeidsgiverInfo =
+                    EnArbeidsgiver(
+                        meldingTilArbeidsgiver = "_",
+                        tiltakArbeidsplassen = "_",
+                    ),
+            ).`should be null`()
     }
 
     @Test
@@ -332,12 +329,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere kontakt med pasient, ingen kontakt`() {
-        sykmeldingDtoKonverterer.konverterKontaktMedPasient() `should be equal to`
-            KontaktMedPasientDTO(
-                kontaktDato = null,
-                begrunnelseIkkeKontakt = null,
-            )
+    fun `burde konvertere kontakt med pasient`() {
+        sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagSykmeldingGrunnlag().tilbakedatering!!).`should not be null`()
     }
 
     @Test
@@ -436,7 +429,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 ruleHits =
                     listOf(
                         RegelinfoDTO(
-                            messageForSender = "description",
+                            messageForSender = "",
                             messageForUser = "description",
                             ruleName = "name",
                             ruleStatus = RegelStatusDTO.OK,

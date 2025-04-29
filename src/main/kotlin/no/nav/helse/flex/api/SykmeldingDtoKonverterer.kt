@@ -37,9 +37,6 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            // TODO: muligens reciever eller sender fra meldingsinformasjon. tror vi skal ignorere
-            legekontorOrgnummer = null,
-            // TODO: Er dette arbeidsgiver fra sykmeldingGrunnlag eller basert på brukers svar?
             arbeidsgiver =
                 konverterArbeidsgiver(
                     sykmelding.sykmeldingGrunnlag.arbeidsgiver,
@@ -60,18 +57,13 @@ class SykmeldingDtoKonverterer(
                     is FlereArbeidsgivere -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
                     is IngenArbeidsgiver -> null
                 },
-            // TODO: Hvor er kontakt med pasient?
-            kontaktMedPasient = konverterKontaktMedPasient(),
+            kontaktMedPasient = sykmelding.sykmeldingGrunnlag.tilbakedatering?.let { konverterKontaktMedPasient(it) },
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
             behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
-            // TODO: Er dette riktig?
-            syketilfelleStartDato =
-                sykmelding.sykmeldingGrunnlag.metadata.genDate
-                    .toLocalDate(),
+            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
-            // TODO: gjelder dette bare for covid?
             harRedusertArbeidsgiverperiode =
                 harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
@@ -79,9 +71,9 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            // TODO: Brukes disse?
-            merknader = null,
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            legekontorOrgnummer = null,
+            merknader = null,
             utenlandskSykmelding = null,
         )
     }
@@ -100,44 +92,12 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            legekontorOrgnummer = null,
-            arbeidsgiver = null,
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            prognose = null,
-            utdypendeOpplysninger = emptyMap(),
-            tiltakArbeidsplassen = null,
-            tiltakNAV = null,
-            andreTiltak = null,
-            meldingTilNAV = null,
-            meldingTilArbeidsgiver = null,
-            kontaktMedPasient =
-                KontaktMedPasientDTO(
-                    kontaktDato = null,
-                    begrunnelseIkkeKontakt = null,
-                ),
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-            // TODO
-            behandler =
-                BehandlerDTO(
-                    fornavn = "Fornavn",
-                    mellomnavn = null,
-                    etternavn = "Etternavn",
-                    adresse =
-                        AdresseDTO(
-                            gate = null,
-                            postnummer = null,
-                            kommune = null,
-                            postboks = null,
-                            land = null,
-                        ),
-                    tlf = null,
-                ),
-            syketilfelleStartDato =
-                sykmelding.sykmeldingGrunnlag.metadata.genDate
-                    .toLocalDate(),
+            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
@@ -148,12 +108,23 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            merknader = null,
-            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             utenlandskSykmelding =
                 UtenlandskSykmelding(
                     land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                 ),
+            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            legekontorOrgnummer = null,
+            arbeidsgiver = null,
+            kontaktMedPasient = null,
+            utdypendeOpplysninger = emptyMap(),
+            tiltakArbeidsplassen = null,
+            tiltakNAV = null,
+            andreTiltak = null,
+            meldingTilNAV = null,
+            meldingTilArbeidsgiver = null,
+            prognose = null,
+            behandler = null,
+            merknader = null,
         )
     }
 
@@ -187,9 +158,8 @@ class SykmeldingDtoKonverterer(
             status = status,
             ruleHits =
                 validationResult.rules.map {
-                    // TODO: blir det riktig å bruke description her?
                     RegelinfoDTO(
-                        messageForSender = it.description,
+                        messageForSender = "",
                         messageForUser = it.description,
                         ruleName = it.name,
                         ruleStatus = status,
@@ -356,11 +326,10 @@ class SykmeldingDtoKonverterer(
             beskrivBistand = bistandNav.beskrivBistand,
         )
 
-    internal fun konverterKontaktMedPasient(): KontaktMedPasientDTO =
+    internal fun konverterKontaktMedPasient(tilbakedatering: Tilbakedatering): KontaktMedPasientDTO =
         KontaktMedPasientDTO(
-            // TODO
-            begrunnelseIkkeKontakt = null,
-            kontaktDato = null,
+            begrunnelseIkkeKontakt = tilbakedatering.begrunnelse,
+            kontaktDato = tilbakedatering.kontaktDato,
         )
 
     internal fun konverterBehandler(behandler: Behandler): BehandlerDTO =
@@ -389,18 +358,13 @@ class SykmeldingDtoKonverterer(
         when (arbeidsgiverInfo) {
             is FlereArbeidsgivere ->
                 ArbeidsgiverDTO(
-                    // TODO: Hva blir riktig for flere arbeidsgivere?
                     navn = arbeidsgiverInfo.navn,
                     stillingsprosent = arbeidsgiverInfo.stillingsprosent,
                 )
 
-            is EnArbeidsgiver ->
-                ArbeidsgiverDTO(
-                    navn = null,
-                    stillingsprosent = null,
-                )
-
-            is IngenArbeidsgiver -> null
+            is EnArbeidsgiver,
+            is IngenArbeidsgiver,
+            -> null
         }
 
     internal fun konverterUtdypendeOpplysninger(
