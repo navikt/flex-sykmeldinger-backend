@@ -46,8 +46,9 @@ class AaregHendelserConsumer(
                     }
                 }
             }
-
-        log.info("Prossesserte ${consumerRecords.count()} records, med størrelse $totalByteSize bytes, iløpet av $time millisekunder")
+        if (time > 50 || totalByteSize > 20_000) {
+            log.warn("Prossesserte ${consumerRecords.count()} records, med størrelse $totalByteSize bytes, iløpet av $time millisekunder")
+        }
     }
 
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
