@@ -18,6 +18,9 @@ import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
+    private lateinit var sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer
+
+    @Autowired
     lateinit var sykmeldingDtoKonverterer: SykmeldingDtoKonverterer
 
     @Autowired
@@ -348,7 +351,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 )
 
-        sykmeldingDtoKonverterer
+        sykmeldingRegelAvklaringer
             .harRedusertArbeidsgiverperiode(
                 hovedDiagnose = medisinskVurdering.hovedDiagnose,
                 biDiagnoser = medisinskVurdering.biDiagnoser,
@@ -384,7 +387,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 )
 
-        sykmeldingDtoKonverterer
+        sykmeldingRegelAvklaringer
             .harRedusertArbeidsgiverperiode(
                 hovedDiagnose = medisinskVurdering.hovedDiagnose,
                 biDiagnoser = medisinskVurdering.biDiagnoser,

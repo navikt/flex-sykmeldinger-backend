@@ -10,7 +10,6 @@ import no.nav.helse.flex.sykmelding.domain.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.Month
 
 @Component
 class SykmeldingDtoKonverterer(
@@ -65,7 +64,7 @@ class SykmeldingDtoKonverterer(
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
             harRedusertArbeidsgiverperiode =
-                harRedusertArbeidsgiverperiode(
+                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
                     biDiagnoser = medisinskVurdering.biDiagnoser,
                     sykmeldingsperioder = sykmeldingsperioder,
@@ -102,7 +101,7 @@ class SykmeldingDtoKonverterer(
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
             harRedusertArbeidsgiverperiode =
-                harRedusertArbeidsgiverperiode(
+                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
                     biDiagnoser = medisinskVurdering.biDiagnoser,
                     sykmeldingsperioder = sykmeldingsperioder,
@@ -392,50 +391,4 @@ class SykmeldingDtoKonverterer(
             SvarRestriksjon.SKJERMET_FOR_NAV ->
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
-
-    internal fun harRedusertArbeidsgiverperiode(
-        hovedDiagnose: DiagnoseDTO?,
-        biDiagnoser: List<DiagnoseDTO>,
-        sykmeldingsperioder: List<SykmeldingsperiodeDTO>,
-        annenFraversArsakDTO: AnnenFraversArsakDTO?,
-    ): Boolean {
-        val diagnoserSomGirRedusertArbgiverPeriode = listOf("R991", "U071", "U072", "A23", "R992")
-
-        val sykmeldingsperioderInnenforKoronaregler =
-            sykmeldingsperioder.filter { periodeErInnenforKoronaregler(it.fom, it.tom) }
-        if (sykmeldingsperioderInnenforKoronaregler.isEmpty()) {
-            return false
-        }
-        if (
-            hovedDiagnose != null &&
-            diagnoserSomGirRedusertArbgiverPeriode.contains(hovedDiagnose.kode)
-        ) {
-            return true
-        } else if (
-            biDiagnoser.isNotEmpty() &&
-            biDiagnoser.find { diagnoserSomGirRedusertArbgiverPeriode.contains(it.kode) } !=
-            null
-        ) {
-            return true
-        }
-        return checkSmittefare(annenFraversArsakDTO)
-    }
-
-    private fun checkSmittefare(annenFraversArsakDTO: AnnenFraversArsakDTO?) =
-        annenFraversArsakDTO?.grunn?.any { annenFraverGrunn ->
-            annenFraverGrunn == AnnenFraverGrunnDTO.SMITTEFARE
-        } == true
-
-    private fun periodeErInnenforKoronaregler(
-        fom: LocalDate,
-        tom: LocalDate,
-    ): Boolean {
-        val koronaForsteFraDato = LocalDate.of(2020, Month.MARCH, 15)
-        val koronaForsteTilDato = LocalDate.of(2021, Month.OCTOBER, 1)
-        val koronaAndreFraDato = LocalDate.of(2021, Month.NOVEMBER, 30)
-        val koronaAndreTilDato = LocalDate.of(2022, Month.JULY, 1)
-
-        return (fom.isAfter(koronaAndreFraDato) && fom.isBefore(koronaAndreTilDato)) ||
-            (fom.isBefore(koronaForsteTilDato) && tom.isAfter(koronaForsteFraDato))
-    }
 }
