@@ -15,6 +15,7 @@ import java.time.Month
 @Component
 class SykmeldingDtoKonverterer(
     private val sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer,
+    private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
 ) {
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
@@ -29,7 +30,6 @@ class SykmeldingDtoKonverterer(
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
-            // TODO: Hvordan beregnes overSøttiÅr?
             pasient =
                 konverterPasient(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
@@ -166,13 +166,8 @@ class SykmeldingDtoKonverterer(
             fornavn = pasient.navn?.fornavn,
             mellomnavn = pasient.navn?.mellomnavn,
             etternavn = pasient.navn?.etternavn,
-            overSyttiAar = erOverSyttiAar(fom),
+            overSyttiAar = sykmeldingRegelAvklaringer.erOverSyttiAar(pasientFnr = pasient.fnr, fom = fom),
         )
-
-    internal fun erOverSyttiAar(fom: LocalDate): Boolean {
-        // TODO: kall pdl
-        return false
-    }
 
     internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
         when (arbeidsgiver) {

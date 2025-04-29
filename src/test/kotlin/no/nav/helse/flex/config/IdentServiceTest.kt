@@ -7,6 +7,7 @@ import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class IdentServiceTest : FakesTestOppsett() {
     @Autowired
@@ -41,5 +42,13 @@ class IdentServiceTest : FakesTestOppsett() {
         val responseData = identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
         responseData.andreIdenter `should be equal to` listOf("pdl-ident")
         responseData.originalIdent `should be equal to` "ny-ident"
+    }
+
+    @Test
+    fun `Burde hente fødselsdato`() {
+        pdlClientFake.setFoedselsdato(LocalDate.parse("2000-01-01"), "pdl-ident")
+
+        val responseData = identService.hentFoedselsdato("pdl-ident")
+        responseData `should be equal to` LocalDate.parse("2000-01-01")
     }
 }

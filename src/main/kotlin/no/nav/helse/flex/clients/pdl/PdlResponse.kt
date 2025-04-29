@@ -1,6 +1,7 @@
 package no.nav.helse.flex.clients.pdl
 
 import org.apache.commons.text.WordUtils
+import java.time.LocalDate
 
 data class HentIdenterResponseData(
     val hentIdenter: HentIdenter? = null,
@@ -21,7 +22,14 @@ data class GetPersonResponseData(
 
 data class HentPerson(
     val navn: List<Navn>? = null,
+    val foedselsdato: List<Foedsel>?,
 )
+
+data class Foedsel(
+    val foedselsdato: String?,
+) {
+    fun tilLocalDate(): LocalDate? = foedselsdato?.let { LocalDate.parse(it) }
+}
 
 data class Navn(
     val fornavn: String,

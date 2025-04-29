@@ -7,3 +7,7 @@ open class FunctionalPdlError(
 class PdlManglerNavnError(
     message: String,
 ) : FunctionalPdlError(message)
+
+class PdlManglerFoedselsdatoError(
+    message: String,
+) : FunctionalPdlError(message)
