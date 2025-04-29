@@ -4,10 +4,7 @@ import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
-import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Disabled
@@ -26,7 +23,10 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde lagre hendelse på sykmelding`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+            )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should not be null`()
@@ -36,7 +36,10 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ikke lagre hendelse dersom sykmelding ikke finnes`() {
-        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+            )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should be null`()
@@ -52,7 +55,11 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                     ),
                 ),
         )
-        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", statusEvent = "SENDT")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
+            )
         invoking {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
         } `should throw` UgyldigSykmeldingStatusException::class
@@ -73,7 +80,10 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Disabled
     @Test
     fun `burde publisere på retry dersom sykmelding ikke finnes`() {
-        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+            )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status)
     }
 
@@ -81,7 +91,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde ikke lagre status hvis hendelse eksisterer på sykmeldingen`() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
         sykmeldingRepository.save(sykmelding)
-        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
+        val status = lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"))
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
     }
