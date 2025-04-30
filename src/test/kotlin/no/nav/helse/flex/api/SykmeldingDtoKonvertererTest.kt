@@ -5,7 +5,6 @@ import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.*
@@ -17,9 +16,6 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
-    @Autowired
-    private lateinit var sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer
-
     @Autowired
     lateinit var sykmeldingDtoKonverterer: SykmeldingDtoKonverterer
 
@@ -334,78 +330,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere kontakt med pasient`() {
         sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagSykmeldingGrunnlag().tilbakedatering!!).`should not be null`()
-    }
-
-    @Test
-    fun `burde konvertere harRedusertArbeidsgiverperiode innenfor covid periode`() {
-        val medisinskVurdering =
-            sykmeldingDtoKonverterer
-                .konverterMedisinskVurdering(
-                    lagMedisinskVurdering(
-                        hovedDiagnoseKode = "R991",
-                        annenFraverArsak =
-                            AnnenFraverArsak(
-                                beskrivelse = "beskrivelse",
-                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
-                            ),
-                    ),
-                )
-
-        sykmeldingRegelAvklaringer
-            .harRedusertArbeidsgiverperiode(
-                hovedDiagnose = medisinskVurdering.hovedDiagnose,
-                biDiagnoser = medisinskVurdering.biDiagnoser,
-                sykmeldingsperioder =
-                    listOf(
-                        SykmeldingsperiodeDTO(
-                            fom = LocalDate.parse("2021-01-01"),
-                            tom = LocalDate.parse("2021-01-31"),
-                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
-                            reisetilskudd = false,
-                            gradert = null,
-                            behandlingsdager = null,
-                            innspillTilArbeidsgiver = null,
-                            aktivitetIkkeMulig = null,
-                        ),
-                    ),
-                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-            ).`should be true`()
-    }
-
-    @Test
-    fun `burde konvertere harRedusertArbeidsgiverperiode utenfor covid periode`() {
-        val medisinskVurdering =
-            sykmeldingDtoKonverterer
-                .konverterMedisinskVurdering(
-                    lagMedisinskVurdering(
-                        hovedDiagnoseKode = "R991",
-                        annenFraverArsak =
-                            AnnenFraverArsak(
-                                beskrivelse = "beskrivelse",
-                                arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
-                            ),
-                    ),
-                )
-
-        sykmeldingRegelAvklaringer
-            .harRedusertArbeidsgiverperiode(
-                hovedDiagnose = medisinskVurdering.hovedDiagnose,
-                biDiagnoser = medisinskVurdering.biDiagnoser,
-                sykmeldingsperioder =
-                    listOf(
-                        SykmeldingsperiodeDTO(
-                            fom = LocalDate.parse("2024-01-01"),
-                            tom = LocalDate.parse("2024-01-31"),
-                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
-                            reisetilskudd = false,
-                            gradert = null,
-                            behandlingsdager = null,
-                            innspillTilArbeidsgiver = null,
-                            aktivitetIkkeMulig = null,
-                        ),
-                    ),
-                annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-            ).`should be false`()
     }
 
     @Test
