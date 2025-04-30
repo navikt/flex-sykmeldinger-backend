@@ -28,4 +28,19 @@ class SykmeldingHendelseBufferTest : IntegrasjonTestOppsett() {
             }
         }
     }
+
+//    @Test
+//    fun `burde være tom etter hentOgFjernAlle`() {
+//        val kafkaMelding =
+//            lagSykmeldingStatusKafkaMessageDTO(
+//                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+//                event = lagSykmeldingStatusKafkaDTO(statusEvent = "TEST_STATUS"),
+//            )
+//        sykmeldingHendelseBuffer.leggTil(kafkaMelding)
+//        sykmeldingHendelseBuffer.hentOgFjernAlle(sykmeldingId = "1")
+//
+//        sykmeldingHendelseBuffer.hentOgFjernAlle(sykmeldingId = "1").run {
+//            this shouldHaveSize 0
+//        }
+//    }
 }

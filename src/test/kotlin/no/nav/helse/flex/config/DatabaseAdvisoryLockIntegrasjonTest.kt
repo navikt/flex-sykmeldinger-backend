@@ -23,7 +23,7 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
         txTemplate.execute {
             advisoryLock.acquire("test")
             val hashedKey = DatabaseAdvisoryLock.stringToLongHash("test")
-            checkAdvisoryLockExists(hashedKey).shouldBeTrue()
+            checkAdvisoryLockGranted(hashedKey).shouldBeTrue()
         }
     }
 
@@ -33,7 +33,7 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
             advisoryLock.acquire("test1", "test2")
             val hashedKey1 = DatabaseAdvisoryLock.stringToIntHash("test1")
             val hashedKey2 = DatabaseAdvisoryLock.stringToIntHash("test2")
-            checkAdvisoryLockExists(hashedKey1, hashedKey2).shouldBeTrue()
+            checkAdvisoryLockGranted(hashedKey1, hashedKey2).shouldBeTrue()
         }
     }
 
@@ -44,7 +44,7 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
                 .acquire("test")
         }
         val hashedKey = DatabaseAdvisoryLock.stringToLongHash("test")
-        checkAdvisoryLockExists(hashedKey).shouldBeFalse()
+        checkAdvisoryLockGranted(hashedKey).shouldBeFalse()
     }
 
     private fun listAdvisoryLocks(): List<Map<String, Any>> =
@@ -58,9 +58,9 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
             mapOf<String, Any>(),
         )
 
-    private fun checkAdvisoryLockExists(key: Long): Boolean = checkAdvisoryLockGranted(classid = 0, objid = key)
+    private fun checkAdvisoryLockGranted(key: Long): Boolean = checkAdvisoryLockGranted(classid = 0, objid = key)
 
-    private fun checkAdvisoryLockExists(
+    private fun checkAdvisoryLockGranted(
         key1: Int,
         key2: Int,
     ): Boolean = checkAdvisoryLockGranted(classid = key1, objid = key2)

@@ -6,9 +6,6 @@ import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessage
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
-import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -45,9 +42,9 @@ class SykmeldingHendelseBuffer(
                 sykmeldingId = this.kafkaMetadata.sykmeldingId,
                 sykmeldingStatusOpprettet = this.kafkaMetadata.timestamp.toInstant(),
                 sykmeldingStatusKafkaMessage =
-                    PGobject().apply {
-                        type = "json"
-                        value = this.serialisertTilString()
+                    PGobject().also {
+                        it.type = "json"
+                        it.value = this.serialisertTilString()
                     },
                 lokaltOpprettet = now,
             )
@@ -60,20 +57,4 @@ class SykmeldingHendelseBuffer(
                     "Felt 'sykmeldingStatusKafkaMessage' er null på BuffretSykmeldingHendelseDbRecord, for sykmelding: ${this.sykmeldingId}",
                 )
     }
-}
-
-@Table("SYKMELDINGHENDELSE_BUFFER")
-data class SykmeldingHendelseBufferDbRecord(
-    @Id
-    val id: String? = null,
-    val sykmeldingId: String,
-    val sykmeldingStatusOpprettet: Instant,
-    val sykmeldingStatusKafkaMessage: PGobject,
-    val lokaltOpprettet: Instant,
-)
-
-interface SykmeldingHendelseBufferRepository : CrudRepository<SykmeldingHendelseBufferDbRecord, String> {
-    fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
-
-    fun deleteAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
 }

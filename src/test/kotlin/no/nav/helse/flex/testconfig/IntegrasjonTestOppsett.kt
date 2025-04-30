@@ -4,6 +4,7 @@ import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
+import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBufferRepository
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.apache.kafka.clients.producer.Producer
@@ -51,6 +52,9 @@ abstract class IntegrasjonTestOppsett {
 
     @Autowired
     lateinit var sykmeldingRepository: SykmeldingRepository
+
+    @Autowired
+    lateinit var sykmeldingHendelseBufferRepository: SykmeldingHendelseBufferRepository
 
     @Autowired
     lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
@@ -114,6 +118,7 @@ abstract class IntegrasjonTestOppsett {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
+        sykmeldingHendelseBufferRepository.deleteAll()
     }
 
     private fun ventPaConsumers() {
