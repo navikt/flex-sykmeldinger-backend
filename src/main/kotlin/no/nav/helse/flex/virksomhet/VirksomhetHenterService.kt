@@ -19,37 +19,20 @@ class VirksomhetHenterService(
     private val narmeseteLederRepository: NarmesteLederRepository,
     private val nowFactory: Supplier<Instant>,
 ) {
-    fun hentVirksomheterForPerson(identer: PersonIdenter): List<Virksomhet> {
-        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
-
-        val virksomheter =
-            sammenstillVirksomheter(
-                arbeidsforhold = arbeidsforhold,
-                narmesteLedere = narmesteLedere,
-                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
-            )
-
-        return virksomheter
-    }
-
-    fun hentVirksomheterForPersonInnenforPeriode(
+    fun hentVirksomheterForPerson(
         identer: PersonIdenter,
-        periode: Pair<LocalDate, LocalDate>,
+        periode: Pair<LocalDate, LocalDate>? = null,
     ): List<Virksomhet> {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-        val arbeidsforholdInnenPeriode = arbeidsforhold.filtrerInnenPeriode(periode)
+        val filtrerteArbeidsforhold = periode?.let { arbeidsforhold.filtrerInnenPeriode(it) } ?: arbeidsforhold
 
         val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
-        val virksomheter =
-            sammenstillVirksomheter(
-                arbeidsforholdInnenPeriode,
-                narmesteLedere = narmesteLedere,
-                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
-            )
-
-        return virksomheter
+        return sammenstillVirksomheter(
+            arbeidsforhold = filtrerteArbeidsforhold,
+            narmesteLedere = narmesteLedere,
+            idagProvider = { nowFactory.get().tilNorgeLocalDate() },
+        )
     }
 
     companion object {
@@ -106,8 +89,7 @@ class VirksomhetHenterService(
             narmesteLedere
                 .filter { it.orgnummer == arbeidsforhold.orgnummer }
                 .filter { it.narmesteLederNavn != null }
-                .sortedBy { it.aktivFom }
-                .lastOrNull()
+                .maxByOrNull { it.aktivFom }
 
         private fun Pair<LocalDate, LocalDate?>.overlapperMed(periode: Pair<LocalDate, LocalDate>): Boolean {
             val (fom, tom) = this

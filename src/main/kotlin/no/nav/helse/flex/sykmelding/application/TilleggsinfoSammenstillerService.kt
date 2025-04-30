@@ -164,7 +164,7 @@ class TilleggsinfoSammenstillerService(
         arbeidsgiverOrgnummer: String,
     ): Arbeidsgiver {
         val virksomheter =
-            virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
+            virksomhetHenterService.hentVirksomheterForPerson(
                 identer = identer,
                 periode = sykmelding.fom to sykmelding.tom,
             )

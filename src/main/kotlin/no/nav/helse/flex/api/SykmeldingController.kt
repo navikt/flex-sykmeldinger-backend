@@ -108,7 +108,7 @@ class SykmeldingController(
         }
 
         val sykmeldingPeriode = sykmlding.fom to sykmlding.tom
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(identer, sykmeldingPeriode)
+        val virksomheter = virksomhetHenterService.hentVirksomheterForPerson(identer, sykmeldingPeriode)
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(

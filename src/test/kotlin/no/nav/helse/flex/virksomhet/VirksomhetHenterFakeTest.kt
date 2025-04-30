@@ -80,7 +80,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
         )
 
         val virksomheter =
-            virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
+            virksomhetHenterService.hentVirksomheterForPerson(
                 PersonIdenter("1"),
                 periode =
                     LocalDate.parse("2021-01-01") to LocalDate.parse("2021-02-01"),
@@ -96,7 +96,7 @@ class VirksomhetHenterFakeTest : FakesTestOppsett() {
         )
 
         val virksomheter =
-            virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
+            virksomhetHenterService.hentVirksomheterForPerson(
                 PersonIdenter("1"),
                 periode =
                     LocalDate.parse("2021-03-01") to LocalDate.parse("2021-04-01"),
