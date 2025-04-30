@@ -1,34 +1,34 @@
-package no.nav.helse.flex.virksomhet
+package no.nav.helse.flex.arbeidsgiverdetaljer
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.tilNorgeLocalDate
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
-import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
 import java.util.function.Supplier
 
 @Service
-class VirksomhetHenterService(
+class ArbeidsgiverDetaljerService(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val narmeseteLederRepository: NarmesteLederRepository,
     private val nowFactory: Supplier<Instant>,
 ) {
-    fun hentVirksomheterForPerson(
+    fun hentArbeidsgiverDetaljerForPerson(
         identer: PersonIdenter,
         periode: Pair<LocalDate, LocalDate>? = null,
-    ): List<Virksomhet> {
+    ): List<ArbeidsgiverDetaljer> {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
         val filtrerteArbeidsforhold = periode?.let { arbeidsforhold.filtrerInnenPeriode(it) } ?: arbeidsforhold
 
         val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
-        return sammenstillVirksomheter(
+        return sammenstillArbeidsgiverDetaljer(
             arbeidsforhold = filtrerteArbeidsforhold,
             narmesteLedere = narmesteLedere,
             idagProvider = { nowFactory.get().tilNorgeLocalDate() },
@@ -36,11 +36,11 @@ class VirksomhetHenterService(
     }
 
     companion object {
-        fun sammenstillVirksomheter(
+        fun sammenstillArbeidsgiverDetaljer(
             arbeidsforhold: Iterable<Arbeidsforhold>,
             narmesteLedere: Iterable<NarmesteLeder>,
             idagProvider: () -> LocalDate,
-        ): List<Virksomhet> {
+        ): List<ArbeidsgiverDetaljer> {
             val gyldigeArbeidsforhold =
                 arbeidsforhold.filter { erGyldigArbeidsforholdType(it.arbeidsforholdType) }
 
@@ -53,7 +53,7 @@ class VirksomhetHenterService(
                     compareByDescending(nullsLast()) { it.tom },
                 ).distinctBy { it.orgnummer }
                 .map { arbeidsforhold ->
-                    Virksomhet(
+                    ArbeidsgiverDetaljer(
                         orgnummer = arbeidsforhold.orgnummer,
                         juridiskOrgnummer = arbeidsforhold.juridiskOrgnummer,
                         navn = arbeidsforhold.orgnavn,
