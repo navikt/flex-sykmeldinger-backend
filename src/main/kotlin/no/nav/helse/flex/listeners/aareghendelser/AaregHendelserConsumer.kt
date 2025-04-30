@@ -63,25 +63,29 @@ class AaregHendelserConsumer(
 
         when (hendelseHandtering) {
             AaregHendelseHandtering.OPPRETT_OPPDATER -> {
-                opprettEllerEndreArbeidsforhold(fnr)
+                val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
+                log.info(
+                    "Arbeidsforhold synkronisert ved aareg hendelse: " +
+                        "Opprettet{${resultat.skalOpprettes.count()}, navArbeidsforholdId: ${resultat.skalOpprettes.map {
+                            it.navArbeidsforholdId
+                        }}}, " +
+                        "Oppdaterte{${resultat.skalOppdateres.count()}, navArbeidsforholdId: ${resultat.skalOppdateres.map {
+                            it.navArbeidsforholdId
+                        }}}, " +
+                        "Slettet{${resultat.skalSlettes.count()}, navArbeidsforholdId: ${resultat.skalSlettes.map {
+                            it.navArbeidsforholdId
+                        }}}",
+                )
             }
 
             AaregHendelseHandtering.SLETT -> {
                 val navArbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
                 arbeidsforholdInnhentingService.slettArbeidsforhold(navArbeidsforholdId)
+                log.info("Arbeidsforhold slettet ved aareg hendelse: $navArbeidsforholdId")
             }
 
             else -> {}
         }
-    }
-
-    private fun opprettEllerEndreArbeidsforhold(fnr: String) {
-        val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
-        log.info(
-            "Arbeidsforhold endret: Opprettet ${resultat.skalOpprettes.count()}. " +
-                "Oppdaterte ${resultat.skalOppdateres.count()}. " +
-                "Slettet ${resultat.skalSlettes.count()}.",
-        )
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
