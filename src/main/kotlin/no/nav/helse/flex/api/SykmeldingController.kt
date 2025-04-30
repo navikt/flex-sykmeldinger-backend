@@ -29,6 +29,7 @@ class SykmeldingController(
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
     private val sykmeldingHandterer: SykmeldingHandterer,
     private val syketilfelleClient: SyketilfelleClient,
+    private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
 ) {
     private val logger = logger()
 
@@ -100,19 +101,24 @@ class SykmeldingController(
     ): ResponseEntity<BrukerinformasjonDTO> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmlding =
+        val sykmelding =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)
                 ?: return ResponseEntity.notFound().build()
-        if (sykmlding.pasientFnr !in identer.alle()) {
+        if (sykmelding.pasientFnr !in identer.alle()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
-        val sykmeldingPeriode = sykmlding.fom to sykmlding.tom
+        val sykmeldingPeriode = sykmelding.fom to sykmelding.tom
         val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(identer, sykmeldingPeriode)
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(
                 arbeidsgivere = arbeidsgiverDetaljer.map { it.konverterTilDto() },
+                erOverSyttiAar =
+                    sykmeldingRegelAvklaringer.erOverSyttiAar(
+                        pasientFnr = sykmelding.pasientFnr,
+                        fom = sykmelding.fom,
+                    ),
             ),
         )
     }

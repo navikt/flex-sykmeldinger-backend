@@ -197,7 +197,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class HentBrukerInfoEndepunkt {
         @Test
-        fun `burde hente brukerinfo`() {
+        fun `burde returnere brukerinfo som inneholder arbeidsgivere`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -241,10 +241,11 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 1
+            brukerinformasjon.erOverSyttiAar.`should be false`()
         }
 
         @Test
-        fun `burde ikke hente brukerinfo når perioden ikke overlapper`() {
+        fun `burde returnere tom liste med arbeidsgivere i brukerinfo når perioden ikke overlapper`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -290,6 +291,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 0
+            brukerinformasjon.erOverSyttiAar.`should be false`()
         }
 
         @Test
