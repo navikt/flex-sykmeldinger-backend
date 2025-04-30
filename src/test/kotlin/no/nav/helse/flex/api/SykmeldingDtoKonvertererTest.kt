@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -25,6 +26,136 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @BeforeEach
     fun setup() {
         pdlClient.reset()
+    }
+
+    @Test
+    fun `burde konvertere sykmelding`() {
+        val sykmelding =
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag())
+
+        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+        dto `should be equal to`
+            SykmeldingDTO(
+                id = sykmelding.sykmeldingId,
+                pasient =
+                    PasientDTO(
+                        fnr = sykmelding.sykmeldingGrunnlag.pasient.fnr,
+                        fornavn =
+                            sykmelding.sykmeldingGrunnlag.pasient.navn
+                                ?.fornavn,
+                        mellomnavn =
+                            sykmelding.sykmeldingGrunnlag.pasient.navn
+                                ?.mellomnavn,
+                        etternavn =
+                            sykmelding.sykmeldingGrunnlag.pasient.navn
+                                ?.etternavn,
+                        overSyttiAar = false,
+                    ),
+                mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
+                behandlingsutfall =
+                    BehandlingsutfallDTO(
+                        status = RegelStatusDTO.OK,
+                        ruleHits = emptyList(),
+                    ),
+                sykmeldingsperioder =
+                    sykmelding.sykmeldingGrunnlag.aktivitet.map {
+                        SykmeldingsperiodeDTO(
+                            fom = it.fom,
+                            tom = it.tom,
+                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
+                            aktivitetIkkeMulig =
+                                AktivitetIkkeMuligDTO(
+                                    medisinskArsak =
+                                        MedisinskArsakDTO(
+                                            beskrivelse = "Pasient er syk",
+                                            arsak = listOf(MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET),
+                                        ),
+                                    arbeidsrelatertArsak = null,
+                                ),
+                            gradert = null,
+                            behandlingsdager = null,
+                            reisetilskudd = false,
+                            innspillTilArbeidsgiver = null,
+                        )
+                    },
+                sykmeldingStatus =
+                    SykmeldingStatusDTO(
+                        statusEvent = "APEN",
+                        timestamp = OffsetDateTime.ofInstant(sykmelding.opprettet, ZoneOffset.UTC),
+                        sporsmalOgSvarListe = emptyList(),
+                        brukerSvar = null,
+                        arbeidsgiver = null,
+                    ),
+                medisinskVurdering =
+                    MedisinskVurderingDTO(
+                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = null),
+                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = null)),
+                        annenFraversArsak = null,
+                        svangerskap = false,
+                        yrkesskade = false,
+                        yrkesskadeDato = null,
+                    ),
+                prognose =
+                    PrognoseDTO(
+                        arbeidsforEtterPeriode = true,
+                        hensynArbeidsplassen = "Tilrettelegging på arbeidsplassen anbefales",
+                        erIArbeid = null,
+                        erIkkeIArbeid = null,
+                    ),
+                utdypendeOpplysninger =
+                    mapOf(
+                        "arbeidsforhold" to
+                            mapOf(
+                                "tilrettelegging" to
+                                    SporsmalSvarDTO(
+                                        sporsmal = "Har du behov for tilrettelegging?",
+                                        svar = "Ja",
+                                        restriksjoner = listOf(SvarRestriksjonDTO.SKJERMET_FOR_ARBEIDSGIVER),
+                                    ),
+                            ),
+                    ),
+                tiltakArbeidsplassen = "Dette er et tiltak",
+                tiltakNAV = "Behov for tilrettelegging",
+                andreTiltak = "Redusert arbeidstid",
+                meldingTilNAV =
+                    MeldingTilNavDTO(
+                        bistandUmiddelbart = false,
+                        beskrivBistand = "Ingen behov for bistand per nå",
+                    ),
+                meldingTilArbeidsgiver = "Melding til arbeidsgiver",
+                kontaktMedPasient =
+                    KontaktMedPasientDTO(
+                        kontaktDato = LocalDate.parse("2025-04-25"),
+                        begrunnelseIkkeKontakt = "Pasienten kunne ikke oppsøke lege tidligere",
+                    ),
+                behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
+                behandler =
+                    BehandlerDTO(
+                        fornavn = "Kari",
+                        mellomnavn = null,
+                        etternavn = "Hansen",
+                        adresse =
+                            AdresseDTO(
+                                gate = "Hovedgaten 1",
+                                postnummer = 101,
+                                kommune = "Oslo",
+                                postboks = null,
+                                land = "Norge",
+                            ),
+                        tlf = "11111111",
+                    ),
+                skjermesForPasient = false,
+                egenmeldt = false,
+                papirsykmelding = false,
+                harRedusertArbeidsgiverperiode = false,
+                rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+                legekontorOrgnummer = null,
+                syketilfelleStartDato = null,
+                navnFastlege = null,
+                merknader = null,
+                utenlandskSykmelding = null,
+                arbeidsgiver = null,
+            )
     }
 
     @Test
