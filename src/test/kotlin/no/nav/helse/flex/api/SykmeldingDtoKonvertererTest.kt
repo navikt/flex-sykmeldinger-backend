@@ -5,6 +5,8 @@ import no.nav.helse.flex.sykmelding.domain.tsm.*
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
+import no.nav.helse.flex.testdata.lagMedisinskVurdering
+import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.*
@@ -31,7 +33,16 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere sykmelding`() {
         val sykmelding =
-            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag())
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        medisinskVurdering =
+                            lagMedisinskVurdering(
+                                syketilfelleStartDato = LocalDate.parse("2025-01-01"),
+                            ),
+                        pasient = lagPasient(navnFastlege = "Fastlege Navn"),
+                    ),
+            )
 
         val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
         dto `should be equal to`
@@ -144,17 +155,21 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                             ),
                         tlf = "11111111",
                     ),
+                syketilfelleStartDato = LocalDate.parse("2025-01-01"),
+                navnFastlege = "Fastlege Navn",
+                arbeidsgiver =
+                    ArbeidsgiverDTO(
+                        navn = "Arbeidsgivernavn",
+                        stillingsprosent = 99,
+                    ),
                 skjermesForPasient = false,
                 egenmeldt = false,
                 papirsykmelding = false,
                 harRedusertArbeidsgiverperiode = false,
                 rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-                legekontorOrgnummer = null,
-                syketilfelleStartDato = null,
-                navnFastlege = null,
                 merknader = null,
                 utenlandskSykmelding = null,
-                arbeidsgiver = null,
+                legekontorOrgnummer = null,
             )
     }
 
