@@ -1,12 +1,12 @@
 package no.nav.helse.flex.sykmeldinghendelsebuffer
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.config.AdvisoryLock
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
-import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Component
@@ -16,7 +16,8 @@ import java.util.function.Supplier
 
 @Component
 class SykmeldingHendelseBuffer(
-    private val buffretSykmeldingHendelseRepository: BuffretSykmeldingHendelseRepository,
+    private val sykmeldingHendelseBufferRepository: SykmeldingHendelseBufferRepository,
+    private val advisoryLock: AdvisoryLock,
     private val nowFactory: Supplier<Instant>,
 ) {
     @Transactional(rollbackFor = [Exception::class])
@@ -24,24 +25,23 @@ class SykmeldingHendelseBuffer(
         val sykmeldingId = hendelse.kafkaMetadata.sykmeldingId
         val record = hendelse.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
         aquireBufferLockFor(sykmeldingId)
-        buffretSykmeldingHendelseRepository.save(record)
+        sykmeldingHendelseBufferRepository.save(record)
     }
 
     @Transactional(rollbackFor = [Exception::class])
     fun hentOgFjernAlle(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
         aquireBufferLockFor(sykmeldingId)
-        val records = buffretSykmeldingHendelseRepository.deleteAllBySykmeldingId(sykmeldingId)
+        val records = sykmeldingHendelseBufferRepository.deleteAllBySykmeldingId(sykmeldingId)
         return records.map { it.tilSykmeldingStatusKafkaMessageDTO() }
     }
 
     private fun aquireBufferLockFor(sykmeldingId: String) {
-        val lockKey = "SykmeldingHendelseBuffer-$sykmeldingId".hashCode()
-        buffretSykmeldingHendelseRepository.aquireAdvisoryLock(lockKey)
+        advisoryLock.acquire("SykmeldingHendelseBuffer", sykmeldingId)
     }
 
     companion object {
-        internal fun SykmeldingStatusKafkaMessageDTO.tilBuffretSykmeldingHendelseDbRecord(now: Instant): BuffretSykmeldingHendelseDbRecord =
-            BuffretSykmeldingHendelseDbRecord(
+        internal fun SykmeldingStatusKafkaMessageDTO.tilBuffretSykmeldingHendelseDbRecord(now: Instant): SykmeldingHendelseBufferDbRecord =
+            SykmeldingHendelseBufferDbRecord(
                 sykmeldingId = this.kafkaMetadata.sykmeldingId,
                 sykmeldingStatusOpprettet = this.kafkaMetadata.timestamp.toInstant(),
                 sykmeldingStatusKafkaMessage =
@@ -52,7 +52,7 @@ class SykmeldingHendelseBuffer(
                 lokaltOpprettet = now,
             )
 
-        internal fun BuffretSykmeldingHendelseDbRecord.tilSykmeldingStatusKafkaMessageDTO(): SykmeldingStatusKafkaMessageDTO =
+        internal fun SykmeldingHendelseBufferDbRecord.tilSykmeldingStatusKafkaMessageDTO(): SykmeldingStatusKafkaMessageDTO =
             this.sykmeldingStatusKafkaMessage.value?.let {
                 objectMapper.readValue(it)
             }
@@ -62,8 +62,8 @@ class SykmeldingHendelseBuffer(
     }
 }
 
-@Table("buffret_sykmeldinghendelse")
-data class BuffretSykmeldingHendelseDbRecord(
+@Table("SYKMELDINGHENDELSE_BUFFER")
+data class SykmeldingHendelseBufferDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingId: String,
@@ -72,11 +72,8 @@ data class BuffretSykmeldingHendelseDbRecord(
     val lokaltOpprettet: Instant,
 )
 
-interface BuffretSykmeldingHendelseRepository : CrudRepository<BuffretSykmeldingHendelseDbRecord, String> {
-    fun findAllBySykmeldingId(sykmeldingId: String): List<BuffretSykmeldingHendelseDbRecord>
+interface SykmeldingHendelseBufferRepository : CrudRepository<SykmeldingHendelseBufferDbRecord, String> {
+    fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
 
-    fun deleteAllBySykmeldingId(sykmeldingId: String): List<BuffretSykmeldingHendelseDbRecord>
-
-    @Query("SELECT pg_advisory_xact_lock(:lockKey)")
-    fun aquireAdvisoryLock(lockKey: Int)
+    fun deleteAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
 }
