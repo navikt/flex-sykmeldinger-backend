@@ -1,63 +1,46 @@
-package no.nav.helse.flex.virksomhet
+package no.nav.helse.flex.arbeidsgiverdetaljer
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.tilNorgeLocalDate
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
-import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
 import java.util.function.Supplier
 
 @Service
-class VirksomhetHenterService(
+class ArbeidsgiverDetaljerService(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val narmeseteLederRepository: NarmesteLederRepository,
     private val nowFactory: Supplier<Instant>,
 ) {
-    fun hentVirksomheterForPerson(identer: PersonIdenter): List<Virksomhet> {
-        val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
-
-        val virksomheter =
-            sammenstillVirksomheter(
-                arbeidsforhold = arbeidsforhold,
-                narmesteLedere = narmesteLedere,
-                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
-            )
-
-        return virksomheter
-    }
-
-    fun hentVirksomheterForPersonInnenforPeriode(
+    fun hentArbeidsgiverDetaljerForPerson(
         identer: PersonIdenter,
-        periode: Pair<LocalDate, LocalDate>,
-    ): List<Virksomhet> {
+        periode: Pair<LocalDate, LocalDate>? = null,
+    ): List<ArbeidsgiverDetaljer> {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
-        val arbeidsforholdInnenPeriode = arbeidsforhold.filtrerInnenPeriode(periode)
+        val filtrerteArbeidsforhold = periode?.let { arbeidsforhold.filtrerInnenPeriode(it) } ?: arbeidsforhold
 
         val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
-        val virksomheter =
-            sammenstillVirksomheter(
-                arbeidsforholdInnenPeriode,
-                narmesteLedere = narmesteLedere,
-                idagProvider = { nowFactory.get().tilNorgeLocalDate() },
-            )
-
-        return virksomheter
+        return sammenstillArbeidsgiverDetaljer(
+            arbeidsforhold = filtrerteArbeidsforhold,
+            narmesteLedere = narmesteLedere,
+            idagProvider = { nowFactory.get().tilNorgeLocalDate() },
+        )
     }
 
     companion object {
-        fun sammenstillVirksomheter(
+        fun sammenstillArbeidsgiverDetaljer(
             arbeidsforhold: Iterable<Arbeidsforhold>,
             narmesteLedere: Iterable<NarmesteLeder>,
             idagProvider: () -> LocalDate,
-        ): List<Virksomhet> {
+        ): List<ArbeidsgiverDetaljer> {
             val gyldigeArbeidsforhold =
                 arbeidsforhold.filter { erGyldigArbeidsforholdType(it.arbeidsforholdType) }
 
@@ -70,7 +53,7 @@ class VirksomhetHenterService(
                     compareByDescending(nullsLast()) { it.tom },
                 ).distinctBy { it.orgnummer }
                 .map { arbeidsforhold ->
-                    Virksomhet(
+                    ArbeidsgiverDetaljer(
                         orgnummer = arbeidsforhold.orgnummer,
                         juridiskOrgnummer = arbeidsforhold.juridiskOrgnummer,
                         navn = arbeidsforhold.orgnavn,
@@ -104,26 +87,17 @@ class VirksomhetHenterService(
             arbeidsforhold: Arbeidsforhold,
         ): NarmesteLeder? =
             narmesteLedere
-                .filter { it.orgnummer == arbeidsforhold.orgnummer }
-                .filter { it.narmesteLederNavn != null }
-                .sortedBy { it.aktivFom }
-                .lastOrNull()
+                .filter { it.orgnummer == arbeidsforhold.orgnummer && it.narmesteLederNavn != null }
+                .maxByOrNull { it.aktivFom }
 
-        private fun Pair<LocalDate, LocalDate?>.overlapperMed(periode: Pair<LocalDate, LocalDate>): Boolean {
+        private fun Pair<LocalDate, LocalDate?>.overlapperMed(periode: Pair<LocalDate, LocalDate>): Boolean =
+            this.erIPeriode(periode.first) || this.erIPeriode(periode.second)
+
+        private fun Pair<LocalDate, LocalDate?>.inneholder(dag: LocalDate): Boolean = this.erIPeriode(dag)
+
+        private fun Pair<LocalDate, LocalDate?>.erIPeriode(date: LocalDate): Boolean {
             val (fom, tom) = this
-            val (periodeFom, periodeTom) = periode
-
-            val tomErInnenfor = tom == null || tom >= periodeFom
-            val fomErInnenfor = fom <= periodeTom
-            return tomErInnenfor && fomErInnenfor
-        }
-
-        private fun Pair<LocalDate, LocalDate?>.inneholder(dag: LocalDate): Boolean {
-            val (fom, tom) = this
-
-            val tomErInnenfor = tom == null || tom >= dag
-            val fomErInnenfor = fom <= dag
-            return tomErInnenfor && fomErInnenfor
+            return (tom == null || tom >= date) && fom <= date
         }
     }
 }

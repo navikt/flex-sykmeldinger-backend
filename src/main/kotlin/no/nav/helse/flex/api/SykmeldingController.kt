@@ -1,6 +1,8 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
+import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.clients.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.config.IdentService
@@ -12,8 +14,6 @@ import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.virksomhet.VirksomhetHenterService
-import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,7 +25,7 @@ class SykmeldingController(
     private val tokenxValidering: TokenxValidering,
     private val identService: IdentService,
     private val sykmeldingRepository: ISykmeldingRepository,
-    private val virksomhetHenterService: VirksomhetHenterService,
+    private val arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
     private val sykmeldingHandterer: SykmeldingHandterer,
     private val syketilfelleClient: SyketilfelleClient,
@@ -108,11 +108,11 @@ class SykmeldingController(
         }
 
         val sykmeldingPeriode = sykmlding.fom to sykmlding.tom
-        val virksomheter = virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(identer, sykmeldingPeriode)
+        val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(identer, sykmeldingPeriode)
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(
-                arbeidsgivere = virksomheter.map { it.konverterTilDto() },
+                arbeidsgivere = arbeidsgiverDetaljer.map { it.konverterTilDto() },
             ),
         )
     }
@@ -197,8 +197,8 @@ class SykmeldingController(
         identService.hentFolkeregisterIdenterMedHistorikkForFnr(this.validerFraDittSykefravaerOgHentFnr())
 }
 
-internal fun Virksomhet.konverterTilDto(): VirksomhetDTO =
-    VirksomhetDTO(
+internal fun ArbeidsgiverDetaljer.konverterTilDto(): ArbeidsgiverDetaljerDTO =
+    ArbeidsgiverDetaljerDTO(
         orgnummer = this.orgnummer,
         juridiskOrgnummer = this.juridiskOrgnummer,
         navn = this.navn,

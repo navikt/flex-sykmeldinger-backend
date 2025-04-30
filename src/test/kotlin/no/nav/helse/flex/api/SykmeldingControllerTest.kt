@@ -3,6 +3,7 @@ package no.nav.helse.flex.api
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
+import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
@@ -14,7 +15,6 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import no.nav.helse.flex.virksomhet.domain.Virksomhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
@@ -342,9 +342,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class ExtensionFuncs {
         @Test
-        fun `konverterer virksomhet dto riktig`() {
-            val virksomhet =
-                Virksomhet(
+        fun `konverterer arbeidsgiverDetaljer dto riktig`() {
+            val arbeidsgiverDetaljer =
+                ArbeidsgiverDetaljer(
                     orgnummer = "orgnr",
                     juridiskOrgnummer = "jurorgnr",
                     navn = "Navn",
@@ -353,9 +353,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     aktivtArbeidsforhold = true,
                     naermesteLeder = null,
                 )
-            val virksomhetDTO = virksomhet.konverterTilDto()
-            virksomhetDTO `should be equal to`
-                VirksomhetDTO(
+            val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
+            arbeidsgiverDetaljerDTO `should be equal to`
+                ArbeidsgiverDetaljerDTO(
                     orgnummer = "orgnr",
                     juridiskOrgnummer = "jurorgnr",
                     navn = "Navn",

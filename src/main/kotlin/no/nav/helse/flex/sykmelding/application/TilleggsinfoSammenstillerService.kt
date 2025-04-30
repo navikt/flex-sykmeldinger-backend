@@ -1,16 +1,16 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
+import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.virksomhet.VirksomhetHenterService
 import org.springframework.stereotype.Component
 
 @Component
 class TilleggsinfoSammenstillerService(
-    private val virksomhetHenterService: VirksomhetHenterService,
+    private val arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService,
     private val sykmeldingRepository: ISykmeldingRepository,
 ) {
     val log = logger()
@@ -163,12 +163,12 @@ class TilleggsinfoSammenstillerService(
         sykmelding: Sykmelding,
         arbeidsgiverOrgnummer: String,
     ): Arbeidsgiver {
-        val virksomheter =
-            virksomhetHenterService.hentVirksomheterForPersonInnenforPeriode(
+        val arbeidsgiverDetaljer =
+            arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(
                 identer = identer,
                 periode = sykmelding.fom to sykmelding.tom,
             )
-        val valgtArbeidsforhold = virksomheter.find { it.orgnummer == arbeidsgiverOrgnummer }
+        val valgtArbeidsforhold = arbeidsgiverDetaljer.find { it.orgnummer == arbeidsgiverOrgnummer }
         if (valgtArbeidsforhold == null) {
             throw KunneIkkeFinneTilleggsinfoException(
                 "Fant ikke arbeidsgiver med orgnummer $arbeidsgiverOrgnummer" +
