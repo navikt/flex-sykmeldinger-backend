@@ -70,12 +70,21 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
+            merknader = konverterMerknader(sykmelding.validation),
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             legekontorOrgnummer = null,
-            merknader = null,
             utenlandskSykmelding = null,
         )
     }
+
+    internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
+        validationResult.rules
+            .map {
+                MerknadDTO(
+                    type = it.type.name,
+                    beskrivelse = it.description,
+                )
+            }
 
     internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
