@@ -29,8 +29,6 @@ class AaregHendelserConsumer(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        log.info("Mottok ${consumerRecords.count()} aareg hendelse records")
-
         var totalByteSize = 0
         val time =
             measureTimeMillis {
@@ -46,8 +44,12 @@ class AaregHendelserConsumer(
                     }
                 }
             }
-
-        log.info("Prossesserte ${consumerRecords.count()} records, med størrelse $totalByteSize bytes, iløpet av $time millisekunder")
+        if (time > 50 || totalByteSize > 20_000) {
+            log.warn(
+                "Prossesserte unormalt mange records: ${consumerRecords.count()}" +
+                    ", med størrelse $totalByteSize bytes, iløpet av $time millisekunder",
+            )
+        }
     }
 
     fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
@@ -61,25 +63,29 @@ class AaregHendelserConsumer(
 
         when (hendelseHandtering) {
             AaregHendelseHandtering.OPPRETT_OPPDATER -> {
-                opprettEllerEndreArbeidsforhold(fnr)
+                val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
+                log.info(
+                    "Arbeidsforhold synkronisert ved aareg hendelse: " +
+                        "Opprettet{${resultat.skalOpprettes.count()}, navArbeidsforholdId: ${resultat.skalOpprettes.map {
+                            it.navArbeidsforholdId
+                        }}}, " +
+                        "Oppdaterte{${resultat.skalOppdateres.count()}, navArbeidsforholdId: ${resultat.skalOppdateres.map {
+                            it.navArbeidsforholdId
+                        }}}, " +
+                        "Slettet{${resultat.skalSlettes.count()}, navArbeidsforholdId: ${resultat.skalSlettes.map {
+                            it.navArbeidsforholdId
+                        }}}",
+                )
             }
 
             AaregHendelseHandtering.SLETT -> {
                 val navArbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
                 arbeidsforholdInnhentingService.slettArbeidsforhold(navArbeidsforholdId)
+                log.info("Arbeidsforhold slettet ved aareg hendelse: $navArbeidsforholdId")
             }
 
             else -> {}
         }
-    }
-
-    private fun opprettEllerEndreArbeidsforhold(fnr: String) {
-        val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
-        log.info(
-            "Arbeidsforhold endret: Opprettet ${resultat.skalOpprettes.count()}. " +
-                "Oppdaterte ${resultat.skalOppdateres.count()}. " +
-                "Slettet ${resultat.skalSlettes.count()}.",
-        )
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
