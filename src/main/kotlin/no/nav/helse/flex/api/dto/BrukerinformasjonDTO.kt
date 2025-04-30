@@ -2,6 +2,7 @@ package no.nav.helse.flex.api.dto
 
 data class BrukerinformasjonDTO(
     val arbeidsgivere: List<ArbeidsgiverDetaljerDTO>,
+    val erOverSyttiAar: Boolean,
 )
 
 data class ArbeidsgiverDetaljerDTO(

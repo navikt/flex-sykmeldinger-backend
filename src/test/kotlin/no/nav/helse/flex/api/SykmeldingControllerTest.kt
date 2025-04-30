@@ -197,7 +197,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     @Nested
     inner class HentBrukerInfoEndepunkt {
         @Test
-        fun `burde hente brukerinfo`() {
+        fun `burde returnere brukerinfo som inneholder arbeidsgivere`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -244,7 +244,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde ikke hente brukerinfo når perioden ikke overlapper`() {
+        fun `burde returnere tom liste med arbeidsgivere i brukerinfo når perioden ikke overlapper`() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
@@ -290,6 +290,55 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
             brukerinformasjon.arbeidsgivere.size `should be equal to` 0
+        }
+
+        @Test
+        fun `burde returnere erOverSytti i brukerinfo`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2022-01-01"),
+                                        tom = LocalDate.parse("2022-01-10"),
+                                    ),
+                                ),
+                        ),
+                ),
+            )
+
+            arbeidsforholdRepository.save(
+                lagArbeidsforhold(
+                    fnr = "fnr",
+                    orgnummer = "orgnummer",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-09"),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/brukerinformasjon")
+                            .header(
+                                "Authorization",
+                                "Bearer ${
+                                    oauth2Server.tokenxToken(
+                                        fnr = "fnr",
+                                    )
+                                }",
+                            ).contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
+            brukerinformasjon.erOverSyttiAar.`should be false`()
         }
 
         @Test
