@@ -29,8 +29,6 @@ class AaregHendelserConsumer(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        log.info("Mottok ${consumerRecords.count()} aareg hendelse records")
-
         var totalByteSize = 0
         val time =
             measureTimeMillis {
@@ -47,7 +45,10 @@ class AaregHendelserConsumer(
                 }
             }
         if (time > 50 || totalByteSize > 20_000) {
-            log.warn("Prossesserte ${consumerRecords.count()} records, med størrelse $totalByteSize bytes, iløpet av $time millisekunder")
+            log.warn(
+                "Prossesserte unormalt mange records: ${consumerRecords.count()}" +
+                    ", med størrelse $totalByteSize bytes, iløpet av $time millisekunder",
+            )
         }
     }
 
