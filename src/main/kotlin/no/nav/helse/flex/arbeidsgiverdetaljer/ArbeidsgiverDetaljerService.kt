@@ -87,25 +87,17 @@ class ArbeidsgiverDetaljerService(
             arbeidsforhold: Arbeidsforhold,
         ): NarmesteLeder? =
             narmesteLedere
-                .filter { it.orgnummer == arbeidsforhold.orgnummer }
-                .filter { it.narmesteLederNavn != null }
+                .filter { it.orgnummer == arbeidsforhold.orgnummer && it.narmesteLederNavn != null }
                 .maxByOrNull { it.aktivFom }
 
-        private fun Pair<LocalDate, LocalDate?>.overlapperMed(periode: Pair<LocalDate, LocalDate>): Boolean {
+        private fun Pair<LocalDate, LocalDate?>.overlapperMed(periode: Pair<LocalDate, LocalDate>): Boolean =
+            this.erIPeriode(periode.first) || this.erIPeriode(periode.second)
+
+        private fun Pair<LocalDate, LocalDate?>.inneholder(dag: LocalDate): Boolean = this.erIPeriode(dag)
+
+        private fun Pair<LocalDate, LocalDate?>.erIPeriode(date: LocalDate): Boolean {
             val (fom, tom) = this
-            val (periodeFom, periodeTom) = periode
-
-            val tomErInnenfor = tom == null || tom >= periodeFom
-            val fomErInnenfor = fom <= periodeTom
-            return tomErInnenfor && fomErInnenfor
-        }
-
-        private fun Pair<LocalDate, LocalDate?>.inneholder(dag: LocalDate): Boolean {
-            val (fom, tom) = this
-
-            val tomErInnenfor = tom == null || tom >= dag
-            val fomErInnenfor = fom <= dag
-            return tomErInnenfor && fomErInnenfor
+            return (tom == null || tom >= date) && fom <= date
         }
     }
 }
