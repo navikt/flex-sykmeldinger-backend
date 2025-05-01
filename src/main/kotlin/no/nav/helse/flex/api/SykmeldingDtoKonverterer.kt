@@ -77,15 +77,6 @@ class SykmeldingDtoKonverterer(
         )
     }
 
-    internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
-        validationResult.rules
-            .map {
-                MerknadDTO(
-                    type = it.type.name,
-                    beskrivelse = it.description,
-                )
-            }
-
     internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
@@ -121,6 +112,7 @@ class SykmeldingDtoKonverterer(
                     land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                 ),
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            merknader = konverterMerknader(sykmelding.validation),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
             kontaktMedPasient = null,
@@ -132,9 +124,17 @@ class SykmeldingDtoKonverterer(
             meldingTilArbeidsgiver = null,
             prognose = null,
             behandler = null,
-            merknader = null,
         )
     }
+
+    internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
+        validationResult.rules
+            .map {
+                MerknadDTO(
+                    type = it.name,
+                    beskrivelse = it.description,
+                )
+            }
 
     internal fun konverterPasient(
         pasient: Pasient,
@@ -155,26 +155,41 @@ class SykmeldingDtoKonverterer(
             is IngenArbeidsgiver -> null
         }
 
-    internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO {
-        val status =
-            when (validationResult.status) {
-                RuleType.OK -> RegelStatusDTO.OK
-                RuleType.PENDING -> RegelStatusDTO.MANUAL_PROCESSING
-                RuleType.INVALID -> RegelStatusDTO.INVALID
+    internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO =
+        when (validationResult.status) {
+            RuleType.OK -> {
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.OK,
+                    ruleHits = emptyList(),
+                )
             }
-        return BehandlingsutfallDTO(
-            status = status,
-            ruleHits =
-                validationResult.rules.map {
-                    RegelinfoDTO(
-                        messageForSender = "",
-                        messageForUser = it.description,
-                        ruleName = it.name,
-                        ruleStatus = status,
-                    )
-                },
-        )
-    }
+            RuleType.PENDING -> {
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.OK,
+                    ruleHits = emptyList(),
+                )
+            }
+            RuleType.INVALID -> {
+                val ruleHits =
+                    validationResult.rules.mapNotNull { rule ->
+                        if (rule is InvalidRule) {
+                            RegelinfoDTO(
+                                messageForSender = rule.reason?.sykmelder ?: "",
+                                messageForUser = rule.reason?.sykmeldt ?: "",
+                                ruleName = rule.name,
+                                ruleStatus = RegelStatusDTO.INVALID,
+                            )
+                        } else {
+                            null
+                        }
+                    }
+
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.INVALID,
+                    ruleHits = ruleHits,
+                )
+            }
+        }
 
     internal fun konverterSykmeldingsperiode(aktivitet: Aktivitet): SykmeldingsperiodeDTO {
         val aktivitetIkkeMuligDto =

@@ -17,6 +17,7 @@ fun lagSykmeldingGrunnlag(
         ),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
+    tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
 ): SykmeldingGrunnlag =
     SykmeldingGrunnlag(
         id = id,
@@ -57,11 +58,7 @@ fun lagSykmeldingGrunnlag(
                 bistandUmiddelbart = false,
                 beskrivBistand = "Ingen behov for bistand per nå",
             ),
-        tilbakedatering =
-            Tilbakedatering(
-                kontaktDato = LocalDate.now().minusDays(5),
-                begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
-            ),
+        tilbakedatering = tilbakedatering,
         utdypendeOpplysninger =
             mapOf(
                 "arbeidsforhold" to
@@ -74,6 +71,12 @@ fun lagSykmeldingGrunnlag(
                             ),
                     ),
             ),
+    )
+
+fun lagTilbakedatering(kontaktDato: LocalDate? = LocalDate.parse("2025-01-01")): Tilbakedatering =
+    Tilbakedatering(
+        kontaktDato = kontaktDato,
+        begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
     )
 
 fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =

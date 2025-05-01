@@ -9,6 +9,8 @@ import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagTilbakedatering
+import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -41,11 +43,17 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                 syketilfelleStartDato = LocalDate.parse("2025-01-01"),
                             ),
                         pasient = lagPasient(navnFastlege = "Fastlege Navn"),
+                        tilbakedatering =
+                            lagTilbakedatering(
+                                LocalDate.parse("2025-04-25"),
+                            ),
                     ),
+                validation = lagValidation(status = RuleType.PENDING),
             )
 
         val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
-        dto `should be equal to`
+
+        val forventetDTO =
             SykmeldingDTO(
                 id = sykmelding.sykmeldingId,
                 pasient =
@@ -167,10 +175,45 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 papirsykmelding = false,
                 harRedusertArbeidsgiverperiode = false,
                 rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-                merknader = null,
+                merknader =
+                    listOf(
+                        MerknadDTO(
+                            type = "UNDER_BEHANDLING",
+                            beskrivelse = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                        ),
+                    ),
                 utenlandskSykmelding = null,
                 legekontorOrgnummer = null,
             )
+
+        dto.id `should be equal to` forventetDTO.id
+        dto.pasient `should be equal to` forventetDTO.pasient
+        dto.mottattTidspunkt `should be equal to` forventetDTO.mottattTidspunkt
+        dto.behandlingsutfall `should be equal to` forventetDTO.behandlingsutfall
+        dto.legekontorOrgnummer `should be equal to` forventetDTO.legekontorOrgnummer
+        dto.arbeidsgiver `should be equal to` forventetDTO.arbeidsgiver
+        dto.sykmeldingsperioder `should be equal to` forventetDTO.sykmeldingsperioder
+        dto.sykmeldingStatus `should be equal to` forventetDTO.sykmeldingStatus
+        dto.medisinskVurdering `should be equal to` forventetDTO.medisinskVurdering
+        dto.skjermesForPasient `should be equal to` forventetDTO.skjermesForPasient
+        dto.prognose `should be equal to` forventetDTO.prognose
+        dto.utdypendeOpplysninger `should be equal to` forventetDTO.utdypendeOpplysninger
+        dto.tiltakArbeidsplassen `should be equal to` forventetDTO.tiltakArbeidsplassen
+        dto.tiltakNAV `should be equal to` forventetDTO.tiltakNAV
+        dto.andreTiltak `should be equal to` forventetDTO.andreTiltak
+        dto.meldingTilNAV `should be equal to` forventetDTO.meldingTilNAV
+        dto.meldingTilArbeidsgiver `should be equal to` forventetDTO.meldingTilArbeidsgiver
+        dto.kontaktMedPasient `should be equal to` forventetDTO.kontaktMedPasient
+        dto.behandletTidspunkt `should be equal to` forventetDTO.behandletTidspunkt
+        dto.behandler `should be equal to` forventetDTO.behandler
+        dto.syketilfelleStartDato `should be equal to` forventetDTO.syketilfelleStartDato
+        dto.navnFastlege `should be equal to` forventetDTO.navnFastlege
+        dto.egenmeldt `should be equal to` forventetDTO.egenmeldt
+        dto.papirsykmelding `should be equal to` forventetDTO.papirsykmelding
+        dto.harRedusertArbeidsgiverperiode `should be equal to` forventetDTO.harRedusertArbeidsgiverperiode
+        dto.merknader `should be equal to` forventetDTO.merknader
+        dto.rulesetVersion `should be equal to` forventetDTO.rulesetVersion
+        dto.utenlandskSykmelding `should be equal to` forventetDTO.utenlandskSykmelding
     }
 
     @Test
@@ -482,14 +525,20 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     fun `burde konvertere behandlingsutfall`() {
         val validationResult =
             ValidationResult(
-                status = RuleType.OK,
+                status = RuleType.INVALID,
                 timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
                 rules =
                     listOf(
-                        OKRule(
-                            name = "name",
-                            description = "description",
+                        InvalidRule(
+                            name = "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING",
+                            description = "",
                             timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                            validationType = ValidationType.MANUAL,
+                            reason =
+                                Reason(
+                                    sykmeldt = "Sykmeldingen er tilbakedatert uten tilstrekkelig begrunnelse fra den som sykmeldte deg.",
+                                    sykmelder = "Ugyldig tilbakedatering",
+                                ),
                         ),
                     ),
             )
@@ -498,14 +547,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
         konvertertBehandlingsutfall `should be equal to`
             BehandlingsutfallDTO(
-                status = RegelStatusDTO.OK,
+                status = RegelStatusDTO.INVALID,
                 ruleHits =
                     listOf(
                         RegelinfoDTO(
-                            messageForSender = "",
-                            messageForUser = "description",
-                            ruleName = "name",
-                            ruleStatus = RegelStatusDTO.OK,
+                            messageForSender = "Ugyldig tilbakedatering",
+                            messageForUser = "Sykmeldingen er tilbakedatert uten tilstrekkelig begrunnelse fra den som sykmeldte deg.",
+                            ruleName = "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING",
+                            ruleStatus = RegelStatusDTO.INVALID,
                         ),
                     ),
             )
