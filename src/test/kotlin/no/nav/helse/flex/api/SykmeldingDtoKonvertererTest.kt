@@ -178,7 +178,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 merknader =
                     listOf(
                         MerknadDTO(
-                            type = "UNDER_BEHANDLING",
+                            type = MerknadtypeDTO.UNDER_BEHANDLING,
                             beskrivelse = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
                         ),
                     ),

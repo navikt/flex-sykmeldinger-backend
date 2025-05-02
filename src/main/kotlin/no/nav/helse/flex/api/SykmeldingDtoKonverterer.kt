@@ -131,7 +131,15 @@ class SykmeldingDtoKonverterer(
         validationResult.rules
             .map {
                 MerknadDTO(
-                    type = it.name,
+                    type =
+                        when (it.name) {
+                            "DELVIS_GODKJENT" -> MerknadtypeDTO.DELVIS_GODKJENT
+                            "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" ->
+                                MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
+                            "UGYLDIG_TILBAKEDATERING" -> MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
+                            "UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
+                            else -> MerknadtypeDTO.UKJENT_MERKNAD
+                        },
                     beskrivelse = it.description,
                 )
             }
