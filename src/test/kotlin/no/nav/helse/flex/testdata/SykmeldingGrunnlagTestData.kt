@@ -16,18 +16,23 @@ fun lagSykmeldingGrunnlag(
             ),
         ),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
+    medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
+    tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
 ): SykmeldingGrunnlag =
     SykmeldingGrunnlag(
         id = id,
         metadata = metadata,
         pasient = pasient,
-        medisinskVurdering = lagMedisinskVurdering(),
+        medisinskVurdering = medisinskVurdering,
         aktivitet = aktiviteter,
         behandler = lagBehandler(),
         arbeidsgiver =
-            EnArbeidsgiver(
+            FlereArbeidsgivere(
                 meldingTilArbeidsgiver = "Melding til arbeidsgiver",
                 tiltakArbeidsplassen = "Dette er et tiltak",
+                navn = "Arbeidsgivernavn",
+                yrkesbetegnelse = "Arbeider",
+                stillingsprosent = 99,
             ),
         signerendeBehandler =
             SignerendeBehandler(
@@ -53,11 +58,7 @@ fun lagSykmeldingGrunnlag(
                 bistandUmiddelbart = false,
                 beskrivBistand = "Ingen behov for bistand per nå",
             ),
-        tilbakedatering =
-            Tilbakedatering(
-                kontaktDato = LocalDate.now().minusDays(5),
-                begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
-            ),
+        tilbakedatering = tilbakedatering,
         utdypendeOpplysninger =
             mapOf(
                 "arbeidsforhold" to
@@ -70,6 +71,12 @@ fun lagSykmeldingGrunnlag(
                             ),
                     ),
             ),
+    )
+
+fun lagTilbakedatering(kontaktDato: LocalDate? = LocalDate.parse("2025-01-01")): Tilbakedatering =
+    Tilbakedatering(
+        kontaktDato = kontaktDato,
+        begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
     )
 
 fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
@@ -105,7 +112,10 @@ fun lagSykmeldingMetadata(
     )
 }
 
-fun lagPasient(fnr: String = "01010112345"): Pasient =
+fun lagPasient(
+    fnr: String = "01010112345",
+    navnFastlege: String? = null,
+): Pasient =
     Pasient(
         fnr = fnr,
         navn =
@@ -119,12 +129,13 @@ fun lagPasient(fnr: String = "01010112345"): Pasient =
                 Kontaktinfo(type = KontaktinfoType.TLF, value = "11111111"),
             ),
         navKontor = null,
-        navnFastlege = null,
+        navnFastlege = navnFastlege,
     )
 
 fun lagMedisinskVurdering(
     hovedDiagnoseKode: String = "R51",
     annenFraverArsak: AnnenFraverArsak? = null,
+    syketilfelleStartDato: LocalDate? = null,
 ): MedisinskVurdering =
     MedisinskVurdering(
         hovedDiagnose =
@@ -143,7 +154,7 @@ fun lagMedisinskVurdering(
         annenFraversArsak = annenFraverArsak,
         yrkesskade = null,
         skjermetForPasient = false,
-        syketilfelletStartDato = null,
+        syketilfelletStartDato = syketilfelleStartDato,
     )
 
 fun lagAktivitetBehandlingsdager(): Behandlingsdager =

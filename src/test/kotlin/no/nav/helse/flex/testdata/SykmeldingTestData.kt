@@ -1,8 +1,9 @@
 package no.nav.helse.flex.testdata
 
-import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.Sykmelding
+import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
 import java.time.Instant
 
 fun lagSykmelding(

@@ -29,6 +29,11 @@ data class RuleOutcome(
     val timestamp: OffsetDateTime,
 )
 
+data class Reason(
+    val sykmeldt: String?,
+    val sykmelder: String?,
+)
+
 sealed interface Rule {
     val type: RuleType
     val name: String
@@ -41,6 +46,7 @@ data class InvalidRule(
     override val description: String,
     val timestamp: OffsetDateTime,
     override val validationType: ValidationType = ValidationType.AUTOMATIC,
+    val reason: Reason? = null,
 ) : Rule {
     override val type = RuleType.INVALID
     val outcome = RuleOutcome(RuleResult.INVALID, timestamp)
@@ -50,6 +56,7 @@ data class PendingRule(
     override val name: String,
     val timestamp: OffsetDateTime,
     override val description: String,
+    val reason: Reason? = null,
 ) : Rule {
     override val validationType = ValidationType.MANUAL
     override val type = RuleType.PENDING

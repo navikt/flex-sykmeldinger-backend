@@ -7,7 +7,7 @@ import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
@@ -16,7 +16,9 @@ import no.nav.helse.flex.testutils.tokenxToken
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be`
+import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -516,7 +518,11 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
-            returnertSykmelding.arbeidsgiver.shouldNotBeNull()
+            returnertSykmelding.arbeidsgiver `should be equal to`
+                ArbeidsgiverDTO(
+                    navn = "Arbeidsgivernavn",
+                    stillingsprosent = 99,
+                )
         }
 
         @Test

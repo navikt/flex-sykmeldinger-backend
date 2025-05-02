@@ -8,15 +8,18 @@ import no.nav.helse.flex.sykmelding.domain.tsm.values.Adresse
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.domain.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
+import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.Month
 
 @Component
 class SykmeldingDtoKonverterer(
     private val sykmeldingStatusDtoKonverterer: SykmeldingStatusDtoKonverterer,
     private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
 ) {
+    val log = logger()
+
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
             is SykmeldingGrunnlag -> konverterSykmelding(sykmelding)
@@ -37,9 +40,6 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            // TODO: muligens reciever eller sender fra meldingsinformasjon. tror vi skal ignorere
-            legekontorOrgnummer = null,
-            // TODO: Er dette arbeidsgiver fra sykmeldingGrunnlag eller basert på brukers svar?
             arbeidsgiver =
                 konverterArbeidsgiver(
                     sykmelding.sykmeldingGrunnlag.arbeidsgiver,
@@ -60,28 +60,23 @@ class SykmeldingDtoKonverterer(
                     is FlereArbeidsgivere -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
                     is IngenArbeidsgiver -> null
                 },
-            // TODO: Hvor er kontakt med pasient?
-            kontaktMedPasient = konverterKontaktMedPasient(),
+            kontaktMedPasient = sykmelding.sykmeldingGrunnlag.tilbakedatering?.let { konverterKontaktMedPasient(it) },
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
             behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
-            // TODO: Er dette riktig?
-            syketilfelleStartDato =
-                sykmelding.sykmeldingGrunnlag.metadata.genDate
-                    .toLocalDate(),
+            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
-            // TODO: gjelder dette bare for covid?
             harRedusertArbeidsgiverperiode =
-                harRedusertArbeidsgiverperiode(
+                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
                     hovedDiagnose = medisinskVurdering.hovedDiagnose,
                     biDiagnoser = medisinskVurdering.biDiagnoser,
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            // TODO: Brukes disse?
-            merknader = null,
+            merknader = konverterMerknader(sykmelding.validation),
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            legekontorOrgnummer = null,
             utenlandskSykmelding = null,
         )
     }
@@ -100,62 +95,58 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            legekontorOrgnummer = null,
-            arbeidsgiver = null,
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            prognose = null,
+            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
+            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
+            navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
+            egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
+            papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
+            harRedusertArbeidsgiverperiode =
+                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
+                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
+                    biDiagnoser = medisinskVurdering.biDiagnoser,
+                    sykmeldingsperioder = sykmeldingsperioder,
+                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
+                ),
+            utenlandskSykmelding =
+                UtenlandskSykmelding(
+                    land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
+                ),
+            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            merknader = konverterMerknader(sykmelding.validation),
+            legekontorOrgnummer = null,
+            arbeidsgiver = null,
+            kontaktMedPasient = null,
             utdypendeOpplysninger = emptyMap(),
             tiltakArbeidsplassen = null,
             tiltakNAV = null,
             andreTiltak = null,
             meldingTilNAV = null,
             meldingTilArbeidsgiver = null,
-            kontaktMedPasient =
-                KontaktMedPasientDTO(
-                    kontaktDato = null,
-                    begrunnelseIkkeKontakt = null,
-                ),
-            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-            // TODO
-            behandler =
-                BehandlerDTO(
-                    fornavn = "Fornavn",
-                    mellomnavn = null,
-                    etternavn = "Etternavn",
-                    adresse =
-                        AdresseDTO(
-                            gate = null,
-                            postnummer = null,
-                            kommune = null,
-                            postboks = null,
-                            land = null,
-                        ),
-                    tlf = null,
-                ),
-            syketilfelleStartDato =
-                sykmelding.sykmeldingGrunnlag.metadata.genDate
-                    .toLocalDate(),
-            navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
-            papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
-            harRedusertArbeidsgiverperiode =
-                harRedusertArbeidsgiverperiode(
-                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
-                    biDiagnoser = medisinskVurdering.biDiagnoser,
-                    sykmeldingsperioder = sykmeldingsperioder,
-                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-                ),
-            merknader = null,
-            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-            utenlandskSykmelding =
-                UtenlandskSykmelding(
-                    land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
-                ),
+            prognose = null,
+            behandler = null,
         )
     }
+
+    internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
+        validationResult.rules
+            .map {
+                MerknadDTO(
+                    type =
+                        when (it.name) {
+                            "DELVIS_GODKJENT" -> MerknadtypeDTO.DELVIS_GODKJENT
+                            "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" ->
+                                MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
+                            "UGYLDIG_TILBAKEDATERING" -> MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
+                            "UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
+                            else -> MerknadtypeDTO.UKJENT_MERKNAD
+                        },
+                    beskrivelse = it.description,
+                )
+            }
 
     internal fun konverterPasient(
         pasient: Pasient,
@@ -176,27 +167,63 @@ class SykmeldingDtoKonverterer(
             is IngenArbeidsgiver -> null
         }
 
-    internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO {
-        val status =
-            when (validationResult.status) {
-                RuleType.OK -> RegelStatusDTO.OK
-                RuleType.PENDING -> RegelStatusDTO.MANUAL_PROCESSING
-                RuleType.INVALID -> RegelStatusDTO.INVALID
+    internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO =
+        when (validationResult.status) {
+            RuleType.OK -> {
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.OK,
+                    ruleHits = emptyList(),
+                )
             }
-        return BehandlingsutfallDTO(
-            status = status,
-            ruleHits =
-                validationResult.rules.map {
-                    // TODO: blir det riktig å bruke description her?
-                    RegelinfoDTO(
-                        messageForSender = it.description,
-                        messageForUser = it.description,
-                        ruleName = it.name,
-                        ruleStatus = status,
-                    )
-                },
-        )
-    }
+            RuleType.PENDING -> {
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.OK,
+                    ruleHits = emptyList(),
+                )
+            }
+            RuleType.INVALID -> {
+                val ruleHits =
+                    validationResult.rules.mapNotNull { rule ->
+                        if (rule is InvalidRule) {
+                            RegelinfoDTO(
+                                messageForSender = rule.reason?.sykmelder ?: "",
+                                messageForUser = rule.reason?.sykmeldt ?: "",
+                                ruleName =
+                                    when (rule.name) {
+                                        "BEHANDLER_IKKE_GYLDIG_I_HPR" ->
+                                            RuleNameDTO.BEHANDLER_IKKE_GYLDIG_I_HPR.name
+                                        "BEHANDLER_MANGLER_AUTORISASJON_I_HPR" ->
+                                            RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name
+                                        "BEHANDLER_IKKE_LE_KI_MT_TL_FT_I_HPR" ->
+                                            RuleNameDTO.BEHANDLER_IKKE_LE_KI_MT_TL_FT_I_HPR.name
+                                        "BEHANDLER_MT_FT_KI_OVER_12_UKER" ->
+                                            RuleNameDTO.BEHANDLER_MT_FT_KI_OVER_12_UKER.name
+                                        "BEHANDLER_SUSPENDERT" ->
+                                            RuleNameDTO.BEHANDLER_SUSPENDERT.name
+                                        "PASIENT_ELDRE_ENN_70" ->
+                                            RuleNameDTO.PASIENT_ELDRE_ENN_70.name
+                                        "ICPC_2_Z_DIAGNOSE" ->
+                                            RuleNameDTO.ICPC_2_Z_DIAGNOSE.name
+                                        "GRADERT_UNDER_20_PROSENT" ->
+                                            RuleNameDTO.GRADERT_UNDER_20_PROSENT.name
+                                        else -> {
+                                            log.warn("Ukjent regelnavn ${rule.name} for behandlingsutfall: ${rule.serialisertTilString()}")
+                                            rule.name
+                                        }
+                                    },
+                                ruleStatus = RegelStatusDTO.INVALID,
+                            )
+                        } else {
+                            null
+                        }
+                    }
+
+                BehandlingsutfallDTO(
+                    status = RegelStatusDTO.INVALID,
+                    ruleHits = ruleHits,
+                )
+            }
+        }
 
     internal fun konverterSykmeldingsperiode(aktivitet: Aktivitet): SykmeldingsperiodeDTO {
         val aktivitetIkkeMuligDto =
@@ -285,12 +312,12 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterMedisinskVurdering(medisinskVurdering: MedisinskVurdering): MedisinskVurderingDTO =
         MedisinskVurderingDTO(
+            hovedDiagnose = medisinskVurdering.hovedDiagnose?.let { konverterDiagnose(it) },
             biDiagnoser = medisinskVurdering.biDiagnoser?.map { konverterDiagnose(it) } ?: emptyList(),
             yrkesskade = medisinskVurdering.yrkesskade != null,
             yrkesskadeDato = medisinskVurdering.yrkesskade?.yrkesskadeDato,
             annenFraversArsak = medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) },
             svangerskap = medisinskVurdering.svangerskap,
-            hovedDiagnose = medisinskVurdering.hovedDiagnose?.let { konverterDiagnose(it) },
         )
 
     internal fun konverterAnnenFraversArsak(annenFraverArsak: AnnenFraverArsak): AnnenFraversArsakDTO? =
@@ -317,6 +344,7 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
         DiagnoseDTO(
+            // TODO: sett når tsm har klart felt
             tekst = null,
             system = diagnose.system.name,
             kode = diagnose.kode,
@@ -356,11 +384,10 @@ class SykmeldingDtoKonverterer(
             beskrivBistand = bistandNav.beskrivBistand,
         )
 
-    internal fun konverterKontaktMedPasient(): KontaktMedPasientDTO =
+    internal fun konverterKontaktMedPasient(tilbakedatering: Tilbakedatering): KontaktMedPasientDTO =
         KontaktMedPasientDTO(
-            // TODO
-            begrunnelseIkkeKontakt = null,
-            kontaktDato = null,
+            begrunnelseIkkeKontakt = tilbakedatering.begrunnelse,
+            kontaktDato = tilbakedatering.kontaktDato,
         )
 
     internal fun konverterBehandler(behandler: Behandler): BehandlerDTO =
@@ -389,18 +416,13 @@ class SykmeldingDtoKonverterer(
         when (arbeidsgiverInfo) {
             is FlereArbeidsgivere ->
                 ArbeidsgiverDTO(
-                    // TODO: Hva blir riktig for flere arbeidsgivere?
                     navn = arbeidsgiverInfo.navn,
                     stillingsprosent = arbeidsgiverInfo.stillingsprosent,
                 )
 
-            is EnArbeidsgiver ->
-                ArbeidsgiverDTO(
-                    navn = null,
-                    stillingsprosent = null,
-                )
-
-            is IngenArbeidsgiver -> null
+            is EnArbeidsgiver,
+            is IngenArbeidsgiver,
+            -> null
         }
 
     internal fun konverterUtdypendeOpplysninger(
@@ -428,50 +450,4 @@ class SykmeldingDtoKonverterer(
             SvarRestriksjon.SKJERMET_FOR_NAV ->
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
-
-    internal fun harRedusertArbeidsgiverperiode(
-        hovedDiagnose: DiagnoseDTO?,
-        biDiagnoser: List<DiagnoseDTO>,
-        sykmeldingsperioder: List<SykmeldingsperiodeDTO>,
-        annenFraversArsakDTO: AnnenFraversArsakDTO?,
-    ): Boolean {
-        val diagnoserSomGirRedusertArbgiverPeriode = listOf("R991", "U071", "U072", "A23", "R992")
-
-        val sykmeldingsperioderInnenforKoronaregler =
-            sykmeldingsperioder.filter { periodeErInnenforKoronaregler(it.fom, it.tom) }
-        if (sykmeldingsperioderInnenforKoronaregler.isEmpty()) {
-            return false
-        }
-        if (
-            hovedDiagnose != null &&
-            diagnoserSomGirRedusertArbgiverPeriode.contains(hovedDiagnose.kode)
-        ) {
-            return true
-        } else if (
-            biDiagnoser.isNotEmpty() &&
-            biDiagnoser.find { diagnoserSomGirRedusertArbgiverPeriode.contains(it.kode) } !=
-            null
-        ) {
-            return true
-        }
-        return checkSmittefare(annenFraversArsakDTO)
-    }
-
-    private fun checkSmittefare(annenFraversArsakDTO: AnnenFraversArsakDTO?) =
-        annenFraversArsakDTO?.grunn?.any { annenFraverGrunn ->
-            annenFraverGrunn == AnnenFraverGrunnDTO.SMITTEFARE
-        } == true
-
-    private fun periodeErInnenforKoronaregler(
-        fom: LocalDate,
-        tom: LocalDate,
-    ): Boolean {
-        val koronaForsteFraDato = LocalDate.of(2020, Month.MARCH, 15)
-        val koronaForsteTilDato = LocalDate.of(2021, Month.OCTOBER, 1)
-        val koronaAndreFraDato = LocalDate.of(2021, Month.NOVEMBER, 30)
-        val koronaAndreTilDato = LocalDate.of(2022, Month.JULY, 1)
-
-        return (fom.isAfter(koronaAndreFraDato) && fom.isBefore(koronaAndreTilDato)) ||
-            (fom.isBefore(koronaForsteTilDato) && tom.isAfter(koronaForsteFraDato))
-    }
 }
