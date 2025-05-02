@@ -3,17 +3,20 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusHandterer: SykmeldingStatusHandterer
+
+    @Autowired
+    lateinit var sykmeldingHendelseBuffer: SykmeldingHendelseBuffer
 
     @AfterEach
     fun cleanUp() {
@@ -77,14 +80,28 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.`should not be null`()
     }
 
-    @Disabled
     @Test
-    fun `burde publisere på retry dersom sykmelding ikke finnes`() {
+    fun `burde buffre status dersom sykmelding ikke finnes`() {
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        buffredeHendelser.size shouldBeEqualTo 1
+        buffredeHendelser.first().kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
+    }
+
+    @Test
+    fun `burde ikke buffre status dersom sykmelding finnes`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        buffredeHendelser.size shouldBeEqualTo 0
     }
 
     @Test

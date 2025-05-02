@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
+import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -17,6 +18,7 @@ class SykmeldingStatusHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
+    private val sykmeldingHendelseBuffer: SykmeldingHendelseBuffer,
 ) {
     private val log = logger()
 
@@ -90,9 +92,12 @@ class SykmeldingStatusHandterer(
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
 
-    private fun publiserPaRetryTopic(hendelse: SykmeldingStatusKafkaMessageDTO) {
-        // TODO: Implementer retry-mekanisme
-        log.warn("Retry topic er ikke implementert")
+    private fun publiserPaRetryTopic(status: SykmeldingStatusKafkaMessageDTO) {
+        sykmeldingHendelseBuffer.leggTil(status)
+        log.info(
+            "Fant ikke sykmelding med id ${status.kafkaMetadata.sykmeldingId}, " +
+                "buffrer status: ${status.event.statusEvent}",
+        )
     }
 
     internal fun sammenstillSykmeldingStatusKafkaMessageDTO(
