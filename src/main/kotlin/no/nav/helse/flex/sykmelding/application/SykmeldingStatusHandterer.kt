@@ -21,37 +21,54 @@ class SykmeldingStatusHandterer(
     private val log = logger()
 
     fun handterSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
-        if (status.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE) {
+        if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
         }
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
 
-        if (sykmelding != null) {
-            val hendelse: SykmeldingHendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        val sykmelding =
+            sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
+                ?: return handterManglendesSykmelding(status)
+
+        return behandleStatusForEksisterendeSykmelding(sykmelding, status)
+    }
+
+    private fun SykmeldingStatusKafkaMessageDTO.erFraEgetSystem(): Boolean = this.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE
+
+    private fun handterManglendesSykmelding(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+        val sykmeldingId = status.kafkaMetadata.sykmeldingId
+        log.info(
+            "Fant ikke sykmelding med id $sykmeldingId, " +
+                "publiserer hendelse på retry topic",
+        )
+        publiserPaRetryTopic(status)
+        return false
+    }
+
+    private fun behandleStatusForEksisterendeSykmelding(
+        sykmelding: Sykmelding,
+        status: SykmeldingStatusKafkaMessageDTO,
+    ): Boolean {
+        val hendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        val sykmeldingId = sykmelding.sykmeldingId
+
+        if (hendelseEksistererPaaSykmelding(sykmelding, hendelse)) {
+            log.warn(
+                "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
+                    "hopper over lagring av hendelse",
+            )
+            return false
+        } else {
             log.info(
-                "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
+                "Håndterer hendelse ${hendelse.status} for sykmelding $sykmeldingId, " +
                     "fra source ${status.kafkaMetadata.source}",
             )
-            if (hendelseEksistererPaaSykmelding(sykmelding, hendelse)) {
-                log.warn(
-                    "Hendelse ${hendelse.status} for sykmelding ${sykmelding.sykmeldingId} eksisterer allerede, " +
-                        "hopper over lagring av hendelse",
-                )
-                return false
-            }
-            sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = hendelse.status)
-            sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
-            log.info("Hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId} lagret")
-        } else {
-            publiserPaRetryTopic(status).also {
-                log.info(
-                    "Fant ikke sykmelding med id ${status.kafkaMetadata.sykmeldingId}, " +
-                        "publiserer hendelse på retry topic",
-                )
-                return false
-            }
         }
+
+        sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = hendelse.status)
+        sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
+        log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
+
         return true
     }
 
@@ -73,8 +90,8 @@ class SykmeldingStatusHandterer(
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
 
-    // TODO
     private fun publiserPaRetryTopic(hendelse: SykmeldingStatusKafkaMessageDTO) {
+        // TODO: Implementer retry-mekanisme
         log.warn("Retry topic er ikke implementert")
     }
 
@@ -90,7 +107,11 @@ class SykmeldingStatusHandterer(
                 fnr = fnr,
                 source = SYKMELDINGSTATUS_LEESAH_SOURCE,
             )
-        return SykmeldingStatusKafkaMessageDTO(kafkaMetadata = metadataDTO, event = sykmeldingStatusKafkaDTO)
+
+        return SykmeldingStatusKafkaMessageDTO(
+            kafkaMetadata = metadataDTO,
+            event = sykmeldingStatusKafkaDTO,
+        )
     }
 }
 
