@@ -2,10 +2,16 @@ package no.nav.helse.flex.listeners.aareghendelser
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testconfig.MockWebServereConfig.Companion.pdlMockWebServer
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.testdata.lagPasient
+import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -51,6 +57,7 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
     fun afterAll() {
         aaregMockWebServer.dispatcher = defaultAaregDispatcher
         eregMockWebServer.dispatcher = defaultEregDispatcher
+        pdlMockWebServer.dispatcher = defaultAaregDispatcher
     }
 
     @AfterEach
@@ -60,12 +67,18 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lese arbeidsforhold hendelse, og lagre endret arbeidsforhold fra aareg + ereg`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
+        pdlMockWebServer.dispatcher =
+            simpleDispatcher { _ ->
+                lagGraphQlResponse(lagGetPersonResponseData())
+            }
+
         val record: ProducerRecord<String, String> =
             ProducerRecord(
                 aaregTopic,
                 null,
                 "key",
-                lagArbeidsforholdHendelse(fnr = "_").serialisertTilString(),
+                lagArbeidsforholdHendelse(fnr = "fnr").serialisertTilString(),
             )
         kafkaProducer.send(record).get()
 

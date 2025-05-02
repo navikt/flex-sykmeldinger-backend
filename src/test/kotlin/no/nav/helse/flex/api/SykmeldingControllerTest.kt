@@ -17,6 +17,7 @@ import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should not be null`
 import org.junit.jupiter.api.AfterEach
