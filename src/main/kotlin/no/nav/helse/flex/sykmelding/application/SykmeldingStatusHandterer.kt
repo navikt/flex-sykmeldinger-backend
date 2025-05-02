@@ -33,6 +33,13 @@ class SykmeldingStatusHandterer(
                 "Håndterer hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId}, " +
                     "fra source ${status.kafkaMetadata.source}",
             )
+            if (hendelseEksistererPaaSykmelding(sykmelding, hendelse)) {
+                log.warn(
+                    "Hendelse ${hendelse.status} for sykmelding ${sykmelding.sykmeldingId} eksisterer allerede, " +
+                        "hopper over lagring av hendelse",
+                )
+                return false
+            }
             sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = hendelse.status)
             sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
             log.info("Hendelse ${hendelse.status} for sykmelding ${status.kafkaMetadata.sykmeldingId} lagret")
@@ -47,6 +54,11 @@ class SykmeldingStatusHandterer(
         }
         return true
     }
+
+    fun hendelseEksistererPaaSykmelding(
+        sykmelding: Sykmelding,
+        sykmeldingHendelse: SykmeldingHendelse,
+    ): Boolean = sykmelding.hendelser.any { it == sykmeldingHendelse }
 
     fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
         val status =
