@@ -22,6 +22,7 @@ class RegistrertePersonerForArbeidsforholdTest : FakesTestOppsett() {
     @BeforeEach
     fun setup() {
         slettDatabase()
+        pdlClientFake.reset()
     }
 
     @Test
