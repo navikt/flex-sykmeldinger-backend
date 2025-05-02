@@ -12,10 +12,4 @@ class SykmeldingHendelseBufferRepositoryFake :
     SykmeldingHendelseBufferRepository {
     override fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord> =
         entities.values.filter { it.sykmeldingId == sykmeldingId }
-
-    override fun deleteAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord> {
-        val records = findAllBySykmeldingId(sykmeldingId)
-        deleteAll(records.toMutableList())
-        return records
-    }
 }

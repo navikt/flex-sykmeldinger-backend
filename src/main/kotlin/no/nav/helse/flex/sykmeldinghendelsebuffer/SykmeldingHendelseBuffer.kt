@@ -25,11 +25,19 @@ class SykmeldingHendelseBuffer(
         sykmeldingHendelseBufferRepository.save(record)
     }
 
+    fun kikkPaaAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> =
+        sykmeldingHendelseBufferRepository
+            .findAllBySykmeldingId(sykmeldingId)
+            .map { it.tilSykmeldingStatusKafkaMessageDTO() }
+
     @Transactional(rollbackFor = [Exception::class])
-    fun hentOgFjernAlle(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
+    fun prosesserAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
         aquireBufferLockFor(sykmeldingId)
-        val records = sykmeldingHendelseBufferRepository.deleteAllBySykmeldingId(sykmeldingId)
-        return records.map { it.tilSykmeldingStatusKafkaMessageDTO() }
+        val records = sykmeldingHendelseBufferRepository.findAllBySykmeldingId(sykmeldingId)
+        sykmeldingHendelseBufferRepository.deleteAll(records)
+        return records
+            .sortedBy { it.sykmeldingStatusOpprettet }
+            .map { it.tilSykmeldingStatusKafkaMessageDTO() }
     }
 
     private fun aquireBufferLockFor(sykmeldingId: String) {

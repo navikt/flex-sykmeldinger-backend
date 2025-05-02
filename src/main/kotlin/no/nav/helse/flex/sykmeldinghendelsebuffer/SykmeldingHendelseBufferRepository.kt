@@ -18,6 +18,4 @@ data class SykmeldingHendelseBufferDbRecord(
 
 interface SykmeldingHendelseBufferRepository : CrudRepository<SykmeldingHendelseBufferDbRecord, String> {
     fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
-
-    fun deleteAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
 }

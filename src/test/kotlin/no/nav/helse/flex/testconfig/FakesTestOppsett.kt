@@ -5,6 +5,7 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBufferRepository
+import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -51,6 +52,9 @@ abstract class FakesTestOppsett {
     @Autowired
     lateinit var sykmeldingHendelseBufferRepository: SykmeldingHendelseBufferRepository
 
+    @Autowired
+    lateinit var advisoryLock: AdvisoryLockFake
+
     @AfterAll
     fun `Vi resetter databasen`() {
         slettDatabase()
@@ -61,5 +65,6 @@ abstract class FakesTestOppsett {
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         sykmeldingHendelseBufferRepository.deleteAll()
+        advisoryLock.reset()
     }
 }
