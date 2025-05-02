@@ -522,7 +522,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere behandlingsutfall`() {
+    fun `burde konvertere behandlingsutfall type INVALID`() {
         val validationResult =
             ValidationResult(
                 status = RuleType.INVALID,
@@ -530,14 +530,16 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 rules =
                     listOf(
                         InvalidRule(
-                            name = "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING",
+                            name = RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
                             description = "",
                             timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
                             validationType = ValidationType.MANUAL,
                             reason =
                                 Reason(
-                                    sykmeldt = "Sykmeldingen er tilbakedatert uten tilstrekkelig begrunnelse fra den som sykmeldte deg.",
-                                    sykmelder = "Ugyldig tilbakedatering",
+                                    sykmeldt =
+                                        "Den som har skrevet sykmeldingen, har ikke autorisasjon til å gjøre det." +
+                                            " Du må derfor få en annen til å skrive sykmeldingen",
+                                    sykmelder = "Behandleren har ikke autorisasjon i HPR",
                                 ),
                         ),
                     ),
@@ -551,12 +553,32 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 ruleHits =
                     listOf(
                         RegelinfoDTO(
-                            messageForSender = "Ugyldig tilbakedatering",
-                            messageForUser = "Sykmeldingen er tilbakedatert uten tilstrekkelig begrunnelse fra den som sykmeldte deg.",
-                            ruleName = "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING",
                             ruleStatus = RegelStatusDTO.INVALID,
+                            messageForSender = "Behandleren har ikke autorisasjon i HPR",
+                            messageForUser =
+                                "Den som har skrevet sykmeldingen, har ikke autorisasjon til å gjøre det." +
+                                    " Du må derfor få en annen til å skrive sykmeldingen",
+                            ruleName = RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
                         ),
                     ),
+            )
+    }
+
+    @Test
+    fun `burde konvertere behandlingsutfall type PENDING`() {
+        val validationResult =
+            ValidationResult(
+                status = RuleType.PENDING,
+                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                rules = emptyList(),
+            )
+
+        val konvertertBehandlingsutfall =
+            sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
+        konvertertBehandlingsutfall `should be equal to`
+            BehandlingsutfallDTO(
+                status = RegelStatusDTO.OK,
+                ruleHits = emptyList(),
             )
     }
 
