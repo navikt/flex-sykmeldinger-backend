@@ -3,6 +3,7 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,8 @@ import java.util.function.Supplier
 class SykmeldingKafkaLagrer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
+    private val sykmeldingHendelseBuffer: SykmeldingHendelseBuffer,
+    private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
     private val nowFactory: Supplier<Instant>,
 ) {
     val log = logger()
@@ -56,20 +59,35 @@ class SykmeldingKafkaLagrer(
 
     private fun opprettNySykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding {
         val now = nowFactory.get()
-        return Sykmelding(
-            sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
-            validation = sykmeldingKafkaRecord.validation,
-            hendelser =
-                listOf(
-                    SykmeldingHendelse(
-                        status = HendelseStatus.APEN,
-                        opprettet = now,
+        val sykmelding =
+            Sykmelding(
+                sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
+                validation = sykmeldingKafkaRecord.validation,
+                hendelser =
+                    listOf(
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
+                            opprettet = now,
+                        ),
                     ),
-                ),
-            opprettet = now,
-            sykmeldingGrunnlagOppdatert = now,
-            validationOppdatert = now,
-            hendelseOppdatert = now,
-        )
+                opprettet = now,
+                sykmeldingGrunnlagOppdatert = now,
+                validationOppdatert = now,
+                hendelseOppdatert = now,
+            )
+        val buffredeStatuser = sykmeldingHendelseBuffer.prosesserAlleFor(sykmeldingKafkaRecord.sykmelding.id)
+        if (buffredeStatuser.isEmpty()) {
+            return sykmelding
+        } else {
+            val buffredeHendelser =
+                buffredeStatuser.map {
+                    sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, it)
+                }
+            val sykmeldingMedBuffredeHendelser =
+                buffredeHendelser.fold(sykmelding) { acc, status ->
+                    acc.leggTilHendelse(status)
+                }
+            return sykmeldingMedBuffredeHendelser
+        }
     }
 }

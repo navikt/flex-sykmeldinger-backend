@@ -7,6 +7,7 @@ import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
+import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
@@ -31,6 +32,9 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
 
     @Autowired
     private lateinit var aaregClient: AaregClientFake
+
+    @Autowired
+    private lateinit var sykmeldignHendelseBuffer: SykmeldingHendelseBuffer
 
     @AfterEach
     fun tearDown() {
@@ -157,5 +161,24 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
         arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
+    }
+
+    @Test
+    fun `burde lagre alle buffrede hendelser på sykmelding`() {
+        sykmeldignHendelseBuffer.leggTil(
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
+            ),
+        )
+
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+        )
+
+        val sykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmelding.hendelser.size `should be equal to` 2
+        sykmelding.hendelser[0].status `should be equal to` HendelseStatus.APEN
+        sykmelding.hendelser[1].status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
     }
 }
