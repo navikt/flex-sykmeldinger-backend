@@ -76,4 +76,13 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
         sykmeldingStatusHandterer.handterSykmeldingStatus(status)
     }
+
+    @Test
+    fun `burde ikke lagre status hvis hendelse eksisterer på sykmeldingen`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        sykmeldingRepository.save(sykmelding)
+        val status = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1")
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
+    }
 }
