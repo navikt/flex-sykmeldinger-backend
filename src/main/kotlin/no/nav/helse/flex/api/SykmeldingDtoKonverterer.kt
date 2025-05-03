@@ -51,7 +51,7 @@ class SykmeldingDtoKonverterer(
             prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
             tiltakArbeidsplassen = konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
-            tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNAV,
+            tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNav,
             andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
             meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
             meldingTilArbeidsgiver =

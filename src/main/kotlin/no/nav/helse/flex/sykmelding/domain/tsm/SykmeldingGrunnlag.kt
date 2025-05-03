@@ -147,7 +147,7 @@ data class BistandNav(
 )
 
 data class Tiltak(
-    val tiltakNAV: String?,
+    val tiltakNav: String?,
     val andreTiltak: String?,
 )
 

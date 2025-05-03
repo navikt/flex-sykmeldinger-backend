@@ -50,7 +50,7 @@ fun lagSykmeldingGrunnlag(
             ),
         tiltak =
             Tiltak(
-                tiltakNAV = "Behov for tilrettelegging",
+                tiltakNav = "Behov for tilrettelegging",
                 andreTiltak = "Redusert arbeidstid",
             ),
         bistandNav =
