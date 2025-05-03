@@ -198,7 +198,7 @@ fun lagAktivitetIkkeMulig(
                 beskrivelse = "Pasient er syk",
             ),
         ),
-    arbeidsrelatertArsak = emptyList(),
+    arbeidsrelatertArsak = null,
     fom = fom,
     tom = tom,
 )
