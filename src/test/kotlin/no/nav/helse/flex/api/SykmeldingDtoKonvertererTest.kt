@@ -326,12 +326,12 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 medisinskArsak =
                     MedisinskArsak(
                         beskrivelse = "",
-                        arsak = MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING,
+                        arsak = listOf(MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING),
                     ),
                 arbeidsrelatertArsak =
                     ArbeidsrelatertArsak(
                         beskrivelse = "",
-                        arsak = ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
+                        arsak = listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING),
                     ),
                 fom = LocalDate.parse("2021-01-01"),
                 tom = LocalDate.parse("2021-01-21"),

@@ -193,7 +193,7 @@ fun lagAktivitetIkkeMulig(
 ) = AktivitetIkkeMulig(
     medisinskArsak =
         MedisinskArsak(
-            arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
+            arsak = listOf(MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET),
             beskrivelse = "Pasient er syk",
         ),
     arbeidsrelatertArsak = null,

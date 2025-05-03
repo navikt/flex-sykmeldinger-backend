@@ -221,8 +221,8 @@ class SykmeldingDtoKonverterer(
                         MedisinskArsakDTO(
                             beskrivelse = aktivitet.medisinskArsak.beskrivelse,
                             arsak =
-                                listOf(
-                                    when (aktivitet.medisinskArsak.arsak) {
+                                aktivitet.medisinskArsak.arsak.map {
+                                    when (it) {
                                         MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
                                             MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
 
@@ -233,8 +233,8 @@ class SykmeldingDtoKonverterer(
                                             MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING
 
                                         MedisinskArsakType.ANNET -> MedisinskArsakTypeDTO.ANNET
-                                    },
-                                ),
+                                    }
+                                },
                         )
                     } else {
                         null
@@ -244,14 +244,14 @@ class SykmeldingDtoKonverterer(
                         ArbeidsrelatertArsakDTO(
                             beskrivelse = aktivitet.arbeidsrelatertArsak.beskrivelse,
                             arsak =
-                                listOf(
-                                    when (aktivitet.arbeidsrelatertArsak.arsak) {
+                                aktivitet.arbeidsrelatertArsak.arsak.map {
+                                    when (it) {
                                         ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING ->
                                             ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING
 
                                         ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakTypeDTO.ANNET
-                                    },
-                                ),
+                                    }
+                                },
                         )
                     } else {
                         null

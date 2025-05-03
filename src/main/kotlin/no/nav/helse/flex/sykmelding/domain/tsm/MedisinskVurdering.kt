@@ -32,7 +32,7 @@ data class Yrkesskade(
 
 data class MedisinskArsak(
     val beskrivelse: String?,
-    val arsak: MedisinskArsakType,
+    val arsak: List<MedisinskArsakType>,
 )
 
 enum class MedisinskArsakType {
@@ -44,7 +44,7 @@ enum class MedisinskArsakType {
 
 data class ArbeidsrelatertArsak(
     val beskrivelse: String?,
-    val arsak: ArbeidsrelatertArsakType,
+    val arsak: List<ArbeidsrelatertArsakType>,
 )
 
 enum class ArbeidsrelatertArsakType {
