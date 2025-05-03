@@ -229,12 +229,12 @@ class SykmeldingDtoKonverterer(
         val aktivitetIkkeMuligDto =
             if (aktivitet is AktivitetIkkeMulig) {
                 val medisinskArsakDto =
-                    if (aktivitet.medisinskArsak != null) {
+                    aktivitet.medisinskArsak.map {
                         MedisinskArsakDTO(
-                            beskrivelse = aktivitet.medisinskArsak.beskrivelse,
+                            beskrivelse = it.beskrivelse,
                             arsak =
                                 listOf(
-                                    when (aktivitet.medisinskArsak.arsak) {
+                                    when (it.arsak) {
                                         MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
                                             MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
 
@@ -248,8 +248,6 @@ class SykmeldingDtoKonverterer(
                                     },
                                 ),
                         )
-                    } else {
-                        null
                     }
                 val arbeidsrelatertArsakDto =
                     if (aktivitet.arbeidsrelatertArsak != null) {

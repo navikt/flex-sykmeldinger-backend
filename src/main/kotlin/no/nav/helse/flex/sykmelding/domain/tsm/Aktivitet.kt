@@ -49,7 +49,7 @@ data class Avventende(
 }
 
 data class AktivitetIkkeMulig(
-    val medisinskArsak: MedisinskArsak?,
+    val medisinskArsak: List<MedisinskArsak>,
     val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
     override val fom: LocalDate,
     override val tom: LocalDate,
