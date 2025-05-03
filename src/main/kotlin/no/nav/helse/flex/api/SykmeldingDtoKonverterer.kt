@@ -328,8 +328,7 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
         DiagnoseDTO(
-            // TODO: sett når tsm har klart felt
-            tekst = null,
+            tekst = diagnose.tekst,
             system = diagnose.system.name,
             kode = diagnose.kode,
         )

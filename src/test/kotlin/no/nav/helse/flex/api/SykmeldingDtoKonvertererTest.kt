@@ -109,8 +109,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 medisinskVurdering =
                     MedisinskVurderingDTO(
-                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = null),
-                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = null)),
+                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = "tekst"),
+                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = "tekst")),
                         annenFraversArsak = null,
                         svangerskap = false,
                         yrkesskade = false,
@@ -372,12 +372,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     DiagnoseInfo(
                         system = DiagnoseSystem.ICD10,
                         kode = "kode",
+                        tekst = "tekst",
                     ),
                 biDiagnoser =
                     listOf(
                         DiagnoseInfo(
                             system = DiagnoseSystem.ICPC2,
                             kode = "bi diagnose",
+                            tekst = "tekst",
                         ),
                     ),
                 svangerskap = true,
@@ -400,16 +402,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     DiagnoseDTO(
                         kode = "kode",
                         system = "ICD10",
-                        // TODO
-                        tekst = null,
+                        tekst = "tekst",
                     ),
                 biDiagnoser =
                     listOf(
                         DiagnoseDTO(
                             kode = "bi diagnose",
                             system = "ICPC2",
-                            // TODO
-                            tekst = null,
+                            tekst = "tekst",
                         ),
                     ),
                 annenFraversArsak =

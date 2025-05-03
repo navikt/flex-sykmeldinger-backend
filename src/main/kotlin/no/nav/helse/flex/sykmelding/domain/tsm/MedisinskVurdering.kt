@@ -15,6 +15,7 @@ data class MedisinskVurdering(
 data class DiagnoseInfo(
     val system: DiagnoseSystem,
     val kode: String,
+    val tekst: String,
 )
 
 enum class DiagnoseSystem {

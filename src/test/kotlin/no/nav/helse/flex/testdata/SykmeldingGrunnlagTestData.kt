@@ -142,12 +142,14 @@ fun lagMedisinskVurdering(
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
                 kode = hovedDiagnoseKode,
+                tekst = "tekst",
             ),
         biDiagnoser =
             listOf(
                 DiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     kode = "J06.9",
+                    tekst = "tekst",
                 ),
             ),
         svangerskap = false,
