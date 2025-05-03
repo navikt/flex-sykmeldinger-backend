@@ -7,7 +7,7 @@ val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE =
     SimpleModule()
         .addPolymorphicDeserializer(ISykmeldingGrunnlag::type) {
             when (it) {
-                SykmeldingType.SYKMELDING -> SykmeldingGrunnlag::class
+                SykmeldingType.XML -> SykmeldingGrunnlag::class
                 SykmeldingType.UTENLANDSK_SYKMELDING -> UtenlandskSykmeldingGrunnlag::class
             }
         }.addPolymorphicDeserializer(Aktivitet::type) {

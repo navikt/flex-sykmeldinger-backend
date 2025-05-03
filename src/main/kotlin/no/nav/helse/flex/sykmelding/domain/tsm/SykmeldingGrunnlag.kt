@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 enum class SykmeldingType {
-    SYKMELDING,
+    XML,
     UTENLANDSK_SYKMELDING,
 }
 
@@ -53,7 +53,7 @@ data class SykmeldingGrunnlag(
     val tilbakedatering: Tilbakedatering?,
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
 ) : ISykmeldingGrunnlag {
-    override val type = SykmeldingType.SYKMELDING
+    override val type = SykmeldingType.XML
 }
 
 data class AvsenderSystem(
