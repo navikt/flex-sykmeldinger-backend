@@ -42,11 +42,11 @@ class SykmeldingListener(
             acknowledgment.acknowledge()
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Feil sykmelding format. Melding key: ${cr.key()}", e)
+            log.error(LogMarker.SECURE_LOGS, "Feil sykmelding format. Melding key: ${cr.key()}, value: ${cr.value()}", e)
             throw e
         } catch (e: Exception) {
             log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Exception ved sykmelding håndtering. Melding key: ${cr.key()}", e)
+            log.error(LogMarker.SECURE_LOGS, "Exception ved sykmelding håndtering. Melding key: ${cr.key()}, value: ${cr.value()}", e)
             throw e
         }
     }
