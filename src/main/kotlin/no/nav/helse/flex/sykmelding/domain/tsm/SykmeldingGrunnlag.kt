@@ -15,6 +15,7 @@ import java.time.OffsetDateTime
 
 enum class SykmeldingType {
     XML,
+    PAPIR,
     UTENLANDSK,
 }
 
@@ -38,22 +39,56 @@ data class UtenlandskSykmeldingGrunnlag(
     override val type = SykmeldingType.UTENLANDSK
 }
 
+sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
+    override val id: String
+    override val metadata: SykmeldingMetadata
+    override val pasient: Pasient
+    override val medisinskVurdering: MedisinskVurdering
+    override val aktivitet: List<Aktivitet>
+    val behandler: Behandler
+    val arbeidsgiver: ArbeidsgiverInfo
+    val signerendeBehandler: SignerendeBehandler
+    val prognose: Prognose?
+    val tiltak: Tiltak?
+    val bistandNav: BistandNav?
+    val tilbakedatering: Tilbakedatering?
+    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
+}
+
 data class SykmeldingGrunnlag(
     override val id: String,
     override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
-    val behandler: Behandler,
-    val arbeidsgiver: ArbeidsgiverInfo,
-    val signerendeBehandler: SignerendeBehandler,
-    val prognose: Prognose?,
-    val tiltak: Tiltak?,
-    val bistandNav: BistandNav?,
-    val tilbakedatering: Tilbakedatering?,
-    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-) : ISykmeldingGrunnlag {
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val signerendeBehandler: SignerendeBehandler,
+    override val prognose: Prognose?,
+    override val tiltak: Tiltak?,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
     override val type = SykmeldingType.XML
+}
+
+data class PapirSykmeldingGrunnlag(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val signerendeBehandler: SignerendeBehandler,
+    override val prognose: Prognose?,
+    override val tiltak: Tiltak?,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
+    override val type = SykmeldingType.PAPIR
 }
 
 data class AvsenderSystem(
