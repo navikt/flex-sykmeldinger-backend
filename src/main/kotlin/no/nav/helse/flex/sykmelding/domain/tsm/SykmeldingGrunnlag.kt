@@ -15,7 +15,7 @@ import java.time.OffsetDateTime
 
 enum class SykmeldingType {
     XML,
-    UTENLANDSK_SYKMELDING,
+    UTENLANDSK,
 }
 
 sealed interface ISykmeldingGrunnlag {
@@ -35,7 +35,7 @@ data class UtenlandskSykmeldingGrunnlag(
     override val aktivitet: List<Aktivitet>,
     val utenlandskInfo: UtenlandskInfo,
 ) : ISykmeldingGrunnlag {
-    override val type = SykmeldingType.UTENLANDSK_SYKMELDING
+    override val type = SykmeldingType.UTENLANDSK
 }
 
 data class SykmeldingGrunnlag(
