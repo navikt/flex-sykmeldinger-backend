@@ -192,11 +192,9 @@ fun lagAktivitetIkkeMulig(
     tom: LocalDate = LocalDate.now().plusDays(1),
 ) = AktivitetIkkeMulig(
     medisinskArsak =
-        listOf(
-            MedisinskArsak(
-                arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
-                beskrivelse = "Pasient er syk",
-            ),
+        MedisinskArsak(
+            arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
+            beskrivelse = "Pasient er syk",
         ),
     arbeidsrelatertArsak = null,
     fom = fom,

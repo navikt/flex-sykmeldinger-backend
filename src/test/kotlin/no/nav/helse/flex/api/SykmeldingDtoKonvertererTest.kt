@@ -85,11 +85,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                             aktivitetIkkeMulig =
                                 AktivitetIkkeMuligDTO(
                                     medisinskArsak =
-                                        listOf(
-                                            MedisinskArsakDTO(
-                                                beskrivelse = "Pasient er syk",
-                                                arsak = listOf(MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET),
-                                            ),
+                                        MedisinskArsakDTO(
+                                            beskrivelse = "Pasient er syk",
+                                            arsak = listOf(MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET),
                                         ),
                                     arbeidsrelatertArsak = null,
                                 ),
@@ -326,11 +324,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         val aktivitet =
             AktivitetIkkeMulig(
                 medisinskArsak =
-                    listOf(
-                        MedisinskArsak(
-                            beskrivelse = "",
-                            arsak = MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING,
-                        ),
+                    MedisinskArsak(
+                        beskrivelse = "",
+                        arsak = MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING,
                     ),
                 arbeidsrelatertArsak =
                     ArbeidsrelatertArsak(
@@ -346,11 +342,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         periode.tom `should be equal to` LocalDate.parse("2021-01-21")
         periode.aktivitetIkkeMulig?.let {
             it.medisinskArsak `should be equal to`
-                listOf(
-                    MedisinskArsakDTO(
-                        beskrivelse = "",
-                        arsak = listOf(MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
-                    ),
+                MedisinskArsakDTO(
+                    beskrivelse = "",
+                    arsak = listOf(MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
                 )
             it.arbeidsrelatertArsak `should be equal to`
                 ArbeidsrelatertArsakDTO(
