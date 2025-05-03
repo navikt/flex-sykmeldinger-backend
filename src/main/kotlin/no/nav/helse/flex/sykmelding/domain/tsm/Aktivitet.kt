@@ -50,7 +50,7 @@ data class Avventende(
 
 data class AktivitetIkkeMulig(
     val medisinskArsak: List<MedisinskArsak>,
-    val arbeidsrelatertArsak: ArbeidsrelatertArsak?,
+    val arbeidsrelatertArsak: List<ArbeidsrelatertArsak>,
     override val fom: LocalDate,
     override val tom: LocalDate,
 ) : Aktivitet {

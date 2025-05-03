@@ -91,7 +91,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                                 arsak = listOf(MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET),
                                             ),
                                         ),
-                                    arbeidsrelatertArsak = null,
+                                    arbeidsrelatertArsak = emptyList(),
                                 ),
                             gradert = null,
                             behandlingsdager = null,
@@ -335,9 +335,11 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                         ),
                     ),
                 arbeidsrelatertArsak =
-                    ArbeidsrelatertArsak(
-                        beskrivelse = "",
-                        arsak = ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
+                    listOf(
+                        ArbeidsrelatertArsak(
+                            beskrivelse = "",
+                            arsak = ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
+                        ),
                     ),
                 fom = LocalDate.parse("2021-01-01"),
                 tom = LocalDate.parse("2021-01-21"),
@@ -355,9 +357,11 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 )
             it.arbeidsrelatertArsak `should be equal to`
-                ArbeidsrelatertArsakDTO(
-                    beskrivelse = "",
-                    arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
+                listOf(
+                    ArbeidsrelatertArsakDTO(
+                        beskrivelse = "",
+                        arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
+                    ),
                 )
         }
     }
