@@ -52,4 +52,4 @@ class SykmeldingListener(
     }
 }
 
-const val SYKMELDING_TOPIC = "tsm.tsm-sykmeldinger"
+const val SYKMELDING_TOPIC = "tsm.sykmeldinger"
