@@ -2,7 +2,6 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.LogMarker
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component
 @Component
 class SykmeldingListener(
     private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -45,16 +43,10 @@ class SykmeldingListener(
         } catch (e: JacksonException) {
             log.error("Feil sykmelding format. Melding key: ${cr.key()}. Se secure logs")
             log.error(LogMarker.SECURE_LOGS, "Feil sykmelding format. Melding key: ${cr.key()}, value: ${cr.value()}", e)
-            if (environmentToggles.isDevelopment()) {
-                acknowledgment.acknowledge()
-            }
             throw e
         } catch (e: Exception) {
             log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}. Se secure logs")
             log.error(LogMarker.SECURE_LOGS, "Exception ved sykmelding håndtering. Melding key: ${cr.key()}, value: ${cr.value()}", e)
-            if (environmentToggles.isDevelopment()) {
-                acknowledgment.acknowledge()
-            }
             throw e
         }
     }
