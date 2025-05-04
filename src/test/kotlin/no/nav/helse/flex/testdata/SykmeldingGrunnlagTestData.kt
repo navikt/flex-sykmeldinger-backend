@@ -34,8 +34,8 @@ fun lagSykmeldingGrunnlag(
                 yrkesbetegnelse = "Arbeider",
                 stillingsprosent = 99,
             ),
-        signerendeBehandler =
-            SignerendeBehandler(
+        sykmelder =
+            Sykmelder(
                 ids =
                     listOf(
                         PersonId(id = "00000000000", type = PersonIdType.DKF),

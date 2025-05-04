@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
-import no.nav.helse.flex.sykmelding.domain.tsm.values.SignerendeBehandler
+import no.nav.helse.flex.sykmelding.domain.tsm.values.Sykmelder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -47,7 +47,7 @@ sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
     override val aktivitet: List<Aktivitet>
     val behandler: Behandler
     val arbeidsgiver: ArbeidsgiverInfo
-    val signerendeBehandler: SignerendeBehandler
+    val sykmelder: Sykmelder
     val prognose: Prognose?
     val tiltak: Tiltak?
     val bistandNav: BistandNav?
@@ -63,7 +63,7 @@ data class SykmeldingGrunnlag(
     override val aktivitet: List<Aktivitet>,
     override val behandler: Behandler,
     override val arbeidsgiver: ArbeidsgiverInfo,
-    override val signerendeBehandler: SignerendeBehandler,
+    override val sykmelder: Sykmelder,
     override val prognose: Prognose?,
     override val tiltak: Tiltak?,
     override val bistandNav: BistandNav?,
@@ -81,7 +81,7 @@ data class PapirSykmeldingGrunnlag(
     override val aktivitet: List<Aktivitet>,
     override val behandler: Behandler,
     override val arbeidsgiver: ArbeidsgiverInfo,
-    override val signerendeBehandler: SignerendeBehandler,
+    override val sykmelder: Sykmelder,
     override val prognose: Prognose?,
     override val tiltak: Tiltak?,
     override val bistandNav: BistandNav?,
