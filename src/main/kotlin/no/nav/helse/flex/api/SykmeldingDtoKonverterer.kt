@@ -27,9 +27,7 @@ class SykmeldingDtoKonverterer(
         }
 
     internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
-        if (sykmelding.sykmeldingGrunnlag !is NorskSykmeldingGrunnlag) {
-            throw IllegalArgumentException("SykmeldingGrunnlag er ikke av type SykmeldingGrunnlag")
-        }
+        require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
         val arbeidsgiver = sykmelding.sykmeldingGrunnlag.arbeidsgiver
