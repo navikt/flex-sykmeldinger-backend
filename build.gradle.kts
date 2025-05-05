@@ -29,11 +29,6 @@ val sykepengesoknadKafkaVersion = "2025.03.19-11.12-e2640af0"
 val commonsTextVersion = "1.13.1"
 val mockitoKotlinVersion = "2.2.0"
 
-ktlint {
-    // Midlertidig, se: https://github.com/JLLeitschuh/ktlint-gradle/issues/809
-    version.set("1.4.1")
-}
-
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation(kotlin("stdlib"))
@@ -65,6 +60,10 @@ dependencies {
     testImplementation("org.awaitility:awaitility")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+}
+
+ktlint {
+    version.set("1.5.0")
 }
 
 kotlin {
