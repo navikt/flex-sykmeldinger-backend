@@ -11,14 +11,13 @@ class SykmeldingRepositoryFake : ISykmeldingRepository {
     private fun lagId(): String = UUID.randomUUID().toString()
 
     override fun save(sykmelding: Sykmelding): Sykmelding {
-        val sykmeldingMedId =
-            if (sykmelding.databaseId == null) {
-                sykmelding.copy(databaseId = lagId())
-            } else {
-                sykmelding
-            }
-        lagretSykmelding[sykmeldingMedId.databaseId!!] = sykmeldingMedId
-        return sykmeldingMedId
+        val sykmeldingMedIder =
+            sykmelding.copy(
+                databaseId = sykmelding.databaseId ?: lagId(),
+                hendelser = sykmelding.hendelser.map { it.copy(databaseId = it.databaseId ?: lagId()) },
+            )
+        lagretSykmelding[sykmeldingMedIder.databaseId!!] = sykmeldingMedIder
+        return sykmeldingMedIder
     }
 
     override fun findBySykmeldingId(id: String): Sykmelding? = lagretSykmelding.values.find { it.sykmeldingGrunnlag.id == id }
