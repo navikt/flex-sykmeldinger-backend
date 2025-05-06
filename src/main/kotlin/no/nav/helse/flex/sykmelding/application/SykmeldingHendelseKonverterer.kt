@@ -35,6 +35,7 @@ class SykmeldingHendelseKonverterer {
             status = hendelseStatus,
             arbeidstakerInfo = null,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
+            // TODO: Burde mappe tilleggsinfo fra status
             tilleggsinfo = null,
             opprettet = status.event.timestamp.toInstant(),
         )
