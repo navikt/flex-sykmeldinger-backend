@@ -22,14 +22,15 @@ class SykmeldingDtoKonverterer(
 
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
-            is SykmeldingGrunnlag -> konverterSykmelding(sykmelding)
+            is NorskSykmeldingGrunnlag -> konverterSykmelding(sykmelding)
             is UtenlandskSykmeldingGrunnlag -> konverterUtenlandskSykmelding(sykmelding)
         }
 
     internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
-        require(sykmelding.sykmeldingGrunnlag is SykmeldingGrunnlag)
+        require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        val arbeidsgiver = sykmelding.sykmeldingGrunnlag.arbeidsgiver
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -40,26 +41,18 @@ class SykmeldingDtoKonverterer(
                 ),
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            arbeidsgiver =
-                konverterArbeidsgiver(
-                    sykmelding.sykmeldingGrunnlag.arbeidsgiver,
-                ),
+            arbeidsgiver = arbeidsgiver.tilArbeidsgiverDTO(),
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
             utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
-            tiltakArbeidsplassen = konverterTiltakArbeidsplassen(sykmelding.sykmeldingGrunnlag.arbeidsgiver),
-            tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNAV,
+            tiltakArbeidsplassen = arbeidsgiver.getTiltakArbeidsplassen(),
+            tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNav,
             andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
             meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
-            meldingTilArbeidsgiver =
-                when (sykmelding.sykmeldingGrunnlag.arbeidsgiver) {
-                    is EnArbeidsgiver -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
-                    is FlereArbeidsgivere -> sykmelding.sykmeldingGrunnlag.arbeidsgiver.meldingTilArbeidsgiver
-                    is IngenArbeidsgiver -> null
-                },
+            meldingTilArbeidsgiver = arbeidsgiver.getMeldingTilArbeidsgiver(),
             kontaktMedPasient = sykmelding.sykmeldingGrunnlag.tilbakedatering?.let { konverterKontaktMedPasient(it) },
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
             behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
@@ -160,13 +153,6 @@ class SykmeldingDtoKonverterer(
             overSyttiAar = sykmeldingRegelAvklaringer.erOverSyttiAar(pasientFnr = pasient.fnr, fom = fom),
         )
 
-    internal fun konverterTiltakArbeidsplassen(arbeidsgiver: ArbeidsgiverInfo): String? =
-        when (arbeidsgiver) {
-            is EnArbeidsgiver -> arbeidsgiver.tiltakArbeidsplassen
-            is FlereArbeidsgivere -> arbeidsgiver.tiltakArbeidsplassen
-            is IngenArbeidsgiver -> null
-        }
-
     internal fun konverterBehandlingsutfall(validationResult: ValidationResult): BehandlingsutfallDTO =
         when (validationResult.status) {
             RuleType.OK -> {
@@ -233,8 +219,8 @@ class SykmeldingDtoKonverterer(
                         MedisinskArsakDTO(
                             beskrivelse = aktivitet.medisinskArsak.beskrivelse,
                             arsak =
-                                listOf(
-                                    when (aktivitet.medisinskArsak.arsak) {
+                                aktivitet.medisinskArsak.arsak.map {
+                                    when (it) {
                                         MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
                                             MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
 
@@ -245,8 +231,8 @@ class SykmeldingDtoKonverterer(
                                             MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING
 
                                         MedisinskArsakType.ANNET -> MedisinskArsakTypeDTO.ANNET
-                                    },
-                                ),
+                                    }
+                                },
                         )
                     } else {
                         null
@@ -256,14 +242,14 @@ class SykmeldingDtoKonverterer(
                         ArbeidsrelatertArsakDTO(
                             beskrivelse = aktivitet.arbeidsrelatertArsak.beskrivelse,
                             arsak =
-                                listOf(
-                                    when (aktivitet.arbeidsrelatertArsak.arsak) {
+                                aktivitet.arbeidsrelatertArsak.arsak.map {
+                                    when (it) {
                                         ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING ->
                                             ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING
 
                                         ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakTypeDTO.ANNET
-                                    },
-                                ),
+                                    }
+                                },
                         )
                     } else {
                         null
@@ -344,8 +330,7 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
         DiagnoseDTO(
-            // TODO: sett når tsm har klart felt
-            tekst = null,
+            tekst = diagnose.tekst,
             system = diagnose.system.name,
             kode = diagnose.kode,
         )
@@ -412,19 +397,6 @@ class SykmeldingDtoKonverterer(
         )
     }
 
-    internal fun konverterArbeidsgiver(arbeidsgiverInfo: ArbeidsgiverInfo): ArbeidsgiverDTO? =
-        when (arbeidsgiverInfo) {
-            is FlereArbeidsgivere ->
-                ArbeidsgiverDTO(
-                    navn = arbeidsgiverInfo.navn,
-                    stillingsprosent = arbeidsgiverInfo.stillingsprosent,
-                )
-
-            is EnArbeidsgiver,
-            is IngenArbeidsgiver,
-            -> null
-        }
-
     internal fun konverterUtdypendeOpplysninger(
         utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
     ): Map<String, Map<String, SporsmalSvarDTO>> =
@@ -451,3 +423,27 @@ class SykmeldingDtoKonverterer(
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
         }
 }
+
+fun ArbeidsgiverInfo.getMeldingTilArbeidsgiver(): String? =
+    when (this) {
+        is EnArbeidsgiver -> this.meldingTilArbeidsgiver
+        is FlereArbeidsgivere -> this.meldingTilArbeidsgiver
+        is IngenArbeidsgiver -> null
+    }
+
+fun ArbeidsgiverInfo.getTiltakArbeidsplassen(): String? =
+    when (this) {
+        is EnArbeidsgiver -> this.tiltakArbeidsplassen
+        is FlereArbeidsgivere -> this.tiltakArbeidsplassen
+        is IngenArbeidsgiver -> null
+    }
+
+fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
+    when (this) {
+        is FlereArbeidsgivere ->
+            ArbeidsgiverDTO(
+                navn = this.navn,
+                stillingsprosent = this.stillingsprosent,
+            )
+        else -> null
+    }

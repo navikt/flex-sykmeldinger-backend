@@ -14,7 +14,7 @@ data class Helsepersonell(
     val rolleTilPasient: RolleTilPasient,
 )
 
-data class SignerendeBehandler(
+data class Sykmelder(
     val ids: List<PersonId>,
     val helsepersonellKategori: HelsepersonellKategori,
 )

@@ -9,13 +9,14 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
-import no.nav.helse.flex.sykmelding.domain.tsm.values.SignerendeBehandler
+import no.nav.helse.flex.sykmelding.domain.tsm.values.Sykmelder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
 enum class SykmeldingType {
-    SYKMELDING,
-    UTENLANDSK_SYKMELDING,
+    XML,
+    PAPIR,
+    UTENLANDSK,
 }
 
 sealed interface ISykmeldingGrunnlag {
@@ -35,7 +36,23 @@ data class UtenlandskSykmeldingGrunnlag(
     override val aktivitet: List<Aktivitet>,
     val utenlandskInfo: UtenlandskInfo,
 ) : ISykmeldingGrunnlag {
-    override val type = SykmeldingType.UTENLANDSK_SYKMELDING
+    override val type = SykmeldingType.UTENLANDSK
+}
+
+sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
+    override val id: String
+    override val metadata: SykmeldingMetadata
+    override val pasient: Pasient
+    override val medisinskVurdering: MedisinskVurdering
+    override val aktivitet: List<Aktivitet>
+    val behandler: Behandler
+    val arbeidsgiver: ArbeidsgiverInfo
+    val sykmelder: Sykmelder
+    val prognose: Prognose?
+    val tiltak: Tiltak?
+    val bistandNav: BistandNav?
+    val tilbakedatering: Tilbakedatering?
+    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
 }
 
 data class SykmeldingGrunnlag(
@@ -44,16 +61,34 @@ data class SykmeldingGrunnlag(
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
-    val behandler: Behandler,
-    val arbeidsgiver: ArbeidsgiverInfo,
-    val signerendeBehandler: SignerendeBehandler,
-    val prognose: Prognose?,
-    val tiltak: Tiltak?,
-    val bistandNav: BistandNav?,
-    val tilbakedatering: Tilbakedatering?,
-    val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
-) : ISykmeldingGrunnlag {
-    override val type = SykmeldingType.SYKMELDING
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val sykmelder: Sykmelder,
+    override val prognose: Prognose?,
+    override val tiltak: Tiltak?,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
+    override val type = SykmeldingType.XML
+}
+
+data class PapirSykmeldingGrunnlag(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val sykmelder: Sykmelder,
+    override val prognose: Prognose?,
+    override val tiltak: Tiltak?,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
+    override val type = SykmeldingType.PAPIR
 }
 
 data class AvsenderSystem(
@@ -147,7 +182,7 @@ data class BistandNav(
 )
 
 data class Tiltak(
-    val tiltakNAV: String?,
+    val tiltakNav: String?,
     val andreTiltak: String?,
 )
 

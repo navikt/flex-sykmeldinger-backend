@@ -34,8 +34,8 @@ fun lagSykmeldingGrunnlag(
                 yrkesbetegnelse = "Arbeider",
                 stillingsprosent = 99,
             ),
-        signerendeBehandler =
-            SignerendeBehandler(
+        sykmelder =
+            Sykmelder(
                 ids =
                     listOf(
                         PersonId(id = "00000000000", type = PersonIdType.DKF),
@@ -50,7 +50,7 @@ fun lagSykmeldingGrunnlag(
             ),
         tiltak =
             Tiltak(
-                tiltakNAV = "Behov for tilrettelegging",
+                tiltakNav = "Behov for tilrettelegging",
                 andreTiltak = "Redusert arbeidstid",
             ),
         bistandNav =
@@ -142,12 +142,14 @@ fun lagMedisinskVurdering(
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
                 kode = hovedDiagnoseKode,
+                tekst = "tekst",
             ),
         biDiagnoser =
             listOf(
                 DiagnoseInfo(
                     system = DiagnoseSystem.ICD10,
                     kode = "J06.9",
+                    tekst = "tekst",
                 ),
             ),
         svangerskap = false,
@@ -191,7 +193,7 @@ fun lagAktivitetIkkeMulig(
 ) = AktivitetIkkeMulig(
     medisinskArsak =
         MedisinskArsak(
-            arsak = MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET,
+            arsak = listOf(MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET),
             beskrivelse = "Pasient er syk",
         ),
     arbeidsrelatertArsak = null,

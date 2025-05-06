@@ -107,8 +107,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
                 medisinskVurdering =
                     MedisinskVurderingDTO(
-                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = null),
-                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = null)),
+                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = "tekst"),
+                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = "tekst")),
                         annenFraversArsak = null,
                         svangerskap = false,
                         yrkesskade = false,
@@ -285,14 +285,13 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
-        sykmeldingDtoKonverterer
-            .konverterArbeidsgiver(
-                arbeidsgiverInfo =
-                    EnArbeidsgiver(
-                        meldingTilArbeidsgiver = "_",
-                        tiltakArbeidsplassen = "_",
-                    ),
-            ).`should be null`()
+        val enArbeidsgiver =
+            EnArbeidsgiver(
+                meldingTilArbeidsgiver = "_",
+                tiltakArbeidsplassen = "_",
+            )
+
+        enArbeidsgiver.tilArbeidsgiverDTO().`should be null`()
     }
 
     @Test
@@ -312,13 +311,12 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 stillingsprosent = 50,
             )
 
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(arbeidsgiver) `should be equal to`
-            forventetArbeidsgiver
+        arbeidsgiver.tilArbeidsgiverDTO() `should be equal to` forventetArbeidsgiver
     }
 
     @Test
     fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-        sykmeldingDtoKonverterer.konverterArbeidsgiver(IngenArbeidsgiver()) `should be equal to` null
+        IngenArbeidsgiver().tilArbeidsgiverDTO().`should be null`()
     }
 
     @Test
@@ -328,12 +326,12 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 medisinskArsak =
                     MedisinskArsak(
                         beskrivelse = "",
-                        arsak = MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING,
+                        arsak = listOf(MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING),
                     ),
                 arbeidsrelatertArsak =
                     ArbeidsrelatertArsak(
                         beskrivelse = "",
-                        arsak = ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING,
+                        arsak = listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING),
                     ),
                 fom = LocalDate.parse("2021-01-01"),
                 tom = LocalDate.parse("2021-01-21"),
@@ -364,12 +362,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     DiagnoseInfo(
                         system = DiagnoseSystem.ICD10,
                         kode = "kode",
+                        tekst = "tekst",
                     ),
                 biDiagnoser =
                     listOf(
                         DiagnoseInfo(
                             system = DiagnoseSystem.ICPC2,
                             kode = "bi diagnose",
+                            tekst = "tekst",
                         ),
                     ),
                 svangerskap = true,
@@ -386,36 +386,31 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
             )
 
-        val konvertertMedisinskVurdering =
-            sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
-                MedisinskVurderingDTO(
-                    hovedDiagnose =
+        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+            MedisinskVurderingDTO(
+                hovedDiagnose =
+                    DiagnoseDTO(
+                        kode = "kode",
+                        system = "ICD10",
+                        tekst = "tekst",
+                    ),
+                biDiagnoser =
+                    listOf(
                         DiagnoseDTO(
-                            kode = "kode",
-                            system = "ICD10",
-                            // TODO
-                            tekst = null,
+                            kode = "bi diagnose",
+                            system = "ICPC2",
+                            tekst = "tekst",
                         ),
-                    biDiagnoser =
-                        listOf(
-                            DiagnoseDTO(
-                                kode = "bi diagnose",
-                                system = "ICPC2",
-                                // TODO
-                                tekst = null,
-                            ),
-                        ),
-                    annenFraversArsak =
-                        AnnenFraversArsakDTO(
-                            beskrivelse = "beskrivelse",
-                            grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
-                        ),
-                    svangerskap = true,
-                    yrkesskade = true,
-                    yrkesskadeDato = LocalDate.parse("2021-01-01"),
-                )
-
-        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to` konvertertMedisinskVurdering
+                    ),
+                annenFraversArsak =
+                    AnnenFraversArsakDTO(
+                        beskrivelse = "beskrivelse",
+                        grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
+                    ),
+                svangerskap = true,
+                yrkesskade = true,
+                yrkesskadeDato = LocalDate.parse("2021-01-01"),
+            )
     }
 
     @Test
@@ -493,27 +488,38 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere tiltak arbeidsplassen`() {
-        sykmeldingDtoKonverterer
-            .konverterTiltakArbeidsplassen(
-                EnArbeidsgiver(
-                    meldingTilArbeidsgiver = "_",
-                    tiltakArbeidsplassen = "tiltak",
-                ),
-            ).shouldBeEqualTo("tiltak")
+        EnArbeidsgiver(
+            meldingTilArbeidsgiver = "_",
+            tiltakArbeidsplassen = "tiltak",
+        ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
 
-        sykmeldingDtoKonverterer.konverterTiltakArbeidsplassen(
-            FlereArbeidsgivere(
-                meldingTilArbeidsgiver = "_",
-                tiltakArbeidsplassen = "tiltak",
-                navn = "_",
-                yrkesbetegnelse = "_",
-                stillingsprosent = 0,
-            ),
-        ) `should be equal to` "tiltak"
+        FlereArbeidsgivere(
+            meldingTilArbeidsgiver = "_",
+            tiltakArbeidsplassen = "tiltak",
+            navn = "_",
+            yrkesbetegnelse = "_",
+            stillingsprosent = 0,
+        ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
 
-        sykmeldingDtoKonverterer.konverterTiltakArbeidsplassen(
-            IngenArbeidsgiver(),
-        ) `should be equal to` null
+        IngenArbeidsgiver().getTiltakArbeidsplassen() `should be equal to` null
+    }
+
+    @Test
+    fun `burde konvertere melding til arbeidsgiver`() {
+        EnArbeidsgiver(
+            meldingTilArbeidsgiver = "Melding",
+            tiltakArbeidsplassen = "_",
+        ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
+
+        FlereArbeidsgivere(
+            meldingTilArbeidsgiver = "Melding",
+            tiltakArbeidsplassen = "_",
+            navn = "_",
+            yrkesbetegnelse = "_",
+            stillingsprosent = 0,
+        ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
+
+        IngenArbeidsgiver().getMeldingTilArbeidsgiver() `should be equal to` null
     }
 
     @Test
