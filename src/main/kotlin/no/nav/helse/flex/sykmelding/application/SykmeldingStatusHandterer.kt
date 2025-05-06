@@ -75,7 +75,7 @@ class SykmeldingStatusHandterer(
     fun hendelseEksistererPaaSykmelding(
         sykmelding: Sykmelding,
         sykmeldingHendelse: SykmeldingHendelse,
-    ): Boolean = sykmelding.hendelser.any { it == sykmeldingHendelse }
+    ): Boolean = sykmelding.hendelser.any { erHendelseDuplikat(sykmeldingHendelse, it) }
 
     fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
         val status =
@@ -112,6 +112,18 @@ class SykmeldingStatusHandterer(
             kafkaMetadata = metadataDTO,
             event = sykmeldingStatusKafkaDTO,
         )
+    }
+
+    companion object {
+        fun erHendelseDuplikat(
+            hendelse1: SykmeldingHendelse,
+            hendelse2: SykmeldingHendelse,
+        ): Boolean =
+            hendelse1.status == hendelse2.status &&
+                hendelse1.opprettet == hendelse2.opprettet &&
+                hendelse1.arbeidstakerInfo == hendelse2.arbeidstakerInfo &&
+                hendelse1.brukerSvar == hendelse2.brukerSvar &&
+                hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
     }
 }
 
