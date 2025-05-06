@@ -141,7 +141,7 @@ class SykmeldingDtoKonverterer(
                         when (it) {
                             is InvalidRule -> it.reason.sykmeldt
                             is PendingRule -> it.reason.sykmeldt
-                            else -> ""
+                            else -> null
                         },
                 )
             }
