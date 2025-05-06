@@ -537,7 +537,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     listOf(
                         InvalidRule(
                             name = RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
-                            description = "",
                             timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
                             validationType = ValidationType.MANUAL,
                             reason =
@@ -586,6 +585,35 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 status = RegelStatusDTO.OK,
                 ruleHits = emptyList(),
             )
+    }
+
+    @Test
+    fun `konverterMerknader burde konvertere én fra validationResult`() {
+        val validationResult =
+            ValidationResult(
+                status = RuleType.PENDING,
+                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                rules =
+                    listOf(
+                        PendingRule(
+                            name = "DELVIS_GODKJENT",
+                            timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+                            reason =
+                                Reason(
+                                    sykmeldt = "Sykmeldingen er delvis godkjent",
+                                    sykmelder = "",
+                                ),
+                        ),
+                    ),
+            )
+        val merknader = sykmeldingDtoKonverterer.konverterMerknader(validationResult)
+        merknader
+            .shouldHaveSize(1)
+            .first()
+            .run {
+                this.type `should be equal to` MerknadtypeDTO.DELVIS_GODKJENT
+                this.beskrivelse `should be equal to` "Sykmeldingen er delvis godkjent"
+            }
     }
 
     @Nested
