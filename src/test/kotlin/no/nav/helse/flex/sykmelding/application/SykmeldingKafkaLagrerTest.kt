@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
+class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     @Autowired
     lateinit var nowFactoryFake: NowFactoryFake
 
