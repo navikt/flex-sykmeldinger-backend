@@ -6,7 +6,7 @@ import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
-import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
+import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBuffer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,7 +22,7 @@ class SykmeldingStatusHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
-    private val sykmeldingHendelseBuffer: SykmeldingHendelseBuffer,
+    private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
 ) {
     private val log = logger()
 
@@ -43,7 +43,7 @@ class SykmeldingStatusHandterer(
 
     @Transactional(rollbackFor = [Exception::class])
     fun prosesserSykmeldingStatuserFraBuffer(sykmeldingId: String) {
-        val buffredeStatuser = sykmeldingHendelseBuffer.prosesserAlleFor(sykmeldingId)
+        val buffredeStatuser = sykmeldingStatusBuffer.prosesserAlleFor(sykmeldingId)
         for (status in buffredeStatuser) {
             lagreSykmeldingStatus(status)
         }
@@ -69,7 +69,7 @@ class SykmeldingStatusHandterer(
             "Fant ikke sykmelding med id $sykmeldingId, " +
                 "buffrer status: $statusEvent",
         )
-        sykmeldingHendelseBuffer.leggTil(status)
+        sykmeldingStatusBuffer.leggTil(status)
     }
 
     private fun lagreStatusForEksisterendeSykmelding(

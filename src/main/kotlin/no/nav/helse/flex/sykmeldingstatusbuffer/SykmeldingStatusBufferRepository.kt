@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldinghendelsebuffer
+package no.nav.helse.flex.sykmeldingstatusbuffer
 
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository
 import java.time.Instant
 
 @Table("sykmeldinghendelse_buffer")
-data class SykmeldingHendelseBufferDbRecord(
+data class SykmeldingStatusBufferDbRecord(
     @Id
     val id: String? = null,
     val sykmeldingId: String,
@@ -16,6 +16,6 @@ data class SykmeldingHendelseBufferDbRecord(
     val lokaltOpprettet: Instant,
 )
 
-interface SykmeldingHendelseBufferRepository : CrudRepository<SykmeldingHendelseBufferDbRecord, String> {
-    fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingHendelseBufferDbRecord>
+interface SykmeldingStatusBufferRepository : CrudRepository<SykmeldingStatusBufferDbRecord, String> {
+    fun findAllBySykmeldingId(sykmeldingId: String): List<SykmeldingStatusBufferDbRecord>
 }

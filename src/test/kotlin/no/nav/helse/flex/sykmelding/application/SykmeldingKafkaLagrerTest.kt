@@ -6,7 +6,7 @@ import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
-import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
+import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBuffer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
@@ -33,7 +33,7 @@ class SykmeldingKafkaLagrerFakeTest : FakesTestOppsett() {
     private lateinit var aaregClient: AaregClientFake
 
     @Autowired
-    private lateinit var sykmeldignHendelseBuffer: SykmeldingHendelseBuffer
+    private lateinit var sykmeldignHendelseBuffer: SykmeldingStatusBuffer
 
     @AfterEach
     fun tearDown() {

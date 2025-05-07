@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldinghendelsebuffer
+package no.nav.helse.flex.sykmeldingstatusbuffer
 
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
@@ -16,12 +16,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-class SykmeldingHendelseBufferIntegrasjonTest : IntegrasjonTestOppsett() {
+class SykmeldingStatusBufferIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     private lateinit var txManager: PlatformTransactionManager
 
     @Autowired
-    private lateinit var sykmeldingHendelseBuffer: SykmeldingHendelseBuffer
+    private lateinit var sykmeldingStatusBuffer: SykmeldingStatusBuffer
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
@@ -33,7 +33,7 @@ class SykmeldingHendelseBufferIntegrasjonTest : IntegrasjonTestOppsett() {
             Runnable {
                 val txTemplate = TransactionTemplate(txManager)
                 txTemplate.execute {
-                    sykmeldingHendelseBuffer.leggTil(
+                    sykmeldingStatusBuffer.leggTil(
                         lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1")),
                     )
                     producerTaskCompleteLatch.countDown()
@@ -45,7 +45,7 @@ class SykmeldingHendelseBufferIntegrasjonTest : IntegrasjonTestOppsett() {
             Callable {
                 val txTemplate = TransactionTemplate(txManager)
                 txTemplate.execute {
-                    sykmeldingHendelseBuffer.prosesserAlleFor("1")
+                    sykmeldingStatusBuffer.prosesserAlleFor("1")
                 }
             }
 
@@ -76,7 +76,7 @@ class SykmeldingHendelseBufferIntegrasjonTest : IntegrasjonTestOppsett() {
             Callable {
                 val txTemplate = TransactionTemplate(txManager)
                 txTemplate.execute {
-                    sykmeldingHendelseBuffer.prosesserAlleFor("1").also {
+                    sykmeldingStatusBuffer.prosesserAlleFor("1").also {
                         consumerTaskCompleteLatch.countDown()
                         consumerTransactionWaitLatch.await()
                     }
@@ -87,7 +87,7 @@ class SykmeldingHendelseBufferIntegrasjonTest : IntegrasjonTestOppsett() {
             Runnable {
                 val txTemplate = TransactionTemplate(txManager)
                 txTemplate.execute {
-                    sykmeldingHendelseBuffer.leggTil(
+                    sykmeldingStatusBuffer.leggTil(
                         lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1")),
                     )
                 }

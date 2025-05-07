@@ -3,7 +3,7 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
+import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBuffer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
@@ -16,7 +16,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     lateinit var sykmeldingStatusHandterer: SykmeldingStatusHandterer
 
     @Autowired
-    lateinit var sykmeldingHendelseBuffer: SykmeldingHendelseBuffer
+    lateinit var sykmeldingStatusBuffer: SykmeldingStatusBuffer
 
     @AfterEach
     fun cleanUp() {
@@ -87,7 +87,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
         sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
-        val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        val buffredeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         buffredeHendelser.size shouldBeEqualTo 1
         buffredeHendelser.first().kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
     }
@@ -100,7 +100,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
         sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
-        val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        val buffredeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         buffredeHendelser.size shouldBeEqualTo 0
     }
 

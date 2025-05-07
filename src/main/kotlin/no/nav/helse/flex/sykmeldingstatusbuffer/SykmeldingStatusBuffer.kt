@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldinghendelsebuffer
+package no.nav.helse.flex.sykmeldingstatusbuffer
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.AdvisoryLock
@@ -13,8 +13,8 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Component
-class SykmeldingHendelseBuffer(
-    private val sykmeldingHendelseBufferRepository: SykmeldingHendelseBufferRepository,
+class SykmeldingStatusBuffer(
+    private val sykmeldingStatusBufferRepository: SykmeldingStatusBufferRepository,
     private val advisoryLock: AdvisoryLock,
     private val nowFactory: Supplier<Instant>,
 ) {
@@ -26,12 +26,12 @@ class SykmeldingHendelseBuffer(
         log.info("Skal legge til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
         val record = hendelse.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
         aquireBufferLockFor(sykmeldingId)
-        sykmeldingHendelseBufferRepository.save(record)
+        sykmeldingStatusBufferRepository.save(record)
         log.info("Lagt til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
     }
 
     fun kikkPaaAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> =
-        sykmeldingHendelseBufferRepository
+        sykmeldingStatusBufferRepository
             .findAllBySykmeldingId(sykmeldingId)
             .map { it.tilSykmeldingStatusKafkaMessageDTO() }
 
@@ -39,8 +39,8 @@ class SykmeldingHendelseBuffer(
     fun prosesserAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
         log.info("Skal prosesserer alle sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
         aquireBufferLockFor(sykmeldingId)
-        val records = sykmeldingHendelseBufferRepository.findAllBySykmeldingId(sykmeldingId)
-        sykmeldingHendelseBufferRepository.deleteAll(records)
+        val records = sykmeldingStatusBufferRepository.findAllBySykmeldingId(sykmeldingId)
+        sykmeldingStatusBufferRepository.deleteAll(records)
         val statuses =
             records
                 .sortedBy { it.sykmeldingStatusOpprettet }
@@ -54,8 +54,8 @@ class SykmeldingHendelseBuffer(
     }
 
     companion object {
-        internal fun SykmeldingStatusKafkaMessageDTO.tilBuffretSykmeldingHendelseDbRecord(now: Instant): SykmeldingHendelseBufferDbRecord =
-            SykmeldingHendelseBufferDbRecord(
+        internal fun SykmeldingStatusKafkaMessageDTO.tilBuffretSykmeldingHendelseDbRecord(now: Instant): SykmeldingStatusBufferDbRecord =
+            SykmeldingStatusBufferDbRecord(
                 sykmeldingId = this.kafkaMetadata.sykmeldingId,
                 sykmeldingStatusOpprettet = this.kafkaMetadata.timestamp.toInstant(),
                 sykmeldingStatusKafkaMessage =
@@ -66,7 +66,7 @@ class SykmeldingHendelseBuffer(
                 lokaltOpprettet = now,
             )
 
-        internal fun SykmeldingHendelseBufferDbRecord.tilSykmeldingStatusKafkaMessageDTO(): SykmeldingStatusKafkaMessageDTO =
+        internal fun SykmeldingStatusBufferDbRecord.tilSykmeldingStatusKafkaMessageDTO(): SykmeldingStatusKafkaMessageDTO =
             this.sykmeldingStatusKafkaMessage.value?.let {
                 objectMapper.readValue(it)
             }

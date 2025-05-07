@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldinghendelsebuffer
+package no.nav.helse.flex.sykmeldingstatusbuffer
 
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagKafkaMetadataDTO
@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.OffsetDateTime
 
-class SykmeldingHendelseBufferTest : FakesTestOppsett() {
+class SykmeldingStatusBufferTest : FakesTestOppsett() {
     @Autowired
-    lateinit var sykmeldingHendelseBuffer: SykmeldingHendelseBuffer
+    lateinit var sykmeldingStatusBuffer: SykmeldingStatusBuffer
 
     @AfterEach
     fun afterEach() {
-        sykmeldingHendelseBufferRepository.deleteAll()
+        sykmeldingStatusBufferRepository.deleteAll()
         advisoryLock.reset()
     }
 
@@ -30,15 +30,15 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
                 event = lagSykmeldingStatusKafkaDTO(statusEvent = "TEST_STATUS"),
             )
-        sykmeldingHendelseBuffer.leggTil(kafkaMelding)
-        val lagredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        sykmeldingStatusBuffer.leggTil(kafkaMelding)
+        val lagredeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         lagredeHendelser shouldHaveSize 1
         lagredeHendelser.first() shouldBeEqualTo kafkaMelding
     }
 
     @Test
     fun `leggTil burde låse buffer`() {
-        sykmeldingHendelseBuffer.leggTil(
+        sykmeldingStatusBuffer.leggTil(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             ),
@@ -59,9 +59,9 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "2"),
             ),
         ).forEach {
-            sykmeldingHendelseBuffer.leggTil(it)
+            sykmeldingStatusBuffer.leggTil(it)
         }
-        val lagredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        val lagredeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         lagredeHendelser shouldHaveSize 2
         lagredeHendelser.forEach {
             it.kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
@@ -70,13 +70,13 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
 
     @Test
     fun `kikkPaaAlleFor burde ikke låse buffer`() {
-        sykmeldingHendelseBuffer.leggTil(
+        sykmeldingStatusBuffer.leggTil(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             ),
         )
         advisoryLock.reset()
-        sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         advisoryLock.hasLocks().shouldBeFalse()
     }
 
@@ -92,9 +92,9 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "2"),
             ),
-        ).forEach { sykmeldingHendelseBuffer.leggTil(it) }
+        ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        val hendelser = sykmeldingHendelseBuffer.prosesserAlleFor("1")
+        val hendelser = sykmeldingStatusBuffer.prosesserAlleFor("1")
         hendelser shouldHaveSize 2
         hendelser.forEach {
             it.kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
@@ -113,12 +113,12 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "2"),
             ),
-        ).forEach { sykmeldingHendelseBuffer.leggTil(it) }
+        ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        sykmeldingHendelseBuffer.prosesserAlleFor("1")
-        val resterendeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
+        sykmeldingStatusBuffer.prosesserAlleFor("1")
+        val resterendeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         resterendeHendelser shouldHaveSize 0
-        val andreHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("2")
+        val andreHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("2")
         andreHendelser shouldHaveSize 1
     }
 
@@ -150,9 +150,9 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
                         timestamp = andreTidspunkt,
                     ),
             ),
-        ).forEach { sykmeldingHendelseBuffer.leggTil(it) }
+        ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        val hendelser = sykmeldingHendelseBuffer.prosesserAlleFor("1")
+        val hendelser = sykmeldingStatusBuffer.prosesserAlleFor("1")
         hendelser shouldHaveSize 3
         hendelser.map { it.kafkaMetadata.timestamp } shouldBeEqualTo
             listOf(
@@ -164,13 +164,13 @@ class SykmeldingHendelseBufferTest : FakesTestOppsett() {
 
     @Test
     fun `prosesserAlleFor burde låse buffer`() {
-        sykmeldingHendelseBuffer.leggTil(
+        sykmeldingStatusBuffer.leggTil(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             ),
         )
         advisoryLock.reset()
-        sykmeldingHendelseBuffer.prosesserAlleFor("1")
+        sykmeldingStatusBuffer.prosesserAlleFor("1")
         advisoryLock.hasLocks().shouldBeTrue()
     }
 }
