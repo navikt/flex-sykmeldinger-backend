@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -14,13 +13,12 @@ import java.util.function.Supplier
 class SykmeldingKafkaLagrer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
-    private val sykmeldingHendelseBuffer: SykmeldingHendelseBuffer,
-    private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
+    private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val nowFactory: Supplier<Instant>,
 ) {
     val log = logger()
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
         val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
         if (eksisterendeSykmelding != null) {
@@ -29,6 +27,7 @@ class SykmeldingKafkaLagrer(
         } else {
             val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
+            sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
             log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} lagret")
         }
@@ -75,19 +74,6 @@ class SykmeldingKafkaLagrer(
                 validationOppdatert = now,
                 hendelseOppdatert = now,
             )
-        val buffredeStatuser = sykmeldingHendelseBuffer.prosesserAlleFor(sykmeldingKafkaRecord.sykmelding.id)
-        if (buffredeStatuser.isEmpty()) {
-            return sykmelding
-        } else {
-            val buffredeHendelser =
-                buffredeStatuser.map {
-                    sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, it)
-                }
-            val sykmeldingMedBuffredeHendelser =
-                buffredeHendelser.fold(sykmelding) { acc, status ->
-                    acc.leggTilHendelse(status)
-                }
-            return sykmeldingMedBuffredeHendelser
-        }
+        return sykmelding
     }
 }

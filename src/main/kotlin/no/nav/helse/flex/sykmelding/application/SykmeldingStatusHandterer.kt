@@ -9,6 +9,7 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.sykmeldinghendelsebuffer.SykmeldingHendelseBuffer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -33,10 +34,18 @@ class SykmeldingStatusHandterer(
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         if (sykmelding == null) {
-            lagreStatusIBuffer(status)
+            leggStatusIBuffer(status)
             return false
         } else {
             return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+        }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    fun prosesserSykmeldingStatuserFraBuffer(sykmeldingId: String) {
+        val buffredeStatuser = sykmeldingHendelseBuffer.prosesserAlleFor(sykmeldingId)
+        for (status in buffredeStatuser) {
+            lagreSykmeldingStatus(status)
         }
     }
 
@@ -53,7 +62,7 @@ class SykmeldingStatusHandterer(
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
 
-    private fun lagreStatusIBuffer(status: SykmeldingStatusKafkaMessageDTO) {
+    private fun leggStatusIBuffer(status: SykmeldingStatusKafkaMessageDTO) {
         val sykmeldingId = status.kafkaMetadata.sykmeldingId
         val statusEvent = status.event.statusEvent
         log.info(
