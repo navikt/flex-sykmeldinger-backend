@@ -30,7 +30,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be true`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should not be null`()
         sykmelding.hendelser.size shouldBeEqualTo 2
@@ -43,7 +43,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be false`()
         val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
         sykmelding.`should be null`()
     }
@@ -64,7 +64,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                 event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
             )
         invoking {
-            sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
+            sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be false`()
         } `should throw` UgyldigSykmeldingStatusException::class
     }
 
@@ -86,7 +86,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
         val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
         buffredeHendelser.size shouldBeEqualTo 1
         buffredeHendelser.first().kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
@@ -99,7 +99,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
             )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
         val buffredeHendelser = sykmeldingHendelseBuffer.kikkPaaAlleFor("1")
         buffredeHendelser.size shouldBeEqualTo 0
     }
@@ -109,7 +109,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
         sykmeldingRepository.save(sykmelding)
         val status = lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"))
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be true`()
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be false`()
     }
 }

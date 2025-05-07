@@ -38,7 +38,7 @@ class SykmeldingStatusListener(
         try {
             log.info("Mottatt status for sykmelding ${cr.key()}")
             val status: SykmeldingStatusKafkaMessageDTO = objectMapper.readValue(cr.value())
-            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+            sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
             acknowledgment.acknowledge()
         } catch (e: JacksonException) {
             log.error("Feil sykmelding status format. Melding key: ${cr.key()}. Se secure logs")

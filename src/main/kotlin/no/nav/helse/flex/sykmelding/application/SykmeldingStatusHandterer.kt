@@ -22,7 +22,7 @@ class SykmeldingStatusHandterer(
 ) {
     private val log = logger()
 
-    fun handterSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+    fun lagreSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
