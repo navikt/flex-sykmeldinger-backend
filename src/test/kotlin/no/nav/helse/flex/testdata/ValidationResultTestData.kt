@@ -1,6 +1,7 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.sykmelding.domain.tsm.PendingRule
+import no.nav.helse.flex.sykmelding.domain.tsm.Reason
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
 import java.time.OffsetDateTime
@@ -25,7 +26,11 @@ fun lagValidation(status: RuleType = RuleType.OK): ValidationResult =
                         PendingRule(
                             name = "UNDER_BEHANDLING",
                             timestamp = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
-                            description = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                            reason =
+                                Reason(
+                                    sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                                    sykmelder = "Sykmeldingen er til manuell behandling",
+                                ),
                         ),
                     ),
             )

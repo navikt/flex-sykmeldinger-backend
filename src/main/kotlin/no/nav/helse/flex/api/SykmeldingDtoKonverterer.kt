@@ -137,7 +137,12 @@ class SykmeldingDtoKonverterer(
                             "UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
                             else -> MerknadtypeDTO.UKJENT_MERKNAD
                         },
-                    beskrivelse = it.description,
+                    beskrivelse =
+                        when (it) {
+                            is InvalidRule -> it.reason.sykmeldt
+                            is PendingRule -> it.reason.sykmeldt
+                            else -> null
+                        },
                 )
             }
 
