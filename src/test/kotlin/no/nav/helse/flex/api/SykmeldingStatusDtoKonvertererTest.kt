@@ -5,8 +5,7 @@ import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagSporsmalSvar
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
@@ -47,6 +46,53 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
 
                 val konvertertStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(originalHendelse)
                 konvertertStatus.statusEvent `should be equal to` forventetStatusEvent
+            }
+        }
+
+    @TestFactory
+    fun `burde konvertere arbeidsgiver for ARBEIDSTAKER`() =
+        mapOf(
+            "ARBEIDSTAKER" to (
+                lagArbeidstakerTilleggsinfo(
+                    arbeidsgiver =
+                        lagArbeidsgiver(
+                            orgnummer = "orgnr",
+                            juridiskOrgnummer = "jurorgnr",
+                            orgnavn = "orgnavn",
+                        ),
+                ) to
+                    ArbeidsgiverStatusDTO(
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jurorgnr",
+                        orgNavn = "orgnavn",
+                    )
+            ),
+            "FISKER_LOTT" to (
+                lagFiskerTilleggsinfo(
+                    arbeidsgiver =
+                        lagArbeidsgiver(
+                            orgnummer = "orgnr",
+                            juridiskOrgnummer = "jurorgnr",
+                            orgnavn = "orgnavn",
+                        ),
+                ) to
+                    ArbeidsgiverStatusDTO(
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jurorgnr",
+                        orgNavn = "orgnavn",
+                    )
+            ),
+            "FISKER_HYRE" to (
+                lagFiskerTilleggsinfo(arbeidsgiver = null) to null
+            ),
+            "ANNET" to (
+                lagArbeidsledigTilleggsinfo() to null
+            ),
+        ).map { (testNavn, testData) ->
+            val (tilleggsinfo, forventetArbeidsgiver) = testData
+            DynamicTest.dynamicTest(testNavn) {
+                val konvertertArbeidsgiver = sykmeldingStatusDtoKonverterer.konverterArbeidsgiver(tilleggsinfo)
+                konvertertArbeidsgiver `should be equal to` forventetArbeidsgiver
             }
         }
 

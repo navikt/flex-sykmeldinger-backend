@@ -4,8 +4,7 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.sykmelding.domain.*
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -14,18 +13,11 @@ import java.time.ZoneOffset
 class SykmeldingStatusDtoKonverterer {
     fun konverterSykmeldingStatus(hendelse: SykmeldingHendelse): SykmeldingStatusDTO =
         SykmeldingStatusDTO(
-            // TODO
             statusEvent = konverterHendelseStatus(hendelse.status),
             timestamp = hendelse.opprettet.atOffset(ZoneOffset.UTC),
+            // TODO
             sporsmalOgSvarListe = emptyList(),
-            arbeidsgiver =
-                hendelse.arbeidstakerInfo?.arbeidsgiver?.let { arbeidsgiver ->
-                    ArbeidsgiverStatusDTO(
-                        orgnummer = arbeidsgiver.orgnummer,
-                        juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
-                        orgNavn = arbeidsgiver.orgnavn,
-                    )
-                },
+            arbeidsgiver = hendelse.tilleggsinfo?.let(::konverterArbeidsgiver),
             brukerSvar = hendelse.brukerSvar?.let { konverterSykmeldingSporsmalSvar(it) },
         )
 
@@ -38,6 +30,20 @@ class SykmeldingStatusDtoKonverterer {
             HendelseStatus.UTGATT -> "UTGATT"
             HendelseStatus.BEKREFTET_AVVIST -> "BEKREFTET"
         }
+
+    internal fun konverterArbeidsgiver(tilleggsinfo: Tilleggsinfo): ArbeidsgiverStatusDTO? =
+        when (tilleggsinfo) {
+            is ArbeidstakerTilleggsinfo -> konverterArbeidsgiver(tilleggsinfo.arbeidsgiver)
+            is FiskerTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterArbeidsgiver)
+            else -> null
+        }
+
+    internal fun konverterArbeidsgiver(arbeidsgiver: Arbeidsgiver): ArbeidsgiverStatusDTO =
+        ArbeidsgiverStatusDTO(
+            orgnummer = arbeidsgiver.orgnummer,
+            juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
+            orgNavn = arbeidsgiver.orgnavn,
+        )
 
     fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
         when (brukerSvar) {

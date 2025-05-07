@@ -6,7 +6,7 @@ data class SykmeldingStatusDTO(
     val statusEvent: String,
     val timestamp: OffsetDateTime,
     val arbeidsgiver: ArbeidsgiverStatusDTO?,
-    // TODO: Remove this, use "brukerSvar" istedet
+    // TODO: Remove this, use "brukerSvar" in frontend istedet
     val sporsmalOgSvarListe: List<SporsmalDTO>,
     val brukerSvar: SykmeldingSporsmalSvarDto?,
 )
