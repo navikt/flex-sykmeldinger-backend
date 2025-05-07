@@ -72,7 +72,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
         val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
         val sammenstillSykmeldingStatusKafkaMessageDTO =
-            sykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
+            SykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = "fnr",
                 sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
             )

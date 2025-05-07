@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
+const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
+
 @Service
 class SykmeldingStatusHandterer(
     private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
@@ -28,33 +31,46 @@ class SykmeldingStatusHandterer(
             return false
         }
 
-        val sykmelding =
-            sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
-                ?: return handterManglendesSykmelding(status)
-
-        return behandleStatusForEksisterendeSykmelding(sykmelding, status)
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
+        if (sykmelding == null) {
+            lagreStatusIBuffer(status)
+            return false
+        } else {
+            return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+        }
     }
 
-    private fun SykmeldingStatusKafkaMessageDTO.erFraEgetSystem(): Boolean = this.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE
+    fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
+        val status =
+            sammenstillSykmeldingStatusKafkaMessageDTO(
+                fnr = sykmelding.pasientFnr,
+                sykmeldingStatusKafkaDTO =
+                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
+                        sykmeldingId = sykmelding.sykmeldingId,
+                        sykmeldingHendelse = sykmelding.sisteHendelse(),
+                    ),
+            )
+        sykmeldingStatusProducer.produserSykmeldingStatus(status)
+    }
 
-    private fun handterManglendesSykmelding(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+    private fun lagreStatusIBuffer(status: SykmeldingStatusKafkaMessageDTO) {
         val sykmeldingId = status.kafkaMetadata.sykmeldingId
+        val statusEvent = status.event.statusEvent
         log.info(
             "Fant ikke sykmelding med id $sykmeldingId, " +
-                "publiserer hendelse på retry topic",
+                "buffrer status: $statusEvent",
         )
-        publiserPaRetryTopic(status)
-        return false
+        sykmeldingHendelseBuffer.leggTil(status)
     }
 
-    private fun behandleStatusForEksisterendeSykmelding(
+    private fun lagreStatusForEksisterendeSykmelding(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
     ): Boolean {
         val hendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
         val sykmeldingId = sykmelding.sykmeldingId
 
-        if (hendelseEksistererPaaSykmelding(sykmelding, hendelse)) {
+        if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {
             log.warn(
                 "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
                     "hopper over lagring av hendelse",
@@ -74,52 +90,33 @@ class SykmeldingStatusHandterer(
         return true
     }
 
-    fun hendelseEksistererPaaSykmelding(
-        sykmelding: Sykmelding,
-        sykmeldingHendelse: SykmeldingHendelse,
-    ): Boolean = sykmelding.hendelser.any { erHendelseDuplikat(sykmeldingHendelse, it) }
-
-    fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
-        val status =
-            sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = sykmelding.pasientFnr,
-                sykmeldingStatusKafkaDTO =
-                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
-                        sykmeldingId = sykmelding.sykmeldingId,
-                        sykmeldingHendelse = sykmelding.sisteHendelse(),
-                    ),
-            )
-        sykmeldingStatusProducer.produserSykmeldingStatus(status)
-    }
-
-    private fun publiserPaRetryTopic(status: SykmeldingStatusKafkaMessageDTO) {
-        sykmeldingHendelseBuffer.leggTil(status)
-        log.info(
-            "Fant ikke sykmelding med id ${status.kafkaMetadata.sykmeldingId}, " +
-                "buffrer status: ${status.event.statusEvent}",
-        )
-    }
-
-    internal fun sammenstillSykmeldingStatusKafkaMessageDTO(
-        fnr: String,
-        sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO,
-    ): SykmeldingStatusKafkaMessageDTO {
-        val sykmeldingId = sykmeldingStatusKafkaDTO.sykmeldingId
-        val metadataDTO =
-            KafkaMetadataDTO(
-                sykmeldingId = sykmeldingId,
-                timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                fnr = fnr,
-                source = SYKMELDINGSTATUS_LEESAH_SOURCE,
-            )
-
-        return SykmeldingStatusKafkaMessageDTO(
-            kafkaMetadata = metadataDTO,
-            event = sykmeldingStatusKafkaDTO,
-        )
-    }
-
     companion object {
+        private fun SykmeldingStatusKafkaMessageDTO.erFraEgetSystem(): Boolean = this.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE
+
+        internal fun sammenstillSykmeldingStatusKafkaMessageDTO(
+            fnr: String,
+            sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO,
+        ): SykmeldingStatusKafkaMessageDTO {
+            val sykmeldingId = sykmeldingStatusKafkaDTO.sykmeldingId
+            val metadataDTO =
+                KafkaMetadataDTO(
+                    sykmeldingId = sykmeldingId,
+                    timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+                    fnr = fnr,
+                    source = SYKMELDINGSTATUS_LEESAH_SOURCE,
+                )
+
+            return SykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = metadataDTO,
+                event = sykmeldingStatusKafkaDTO,
+            )
+        }
+
+        fun finnesDuplikatHendelsePaaSykmelding(
+            sykmelding: Sykmelding,
+            sykmeldingHendelse: SykmeldingHendelse,
+        ): Boolean = sykmelding.hendelser.any { erHendelseDuplikat(sykmeldingHendelse, it) }
+
         fun erHendelseDuplikat(
             hendelse1: SykmeldingHendelse,
             hendelse2: SykmeldingHendelse,
@@ -131,6 +128,3 @@ class SykmeldingStatusHandterer(
                 hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
     }
 }
-
-const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
-const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
