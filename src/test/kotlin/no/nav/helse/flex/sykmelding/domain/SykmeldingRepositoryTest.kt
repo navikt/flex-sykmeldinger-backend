@@ -103,7 +103,10 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding
                 .leggTilHendelse(
-                    SykmeldingHendelse(status = HendelseStatus.APEN, opprettet = Instant.parse("2021-01-01T00:00:00.00Z")),
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                    ),
                 )
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -112,43 +115,6 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             .findBySykmeldingId("1")
             .`should not be null`()
             .hendelser.size `should be equal to` 2
-    }
-
-    @Test
-    fun `burde lagre hendelse med arbeidstaker info`() {
-        val hendelse =
-            lagSykmeldingHendelse(
-                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                arbeidstakerInfo =
-                    lagArbeidstakerInfo(
-                        arbeidsgiver =
-                            lagArbeidsgiver(
-                                orgnummer = "orgnummer",
-                                juridiskOrgnummer = "juridiskOrgnummer",
-                                orgnavn = "orgnavn",
-                                erAktivtArbeidsforhold = true,
-                                narmesteLeder = NarmesteLeder(navn = "narmesteLederNavn"),
-                            ),
-                    ),
-            )
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                hendelser = listOf(hendelse),
-            )
-
-        val lagretSykmelding = sykmeldingRepository.save(sykmelding)
-        val arbeidstakerInfo = lagretSykmelding.sisteHendelse().arbeidstakerInfo
-        arbeidstakerInfo `should be equal to`
-            ArbeidstakerInfo(
-                Arbeidsgiver(
-                    orgnummer = "orgnummer",
-                    juridiskOrgnummer = "juridiskOrgnummer",
-                    orgnavn = "orgnavn",
-                    erAktivtArbeidsforhold = true,
-                    narmesteLeder = NarmesteLeder(navn = "narmesteLederNavn"),
-                ),
-            )
     }
 
     @TestFactory

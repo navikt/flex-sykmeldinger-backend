@@ -6,7 +6,6 @@ import java.time.Instant
 
 fun lagSykmeldingHendelse(
     status: HendelseStatus = HendelseStatus.APEN,
-    arbeidstakerInfo: ArbeidstakerInfo? = null,
     tilleggsinfo: Tilleggsinfo? = null,
     brukerSvar: BrukerSvar? = null,
     opprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
@@ -15,10 +14,4 @@ fun lagSykmeldingHendelse(
     tilleggsinfo = tilleggsinfo,
     brukerSvar = brukerSvar,
     opprettet = opprettet,
-    arbeidstakerInfo = arbeidstakerInfo,
 )
-
-fun lagArbeidstakerInfo(arbeidsgiver: Arbeidsgiver = lagArbeidsgiver()): ArbeidstakerInfo =
-    ArbeidstakerInfo(
-        arbeidsgiver = arbeidsgiver,
-    )

@@ -6,8 +6,6 @@ import java.time.Instant
 data class SykmeldingHendelse(
     internal val databaseId: String? = null,
     val status: HendelseStatus,
-    // TODO: Dette feltet burde vel fjernes
-    val arbeidstakerInfo: ArbeidstakerInfo? = null,
     val brukerSvar: BrukerSvar? = null,
     val tilleggsinfo: Tilleggsinfo? = null,
     val opprettet: Instant,
