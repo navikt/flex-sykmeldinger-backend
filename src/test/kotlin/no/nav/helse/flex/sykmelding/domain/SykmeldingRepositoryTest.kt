@@ -13,7 +13,6 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     @AfterEach
@@ -125,9 +124,6 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 source `should be equal to` "TEST_SOURCE"
                 hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00.00Z")
                 lokaltOpprettet `should be equal to` Instant.parse("2022-01-01T00:00:00.00Z")
-//                hendelseOpprettet
-//                    .truncatedTo(ChronoUnit.MICROS)
-//                    .`should be equal to` Instant.parse("2021-01-01T00:00:00.00Z")
             }
     }
 
@@ -218,6 +214,4 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     it.copy(databaseId = null)
                 },
         )
-
-    fun Instant.trimToMillisForOperativsystemForskjeller(): Instant = truncatedTo(ChronoUnit.MICROS)
 }
