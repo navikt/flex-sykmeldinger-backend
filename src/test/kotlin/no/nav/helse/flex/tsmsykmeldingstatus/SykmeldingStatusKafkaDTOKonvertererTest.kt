@@ -1,4 +1,4 @@
-package no.nav.helse.flex.producers.sykmeldingstatus
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
