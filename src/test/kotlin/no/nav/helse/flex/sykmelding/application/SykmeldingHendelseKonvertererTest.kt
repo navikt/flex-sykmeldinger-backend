@@ -6,14 +6,14 @@ import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKaf
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.`should throw`
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import org.amshove.kluent.*
+import org.amshove.kluent.invoking
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
