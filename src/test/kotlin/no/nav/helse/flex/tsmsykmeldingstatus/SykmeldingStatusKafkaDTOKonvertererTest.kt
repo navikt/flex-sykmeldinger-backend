@@ -5,6 +5,9 @@ import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testdata.*
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SvartypeKafkaDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

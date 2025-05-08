@@ -1,4 +1,4 @@
-package no.nav.helse.flex.producers.sykmeldingstatus.dto
+package no.nav.helse.flex.tsmsykmeldingstatus.dto
 
 data class SporsmalKafkaDTO(
     val tekst: String,

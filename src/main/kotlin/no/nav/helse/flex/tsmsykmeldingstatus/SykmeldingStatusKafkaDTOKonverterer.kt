@@ -8,6 +8,7 @@ import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 
