@@ -7,6 +7,7 @@ import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBuffer
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -76,7 +77,18 @@ class SykmeldingStatusHandterer(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
     ): Boolean {
-        val hendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        val hendelse =
+            try {
+                sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+            } catch (e: Exception) {
+                log.errorSecure(
+                    "Feil ved konvertering av sykmeldingstatus fra kafka, status: $${status.event.statusEvent}, " +
+                        "sykmeldingId: ${status.kafkaMetadata.sykmeldingId}",
+                    secureMessage = "Sykmeldingstatus: $status",
+                    secureThrowable = e,
+                )
+                throw e
+            }
         val sykmeldingId = sykmelding.sykmeldingId
 
         if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {

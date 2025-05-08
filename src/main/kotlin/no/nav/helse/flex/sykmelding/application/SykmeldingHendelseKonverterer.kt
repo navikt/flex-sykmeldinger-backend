@@ -55,7 +55,7 @@ class SykmeldingHendelseKonverterer {
             }
             "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
             "UTGATT" -> HendelseStatus.UTGATT
-            else -> throw IllegalArgumentException("Ukjent status")
+            else -> throw IllegalArgumentException("Ukjent status: $status")
         }
 
     internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {
