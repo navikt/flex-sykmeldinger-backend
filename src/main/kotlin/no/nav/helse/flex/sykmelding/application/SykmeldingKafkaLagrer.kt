@@ -13,11 +13,12 @@ import java.util.function.Supplier
 class SykmeldingKafkaLagrer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
+    private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val nowFactory: Supplier<Instant>,
 ) {
     val log = logger()
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
         val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
         if (eksisterendeSykmelding != null) {
@@ -26,6 +27,7 @@ class SykmeldingKafkaLagrer(
         } else {
             val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
+            sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
             log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} lagret")
         }
@@ -56,20 +58,22 @@ class SykmeldingKafkaLagrer(
 
     private fun opprettNySykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding {
         val now = nowFactory.get()
-        return Sykmelding(
-            sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
-            validation = sykmeldingKafkaRecord.validation,
-            hendelser =
-                listOf(
-                    SykmeldingHendelse(
-                        status = HendelseStatus.APEN,
-                        opprettet = now,
+        val sykmelding =
+            Sykmelding(
+                sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
+                validation = sykmeldingKafkaRecord.validation,
+                hendelser =
+                    listOf(
+                        SykmeldingHendelse(
+                            status = HendelseStatus.APEN,
+                            opprettet = now,
+                        ),
                     ),
-                ),
-            opprettet = now,
-            sykmeldingGrunnlagOppdatert = now,
-            validationOppdatert = now,
-            hendelseOppdatert = now,
-        )
+                opprettet = now,
+                sykmeldingGrunnlagOppdatert = now,
+                validationOppdatert = now,
+                hendelseOppdatert = now,
+            )
+        return sykmelding
     }
 }

@@ -8,30 +8,41 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 fun lagSykmeldingStatusKafkaMessageDTO(
-    sykmeldingId: String = "1",
-    fnr: String = "fnr",
-    brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
-    statusEvent: String = "SENDT",
-    source: String = "syfosmaltinn",
+    kafkaMetadata: KafkaMetadataDTO = lagKafkaMetadataDTO(),
+    event: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaDTO(),
 ): SykmeldingStatusKafkaMessageDTO =
     SykmeldingStatusKafkaMessageDTO(
-        kafkaMetadata =
-            KafkaMetadataDTO(
-                sykmeldingId = sykmeldingId,
-                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
-                fnr = fnr,
-                source = source,
-            ),
-        event =
-            SykmeldingStatusKafkaDTO(
-                sykmeldingId = sykmeldingId,
-                timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
-                statusEvent = statusEvent,
-                arbeidsgiver = null,
-                sporsmals = null,
-                brukerSvar = brukerSvarKafkaDTO,
-                tidligereArbeidsgiver = null,
-            ),
+        kafkaMetadata = kafkaMetadata,
+        event = event,
+    )
+
+fun lagKafkaMetadataDTO(
+    sykmeldingId: String = "test-id",
+    timestamp: OffsetDateTime = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+    fnr: String = "test-fnr",
+    source: String = "test-source",
+): KafkaMetadataDTO =
+    KafkaMetadataDTO(
+        sykmeldingId = sykmeldingId,
+        timestamp = timestamp,
+        fnr = fnr,
+        source = source,
+    )
+
+fun lagSykmeldingStatusKafkaDTO(
+    sykmeldingId: String = "test-id",
+    timestamp: OffsetDateTime = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
+    statusEvent: String = "SENDT",
+    brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
+): SykmeldingStatusKafkaDTO =
+    SykmeldingStatusKafkaDTO(
+        sykmeldingId = sykmeldingId,
+        timestamp = timestamp,
+        statusEvent = statusEvent,
+        arbeidsgiver = null,
+        sporsmals = null,
+        brukerSvar = brukerSvarKafkaDTO,
+        tidligereArbeidsgiver = null,
     )
 
 fun lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO: ArbeidssituasjonDTO) =

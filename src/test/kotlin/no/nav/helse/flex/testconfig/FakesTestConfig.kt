@@ -6,6 +6,7 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBufferRepository
 import no.nav.helse.flex.testconfig.fakes.*
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
@@ -28,6 +29,12 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
+
+    @Bean
+    fun sykmeldingHendelseBufferRepository(): SykmeldingStatusBufferRepository = SykmeldingStatusBufferRepositoryFake()
+
+    @Bean
+    fun advisoryLock(): AdvisoryLockFake = AdvisoryLockFake()
 
     @Bean
     fun pdlClient(): PdlClientFake = PdlClientFake()

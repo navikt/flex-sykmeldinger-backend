@@ -4,9 +4,7 @@ import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeEqualTo
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -24,7 +22,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         environmentToggles.setEnvironment("dev")
 
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-        val kafkamelding = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+        val kafkamelding =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
+                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
+            )
 
         kafkaProducer
             .send(
@@ -45,7 +47,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde ikke lagre hendelse fra kafka dersom sykmelding ikke finnes`() {
         environmentToggles.setEnvironment("dev")
 
-        val kafkamelding = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+        val kafkamelding =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
+                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
+            )
 
         kafkaProducer
             .send(
@@ -65,7 +71,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde ikke lagre hendelse i prod`() {
         environmentToggles.setEnvironment("prod")
-        val kafkamelding = lagSykmeldingStatusKafkaMessageDTO(sykmeldingId = "1", fnr = "fnr", statusEvent = "SENDT")
+        val kafkamelding =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
+                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
+            )
 
         kafkaProducer
             .send(
