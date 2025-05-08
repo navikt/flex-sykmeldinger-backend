@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
-import no.nav.helse.flex.sykmelding.application.SykmeldingStatusHandterer
+import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper

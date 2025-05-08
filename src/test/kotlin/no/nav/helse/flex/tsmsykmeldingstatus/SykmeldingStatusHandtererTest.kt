@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException

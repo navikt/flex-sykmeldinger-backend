@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
 import no.nav.helse.flex.api.dto.JaEllerNei
@@ -7,6 +7,7 @@ import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessage
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import org.springframework.stereotype.Component
 

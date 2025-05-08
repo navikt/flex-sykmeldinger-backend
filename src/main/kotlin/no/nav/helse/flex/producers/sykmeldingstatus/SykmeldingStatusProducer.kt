@@ -2,7 +2,7 @@ package no.nav.helse.flex.producers.sykmeldingstatus
 
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.SykmeldingStatusKafkaDTO
-import no.nav.helse.flex.sykmelding.application.SYKMELDINGSTATUS_TOPIC
+import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 import org.apache.kafka.clients.producer.Producer
