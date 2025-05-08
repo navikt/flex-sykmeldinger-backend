@@ -1,5 +1,6 @@
-package no.nav.helse.flex.producers.sykmeldingstatus
+package no.nav.helse.flex.producers
 
+import no.nav.helse.flex.producers.SykmeldingStatusProducerKafka
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics

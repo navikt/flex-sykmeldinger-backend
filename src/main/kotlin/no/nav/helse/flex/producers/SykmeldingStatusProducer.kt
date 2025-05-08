@@ -1,4 +1,4 @@
-package no.nav.helse.flex.producers.sykmeldingstatus
+package no.nav.helse.flex.producers
 
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC

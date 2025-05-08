@@ -3,7 +3,7 @@ package no.nav.helse.flex.listeners
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.LogMarker

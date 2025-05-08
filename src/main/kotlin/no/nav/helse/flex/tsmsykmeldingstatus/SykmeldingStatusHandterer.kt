@@ -1,6 +1,8 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.producers.sykmeldingstatus.*
+import no.nav.helse.flex.producers.KafkaMetadataDTO
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.SykmeldingStatusProducer
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
