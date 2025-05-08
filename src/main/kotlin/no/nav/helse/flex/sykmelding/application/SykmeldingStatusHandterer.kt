@@ -82,7 +82,7 @@ class SykmeldingStatusHandterer(
                 sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
             } catch (e: Exception) {
                 log.errorSecure(
-                    "Feil ved konvertering av sykmeldingstatus fra kafka, status: $${status.event.statusEvent}, " +
+                    "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${status.event.statusEvent}, " +
                         "sykmeldingId: ${status.kafkaMetadata.sykmeldingId}",
                     secureMessage = "Sykmeldingstatus: $status",
                     secureThrowable = e,

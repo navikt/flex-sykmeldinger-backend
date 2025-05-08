@@ -1,14 +1,21 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.`should throw`
+import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
+import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
+import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.params.ParameterizedTest
@@ -157,6 +164,180 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                 val annetBrukerSvar = konvertert as? AnnetArbeidssituasjonBrukerSvar
                 annetBrukerSvar.`should not be null`()
             }
+        }
+    }
+
+    @Nested
+    inner class KonverterTilleggsinfo {
+        @Test
+        fun `arbeidstaker burde konverteres riktig med arbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+                    arbeidsgiver =
+                        ArbeidsgiverStatusKafkaDTO(
+                            orgnummer = "orgnummer",
+                            juridiskOrgnummer = "juridiskOrgnummer",
+                            orgNavn = "orgNavn",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<ArbeidstakerTilleggsinfo>().run {
+                arbeidsgiver.orgnummer shouldBeEqualTo "orgnummer"
+                arbeidsgiver.juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
+                arbeidsgiver.orgnavn shouldBeEqualTo "orgNavn"
+            }
+        }
+
+        @Test
+        fun `arbeidstaker burde feile uten arbeidsgiver`() {
+            invoking {
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+                    arbeidsgiver = null,
+                )
+            }.shouldThrow(Exception::class)
+        }
+
+        @Test
+        fun `arbeidsledig burde konverteres riktig med tidligereArbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    tidligereArbeidsgiver =
+                        TidligereArbeidsgiverKafkaDTO(
+                            orgnummer = "orgnummer",
+                            orgNavn = "orgNavn",
+                            sykmeldingsId = "_",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<ArbeidsledigTilleggsinfo>().run {
+                tidligereArbeidsgiver.shouldNotBeNull().run {
+                    orgnummer shouldBeEqualTo "orgnummer"
+                    orgNavn shouldBeEqualTo "orgNavn"
+                }
+            }
+        }
+
+        @Test
+        fun `arbeidsledig burde konverteres riktig uten tidligereArbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    tidligereArbeidsgiver = null,
+                )
+            tilleggsinfo.shouldBeInstanceOf<ArbeidsledigTilleggsinfo>().run {
+                tidligereArbeidsgiver.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `permittert burde konverteres riktig med tidligereArbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
+                    tidligereArbeidsgiver =
+                        TidligereArbeidsgiverKafkaDTO(
+                            orgnummer = "orgnummer",
+                            orgNavn = "orgNavn",
+                            sykmeldingsId = "_",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<PermittertTilleggsinfo>().run {
+                tidligereArbeidsgiver.shouldNotBeNull().run {
+                    orgnummer shouldBeEqualTo "orgnummer"
+                    orgNavn shouldBeEqualTo "orgNavn"
+                }
+            }
+        }
+
+        @Test
+        fun `permittert burde konverteres riktig uten tidligereArbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
+                    tidligereArbeidsgiver = null,
+                )
+            tilleggsinfo.shouldBeInstanceOf<PermittertTilleggsinfo>().run {
+                tidligereArbeidsgiver.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `fisker burde konverteres riktig med arbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.FISKER,
+                    arbeidsgiver =
+                        ArbeidsgiverStatusKafkaDTO(
+                            orgnummer = "orgnummer",
+                            juridiskOrgnummer = "juridiskOrgnummer",
+                            orgNavn = "orgNavn",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<FiskerTilleggsinfo>().run {
+                arbeidsgiver.shouldNotBeNull().run {
+                    orgnummer shouldBeEqualTo "orgnummer"
+                    juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
+                    orgnavn shouldBeEqualTo "orgNavn"
+                }
+            }
+        }
+
+        @Test
+        fun `fisker burde konverteres riktig uten arbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.FISKER,
+                    arbeidsgiver = null,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<FiskerTilleggsinfo>().run {
+                arbeidsgiver.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `frilanser burde konverteres riktig`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<FrilanserTilleggsinfo>()
+        }
+
+        @Test
+        fun `naringsdrivende burde konverteres riktig`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<NaringsdrivendeTilleggsinfo>()
+        }
+
+        @Test
+        fun `jordbruker burde konverteres riktig`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<JordbrukerTilleggsinfo>()
+        }
+
+        @Test
+        fun `annet arbeidssituasjon burde konverteres riktig`() {
+            val tilleggsinfo =
+                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                    arbeidssituasjon = Arbeidssituasjon.ANNET,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<AnnetArbeidssituasjonTilleggsinfo>()
         }
     }
 }

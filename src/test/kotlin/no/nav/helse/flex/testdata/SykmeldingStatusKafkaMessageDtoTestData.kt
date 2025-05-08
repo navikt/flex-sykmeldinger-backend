@@ -34,15 +34,23 @@ fun lagSykmeldingStatusKafkaDTO(
     timestamp: OffsetDateTime = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
     statusEvent: String = "SENDT",
     brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
+    arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = lagArbeidsgiverStatusKafkaDTO(),
 ): SykmeldingStatusKafkaDTO =
     SykmeldingStatusKafkaDTO(
         sykmeldingId = sykmeldingId,
         timestamp = timestamp,
         statusEvent = statusEvent,
-        arbeidsgiver = null,
+        arbeidsgiver = arbeidsgiver,
         sporsmals = null,
         brukerSvar = brukerSvarKafkaDTO,
         tidligereArbeidsgiver = null,
+    )
+
+fun lagArbeidsgiverStatusKafkaDTO(): ArbeidsgiverStatusKafkaDTO =
+    ArbeidsgiverStatusKafkaDTO(
+        orgnummer = "test-orgnummer",
+        juridiskOrgnummer = "test-juridisk-orgnummer",
+        orgNavn = "test-orgnavn",
     )
 
 fun lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO: ArbeidssituasjonDTO) =
