@@ -2,7 +2,6 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
