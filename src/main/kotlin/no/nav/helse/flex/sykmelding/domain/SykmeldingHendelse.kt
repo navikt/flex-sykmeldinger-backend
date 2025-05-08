@@ -8,8 +8,14 @@ data class SykmeldingHendelse(
     val status: HendelseStatus,
     val brukerSvar: BrukerSvar? = null,
     val tilleggsinfo: Tilleggsinfo? = null,
-    val opprettet: Instant,
-)
+    val source: String? = null,
+    val hendelseOpprettet: Instant,
+    val lokaltOpprettet: Instant,
+) {
+    companion object {
+        const val LOKAL_SOURCE = "flex-sykmeldinger-backend"
+    }
+}
 
 enum class HendelseStatus {
     APEN,

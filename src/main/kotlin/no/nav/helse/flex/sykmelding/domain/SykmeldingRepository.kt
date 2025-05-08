@@ -151,7 +151,9 @@ data class SykmeldingHendelseDbRecord(
     val tidligereArbeidsgiver: PGobject?,
     val tilleggsinfo: PGobject?,
     val brukerSvar: PGobject?,
-    val opprettet: Instant,
+    val source: String? = null,
+    val hendelseOpprettet: Instant,
+    val lokaltOpprettet: Instant,
 ) {
     fun mapTilHendelse(): SykmeldingHendelse =
         SykmeldingHendelse(
@@ -159,7 +161,9 @@ data class SykmeldingHendelseDbRecord(
             status = this.status,
             tilleggsinfo = this.tilleggsinfo?.fraPsqlJson(),
             brukerSvar = this.brukerSvar?.fraPsqlJson(),
-            opprettet = opprettet,
+            source = this.source,
+            hendelseOpprettet = this.hendelseOpprettet,
+            lokaltOpprettet = this.lokaltOpprettet,
         )
 
     companion object {
@@ -179,7 +183,9 @@ data class SykmeldingHendelseDbRecord(
                 tidligereArbeidsgiver = null,
                 tilleggsinfo = hendelse.tilleggsinfo?.tilPsqlJson(),
                 brukerSvar = hendelse.brukerSvar?.tilPsqlJson(),
-                opprettet = hendelse.opprettet,
+                source = hendelse.source,
+                hendelseOpprettet = hendelse.hendelseOpprettet,
+                lokaltOpprettet = hendelse.lokaltOpprettet,
             )
     }
 }

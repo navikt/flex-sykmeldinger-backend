@@ -4,6 +4,7 @@ import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import no.nav.helse.flex.testdata.lagSykmelding
@@ -15,6 +16,7 @@ import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.`should throw`
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,11 +25,21 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer
+
+    @Autowired
+    lateinit var nowFactory: NowFactoryFake
+
+    @AfterEach
+    fun afterEach() {
+        nowFactory.reset()
+    }
 
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
@@ -35,18 +47,32 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
 
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "tsm"),
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "TEST_SOURCE"),
                 event =
                     lagSykmeldingStatusKafkaDTO(
                         statusEvent = "APEN",
+                        timestamp = Instant.parse("2021-01-01T00:00:00Z").atOffset(ZoneOffset.UTC),
                         brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
                     ),
             )
 
-        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status).let {
-            it.brukerSvar.`should not be null`()
-            it.status `should be equal to` HendelseStatus.APEN
+        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status).run {
+            this.status `should be equal to` HendelseStatus.APEN
+            hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
+            source `should be equal to` "TEST_SOURCE"
+            brukerSvar.`should not be null`()
         }
+    }
+
+    @Test
+    fun `burde sette lokaltOpprettet til nå`() {
+        nowFactory.setNow(Instant.parse("2021-01-01T00:00:00Z"))
+
+        val sykmelding = lagSykmelding()
+        val status = lagSykmeldingStatusKafkaMessageDTO()
+
+        val hendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        hendelse.lokaltOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
     }
 
     @ParameterizedTest

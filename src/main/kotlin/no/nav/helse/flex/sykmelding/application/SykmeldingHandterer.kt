@@ -119,13 +119,15 @@ class SykmeldingHandterer(
         tilleggsinfo: Tilleggsinfo? = null,
     ): Sykmelding {
         sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = status)
-
+        val now = nowFactory.get()
         return sykmelding.leggTilHendelse(
             SykmeldingHendelse(
                 status = status,
                 brukerSvar = brukerSvar,
                 tilleggsinfo = tilleggsinfo,
-                opprettet = nowFactory.get(),
+                source = SykmeldingHendelse.LOKAL_SOURCE,
+                hendelseOpprettet = now,
+                lokaltOpprettet = now,
             ).also {
                 logger.info("Legger til hendelse ${it.status} på sykmelding ${sykmelding.sykmeldingId}")
             },

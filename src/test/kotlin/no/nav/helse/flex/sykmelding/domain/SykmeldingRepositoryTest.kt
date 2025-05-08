@@ -38,7 +38,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
-                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            lokaltOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                         ),
                     ),
                 opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
@@ -105,7 +106,9 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 .leggTilHendelse(
                     lagSykmeldingHendelse(
                         status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        source = "TEST_SOURCE",
+                        hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        lokaltOpprettet = Instant.parse("2022-01-01T00:00:00.00Z"),
                     ),
                 )
 
@@ -114,7 +117,18 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository
             .findBySykmeldingId("1")
             .`should not be null`()
-            .hendelser.size `should be equal to` 2
+            .hendelser
+            .shouldHaveSize(2)
+            .last()
+            .run {
+                status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                source `should be equal to` "TEST_SOURCE"
+                hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00.00Z")
+                lokaltOpprettet `should be equal to` Instant.parse("2022-01-01T00:00:00.00Z")
+//                hendelseOpprettet
+//                    .truncatedTo(ChronoUnit.MICROS)
+//                    .`should be equal to` Instant.parse("2021-01-01T00:00:00.00Z")
+            }
     }
 
     @TestFactory

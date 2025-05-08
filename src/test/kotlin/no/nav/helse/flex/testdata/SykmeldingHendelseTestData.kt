@@ -8,10 +8,14 @@ fun lagSykmeldingHendelse(
     status: HendelseStatus = HendelseStatus.APEN,
     tilleggsinfo: Tilleggsinfo? = null,
     brukerSvar: BrukerSvar? = null,
-    opprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    source: String? = null,
+    hendelseOpprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
+    lokaltOpprettet: Instant = Instant.parse("2021-01-01T00:00:00.00Z"),
 ) = SykmeldingHendelse(
     status = status,
     tilleggsinfo = tilleggsinfo,
     brukerSvar = brukerSvar,
-    opprettet = opprettet,
+    hendelseOpprettet = hendelseOpprettet,
+    lokaltOpprettet = lokaltOpprettet,
+    source = source,
 )

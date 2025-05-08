@@ -49,7 +49,7 @@ object SykmeldingStatusKafkaDTOKonverterer {
                 val sporsmalSvarDto = SykmeldingStatusDtoKonverterer().konverterSykmeldingSporsmalSvar(sykmeldingHendelse.brukerSvar)
                 SykmeldingStatusKafkaDTO(
                     sykmeldingId = sykmeldingId,
-                    timestamp = sykmeldingHendelse.opprettet.tilNorgeOffsetDateTime(),
+                    timestamp = sykmeldingHendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
                     statusEvent =
                         sykmeldingHendelse.status
                             .tilBakoverkompatibelSendtStatus(sykmeldingHendelse.brukerSvar)
@@ -68,7 +68,7 @@ object SykmeldingStatusKafkaDTOKonverterer {
             HendelseStatus.BEKREFTET_AVVIST -> {
                 SykmeldingStatusKafkaDTO(
                     sykmeldingId = sykmeldingId,
-                    timestamp = sykmeldingHendelse.opprettet.tilNorgeOffsetDateTime(),
+                    timestamp = sykmeldingHendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
                     statusEvent = sykmeldingHendelse.status.tilStatusEventDTO(),
                     arbeidsgiver = null,
                     sporsmals = emptyList(),
@@ -79,7 +79,7 @@ object SykmeldingStatusKafkaDTOKonverterer {
             -> {
                 SykmeldingStatusKafkaDTO(
                     sykmeldingId = sykmeldingId,
-                    timestamp = sykmeldingHendelse.opprettet.tilNorgeOffsetDateTime(),
+                    timestamp = sykmeldingHendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
                     statusEvent = sykmeldingHendelse.status.tilStatusEventDTO(),
                     arbeidsgiver = null,
                     sporsmals = null,
