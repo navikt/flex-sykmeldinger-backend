@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldingstatusbuffer
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett

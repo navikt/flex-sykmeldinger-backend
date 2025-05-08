@@ -6,8 +6,8 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBufferRepository
 import no.nav.helse.flex.testconfig.fakes.*
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.support.NoOpCacheManager

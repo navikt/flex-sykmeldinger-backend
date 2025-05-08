@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldingstatusbuffer
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import org.amshove.kluent.`should be equal to`
