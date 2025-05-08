@@ -2,17 +2,16 @@ package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
 import no.nav.helse.flex.api.dto.JaEllerNei
+import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
 import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
+import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingHendelseKonverterer {
-    private val log = logger()
-
     fun konverterStatusTilSykmeldingHendelse(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
@@ -23,19 +22,25 @@ class SykmeldingHendelseKonverterer {
             HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
             -> {
                 if (status.event.brukerSvar == null) {
-                    throw IllegalStateException("Brukersvar er påkrevd, men er null i status: ${status.serialisertTilString()}")
-                        .also {
-                            log.error(it.message)
-                        }
+                    throw IllegalStateException("Brukersvar er påkrevd, men er null i sykmeldingstatus")
                 }
             }
             else -> {}
         }
+        val brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) }
+        val tilleggsinfo =
+            brukerSvar?.let { brukerSvar ->
+                konverterTilTilleggsinfo(
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon,
+                    arbeidsgiver = status.event.arbeidsgiver,
+                    tidligereArbeidsgiver = status.event.tidligereArbeidsgiver,
+                )
+            }
+
         return SykmeldingHendelse(
             status = hendelseStatus,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
-            // TODO: Burde mappe tilleggsinfo fra status
-            tilleggsinfo = null,
+            tilleggsinfo = tilleggsinfo,
             opprettet = status.event.timestamp.toInstant(),
         )
     }
@@ -55,7 +60,7 @@ class SykmeldingHendelseKonverterer {
             }
             "SENDT" -> HendelseStatus.SENDT_TIL_ARBEIDSGIVER
             "UTGATT" -> HendelseStatus.UTGATT
-            else -> throw IllegalArgumentException("Ukjent status")
+            else -> throw IllegalArgumentException("Ukjent status: $status")
         }
 
     internal fun konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): BrukerSvar {
@@ -275,5 +280,57 @@ class SykmeldingHendelseKonverterer {
                 )
             }
         }
+    }
+
+    internal fun konverterTilTilleggsinfo(
+        arbeidssituasjon: Arbeidssituasjon,
+        arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
+        tidligereArbeidsgiver: TidligereArbeidsgiverKafkaDTO? = null,
+    ): Tilleggsinfo =
+        when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSTAKER -> {
+                requireNotNull(arbeidsgiver) { "Arbeidsgiver er påkrevd for arbeidstaker" }
+                ArbeidstakerTilleggsinfo(arbeidsgiver = konverterArbeidsgiver(arbeidsgiver))
+            }
+            Arbeidssituasjon.ARBEIDSLEDIG -> {
+                ArbeidsledigTilleggsinfo(
+                    tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
+                )
+            }
+            Arbeidssituasjon.PERMITTERT -> {
+                PermittertTilleggsinfo(
+                    tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
+                )
+            }
+            Arbeidssituasjon.FISKER ->
+                FiskerTilleggsinfo(
+                    arbeidsgiver = arbeidsgiver?.let { konverterArbeidsgiver(it) },
+                )
+            Arbeidssituasjon.FRILANSER -> FrilanserTilleggsinfo
+            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo
+            Arbeidssituasjon.JORDBRUKER -> JordbrukerTilleggsinfo
+            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonTilleggsinfo
+        }
+
+    internal fun konverterArbeidsgiver(arbeidsgiver: ArbeidsgiverStatusKafkaDTO): Arbeidsgiver {
+        requireNotNull(arbeidsgiver.juridiskOrgnummer) { "Arbeidsgiver juridiskOrgnummer er påkrevd" }
+        return Arbeidsgiver(
+            orgnummer = arbeidsgiver.orgnummer,
+            juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
+            orgnavn = arbeidsgiver.orgNavn,
+            // TODO: Hvordan finner vi ut av dette?
+            erAktivtArbeidsforhold = true,
+            // TODO: Trenger vi dette?
+            narmesteLeder = null,
+        )
+    }
+
+    internal fun konverterTidligereArbeidsgiver(tidligereArbeidsgiver: TidligereArbeidsgiverKafkaDTO): TidligereArbeidsgiver {
+        requireNotNull(tidligereArbeidsgiver.orgnummer) { "Tidligere arbeidsgiver orgnummer er påkrevd" }
+        requireNotNull(tidligereArbeidsgiver.orgNavn) { "Tidligere arbeidsgiver orgnavn er påkrevd" }
+        return TidligereArbeidsgiver(
+            orgnummer = tidligereArbeidsgiver.orgnummer,
+            orgNavn = tidligereArbeidsgiver.orgNavn,
+        )
     }
 }

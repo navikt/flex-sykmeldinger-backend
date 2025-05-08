@@ -49,7 +49,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde ikke kunne endre status fra SENDT_TIL_ARBEIDSGIVER til SENDT`() {
+    fun `burde respektere regler for status endring`() {
         sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
                 .leggTilHendelse(
@@ -61,7 +61,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
             )
         invoking {
             sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be false`()
