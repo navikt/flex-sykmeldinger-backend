@@ -1,0 +1,3 @@
+ALTER TABLE SYKMELDINGHENDELSE
+    DROP COLUMN arbeidstaker_info
+;

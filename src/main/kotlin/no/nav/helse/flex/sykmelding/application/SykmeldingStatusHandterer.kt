@@ -121,7 +121,6 @@ class SykmeldingStatusHandterer(
         ): Boolean =
             hendelse1.status == hendelse2.status &&
                 hendelse1.opprettet == hendelse2.opprettet &&
-                hendelse1.arbeidstakerInfo == hendelse2.arbeidstakerInfo &&
                 hendelse1.brukerSvar == hendelse2.brukerSvar &&
                 hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
     }
