@@ -1,13 +1,14 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
 import no.nav.helse.flex.api.dto.JaEllerNei
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.BrukerSvarKafkaDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import org.springframework.stereotype.Component
 
 @Component

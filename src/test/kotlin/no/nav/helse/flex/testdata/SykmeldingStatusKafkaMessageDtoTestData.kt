@@ -1,9 +1,12 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.producers.sykmeldingstatus.KafkaMetadataDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.*
+import no.nav.helse.flex.producers.KafkaMetadataDTO
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.FiskereSvarKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import java.time.LocalDate
 import java.time.OffsetDateTime
 

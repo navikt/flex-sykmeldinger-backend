@@ -1,14 +1,15 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import org.amshove.kluent.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`

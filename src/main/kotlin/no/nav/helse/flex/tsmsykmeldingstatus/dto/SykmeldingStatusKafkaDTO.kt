@@ -1,4 +1,4 @@
-package no.nav.helse.flex.producers.sykmeldingstatus.dto
+package no.nav.helse.flex.tsmsykmeldingstatus.dto
 
 import java.time.OffsetDateTime
 

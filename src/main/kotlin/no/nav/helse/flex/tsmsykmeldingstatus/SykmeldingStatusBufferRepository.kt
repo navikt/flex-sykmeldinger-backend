@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmeldingstatusbuffer
+package no.nav.helse.flex.tsmsykmeldingstatus
 
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id

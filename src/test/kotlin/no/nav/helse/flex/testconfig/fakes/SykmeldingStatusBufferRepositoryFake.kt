@@ -1,8 +1,8 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBufferDbRecord
-import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBufferRepository
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferDbRecord
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 
 class SykmeldingStatusBufferRepositoryFake :
     AbstractCrudRepositoryFake<SykmeldingStatusBufferDbRecord>(

@@ -6,12 +6,12 @@ import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
-import no.nav.helse.flex.sykmeldingstatusbuffer.SykmeldingStatusBuffer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

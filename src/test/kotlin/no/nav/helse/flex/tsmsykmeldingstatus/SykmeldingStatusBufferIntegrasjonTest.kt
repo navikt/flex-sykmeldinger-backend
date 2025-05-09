@@ -1,6 +1,6 @@
-package no.nav.helse.flex.sykmeldingstatusbuffer
+package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.lagKafkaMetadataDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO

@@ -1,7 +1,7 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.sykmeldingstatus.SykmeldingStatusProducer
+import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.producers.SykmeldingStatusProducer
 
 class SykmeldingStatusProducerFake : SykmeldingStatusProducer {
     private var sendteStatuser: MutableList<SykmeldingStatusKafkaMessageDTO> = mutableListOf()
