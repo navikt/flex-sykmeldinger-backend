@@ -90,7 +90,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
             )
 
         invoking { sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status) } `should throw`
-            IllegalStateException::class
+            IllegalArgumentException::class
     }
 
     @TestFactory
