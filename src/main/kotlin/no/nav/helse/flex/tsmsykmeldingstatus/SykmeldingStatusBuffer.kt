@@ -23,11 +23,11 @@ class SykmeldingStatusBuffer(
     @Transactional(rollbackFor = [Exception::class])
     fun leggTil(hendelse: SykmeldingStatusKafkaMessageDTO) {
         val sykmeldingId = hendelse.kafkaMetadata.sykmeldingId
-        log.info("Skal legge til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        log.info("Skal legge til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
         val record = hendelse.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
         aquireBufferLockFor(sykmeldingId)
         sykmeldingStatusBufferRepository.save(record)
-        log.info("Lagt til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        log.info("Lagt til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
     }
 
     fun kikkPaaAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> =
@@ -37,7 +37,7 @@ class SykmeldingStatusBuffer(
 
     @Transactional(rollbackFor = [Exception::class])
     fun prosesserAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
-        log.info("Skal prosesserer alle sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+        log.info("Skal prosesserer alle sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
         aquireBufferLockFor(sykmeldingId)
         val records = sykmeldingStatusBufferRepository.findAllBySykmeldingId(sykmeldingId)
         sykmeldingStatusBufferRepository.deleteAll(records)
@@ -45,7 +45,11 @@ class SykmeldingStatusBuffer(
             records
                 .sortedBy { it.sykmeldingStatusOpprettet }
                 .map { it.tilSykmeldingStatusKafkaMessageDTO() }
-        log.info("Prosesserer alle sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+        if (statuses.isEmpty()) {
+            log.info("Ingen sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
+        } else {
+            log.info("Prosesserer ${statuses.size} sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
+        }
         return statuses
     }
 

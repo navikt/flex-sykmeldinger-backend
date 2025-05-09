@@ -44,7 +44,7 @@ class AaregHendelserConsumer(
                     }
                 }
             }
-        if (time > 50 || totalByteSize > 20_000) {
+        if (time >= 1000 || totalByteSize >= 20_000) {
             log.warn(
                 "Prossesserte unormalt mange records: ${consumerRecords.count()}" +
                     ", med størrelse $totalByteSize bytes, iløpet av $time millisekunder",
