@@ -32,8 +32,8 @@ data class ArbeidstakerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsgiverOrgnummer: SporsmalSvar<String>,
-    val riktigNarmesteLeder: SporsmalSvar<Boolean>,
-    val harEgenmeldingsdager: SporsmalSvar<Boolean>,
+    val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
+    val harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
@@ -77,10 +77,14 @@ data class FiskerBrukerSvar(
     private val erArbeidstaker = lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)
 
     init {
-        val erArbeidstaker = runCatching { somArbeidstaker() }.isSuccess
-        val erNaringsdrivende = runCatching { somNaringsdrivende() }.isSuccess
-        if (!erArbeidstaker && !erNaringsdrivende) {
-            throw IllegalArgumentException("Fisker må ha satt felter tilknyttet arbeidsgiver eller næringsdrivende")
+        if (erArbeidstaker) {
+            runCatching { somArbeidstaker() }.onFailure {
+                throw IllegalArgumentException("Fisker som arbeidstaker må ha satt felter tilknyttet arbeidsgiver")
+            }
+        } else {
+            runCatching { somNaringsdrivende() }.onFailure {
+                throw IllegalArgumentException("Fisker som naringsdrivende må ha satt felter tilknyttet næringsdrivende")
+            }
         }
     }
 
@@ -90,8 +94,8 @@ data class FiskerBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
             arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
             arbeidsgiverOrgnummer = requireNotNull(arbeidsgiverOrgnummer) { "Fisker som er arbeidstaker må ha satt arbeidsgiverOrgnummer" },
-            riktigNarmesteLeder = requireNotNull(riktigNarmesteLeder) { "Fisker som er arbeidstaker må ha satt riktigNarmesteLeder" },
-            harEgenmeldingsdager = requireNotNull(harEgenmeldingsdager) { "Fisker som er arbeidstaker må ha satt harEgenmeldingsdager" },
+            riktigNarmesteLeder = riktigNarmesteLeder,
+            harEgenmeldingsdager = harEgenmeldingsdager,
             egenmeldingsdager = egenmeldingsdager,
             uriktigeOpplysninger = uriktigeOpplysninger,
         )
@@ -102,9 +106,9 @@ data class FiskerBrukerSvar(
         return NaringsdrivendeBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
             arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
-            harBruktEgenmelding = requireNotNull(harBruktEgenmelding) { "Fisker som er næringsdrivende må ha satt harBruktEgenmelding" },
+            harBruktEgenmelding = harBruktEgenmelding,
             egenmeldingsperioder = egenmeldingsperioder,
-            harForsikring = requireNotNull(harForsikring) { "Fisker som er næringsdrivende må ha satt harForsikring" },
+            harForsikring = harForsikring,
             uriktigeOpplysninger = uriktigeOpplysninger,
         )
     }
@@ -113,9 +117,9 @@ data class FiskerBrukerSvar(
 data class FrilanserBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
-    val harBruktEgenmelding: SporsmalSvar<Boolean>,
+    val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
-    val harForsikring: SporsmalSvar<Boolean>,
+    val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.FRILANSER
@@ -124,9 +128,9 @@ data class FrilanserBrukerSvar(
 data class JordbrukerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
-    val harBruktEgenmelding: SporsmalSvar<Boolean>,
+    val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
-    val harForsikring: SporsmalSvar<Boolean>,
+    val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
@@ -135,9 +139,9 @@ data class JordbrukerBrukerSvar(
 data class NaringsdrivendeBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
-    val harBruktEgenmelding: SporsmalSvar<Boolean>,
+    val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
-    val harForsikring: SporsmalSvar<Boolean>,
+    val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE

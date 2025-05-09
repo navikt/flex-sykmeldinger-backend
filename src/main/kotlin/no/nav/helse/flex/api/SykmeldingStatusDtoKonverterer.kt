@@ -50,19 +50,19 @@ class SykmeldingStatusDtoKonverterer {
             is ArbeidstakerBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.tilFritekstFormSvar(),
-                    riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder.tilJaEllerNeiFormSvar(),
+                    riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.tilJaEllerNeiFormSvar(),
                     egenmeldingsdager = brukerSvar.egenmeldingsdager?.tilDatolisteFormSvar(),
-                    harBruktEgenmeldingsdager = brukerSvar.harEgenmeldingsdager.tilJaEllerNeiFormSvar(),
+                    harBruktEgenmeldingsdager = brukerSvar.harEgenmeldingsdager?.tilJaEllerNeiFormSvar(),
                 )
 
             is AnnetArbeidssituasjonBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                 )
             is ArbeidsledigBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
@@ -101,27 +101,27 @@ class SykmeldingStatusDtoKonverterer {
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
-                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                    harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
                 )
             is JordbrukerBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
-                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                    harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
                 )
             is NaringsdrivendeBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
-                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding.tilJaEllerNeiFormSvar(),
+                    harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
-                    harForsikring = brukerSvar.harForsikring.tilJaEllerNeiFormSvar(),
+                    harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
                 )
         }
 

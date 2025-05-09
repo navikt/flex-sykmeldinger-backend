@@ -134,31 +134,31 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
                 val arbeidstakerBrukerSvar = konvertert as? ArbeidstakerBrukerSvar
                 arbeidstakerBrukerSvar.`should not be null`()
                 arbeidstakerBrukerSvar.arbeidsgiverOrgnummer.svar `should be equal to` "123456789"
-                arbeidstakerBrukerSvar.riktigNarmesteLeder.svar `should be equal to` true
-                arbeidstakerBrukerSvar.harEgenmeldingsdager.svar `should be equal to` true
+                arbeidstakerBrukerSvar.riktigNarmesteLeder?.svar `should be equal to` true
+                arbeidstakerBrukerSvar.harEgenmeldingsdager?.svar `should be equal to` true
                 arbeidstakerBrukerSvar.egenmeldingsdager?.svar `should be equal to` listOf(LocalDate.parse("2021-01-01"))
             }
             ArbeidssituasjonDTO.FRILANSER -> {
                 val frilanserBrukerSvar = konvertert as? FrilanserBrukerSvar
                 frilanserBrukerSvar.`should not be null`()
-                frilanserBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
+                frilanserBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 frilanserBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
                         Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
                         Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
                     )
-                frilanserBrukerSvar.harForsikring.svar `should be equal to` true
+                frilanserBrukerSvar.harForsikring?.svar `should be equal to` true
             }
             ArbeidssituasjonDTO.NAERINGSDRIVENDE -> {
                 val naeringsdrivendeBrukerSvar = konvertert as? NaringsdrivendeBrukerSvar
                 naeringsdrivendeBrukerSvar.`should not be null`()
-                naeringsdrivendeBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
+                naeringsdrivendeBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 naeringsdrivendeBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
                         Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
                         Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
                     )
-                naeringsdrivendeBrukerSvar.harForsikring.svar `should be equal to` true
+                naeringsdrivendeBrukerSvar.harForsikring?.svar `should be equal to` true
             }
             ArbeidssituasjonDTO.FISKER -> {
                 val fiskerBrukerSvar = konvertert as? FiskerBrukerSvar
@@ -169,13 +169,13 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
             ArbeidssituasjonDTO.JORDBRUKER -> {
                 val jordbrukerBrukerSvar = konvertert as? JordbrukerBrukerSvar
                 jordbrukerBrukerSvar.`should not be null`()
-                jordbrukerBrukerSvar.harBruktEgenmelding.svar `should be equal to` true
+                jordbrukerBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 jordbrukerBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
                         Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
                         Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
                     )
-                jordbrukerBrukerSvar.harForsikring.svar `should be equal to` true
+                jordbrukerBrukerSvar.harForsikring?.svar `should be equal to` true
             }
             ArbeidssituasjonDTO.ARBEIDSLEDIG -> {
                 val arbeidsledigBrukerSvar = konvertert as? ArbeidsledigBrukerSvar
