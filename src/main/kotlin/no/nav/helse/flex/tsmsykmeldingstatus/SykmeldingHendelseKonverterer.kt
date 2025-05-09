@@ -10,9 +10,13 @@ import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.util.function.Supplier
 
 @Component
-class SykmeldingHendelseKonverterer {
+class SykmeldingHendelseKonverterer(
+    private val nowFactory: Supplier<Instant>,
+) {
     fun konverterStatusTilSykmeldingHendelse(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
@@ -42,7 +46,9 @@ class SykmeldingHendelseKonverterer {
             status = hendelseStatus,
             brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = tilleggsinfo,
-            opprettet = status.event.timestamp.toInstant(),
+            source = status.kafkaMetadata.source,
+            hendelseOpprettet = status.event.timestamp.toInstant(),
+            lokaltOpprettet = nowFactory.get(),
         )
     }
 

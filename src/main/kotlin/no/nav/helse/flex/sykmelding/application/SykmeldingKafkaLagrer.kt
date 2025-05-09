@@ -67,7 +67,9 @@ class SykmeldingKafkaLagrer(
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
-                            opprettet = now,
+                            source = SykmeldingHendelse.LOKAL_SOURCE,
+                            hendelseOpprettet = now,
+                            lokaltOpprettet = now,
                         ),
                     ),
                 opprettet = now,

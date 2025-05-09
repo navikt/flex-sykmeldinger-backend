@@ -129,15 +129,24 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde sette status til ny`() {
+    fun `burde legge til hendelse med status APEN`() {
+        val now = Instant.parse("2024-01-01T00:00:00Z")
+        nowFactoryFake.setNow(now)
         val sykmeldingKafkaRecord = lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1"))
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-        sykmelding.shouldNotBeNull()
-        sykmelding.hendelser.size `should be equal to` 1
-        val status = sykmelding.hendelser[0]
-        status.status `should be equal to` HendelseStatus.APEN
+        sykmelding
+            .shouldNotBeNull()
+            .hendelser
+            .shouldHaveSize(1)
+            .first()
+            .run {
+                status `should be equal to` HendelseStatus.APEN
+                hendelseOpprettet `should be equal to` now
+                lokaltOpprettet `should be equal to` now
+                source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
+            }
     }
 
     @Test

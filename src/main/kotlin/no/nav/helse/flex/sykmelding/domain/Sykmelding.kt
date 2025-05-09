@@ -38,12 +38,12 @@ data class Sykmelding(
     val avsenderSystemNavn: AvsenderSystemNavn
         get() = sykmeldingGrunnlag.metadata.avsenderSystem.navn
 
-    fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.opprettet } ?: error("Ingen hendelser. Skal ikke skje.")
+    fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.hendelseOpprettet } ?: error("Ingen hendelser. Skal ikke skje.")
 
     fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
         this.copy(
             hendelser = this.hendelser + sykmeldingHendelse,
-            sykmeldingGrunnlagOppdatert = sykmeldingHendelse.opprettet,
+            hendelseOppdatert = sykmeldingHendelse.lokaltOpprettet,
         )
 }
 

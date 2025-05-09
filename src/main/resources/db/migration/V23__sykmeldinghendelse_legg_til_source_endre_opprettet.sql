@@ -1,0 +1,16 @@
+ALTER TABLE SYKMELDINGHENDELSE
+    ADD COLUMN hendelse_opprettet TIMESTAMP WITH TIME ZONE,
+    ADD COLUMN lokalt_opprettet TIMESTAMP WITH TIME ZONE,
+    ADD COLUMN source VARCHAR(256);
+
+UPDATE SYKMELDINGHENDELSE
+SET
+    hendelse_opprettet = opprettet,
+    lokalt_opprettet = opprettet;
+
+ALTER TABLE SYKMELDINGHENDELSE
+    ALTER COLUMN hendelse_opprettet SET NOT NULL,
+    ALTER COLUMN lokalt_opprettet SET NOT NULL;
+
+ALTER TABLE SYKMELDINGHENDELSE
+    DROP COLUMN opprettet;

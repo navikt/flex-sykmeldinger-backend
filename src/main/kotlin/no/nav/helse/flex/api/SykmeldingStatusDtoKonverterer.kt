@@ -14,7 +14,7 @@ class SykmeldingStatusDtoKonverterer {
     fun konverterSykmeldingStatus(hendelse: SykmeldingHendelse): SykmeldingStatusDTO =
         SykmeldingStatusDTO(
             statusEvent = konverterHendelseStatus(hendelse.status),
-            timestamp = hendelse.opprettet.atOffset(ZoneOffset.UTC),
+            timestamp = hendelse.hendelseOpprettet.atOffset(ZoneOffset.UTC),
             // TODO
             sporsmalOgSvarListe = emptyList(),
             arbeidsgiver = hendelse.tilleggsinfo?.let(::konverterArbeidsgiver),

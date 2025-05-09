@@ -21,7 +21,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.BEKREFTET_AVVIST,
-                opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
         val sykmeldingStatusKafkaDTO =
             SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
@@ -45,7 +45,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
                         status = HendelseStatus.AVBRUTT,
-                        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                     ),
             )
 
@@ -65,7 +65,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
                         status = HendelseStatus.APEN,
-                        opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                        hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                     ),
             )
 
@@ -87,7 +87,7 @@ class SykmeldingStatusKafkaDTOKonvertererTest {
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            opprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                             brukerSvar = lagArbeidstakerBrukerSvar(),
                             tilleggsinfo =
                                 ArbeidstakerTilleggsinfo(
