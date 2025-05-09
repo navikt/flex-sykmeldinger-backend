@@ -37,7 +37,7 @@ class SykmeldingStatusBuffer(
 
     @Transactional(rollbackFor = [Exception::class])
     fun prosesserAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
-        log.info("Skal prosesserer alle sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+        log.info("Skal prosesserer alle sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
         aquireBufferLockFor(sykmeldingId)
         val records = sykmeldingStatusBufferRepository.findAllBySykmeldingId(sykmeldingId)
         sykmeldingStatusBufferRepository.deleteAll(records)
@@ -45,7 +45,11 @@ class SykmeldingStatusBuffer(
             records
                 .sortedBy { it.sykmeldingStatusOpprettet }
                 .map { it.tilSykmeldingStatusKafkaMessageDTO() }
-        log.info("Prosesserer alle sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+        if (statuses.isEmpty()) {
+            log.info("Ingen sykmeldinghendelser i buffer for sykmeldingId: $sykmeldingId")
+        } else {
+            log.info("Prosesserer ${statuses.size} sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+        }
         return statuses
     }
 
