@@ -22,15 +22,13 @@ data class SendSykmeldingRequestDTO(
         when (arbeidssituasjon) {
             Arbeidssituasjon.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
-                requireNotNull(riktigNarmesteLeder) { "$arbeidssituasjon må ha satt riktigNarmesteLeder" }
-                requireNotNull(harEgenmeldingsdager) { "$arbeidssituasjon må ha satt harEgenmeldingsdager" }
                 ArbeidstakerBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.somUkjentSporsmal(),
-                    riktigNarmesteLeder = riktigNarmesteLeder.tilBoolean().somUkjentSporsmal(),
-                    harEgenmeldingsdager = harEgenmeldingsdager.tilBoolean().somUkjentSporsmal(),
+                    riktigNarmesteLeder = riktigNarmesteLeder?.tilBoolean()?.somUkjentSporsmal(),
+                    harEgenmeldingsdager = harEgenmeldingsdager?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsdager = egenmeldingsdager?.somUkjentSporsmal(),
                 )
             }
@@ -70,39 +68,33 @@ data class SendSykmeldingRequestDTO(
                 )
             }
             Arbeidssituasjon.FRILANSER -> {
-                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
-                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
                 FrilanserBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean().somUkjentSporsmal(),
+                    harBruktEgenmelding = harBruktEgenmelding?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder()?.somUkjentSporsmal(),
-                    harForsikring = harForsikring.tilBoolean().somUkjentSporsmal(),
+                    harForsikring = harForsikring?.tilBoolean()?.somUkjentSporsmal(),
                 )
             }
             Arbeidssituasjon.NAERINGSDRIVENDE -> {
-                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
-                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
                 NaringsdrivendeBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean().somUkjentSporsmal(),
+                    harBruktEgenmelding = harBruktEgenmelding?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder()?.somUkjentSporsmal(),
-                    harForsikring = harForsikring.tilBoolean().somUkjentSporsmal(),
+                    harForsikring = harForsikring?.tilBoolean()?.somUkjentSporsmal(),
                 )
             }
             Arbeidssituasjon.JORDBRUKER -> {
-                requireNotNull(harBruktEgenmelding) { "$arbeidssituasjon må ha satt harBruktEgenmelding" }
-                requireNotNull(harForsikring) { "$arbeidssituasjon må ha satt harForsikring" }
                 JordbrukerBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                    harBruktEgenmelding = harBruktEgenmelding.tilBoolean().somUkjentSporsmal(),
+                    harBruktEgenmelding = harBruktEgenmelding?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsperioder = egenmeldingsperioder?.tilEgenmeldingsperioder()?.somUkjentSporsmal(),
-                    harForsikring = harForsikring.tilBoolean().somUkjentSporsmal(),
+                    harForsikring = harForsikring?.tilBoolean()?.somUkjentSporsmal(),
                 )
             }
             Arbeidssituasjon.ANNET -> {
