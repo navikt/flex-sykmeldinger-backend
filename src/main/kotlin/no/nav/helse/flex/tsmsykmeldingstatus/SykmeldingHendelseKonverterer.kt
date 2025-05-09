@@ -26,8 +26,8 @@ class SykmeldingHendelseKonverterer(
             HendelseStatus.SENDT_TIL_NAV,
             HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
             -> {
-                if (status.event.brukerSvar == null) {
-                    throw IllegalStateException("Brukersvar er påkrevd, men er null i sykmeldingstatus")
+                requireNotNull(status.event.brukerSvar) {
+                    "Brukersvar er påkrevd for SENDT_TIL_NAV og SENDT_TIL_ARBEIDSGIVER"
                 }
             }
             else -> {}
@@ -206,22 +206,25 @@ class SykmeldingHendelseKonverterer(
 
         return when (brukerSvarKafkaDTO.arbeidssituasjon.svar) {
             ARBEIDSTAKER -> {
+                requireNotNull(arbeidsgiverOrgnummer) { "Arbeidsgiver orgnummer er påkrevd for ARBEIDSTAKER" }
                 ArbeidstakerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
-                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer ?: throw IllegalStateException("Arbeidsgiver orgnummer er påkrevd"),
-                    riktigNarmesteLeder = riktigNarmesteLeder ?: throw IllegalStateException("Riktig nærmeste leder er påkrevd"),
-                    harEgenmeldingsdager = harEgenmeldingsdager ?: throw IllegalStateException("Har egenmeldingsdager er påkrevd"),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+                    riktigNarmesteLeder = riktigNarmesteLeder,
+                    harEgenmeldingsdager = harEgenmeldingsdager,
                     egenmeldingsdager = egenmeldingsdager,
                 )
             }
             FISKER -> {
+                requireNotNull(lottOgHyre) { "Lott eller hyre er påkrevd for FISKER" }
+                requireNotNull(blad) { "Blad er påkrevd for FISKER" }
                 FiskerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
-                    lottOgHyre = lottOgHyre ?: throw IllegalStateException("Lott eller hyre er påkrevd"),
-                    blad = blad ?: throw IllegalStateException("Blad er påkrevd"),
+                    lottOgHyre = lottOgHyre,
+                    blad = blad,
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
                     riktigNarmesteLeder = riktigNarmesteLeder,
                     harEgenmeldingsdager = harEgenmeldingsdager,
@@ -237,9 +240,9 @@ class SykmeldingHendelseKonverterer(
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
-                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
-                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                    harForsikring = harForsikring,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
@@ -247,9 +250,9 @@ class SykmeldingHendelseKonverterer(
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
-                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
-                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                    harForsikring = harForsikring,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
@@ -258,9 +261,9 @@ class SykmeldingHendelseKonverterer(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
-                    harBruktEgenmelding = harBruktEgenmelding ?: throw IllegalStateException("Har brukt egenmelding er påkrevd"),
+                    harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
-                    harForsikring = harForsikring ?: throw IllegalStateException("Har forsikring er påkrevd"),
+                    harForsikring = harForsikring,
                 )
             }
             ARBEIDSLEDIG -> {
