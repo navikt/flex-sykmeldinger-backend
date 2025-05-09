@@ -23,11 +23,11 @@ class SykmeldingStatusBuffer(
     @Transactional(rollbackFor = [Exception::class])
     fun leggTil(hendelse: SykmeldingStatusKafkaMessageDTO) {
         val sykmeldingId = hendelse.kafkaMetadata.sykmeldingId
-        log.info("Skal legge til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        log.info("Skal legge til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
         val record = hendelse.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
         aquireBufferLockFor(sykmeldingId)
         sykmeldingStatusBufferRepository.save(record)
-        log.info("Lagt til sykmeldinghendelse i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        log.info("Lagt til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
     }
 
     fun kikkPaaAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> =
@@ -46,9 +46,9 @@ class SykmeldingStatusBuffer(
                 .sortedBy { it.sykmeldingStatusOpprettet }
                 .map { it.tilSykmeldingStatusKafkaMessageDTO() }
         if (statuses.isEmpty()) {
-            log.info("Ingen sykmeldinghendelser i buffer for sykmeldingId: $sykmeldingId")
+            log.info("Ingen sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
         } else {
-            log.info("Prosesserer ${statuses.size} sykmeldinghendelse i buffer for sykmeldingId: $sykmeldingId")
+            log.info("Prosesserer ${statuses.size} sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
         }
         return statuses
     }
