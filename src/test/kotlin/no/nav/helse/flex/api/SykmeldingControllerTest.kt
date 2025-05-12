@@ -7,6 +7,7 @@ import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
+import no.nav.helse.flex.sykmelding.application.SporsmalSvar
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -840,6 +841,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 }
 
+// todo dette er ikke en ferdig test
 fun lagSendSykmeldingRequestDTO(
     erOpplysningeneRiktige: YesOrNoDTO = YesOrNoDTO.YES,
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ANNET,
@@ -849,16 +851,16 @@ fun lagSendSykmeldingRequestDTO(
     arbeidsledig: ArbeidsledigDTO? = null,
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        arbeidssituasjon = arbeidssituasjon,
+        erOpplysningeneRiktige = SporsmalSvar("Er opplysningene riktige?", erOpplysningeneRiktige),
+        arbeidssituasjon = SporsmalSvar("Hva er din arbeidssituasjon?", arbeidssituasjon),
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-        riktigNarmesteLeder = riktigNarmesteLeder,
-        harEgenmeldingsdager = harEgenmeldingsdager,
-        arbeidsledig = arbeidsledig,
+        harEgenmeldingsdager = harEgenmeldingsdager?.let { SporsmalSvar("Har du brukt egenmeldingsdager?", it) },
+        riktigNarmesteLeder = riktigNarmesteLeder?.let { SporsmalSvar("Er dette din nærmeste leder?", it) },
+        arbeidsledig = arbeidsledig?.let { SporsmalSvar("Er du arbeidsledig?", it) },
         egenmeldingsdager = null,
         egenmeldingsperioder = null,
         fisker = null,
         harBruktEgenmelding = null,
-        harForsikring = null,
+        harForsikring = SporsmalSvar("Har du forsikring?", YesOrNoDTO.NO),
         uriktigeOpplysninger = null,
     )
