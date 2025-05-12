@@ -1,10 +1,9 @@
 package no.nav.helse.flex.listeners
 
-import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
-import no.nav.helse.flex.utils.LogMarker
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -29,24 +28,40 @@ class SykmeldingListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
+        try {
+            prosesserKafkaRecord(cr)
+            acknowledgment.acknowledge()
+        } catch (e: Exception) {
+            throw RuntimeException("Feil ved behandling av sykmelding på kafka. Melding key: ${cr.key()}")
+        }
+    }
+
+    internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         val value = cr.value()
         if (value == null) {
-            log.warn("Mottok sykmelding med null value, key: ${cr.key()}")
+            log.warn("Mottok sykmelding med null value, key: ${cr.key()}. Hopper over denne")
             return
         }
 
+        val sykmeldingRecord: SykmeldingKafkaRecord =
+            try {
+                objectMapper.readValue(value)
+            } catch (e: Exception) {
+                log.errorSecure(
+                    "Feil sykmelding format. Melding key: ${cr.key()}",
+                    secureMessage = "Rå sykmelding: ${cr.value()}",
+                    secureThrowable = e,
+                )
+                throw e
+            }
+        log.info("Mottok sykmelding med id ${sykmeldingRecord.sykmelding.id} fra topic $SYKMELDING_TOPIC")
         try {
-            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord = objectMapper.readValue(value)
-            log.info("Mottok sykmelding med id ${sykmeldingMedBehandlingsutfall.sykmelding.id} fra topic $SYKMELDING_TOPIC")
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
-            acknowledgment.acknowledge()
-        } catch (e: JacksonException) {
-            log.error("Feil sykmelding format. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Feil sykmelding format. Melding key: ${cr.key()}, value: ${cr.value()}", e)
-            throw e
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingRecord)
         } catch (e: Exception) {
-            log.error("Exception ved sykmelding håndtering. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Exception ved sykmelding håndtering. Melding key: ${cr.key()}, value: ${cr.value()}", e)
+            log.errorSecure(
+                "Feil ved sykmelding håndtering. sykmeldingId: ${sykmeldingRecord.sykmelding.id}, meldingKey: ${cr.key()}",
+                secureThrowable = e,
+            )
             throw e
         }
     }
