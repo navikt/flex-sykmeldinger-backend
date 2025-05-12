@@ -3,12 +3,15 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.concurrent.TimeUnit
 
 class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Autowired
@@ -16,6 +19,9 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Autowired
     lateinit var sykmeldingStatusBuffer: SykmeldingStatusBuffer
+
+    @Autowired
+    lateinit var advisoryLockFake: AdvisoryLockFake
 
     @AfterEach
     fun cleanUp() {
@@ -109,5 +115,19 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         val status = lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"))
         sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be true`()
         sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be false`()
+    }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    fun `lagreSykmeldingStatus og prosesserSykmeldingStatuserFraBuffer burde synkronisere ved buffer lås`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+            ),
+        )
+        advisoryLockFake.lockCount() `should be equal to` 1
+        sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmeldingId = "1")
+        advisoryLockFake.lockCount() `should be equal to` 2
     }
 }

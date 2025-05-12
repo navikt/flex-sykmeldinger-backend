@@ -20,14 +20,16 @@ class SykmeldingStatusBuffer(
 ) {
     private val log = logger()
 
-    @Transactional(rollbackFor = [Exception::class])
-    fun leggTil(hendelse: SykmeldingStatusKafkaMessageDTO) {
-        val sykmeldingId = hendelse.kafkaMetadata.sykmeldingId
-        log.info("Skal legge til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
-        val record = hendelse.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
-        aquireBufferLockFor(sykmeldingId)
+    fun taLaasFor(sykmeldingId: String) {
+        advisoryLock.acquire("SykmeldingHendelseBuffer", sykmeldingId)
+    }
+
+    fun leggTil(status: SykmeldingStatusKafkaMessageDTO) {
+        val sykmeldingId = status.kafkaMetadata.sykmeldingId
+        log.info("Skal legge til sykmeldingstatus i buffer. Status: ${status.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        val record = status.tilBuffretSykmeldingHendelseDbRecord(now = nowFactory.get())
         sykmeldingStatusBufferRepository.save(record)
-        log.info("Lagt til sykmeldingstatus i buffer. Status: ${hendelse.event.statusEvent}, sykmeldingId: $sykmeldingId")
+        log.info("Lagt til sykmeldingstatus i buffer. Status: ${status.event.statusEvent}, sykmeldingId: $sykmeldingId")
     }
 
     fun kikkPaaAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> =
@@ -36,9 +38,8 @@ class SykmeldingStatusBuffer(
             .map { it.tilSykmeldingStatusKafkaMessageDTO() }
 
     @Transactional(rollbackFor = [Exception::class])
-    fun prosesserAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
+    fun fjernAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaMessageDTO> {
         log.info("Skal prosesserer alle sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
-        aquireBufferLockFor(sykmeldingId)
         val records = sykmeldingStatusBufferRepository.findAllBySykmeldingId(sykmeldingId)
         sykmeldingStatusBufferRepository.deleteAll(records)
         val statuses =
@@ -51,10 +52,6 @@ class SykmeldingStatusBuffer(
             log.info("Prosesserer ${statuses.size} sykmeldingstatuser i buffer for sykmeldingId: $sykmeldingId")
         }
         return statuses
-    }
-
-    private fun aquireBufferLockFor(sykmeldingId: String) {
-        advisoryLock.acquire("SykmeldingHendelseBuffer", sykmeldingId)
     }
 
     companion object {
