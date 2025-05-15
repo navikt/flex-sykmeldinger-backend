@@ -29,6 +29,10 @@ class SykmeldingListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
+            if (cr.value() == null) {
+                log.warn("Mottok sykmelding tombstone, key: ${cr.key()}. Ikke implementert, hopper over denne uten ack")
+                return
+            }
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
         } catch (e: Exception) {
@@ -38,11 +42,6 @@ class SykmeldingListener(
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         val value = cr.value()
-        if (value == null) {
-            log.warn("Mottok sykmelding med null value, key: ${cr.key()}. Hopper over denne")
-            return
-        }
-
         val sykmeldingRecord: SykmeldingKafkaRecord =
             try {
                 objectMapper.readValue(value)
