@@ -1,12 +1,11 @@
 package no.nav.helse.flex.listeners
 
-import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
-import no.nav.helse.flex.utils.LogMarker
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -32,21 +31,37 @@ class SykmeldingStatusListener(
         acknowledgment: Acknowledgment,
     ) {
         if (environmentToggles.isProduction()) {
-            log.info("SykmeldingStatus listener er skrudd av i prod. Hopper over melding med key: ${cr.key()}")
+            log.info("SykmeldingStatus listener er skrudd av i prod. Hopper over melding, meldingKey: ${cr.key()}")
             return
         }
         try {
-            log.info("Mottatt status for sykmelding ${cr.key()}")
-            val status: SykmeldingStatusKafkaMessageDTO = objectMapper.readValue(cr.value())
-            sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
+            prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
-        } catch (e: JacksonException) {
-            log.error("Feil sykmelding status format. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Feil sykmelding status format. Melding key: ${cr.key()}", e)
-            throw e
         } catch (e: Exception) {
-            log.error("Exception ved sykmelding status håndtering. Melding key: ${cr.key()}. Se secure logs")
-            log.error(LogMarker.SECURE_LOGS, "Exception ved sykmelding status håndtering. Melding key: ${cr.key()}", e)
+            throw RuntimeException("Feil ved behandling av sykmelding status på kafka, meldingKey: ${cr.key()}")
+        }
+    }
+
+    internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
+        log.info("Mottatt status for sykmelding: ${cr.key()}")
+        val status: SykmeldingStatusKafkaMessageDTO =
+            try {
+                objectMapper.readValue(cr.value())
+            } catch (e: Exception) {
+                log.errorSecure(
+                    "Feil sykmelding status format, meldingKey: ${cr.key()}",
+                    secureMessage = "Rå sykmelding status: ${cr.value()}",
+                    secureThrowable = e,
+                )
+                throw e
+            }
+
+        try {
+            sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
+        } catch (e: Exception) {
+            log.errorSecure(
+                "Feil ved håndtering av sykmelding status, sykmeldingId: ${status.kafkaMetadata.sykmeldingId}, status: ${status.event.statusEvent}, meldingKey: ${cr.key()}",
+            )
             throw e
         }
     }
