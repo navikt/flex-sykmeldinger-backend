@@ -28,6 +28,7 @@ class SykmeldingStatusHandterer(
 ) {
     private val log = logger()
 
+    @Transactional(rollbackFor = [Exception::class])
     fun lagreSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
