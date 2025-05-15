@@ -28,15 +28,18 @@ class SykmeldingStatusHandterer(
 ) {
     private val log = logger()
 
+    @Transactional(rollbackFor = [Exception::class])
     fun lagreSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
         }
-
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(status.kafkaMetadata.sykmeldingId)
+        val sykmeldingId = status.kafkaMetadata.sykmeldingId
+        sykmeldingStatusBuffer.taLaasFor(sykmeldingId)
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
-            leggStatusIBuffer(status)
+            log.info("Fant ikke sykmelding med id $sykmeldingId, buffrer status: ${status.event.statusEvent}")
+            sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
             return lagreStatusForEksisterendeSykmelding(sykmelding, status)
@@ -45,7 +48,8 @@ class SykmeldingStatusHandterer(
 
     @Transactional(rollbackFor = [Exception::class])
     fun prosesserSykmeldingStatuserFraBuffer(sykmeldingId: String) {
-        val buffredeStatuser = sykmeldingStatusBuffer.prosesserAlleFor(sykmeldingId)
+        sykmeldingStatusBuffer.taLaasFor(sykmeldingId)
+        val buffredeStatuser = sykmeldingStatusBuffer.fjernAlleFor(sykmeldingId)
         for (status in buffredeStatuser) {
             lagreSykmeldingStatus(status)
         }
@@ -62,16 +66,6 @@ class SykmeldingStatusHandterer(
                     ),
             )
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
-    }
-
-    private fun leggStatusIBuffer(status: SykmeldingStatusKafkaMessageDTO) {
-        val sykmeldingId = status.kafkaMetadata.sykmeldingId
-        val statusEvent = status.event.statusEvent
-        log.info(
-            "Fant ikke sykmelding med id $sykmeldingId, " +
-                "buffrer status: $statusEvent",
-        )
-        sykmeldingStatusBuffer.leggTil(status)
     }
 
     private fun lagreStatusForEksisterendeSykmelding(

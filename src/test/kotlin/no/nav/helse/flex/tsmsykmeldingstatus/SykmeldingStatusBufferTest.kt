@@ -5,7 +5,6 @@ import no.nav.helse.flex.testdata.lagKafkaMetadataDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeFalse
 import org.amshove.kluent.shouldBeTrue
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
@@ -24,6 +23,12 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
     }
 
     @Test
+    fun `taLaasFor burde låse buffer`() {
+        sykmeldingStatusBuffer.taLaasFor("1")
+        advisoryLock.hasLock("SykmeldingHendelseBuffer", "1").shouldBeTrue()
+    }
+
+    @Test
     fun `leggTil burde legge til sykmeldinghendelse`() {
         val kafkaMelding =
             lagSykmeldingStatusKafkaMessageDTO(
@@ -34,16 +39,6 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
         val lagredeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         lagredeHendelser shouldHaveSize 1
         lagredeHendelser.first() shouldBeEqualTo kafkaMelding
-    }
-
-    @Test
-    fun `leggTil burde låse buffer`() {
-        sykmeldingStatusBuffer.leggTil(
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-            ),
-        )
-        advisoryLock.hasLock("SykmeldingHendelseBuffer", "1").shouldBeTrue()
     }
 
     @Test
@@ -69,19 +64,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `kikkPaaAlleFor burde ikke låse buffer`() {
-        sykmeldingStatusBuffer.leggTil(
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-            ),
-        )
-        advisoryLock.reset()
-        sykmeldingStatusBuffer.kikkPaaAlleFor("1")
-        advisoryLock.hasLocks().shouldBeFalse()
-    }
-
-    @Test
-    fun `prosesserAlleFor burde hente alle for sykmeldingId`() {
+    fun `fjernAlleFor burde hente alle for sykmeldingId`() {
         listOf(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -94,7 +77,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
             ),
         ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        val hendelser = sykmeldingStatusBuffer.prosesserAlleFor("1")
+        val hendelser = sykmeldingStatusBuffer.fjernAlleFor("1")
         hendelser shouldHaveSize 2
         hendelser.forEach {
             it.kafkaMetadata.sykmeldingId shouldBeEqualTo "1"
@@ -102,7 +85,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `prosesserAlleFor burde slette alle for sykmeldingId`() {
+    fun `fjernAlleFor burde slette alle for sykmeldingId`() {
         listOf(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -115,7 +98,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
             ),
         ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        sykmeldingStatusBuffer.prosesserAlleFor("1")
+        sykmeldingStatusBuffer.fjernAlleFor("1")
         val resterendeHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("1")
         resterendeHendelser shouldHaveSize 0
         val andreHendelser = sykmeldingStatusBuffer.kikkPaaAlleFor("2")
@@ -123,7 +106,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `prosesserAlleFor burde returnere hendelser i rekkefølge`() {
+    fun `fjernAlleFor burde returnere hendelser i rekkefølge`() {
         val førsteTidspunkt = OffsetDateTime.parse("2023-01-01T00:00:00Z")
         val andreTidspunkt = OffsetDateTime.parse("2024-01-01T00:00:00Z")
         val tredjeTidspunkt = OffsetDateTime.parse("2025-01-01T00:00:00Z")
@@ -152,7 +135,7 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
             ),
         ).forEach { sykmeldingStatusBuffer.leggTil(it) }
 
-        val hendelser = sykmeldingStatusBuffer.prosesserAlleFor("1")
+        val hendelser = sykmeldingStatusBuffer.fjernAlleFor("1")
         hendelser shouldHaveSize 3
         hendelser.map { it.kafkaMetadata.timestamp } shouldBeEqualTo
             listOf(
@@ -160,17 +143,5 @@ class SykmeldingStatusBufferTest : FakesTestOppsett() {
                 andreTidspunkt,
                 tredjeTidspunkt,
             )
-    }
-
-    @Test
-    fun `prosesserAlleFor burde låse buffer`() {
-        sykmeldingStatusBuffer.leggTil(
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-            ),
-        )
-        advisoryLock.reset()
-        sykmeldingStatusBuffer.prosesserAlleFor("1")
-        advisoryLock.hasLocks().shouldBeTrue()
     }
 }
