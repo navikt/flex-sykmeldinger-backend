@@ -50,6 +50,7 @@ class SykmeldingStatusHandterer(
                     true
                 }
                 StatusEventKafkaDTO.APEN -> {
+                    log.info("Ignorerer status $statusEvent for sykmelding '$sykmeldingId'")
                     true
                 }
                 else -> {
