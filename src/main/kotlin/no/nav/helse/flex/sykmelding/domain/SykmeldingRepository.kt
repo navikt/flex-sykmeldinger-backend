@@ -23,6 +23,10 @@ interface ISykmeldingRepository {
 
     fun findAll(): List<Sykmelding>
 
+    fun deleteBySykmeldingId(sykmeldingId: String)
+
+    fun delete(sykmelding: Sykmelding)
+
     fun deleteAll()
 }
 
@@ -71,6 +75,24 @@ class SykmeldingRepository(
         }
     }
 
+    @Transactional(rollbackFor = [Exception::class])
+    override fun deleteBySykmeldingId(sykmeldingId: String) {
+        val sykmelding = findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            return
+        }
+        delete(sykmelding)
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    override fun delete(sykmelding: Sykmelding) {
+        val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding)
+        val hendelserDbRecords = SykmeldingHendelseDbRecord.mapFraHendelser(sykmelding.hendelser, sykmelding.sykmeldingId)
+        sykmeldingHendelseDbRepository.deleteAll(hendelserDbRecords)
+        sykmeldingDbRepository.delete(sykmeldingDbRecord)
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
     override fun deleteAll() {
         sykmeldingHendelseDbRepository.deleteAll()
         sykmeldingDbRepository.deleteAll()

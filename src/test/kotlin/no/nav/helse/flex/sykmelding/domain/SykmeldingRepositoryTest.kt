@@ -4,17 +4,18 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 
 class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
+    @Autowired
+    lateinit var sykmeldingHendelseDbRepository: SykmeldingHendelseDbRepository
+
     @AfterEach
     fun afterEach() {
         super.slettDatabase()
@@ -204,6 +205,78 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "3", pasient = lagPasient(fnr = "3"))))
 
         sykmeldingRepository.findAllByPersonIdenter(PersonIdenter("1", listOf("2"))) shouldHaveSize 2
+    }
+
+    @Test
+    fun `deleteBySykmeldingId burde slette bestemt sykmelding`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+
+        sykmeldingRepository.deleteBySykmeldingId("1")
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
+        sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
+    }
+
+    @Test
+    fun `deleteBySykmeldingId burde slette sykmelding hendelser`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldNotBeEmpty()
+        sykmeldingRepository.deleteBySykmeldingId("1")
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
+    }
+
+    @Test
+    fun `delete burde slette bestemt sykmelding`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+
+        val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.delete(sykmelding1)
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
+        sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
+    }
+
+    @Test
+    fun `delete burde slette sykmelding hendelser`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldNotBeEmpty()
+        val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.delete(sykmelding1)
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
     }
 
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =

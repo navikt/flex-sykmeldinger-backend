@@ -57,7 +57,7 @@ class SykmeldingStatusListener(
             }
 
         try {
-            sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
+            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
         } catch (e: Exception) {
             log.errorSecure(
                 "Feil ved håndtering av sykmelding status, sykmeldingId: ${status.kafkaMetadata.sykmeldingId}, status: ${status.event.statusEvent}, meldingKey: ${cr.key()}",

@@ -7,6 +7,7 @@ import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
@@ -29,7 +30,7 @@ class SykmeldingStatusHandterer(
     private val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
-    fun lagreSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+    fun handterSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
@@ -42,7 +43,14 @@ class SykmeldingStatusHandterer(
             sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
-            return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+            val statusEvent = status.event.statusEvent
+            if (statusEvent == StatusEventKafkaDTO.SLETTET) {
+                log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
+                sykmeldingRepository.delete(sykmelding)
+                return true
+            } else {
+                return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+            }
         }
     }
 
@@ -51,7 +59,7 @@ class SykmeldingStatusHandterer(
         sykmeldingStatusBuffer.taLaasFor(sykmeldingId)
         val buffredeStatuser = sykmeldingStatusBuffer.fjernAlleFor(sykmeldingId)
         for (status in buffredeStatuser) {
-            lagreSykmeldingStatus(status)
+            handterSykmeldingStatus(status)
         }
     }
 
