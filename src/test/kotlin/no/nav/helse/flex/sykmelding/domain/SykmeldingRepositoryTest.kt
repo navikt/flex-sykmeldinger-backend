@@ -204,7 +204,31 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde slette bestemt sykmelding`() {
+    fun `deleteBySykmeldingId burde slette bestemt sykmelding`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+
+        sykmeldingRepository.deleteBySykmeldingId("1")
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
+        sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
+    }
+
+//    @Test
+//    fun `deleteBySykmeldingId burde slette sykmelding hendelser`() {
+//        TODO()
+//    }
+
+    @Test
+    fun `delete burde slette bestemt sykmelding`() {
         sykmeldingRepository.save(
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
