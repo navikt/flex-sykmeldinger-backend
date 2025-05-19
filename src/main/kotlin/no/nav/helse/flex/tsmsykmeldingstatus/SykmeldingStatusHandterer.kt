@@ -29,7 +29,7 @@ class SykmeldingStatusHandterer(
     private val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
-    fun lagreSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
+    fun handterSykmeldingStatus(status: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (status.erFraEgetSystem()) {
             log.info("Hendelse er fra flex-sykmeldinger-backend, ignorerer")
             return false
@@ -58,7 +58,7 @@ class SykmeldingStatusHandterer(
         sykmeldingStatusBuffer.taLaasFor(sykmeldingId)
         val buffredeStatuser = sykmeldingStatusBuffer.fjernAlleFor(sykmeldingId)
         for (status in buffredeStatuser) {
-            lagreSykmeldingStatus(status)
+            handterSykmeldingStatus(status)
         }
     }
 
