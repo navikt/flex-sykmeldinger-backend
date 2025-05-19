@@ -1,10 +1,10 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.sykmelding.SykmeldingDbRepositoryFake
-import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.SykmeldingDbRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
 import org.amshove.kluent.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

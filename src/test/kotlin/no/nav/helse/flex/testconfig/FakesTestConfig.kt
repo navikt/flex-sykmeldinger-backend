@@ -4,11 +4,11 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
-import no.nav.helse.flex.sykmelding.SykmeldingDbRepositoryFake
-import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepositoryFake
 import no.nav.helse.flex.sykmelding.domain.SykmeldingDbRepository
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.fakes.*
+import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
