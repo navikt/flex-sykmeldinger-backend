@@ -43,13 +43,18 @@ class SykmeldingStatusHandterer(
             sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
-            val statusEvent = status.event.statusEvent
-            if (statusEvent == StatusEventKafkaDTO.SLETTET) {
-                log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
-                sykmeldingRepository.delete(sykmelding)
-                return true
-            } else {
-                return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+            return when (val statusEvent = status.event.statusEvent) {
+                StatusEventKafkaDTO.SLETTET -> {
+                    log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
+                    sykmeldingRepository.delete(sykmelding)
+                    true
+                }
+                StatusEventKafkaDTO.APEN -> {
+                    true
+                }
+                else -> {
+                    return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+                }
             }
         }
     }

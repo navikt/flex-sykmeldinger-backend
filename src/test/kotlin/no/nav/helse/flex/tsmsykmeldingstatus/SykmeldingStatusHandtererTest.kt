@@ -54,6 +54,40 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
+    fun `burde ignorere APEN status`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
+            hendelser.shouldHaveSize(1)
+        }
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "APEN",
+                    ),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
+            hendelser.shouldHaveSize(1)
+        }
+    }
+
+    @Test
+    fun `burde returnere true ved APEN status`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "APEN",
+                    ),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).shouldBeTrue()
+    }
+
+    @Test
     fun `burde slette sykmelding ved status SLETTET`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status =
