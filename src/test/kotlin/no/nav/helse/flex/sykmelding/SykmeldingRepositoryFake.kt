@@ -1,44 +1,34 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import java.util.*
+import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
 
-class SykmeldingRepositoryFake : ISykmeldingRepository {
-    private val lagretSykmelding: MutableMap<String, Sykmelding> = mutableMapOf()
+class SykmeldingDbRepositoryFake :
+    AbstractCrudRepositoryFake<SykmeldingDbRecord>(
+        getEntityId = { it.id },
+        setEntityId = { entity, id -> entity.copy(id = id) },
+    ),
+    SykmeldingDbRepository {
+    override fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord> = this.entities.values.filter { it.fnr in identer }
 
-    private fun lagId(): String = UUID.randomUUID().toString()
-
-    override fun save(sykmelding: Sykmelding): Sykmelding {
-        val sykmeldingMedIder =
-            sykmelding.copy(
-                databaseId = sykmelding.databaseId ?: lagId(),
-                hendelser = sykmelding.hendelser.map { it.copy(databaseId = it.databaseId ?: lagId()) },
-            )
-        lagretSykmelding[sykmeldingMedIder.databaseId!!] = sykmeldingMedIder
-        return sykmeldingMedIder
-    }
-
-    override fun findBySykmeldingId(id: String): Sykmelding? = lagretSykmelding.values.find { it.sykmeldingGrunnlag.id == id }
-
-    override fun findAllByPersonIdenter(identer: PersonIdenter): List<Sykmelding> =
-        lagretSykmelding.values.filter {
-            it.sykmeldingGrunnlag.pasient.fnr in
-                identer.alle()
+    override fun findBySykmeldingId(sykmeldingUuid: String): SykmeldingDbRecord? =
+        this.entities.values.find {
+            it.sykmeldingId ==
+                sykmeldingUuid
         }
+}
 
-    override fun findAll(): List<Sykmelding> = lagretSykmelding.values.toList()
+class SykmeldingHendelseDbRepositoryFake :
+    AbstractCrudRepositoryFake<SykmeldingHendelseDbRecord>(
+        getEntityId = { it.id },
+        setEntityId = { entity, id -> entity.copy(id = id) },
+    ),
+    SykmeldingHendelseDbRepository {
+    override fun findAllBySykmeldingId(sykmeldingUuid: String): List<SykmeldingHendelseDbRecord> =
+        this.entities.values.filter { it.sykmeldingId == sykmeldingUuid }
 
-    override fun deleteBySykmeldingId(sykmeldingId: String) {
-        lagretSykmelding.remove(sykmeldingId)
-    }
-
-    override fun delete(sykmelding: Sykmelding) {
-        lagretSykmelding.remove(sykmelding.databaseId)
-    }
-
-    override fun deleteAll() {
-        lagretSykmelding.clear()
-    }
+    override fun findAllBySykmeldingIdIn(sykmeldingUuid: Collection<String>): List<SykmeldingHendelseDbRecord> =
+        this.entities.values.filter {
+            it.sykmeldingId in sykmeldingUuid
+        }
 }
