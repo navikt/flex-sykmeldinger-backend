@@ -30,6 +30,10 @@ class SykmeldingRepositoryFake : ISykmeldingRepository {
 
     override fun findAll(): List<Sykmelding> = lagretSykmelding.values.toList()
 
+    override fun delete(sykmelding: Sykmelding) {
+        lagretSykmelding.remove(sykmelding.databaseId)
+    }
+
     override fun deleteAll() {
         lagretSykmelding.clear()
     }
