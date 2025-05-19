@@ -42,7 +42,14 @@ class SykmeldingStatusHandterer(
             sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
-            return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+            val statusEvent = status.event.statusEvent
+            if (statusEvent == "SLETTET") {
+                log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
+                sykmeldingRepository.delete(sykmelding)
+                return true
+            } else {
+                return lagreStatusForEksisterendeSykmelding(sykmelding, status)
+            }
         }
     }
 

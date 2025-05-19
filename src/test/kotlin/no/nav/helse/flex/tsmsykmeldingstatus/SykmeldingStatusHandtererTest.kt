@@ -54,6 +54,51 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
+    fun `burde slette sykmelding ved status SLETTET`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "SLETTET",
+                    ),
+            )
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be true`()
+        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
+    }
+
+    @Test
+    fun `burde returnere true ved slette sykmelding`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "SLETTET",
+                    ),
+            )
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status).`should be true`()
+    }
+
+    @Test
+    fun `burde kun slette spesifikk sykmelding ved status SLETTET`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "SLETTET",
+                    ),
+            )
+        sykmeldingStatusHandterer.lagreSykmeldingStatus(status)
+        sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
+    }
+
+    @Test
     fun `burde respektere regler for status endring`() {
         sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
