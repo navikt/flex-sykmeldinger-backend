@@ -9,9 +9,13 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 
 class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
+    @Autowired
+    lateinit var sykmeldingHendelseDbRepository: SykmeldingHendelseDbRepository
+
     @AfterEach
     fun afterEach() {
         super.slettDatabase()
@@ -222,10 +226,21 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
     }
 
-//    @Test
-//    fun `deleteBySykmeldingId burde slette sykmelding hendelser`() {
-//        TODO()
-//    }
+    @Test
+    fun `deleteBySykmeldingId burde slette sykmelding hendelser`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldNotBeEmpty()
+        sykmeldingRepository.deleteBySykmeldingId("1")
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
+    }
 
     @Test
     fun `delete burde slette bestemt sykmelding`() {
@@ -245,6 +260,23 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
         sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
+    }
+
+    @Test
+    fun `delete burde slette sykmelding hendelser`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(),
+                    ),
+            ),
+        )
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldNotBeEmpty()
+        val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.delete(sykmelding1)
+        sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
     }
 
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =
