@@ -53,7 +53,7 @@ class PdlClientTest {
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
-                query(${"$"}ident: ID!) {
+                query HentIdenterMedHistorikk(${"$"}ident: ID!) {
                     hentIdenter(ident: ${"$"}ident, historikk: true) {
                         identer {
                             ident,
@@ -124,7 +124,7 @@ class PdlClientTest {
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
-            query(${'$'}ident: ID!) {
+            query HentPersonNavn(${'$'}ident: ID!) {
                 hentPerson(ident: ${'$'}ident) {
                     navn(historikk: false) {
                         fornavn
@@ -200,7 +200,7 @@ class PdlClientTest {
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
-                query(${"$"}ident: ID!) {
+                query HentPersonFoedselsdato(${"$"}ident: ID!) {
                   hentPerson(ident: ${"$"}ident) {
                     foedselsdato {
                       foedselsdato
