@@ -1,9 +1,15 @@
 package no.nav.helse.flex.testconfig
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.clients.pdl.GraphQlRequest
+import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
+import no.nav.helse.flex.clients.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -18,8 +24,6 @@ fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatc
     object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse = dispatcherFunc(request)
     }
-
-val notFoundDispatcher = simpleDispatcher { MockResponse().setResponseCode(404) }
 
 val defaultAaregDispatcher =
     simpleDispatcher {
@@ -47,7 +51,29 @@ val defaultSyketilfelleDispatcher =
             )
     }
 
-val defaultPdlDispatcher = notFoundDispatcher
+val defaultPdlDispatcher =
+    simpleDispatcher { req ->
+        val parsedReq = objectMapper.readValue<GraphQlRequest>(req.body.readByteArray())
+        when (parsedReq.operationName) {
+            "HentIdenterMedHistorikk" ->
+                lagGraphQlResponse(
+                    lagHentIdenterResponseData(),
+                )
+            "HentPersonNavn" ->
+                lagGraphQlResponse(
+                    lagGetPersonResponseData(),
+                )
+            "HentPersonFoedselsdato" ->
+                lagGraphQlResponse(
+                    lagGetPersonResponseData(),
+                )
+            else -> {
+                MockResponse()
+                    .setResponseCode(404)
+                    .setHeader("Content-Type", "application/json")
+            }
+        }
+    }
 
 @TestConfiguration
 class MockWebServereConfig {

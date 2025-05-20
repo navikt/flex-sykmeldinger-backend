@@ -6,6 +6,10 @@ class ArbeidsforholdRepositoryFake :
     AbstractCrudRepositoryFake<Arbeidsforhold>(
         getEntityId = { it.id },
         setEntityId = { entity, id -> entity.copy(id = id) },
+        uniqueConstraints =
+            listOf(
+                Arbeidsforhold::navArbeidsforholdId,
+            ),
     ),
     ArbeidsforholdRepository {
     override fun findByNavArbeidsforholdId(navArbeidsforholdId: String): Arbeidsforhold? =

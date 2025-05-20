@@ -45,11 +45,12 @@ class PdlClientTest {
 
             pdlClient.hentIdenterMedHistorikk(ident = "ident")
 
-            recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
+            val request = recordedRequest.shouldNotBeNull()
+            request.shouldNotBeNull()
+            request.headers["Tema"] `should be equal to` "SYK"
+            request.headers["Behandlingsnummer"] `should be equal to` "B229"
+            request.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query(${"$"}ident: ID!) {
@@ -63,7 +64,7 @@ class PdlClientTest {
                 """
             parsedBody.variables `should be equal to` mapOf("ident" to "ident")
 
-            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
@@ -116,11 +117,11 @@ class PdlClientTest {
 
             pdlClient.hentFormattertNavn("fnr")
 
-            recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
+            val request = recordedRequest.shouldNotBeNull()
+            request.headers["Behandlingsnummer"] `should be equal to` "B229"
+            request.headers["Tema"] `should be equal to` "SYK"
+            request.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
             query(${'$'}ident: ID!) {
@@ -135,7 +136,7 @@ class PdlClientTest {
             """
             parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
 
-            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test
@@ -192,11 +193,11 @@ class PdlClientTest {
 
             pdlClient.hentFoedselsdato("fnr")
 
-            recordedRequest.shouldNotBeNull()
-            recordedRequest.headers["Behandlingsnummer"] `should be equal to` "B229"
-            recordedRequest.headers["Tema"] `should be equal to` "SYK"
-            recordedRequest.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(recordedRequest.body.readUtf8())
+            val request = recordedRequest.shouldNotBeNull()
+            request.headers["Behandlingsnummer"] `should be equal to` "B229"
+            request.headers["Tema"] `should be equal to` "SYK"
+            request.headers["Content-Type"] `should be equal to` "application/json"
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query(${"$"}ident: ID!) {
@@ -209,7 +210,7 @@ class PdlClientTest {
             """
             parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
 
-            recordedRequest.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+            request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
 
         @Test

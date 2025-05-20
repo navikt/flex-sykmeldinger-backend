@@ -2,6 +2,8 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.config.IdentService
+import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -13,18 +15,41 @@ data class SynkroniserteArbeidsforhold(
     val skalOpprettes: List<Arbeidsforhold> = emptyList(),
     val skalOppdateres: List<Arbeidsforhold> = emptyList(),
     val skalSlettes: List<Arbeidsforhold> = emptyList(),
-)
+) {
+    fun toLogString(): String {
+        val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
+        val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
+        val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
+        return "SynkroniserteArbeidsforhold(" +
+            "antallOpprettet=${opprettetIds.count()}, " +
+            "antallOppdatert=${oppdatertIds.count()}, " +
+            "antallSlettet=${slettetIds.count()}, " +
+            "opprettet navArbeidsforholdId: $opprettetIds, " +
+            "oppdatert navArbeidsforholdId: $oppdatertIds, " +
+            "slettet navArbeidsforholdId: $slettetIds" +
+            ")"
+    }
+}
 
 @Service
 @Transactional
 class ArbeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val identService: IdentService,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
+    private val log = logger()
+
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
-        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identerOgEksterneArbeidsforhold.identer.alle())
+        val alleIdenter =
+            run {
+                val identerFraAareg = identerOgEksterneArbeidsforhold.identer
+                val identerFraPdl = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
+                (identerFraAareg.alle() + identerFraPdl.alle()).distinct()
+            }
+        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(alleIdenter)
         val synkroniserteArbeidsforhold =
             synkroniserArbeidsforhold(
                 interneArbeidsforhold = interneArbeidsforhold,
@@ -33,6 +58,7 @@ class ArbeidsforholdInnhentingService(
                 now = nowFactory.get(),
             )
         lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
+        log.info(synkroniserteArbeidsforhold.toLogString())
         return synkroniserteArbeidsforhold
     }
 

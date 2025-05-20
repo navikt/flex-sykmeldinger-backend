@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.clients.aareg.ArbeidsforholdOversikt
 import no.nav.helse.flex.clients.aareg.ArbeidsforholdoversiktResponse
 import no.nav.helse.flex.utils.objectMapper
+import java.time.LocalDate
 
 fun lagArbeidsforholdOversiktResponse(
     arbeidsforholdoversikter: List<ArbeidsforholdOversikt> = listOf(lagArbeidsforholdOversikt()),
@@ -13,21 +14,25 @@ fun lagArbeidsforholdOversiktResponse(
     )
 
 fun lagArbeidsforholdOversikt(
-    identer: List<String> = listOf("2175141353812"),
-    orgnummer: String = "910825518",
     navArbeidsforholdId: String = "navArbeidsforholdId",
+    typeKode: String = "ordinaertArbeidsforhold",
+    arbeidstakerIdenter: List<String> = listOf("2175141353812"),
+    arbeidsstedOrgnummer: String = "910825518",
+    opplysningspliktigOrgnummer: String = "810825472",
+    startdato: LocalDate = LocalDate.parse("2014-01-01"),
+    sluttdato: LocalDate? = null,
 ): ArbeidsforholdOversikt =
     objectMapper.readValue(
         """
             {
           "type": {
-            "kode": "ordinaertArbeidsforhold",
+            "kode": "$typeKode",
             "beskrivelse": "Ordinært arbeidsforhold"
           },
           "arbeidstaker": {
             "identer": [
             ${
-            identer.joinToString(",\n") {
+            arbeidstakerIdenter.joinToString(",\n") {
                 """
                 {
                   "type": "FOLKEREGISTERIDENT",
@@ -44,7 +49,7 @@ fun lagArbeidsforholdOversikt(
             "identer": [
               {
                 "type": "ORGANISASJONSNUMMER",
-                "ident": "$orgnummer"
+                "ident": "$arbeidsstedOrgnummer"
               }
             ]
           },
@@ -53,11 +58,12 @@ fun lagArbeidsforholdOversikt(
             "identer": [
               {
                 "type": "ORGANISASJONSNUMMER",
-                "ident": "810825472"
+                "ident": "$opplysningspliktigOrgnummer"
               }
             ]
           },
-          "startdato": "2014-01-01",
+          "startdato": "$startdato",
+          "sluttdato": ${sluttdato?.let { "\"$it\"" }},
           "yrke": {
             "kode": "1231119",
             "beskrivelse": "KONTORLEDER"

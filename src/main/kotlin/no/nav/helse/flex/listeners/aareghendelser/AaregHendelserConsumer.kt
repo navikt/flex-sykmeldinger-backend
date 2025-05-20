@@ -63,19 +63,8 @@ class AaregHendelserConsumer(
 
         when (hendelseHandtering) {
             AaregHendelseHandtering.OPPRETT_OPPDATER -> {
-                val resultat = arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
-                log.info(
-                    "Arbeidsforhold synkronisert ved aareg hendelse: " +
-                        "Opprettet{${resultat.skalOpprettes.count()}, navArbeidsforholdId: ${resultat.skalOpprettes.map {
-                            it.navArbeidsforholdId
-                        }}}, " +
-                        "Oppdaterte{${resultat.skalOppdateres.count()}, navArbeidsforholdId: ${resultat.skalOppdateres.map {
-                            it.navArbeidsforholdId
-                        }}}, " +
-                        "Slettet{${resultat.skalSlettes.count()}, navArbeidsforholdId: ${resultat.skalSlettes.map {
-                            it.navArbeidsforholdId
-                        }}}",
-                )
+                log.info("Synkroniserer arbeidsforhold ved aareg hendelse")
+                arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
             }
 
             AaregHendelseHandtering.SLETT -> {
