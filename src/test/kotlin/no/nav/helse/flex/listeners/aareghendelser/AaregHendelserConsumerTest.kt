@@ -1,6 +1,5 @@
 package no.nav.helse.flex.listeners.aareghendelser
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -66,7 +65,7 @@ class AaregHendelserListenerTest {
             )
         invoking {
             listener.listen(records)
-        } `should throw` MismatchedInputException::class
+        } `should throw` Exception::class
     }
 
     @Test

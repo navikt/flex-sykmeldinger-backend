@@ -3,6 +3,7 @@ package no.nav.helse.flex.listeners.aareghendelser
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -39,8 +40,12 @@ class AaregHendelserConsumer(
                         val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
                         handterHendelse(hendelse)
                     } catch (e: Exception) {
-                        log.error("Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.")
-                        throw e
+                        log.errorSecure(
+                            "Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.",
+                            secureMessage = e.message ?: "",
+                            secureThrowable = e,
+                        )
+                        throw RuntimeException("Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.")
                     }
                 }
             }
