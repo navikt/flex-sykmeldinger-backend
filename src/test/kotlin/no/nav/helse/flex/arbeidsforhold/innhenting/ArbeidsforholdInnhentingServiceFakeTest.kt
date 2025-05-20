@@ -3,9 +3,11 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.*
 import no.nav.helse.flex.clients.ereg.Navn
 import no.nav.helse.flex.clients.ereg.Nokkelinfo
+import no.nav.helse.flex.clients.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
@@ -25,11 +27,15 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
     @Autowired
     lateinit var eregClientFake: EregClientFake
 
+    @Autowired
+    lateinit var pdlClient: PdlClientFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
         aaregClientFake.reset()
         eregClientFake.reset()
+        pdlClient.reset()
     }
 
     @Test
@@ -224,5 +230,41 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         arbeidsforhold.size `should be equal to` 1
 
         arbeidsforhold.first().fnr `should be equal to` "første-ident"
+    }
+
+    @Test
+    fun `burde bruke identer fra PDL i tillegg til Aareg, fordi Aareg ikke er i sync i en migreringsperiode`() {
+        arbeidsforholdRepository.save(
+            lagArbeidsforhold(navArbeidsforholdId = "1", fnr = "aareg-ukjent-ident"),
+        )
+
+        pdlClient.setIdentMedHistorikk(
+            listOf(
+                PdlIdent(
+                    gruppe = "FOLKEREGISTERIDENT",
+                    ident = "kjent_ident",
+                ),
+                PdlIdent(
+                    gruppe = "FOLKEREGISTERIDENT",
+                    ident = "aareg-ukjent-ident",
+                ),
+            ),
+            ident = "kjent_ident",
+        )
+
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "1",
+                        arbeidstakerIdenter = listOf("kjent_ident"),
+                    ),
+                ),
+            ),
+            fnr = "kjent_ident",
+        )
+
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("kjent_ident")
+        arbeidsforholdRepository.findAll().shouldHaveSize(1)
     }
 }

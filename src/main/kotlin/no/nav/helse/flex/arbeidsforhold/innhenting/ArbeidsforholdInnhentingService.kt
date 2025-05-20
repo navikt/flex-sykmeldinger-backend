@@ -2,6 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.config.IdentService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -20,11 +21,18 @@ data class SynkroniserteArbeidsforhold(
 class ArbeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
+    private val identService: IdentService,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
-        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identerOgEksterneArbeidsforhold.identer.alle())
+        val alleIdenter =
+            run {
+                val identerFraAareg = identerOgEksterneArbeidsforhold.identer
+                val identerFraPdl = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnr)
+                (identerFraAareg.alle() + identerFraPdl.alle()).distinct()
+            }
+        val interneArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(alleIdenter)
         val synkroniserteArbeidsforhold =
             synkroniserArbeidsforhold(
                 interneArbeidsforhold = interneArbeidsforhold,
