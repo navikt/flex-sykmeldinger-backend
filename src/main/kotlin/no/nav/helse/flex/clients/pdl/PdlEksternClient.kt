@@ -36,6 +36,7 @@ class PdlEksternClient(
                               }
                             }
                             """.trimIndent(),
+                        operationName = "HentIdenterMedHistorikk",
                         variables = Collections.singletonMap("ident", ident),
                     ),
                 headers =
@@ -71,6 +72,7 @@ class PdlEksternClient(
                               }
                             }
                             """.trimIndent(),
+                        operationName = "HentPersonNavn",
                         variables = Collections.singletonMap("ident", fnr),
                     ),
                 headers =
@@ -109,6 +111,7 @@ class PdlEksternClient(
                               }
                             }
                             """.trimIndent(),
+                        operationName = "HentPersonFoedselsdato",
                         variables = Collections.singletonMap("ident", fnr),
                     ),
                 headers =

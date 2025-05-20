@@ -55,6 +55,7 @@ class PdlGraphQlClient(
 data class GraphQlRequest(
     val query: String,
     val variables: Map<String, String>,
+    val operationName: String? = null,
 )
 
 data class GraphQlResponse<out T : Any>(
