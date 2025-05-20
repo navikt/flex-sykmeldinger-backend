@@ -1,19 +1,18 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.*
-import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.clients.ereg.Navn
+import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldHaveSize
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 import java.time.LocalDate
 
 class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
@@ -28,162 +27,147 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
     @AfterEach
     fun tearDown() {
+        slettDatabase()
         aaregClientFake.reset()
         eregClientFake.reset()
     }
 
     @Test
-    fun `lagrer arbeidsforhold fra eksternt arbeidsforhold som ikke finnes fra før`() {
-        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-            mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    lagIdenterOgEksterneArbeidsforhold(
-                        eksterneArbeidsforhold =
-                            listOf(
-                                lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId"),
-                            ),
-                    )
-            }
-        val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
-        val arbeidsforholdInnhentingService =
-            ArbeidsforholdInnhentingService(
-                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-                arbeidsforholdRepository = arbeidsforholdRepository,
-            )
-
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("navArbeidsforholdId")
-        verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
+    fun `burde opprette arbeidsforhold som ikke finnes fra før`() {
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "navArbeidsforholdId",
+                        arbeidstakerIdenter = listOf("fnr"),
+                    ),
+                ),
+            ),
+            fnr = "fnr",
+        )
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        arbeidsforholdRepository.getAllByFnrIn(listOf("fnr")) shouldHaveSize 1
     }
 
     @Test
-    fun `lagrer oppdatert arbeidsforhold fra eksternt arbeidsforhold som finnes fra før`() {
-        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-            mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    lagIdenterOgEksterneArbeidsforhold(
-                        eksterneArbeidsforhold =
-                            listOf(
-                                lagEksterntArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId"),
-                            ),
-                    )
+    fun `burde oppdatert arbeidsforhold som finnes fra før`() {
+        arbeidsforholdRepository.save(
+            lagArbeidsforhold(
+                navArbeidsforholdId = "1",
+                fnr = "fnr",
+                orgnummer = "org-1",
+            ),
+        )
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "1",
+                        arbeidstakerIdenter = listOf("fnr"),
+                        arbeidsstedOrgnummer = "org-2",
+                    ),
+                ),
+            ),
+            fnr = "fnr",
+        )
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        arbeidsforholdRepository
+            .getAllByFnrIn(listOf("fnr"))
+            .shouldHaveSize(1)
+            .first()
+            .run {
+                orgnummer shouldBeEqualTo "org-2"
             }
-        val arbeidsforholdRepository =
-            mock<ArbeidsforholdRepository> {
-                on { findByNavArbeidsforholdId(any()) } doReturn lagArbeidsforhold(navArbeidsforholdId = "navArbeidsforholdId")
-            }
-        val arbeidsforholdInnhentingService =
-            ArbeidsforholdInnhentingService(
-                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-                arbeidsforholdRepository = arbeidsforholdRepository,
-            )
-
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("navArbeidsforholdId")
-        verify(arbeidsforholdRepository).saveAll<Arbeidsforhold>(any())
     }
 
     @Test
     fun `lagrer riktig data for nytt arbeidsforhold`() {
-        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-            mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    lagIdenterOgEksterneArbeidsforhold(
-                        eksterneArbeidsforhold =
-                            listOf(
-                                EksterntArbeidsforhold(
-                                    navArbeidsforholdId = "arbeidsforhold",
-                                    orgnummer = "orgnummer",
-                                    juridiskOrgnummer = "jorgnummer",
-                                    orgnavn = "Orgnavn",
-                                    fom = LocalDate.parse("2020-01-01"),
-                                    tom = null,
-                                    arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                                ),
-                            ),
-                    )
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "1",
+                        typeKode = "maritimtArbeidsforhold",
+                        arbeidstakerIdenter = listOf("fnr"),
+                        arbeidsstedOrgnummer = "orgnummer",
+                        opplysningspliktigOrgnummer = "juridiskOrgnummer",
+                        startdato = LocalDate.parse("2020-01-01"),
+                        sluttdato = null,
+                    ),
+                ),
+            ),
+            fnr = "fnr",
+        )
+        eregClientFake.setNokkelinfo(
+            Nokkelinfo(
+                navn = Navn("Orgnavn"),
+            ),
+            orgnummer = "orgnummer",
+        )
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        arbeidsforholdRepository
+            .findByNavArbeidsforholdId("1")
+            .shouldNotBeNull()
+            .run {
+                fnr shouldBeEqualTo "fnr"
+                orgnummer shouldBeEqualTo "orgnummer"
+                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
+                orgnavn shouldBeEqualTo "Orgnavn"
+                arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
+                fom shouldBeEqualTo LocalDate.parse("2020-01-01")
+                tom shouldBeEqualTo null
             }
-        val arbeidsforholdRepository = mock<ArbeidsforholdRepository>()
-        val arbeidsforholdInnhentingService =
-            ArbeidsforholdInnhentingService(
-                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-                arbeidsforholdRepository = arbeidsforholdRepository,
-                nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
-            )
-
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr = "fnr")
-
-        val forventetArbeidsforhold =
-            lagArbeidsforhold(
-                navArbeidsforholdId = "arbeidsforhold",
-                fnr = "fnr",
-                orgnummer = "orgnummer",
-                juridiskOrgnummer = "jorgnummer",
-                orgnavn = "Orgnavn",
-                fom = LocalDate.parse("2020-01-01"),
-                tom = null,
-                arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                opprettet = Instant.parse("2020-01-01T00:00:00Z"),
-            )
-        verify(arbeidsforholdRepository).saveAll(listOf(forventetArbeidsforhold))
     }
 
     @Test
     fun `lagrer riktig data for oppdatert arbeidsforhold`() {
-        val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter =
-            mock {
-                on { hentEksterneArbeidsforholdForPerson(any()) } doReturn
-                    lagIdenterOgEksterneArbeidsforhold(
-                        identer = PersonIdenter(originalIdent = "nytt_fnr"),
-                        eksterneArbeidsforhold =
-                            listOf(
-                                EksterntArbeidsforhold(
-                                    navArbeidsforholdId = "arbeidsforhold",
-                                    orgnummer = "nytt_orgnummer",
-                                    juridiskOrgnummer = "nytt_jorgnummer",
-                                    orgnavn = "nytt_Orgnavn",
-                                    fom = LocalDate.parse("2020-01-01"),
-                                    tom = null,
-                                    arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                                ),
-                            ),
-                    )
-            }
-        val arbeidsforholdRepository =
-            mock<ArbeidsforholdRepository> {
-                on { findByNavArbeidsforholdId(any()) } doReturn
-                    lagArbeidsforhold(
-                        navArbeidsforholdId = "arbeidsforhold",
-                        fnr = "fnr",
-                        orgnummer = "orgnummer",
-                        juridiskOrgnummer = "jorgnummer",
-                        orgnavn = "Orgnavn",
-                        fom = LocalDate.parse("2020-01-01"),
-                        tom = null,
-                        arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                        opprettet = Instant.parse("2020-01-01T00:00:00Z"),
-                    )
-            }
-        val arbeidsforholdInnhentingService =
-            ArbeidsforholdInnhentingService(
-                eksternArbeidsforholdHenter = eksternArbeidsforholdHenter,
-                arbeidsforholdRepository = arbeidsforholdRepository,
-                nowFactory = { Instant.parse("2020-01-01T00:00:00Z") },
-            )
-
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr = "nytt_fnr")
-
-        val forventetArbeidsforhold =
+        arbeidsforholdRepository.save(
             lagArbeidsforhold(
-                navArbeidsforholdId = "arbeidsforhold",
-                fnr = "nytt_fnr",
-                orgnummer = "nytt_orgnummer",
-                juridiskOrgnummer = "nytt_jorgnummer",
-                orgnavn = "nytt_Orgnavn",
+                navArbeidsforholdId = "1",
+                fnr = "fnr",
+                orgnummer = "orgnummer",
+                juridiskOrgnummer = "juridiskOrgnummer",
+                orgnavn = "Orgnavn",
                 fom = LocalDate.parse("2020-01-01"),
                 tom = null,
-                arbeidsforholdType = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
-                opprettet = Instant.parse("2020-01-01T00:00:00Z"),
-            )
-        verify(arbeidsforholdRepository).saveAll(listOf(forventetArbeidsforhold))
+                arbeidsforholdType = ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD,
+            ),
+        )
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "1",
+                        typeKode = "ordinaertArbeidsforhold",
+                        arbeidstakerIdenter = listOf("fnr"),
+                        arbeidsstedOrgnummer = "orgnummer-2",
+                        opplysningspliktigOrgnummer = "juridiskOrgnummer-2",
+                        startdato = LocalDate.parse("2020-01-02"),
+                        sluttdato = null,
+                    ),
+                ),
+            ),
+            fnr = "fnr",
+        )
+        eregClientFake.setNokkelinfo(
+            Nokkelinfo(
+                navn = Navn("Orgnavn-2"),
+            ),
+            orgnummer = "orgnummer-2",
+        )
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        arbeidsforholdRepository
+            .findByNavArbeidsforholdId("1")
+            .shouldNotBeNull()
+            .run {
+                fnr shouldBeEqualTo "fnr"
+                orgnummer shouldBeEqualTo "orgnummer-2"
+                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer-2"
+                orgnavn shouldBeEqualTo "Orgnavn-2"
+                arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+                fom shouldBeEqualTo LocalDate.parse("2020-01-02")
+                tom shouldBeEqualTo null
+            }
     }
 
     @Test
@@ -195,11 +179,11 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 listOf(
                     lagArbeidsforholdOversikt(
                         navArbeidsforholdId = "første",
-                        identer = listOf("første-ident", "ny-ident"),
+                        arbeidstakerIdenter = listOf("første-ident", "ny-ident"),
                     ),
                     lagArbeidsforholdOversikt(
                         navArbeidsforholdId = "andre",
-                        identer = listOf("første-ident", "ny-ident"),
+                        arbeidstakerIdenter = listOf("første-ident", "ny-ident"),
                     ),
                 ),
             ),
@@ -223,7 +207,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         val oppdatertArbeidsforholdMedNyIdent =
             lagArbeidsforholdOversikt(
                 navArbeidsforholdId = "originaltArbeidsforhold",
-                identer = listOf("første-ident", "ny-ident"),
+                arbeidstakerIdenter = listOf("første-ident", "ny-ident"),
             )
         aaregClientFake.setArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
