@@ -52,8 +52,8 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     fun `burde hente riktig arbeidsgiverDetaljer for person`() {
         arbeidsforholdRepository.saveAll(
             listOf(
-                lagArbeidsforhold(fnr = "1", orgnummer = "org1"),
-                lagArbeidsforhold(fnr = "2", orgnummer = "org2"),
+                lagArbeidsforhold(fnr = "1", orgnummer = "org1", navArbeidsforholdId = "1"),
+                lagArbeidsforhold(fnr = "2", orgnummer = "org2", navArbeidsforholdId = "2"),
             ),
         )
         narmesteLederRepository.saveAll(

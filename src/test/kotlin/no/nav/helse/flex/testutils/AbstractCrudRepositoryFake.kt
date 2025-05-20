@@ -5,10 +5,12 @@ import java.util.Optional
 import java.util.UUID
 import kotlin.collections.forEach
 import kotlin.collections.remove
+import kotlin.reflect.KProperty1
 
 abstract class AbstractCrudRepositoryFake<T : Any>(
     val getEntityId: (T) -> String?,
     val setEntityId: (T, String) -> T,
+    private val uniqueConstraints: List<KProperty1<T, Any?>> = emptyList(),
 ) : CrudRepository<T, String> {
     val entities: MutableMap<String, T> = mutableMapOf()
 
@@ -21,6 +23,7 @@ abstract class AbstractCrudRepositoryFake<T : Any>(
             } else {
                 entity
             }
+        checkUniqueConstraints(entityWithId)
         entities[getEntityId(entityWithId)!!] = entityWithId
         @Suppress("UNCHECKED_CAST")
         return entityWithId as (S & Any)
@@ -62,5 +65,18 @@ abstract class AbstractCrudRepositoryFake<T : Any>(
 
     override fun deleteAll() {
         entities.clear()
+    }
+
+    private fun checkUniqueConstraints(entity: T) {
+        val entityId = getEntityId(entity)
+        val otherEntities = this.entities.filterKeys { id -> id != entityId }.values
+        uniqueConstraints.forEach { constraintProp ->
+            val value = constraintProp(entity)
+            if (otherEntities.any { constraintProp(it) == value }) {
+                throw IllegalStateException(
+                    "Insertion of entity violates unique constraint on ${constraintProp.name}, with value: $value, entity: $entity",
+                )
+            }
+        }
     }
 }
