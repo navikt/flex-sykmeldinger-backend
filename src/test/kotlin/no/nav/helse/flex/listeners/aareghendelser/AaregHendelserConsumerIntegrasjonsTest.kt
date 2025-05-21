@@ -15,6 +15,9 @@ import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import org.amshove.kluent.invoking
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldThrow
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
@@ -34,6 +37,9 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
 
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer
+
+    @Autowired
+    private lateinit var aaregHendelserConsumer: AaregHendelserConsumer
 
     @BeforeAll
     fun beforeAll() {
@@ -85,5 +91,73 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
         await().atMost(Duration.ofSeconds(20)).until {
             arbeidsforholdRepository.findAll().count() >= 1
         }
+    }
+
+    @Test
+    fun `burde ignorere hendelse uten person ident, pga midlertidig Aareg bug`() {
+        val aaregHendelseUtenArbeidstaker =
+            """
+            {
+              "id": 0,
+              "endringstype": "Sletting",
+              "entitetsendringer": [
+                "Permittering",
+                "Ansettelsesdetaljer",
+                "Permisjon",
+                "Ansettelsesperiode"
+              ],
+              "arbeidsforhold": {
+                "navArbeidsforholdId": 1,
+                "navUuid": "test",
+                "type": {
+                  "kode": "ordinaertArbeidsforhold",
+                  "beskrivelse": "Ordinært arbeidsforhold"
+                },
+                "arbeidstaker": {},
+                "arbeidssted": {
+                  "type": "Underenhet",
+                  "identer": [
+                    {
+                      "type": "ORGANISASJONSNUMMER",
+                      "ident": "org-nummer",
+                      "gjeldende": true
+                    }
+                  ]
+                },
+                "opplysningspliktig": {
+                  "type": "Hovedenhet",
+                  "identer": [
+                    {
+                      "type": "ORGANISASJONSNUMMER",
+                      "ident": "org-nummer",
+                      "gjeldende": true
+                    }
+                  ]
+                }
+              },
+              "tidsstempel": "2025-05-21T00:00:00"
+            }
+            """.trimIndent()
+
+        aaregHendelserConsumer.handterHendelser(
+            listOf(
+                RawHendelse(value = aaregHendelseUtenArbeidstaker),
+            ),
+        )
+
+        arbeidsforholdRepository.count() `shouldBeEqualTo` 0
+    }
+
+    @Test
+    fun `burde kaste feil ved annen deserialisering feil, pga midlertidig Aareg bug`() {
+        val aaregHendelseUtenArbeidstaker = "{}"
+
+        invoking {
+            aaregHendelserConsumer.handterHendelser(
+                listOf(
+                    RawHendelse(value = aaregHendelseUtenArbeidstaker),
+                ),
+            )
+        }.shouldThrow(RuntimeException::class)
     }
 }
