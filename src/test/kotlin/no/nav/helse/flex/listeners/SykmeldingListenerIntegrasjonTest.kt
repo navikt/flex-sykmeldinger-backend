@@ -2,7 +2,6 @@ package no.nav.helse.flex.listeners
 
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
@@ -13,13 +12,9 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
 class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
-    @Autowired
-    lateinit var environmentToggles: EnvironmentTogglesFake
-
     @AfterEach
     fun afterEach() {
         slettDatabase()
@@ -28,8 +23,6 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @ParameterizedTest
     @ValueSource(strings = [TEST_SYKMELDING_TOPIC, SYKMELDING_TOPIC])
     fun `burde lagre sykmelding fra kafka`(topic: String) {
-        environmentToggles.setEnvironment("dev")
-
         val kafkaMelding =
             SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
