@@ -20,17 +20,40 @@ class SykmeldingKafkaLagrer(
     val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
-    fun lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
+    fun lagreSykmeldingFraKafka(
+        sykmeldingId: String,
+        sykmeldingKafkaRecord: SykmeldingKafkaRecord?,
+    ) {
+        if (sykmeldingKafkaRecord == null) {
+            slettSykmelding(sykmeldingId = sykmeldingId)
+        } else {
+            opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord)
+        }
+    }
+
+    internal fun opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
         val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
         if (eksisterendeSykmelding != null) {
             val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, sykmeldingKafkaRecord)
             sykmeldingRepository.save(oppdatertSykmelding)
+            log.info("Sykmelding oppdatert: ${eksisterendeSykmelding.sykmeldingId}")
         } else {
             val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
-            log.info("Sykmelding ${sykmeldingKafkaRecord.sykmelding.id} lagret")
+            log.info("Sykmelding lagret: ${sykmeldingKafkaRecord.sykmelding.id}")
+        }
+    }
+
+    internal fun slettSykmelding(sykmeldingId: String) {
+        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+        if (sykmelding == null) {
+            log.warn("Prøver å slette sykmelding $sykmeldingId som ikke finnes, hopper over")
+            return
+        } else {
+            sykmeldingRepository.delete(sykmelding)
+            log.info("Sykmelding slettet: $sykmeldingId")
         }
     }
 
@@ -39,7 +62,7 @@ class SykmeldingKafkaLagrer(
         sykmeldingKafkaRecord: SykmeldingKafkaRecord,
     ): Sykmelding {
         var oppdatertSykmelding = eksisterendeSykmelding
-        log.info("Sykmelding ${eksisterendeSykmelding.sykmeldingId} finnes fra før, oppdaterer den")
+
         if (eksisterendeSykmelding.sykmeldingGrunnlag != sykmeldingKafkaRecord.sykmelding) {
             oppdatertSykmelding =
                 oppdatertSykmelding.copy(
