@@ -1,5 +1,7 @@
 package no.nav.helse.flex.listeners.aareghendelser
 
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
@@ -66,11 +68,20 @@ class AaregHendelserConsumer(
 
     internal fun handterHendelser(hendelser: List<RawHendelse>) {
         val arbeidsforholdHendelser =
-            hendelser.map { hendelse ->
+            hendelser.mapNotNull { hendelse ->
                 try {
                     objectMapper.readValue<ArbeidsforholdHendelse>(hendelse.value)
                 } catch (e: Exception) {
-                    throw RuntimeException("Feil aareg hendelse format, rå hendelse: ${hendelse.value}", e)
+                    if (e is MismatchedInputException && e.stringPath().endsWith("arbeidstaker.identer")) {
+                        log.warn(
+                            "Aareg hendelse inneholder ikke fnr. " +
+                                "Dette er antagelig en bug i formindelse med Aareg endringer rundt 21.05.2025. " +
+                                "Ignorerer hendelse: ${hendelse.key}",
+                        )
+                        null
+                    } else {
+                        throw RuntimeException("Feil aareg hendelse format, rå hendelse: ${hendelse.value}", e)
+                    }
                 }
             }
         handterArbeidsforholdHendelser(arbeidsforholdHendelser)
@@ -96,6 +107,8 @@ class AaregHendelserConsumer(
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
+
+    private fun JsonMappingException.stringPath(): String = this.path.joinToString(".") { it.fieldName ?: it.index.toString() }
 
     companion object {
         internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering {
