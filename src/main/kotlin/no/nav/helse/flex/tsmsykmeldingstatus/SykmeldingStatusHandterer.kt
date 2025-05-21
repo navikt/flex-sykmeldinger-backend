@@ -3,6 +3,8 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.producers.KafkaMetadataDTO
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.SykmeldingStatusProducer
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
@@ -43,6 +45,7 @@ class SykmeldingStatusHandterer(
             sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
+            validerStatusForSykmelding(sykmelding, status)
             return when (val statusEvent = status.event.statusEvent) {
                 StatusEventKafkaDTO.SLETTET -> {
                     log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
@@ -57,6 +60,28 @@ class SykmeldingStatusHandterer(
                     return lagreStatusForEksisterendeSykmelding(sykmelding, status)
                 }
             }
+        }
+    }
+
+    fun validerStatusForSykmelding(
+        sykmelding: Sykmelding,
+        status: SykmeldingStatusKafkaMessageDTO,
+    ) {
+        if (sykmelding.sisteHendelse().status == HendelseStatus.APEN) {
+            return
+        }
+        val statusFraKafkaOpprettet = status.kafkaMetadata.timestamp.toInstant()
+        if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
+            log.errorSecure(
+                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
+                    "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
+                secureMessage =
+                    "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
+                        "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
+            )
+            throw SykmeldingHendelseException(
+                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka",
+            )
         }
     }
 

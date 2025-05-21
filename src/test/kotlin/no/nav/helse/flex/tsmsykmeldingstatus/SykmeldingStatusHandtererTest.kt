@@ -1,5 +1,6 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit
 
 class SykmeldingStatusHandtererTest : FakesTestOppsett() {
@@ -208,5 +211,79 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         advisoryLockFake.lockCount() `should be equal to` 1
         sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmeldingId = "1")
         advisoryLockFake.lockCount() `should be equal to` 2
+    }
+
+    @Test
+    fun `burde kaste feil når status er eldre enn sykmeldingens siste hendelse`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+            ).leggTilHendelse(
+                lagSykmeldingHendelse(
+                    status = HendelseStatus.AVBRUTT,
+                    hendelseOpprettet = Instant.parse("2025-01-01T12:00:00Z"),
+                ),
+            )
+
+        sykmeldingRepository.save(sykmelding)
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                        timestamp = OffsetDateTime.parse("2024-01-01T12:00:00+00:00"),
+                    ),
+            )
+        invoking {
+            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        } `should throw` SykmeldingHendelseException::class
+    }
+
+    @Test
+    fun `burde ikke kaste feil når status er nyere enn sykmeldingens siste hendelse`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+            )
+
+        sykmeldingRepository.save(sykmelding)
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                        timestamp = OffsetDateTime.parse("2025-01-01T12:00:00+00:00"),
+                    ),
+            )
+        invoking {
+            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        } `should not throw` SykmeldingHendelseException::class
+    }
+
+    @Test
+    fun `burde ignorere når sykmeldingens siste hendelse er APEN, selv om den er laget etter kafka-status`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.APEN,
+                            hendelseOpprettet = Instant.parse("2025-01-01T12:00:00Z"),
+                        ),
+                    ),
+            )
+        sykmeldingRepository.save(sykmelding)
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                        timestamp = OffsetDateTime.parse("2024-01-01T12:00:00+00:00"),
+                    ),
+            )
+        invoking {
+            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        } `should not throw` SykmeldingHendelseException::class
     }
 }
