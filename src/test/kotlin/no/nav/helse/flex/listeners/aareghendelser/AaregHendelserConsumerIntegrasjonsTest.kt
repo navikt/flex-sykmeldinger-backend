@@ -35,6 +35,9 @@ class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
     private lateinit var eregMockWebServer: MockWebServer
 
+    @Autowired
+    private lateinit var aaregHendelserConsumer: AaregHendelserConsumer
+
     @BeforeAll
     fun beforeAll() {
         aaregMockWebServer.dispatcher =

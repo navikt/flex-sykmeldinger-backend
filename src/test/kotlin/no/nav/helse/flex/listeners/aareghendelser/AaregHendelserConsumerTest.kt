@@ -78,7 +78,7 @@ class AaregHendelserListenerTest {
         val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
         val hendelse = lagArbeidsforholdHendelse()
 
-        listener.handterHendelse(hendelse)
+        listener.handterArbeidsforholdHendelser(listOf(hendelse))
         verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
     }
 

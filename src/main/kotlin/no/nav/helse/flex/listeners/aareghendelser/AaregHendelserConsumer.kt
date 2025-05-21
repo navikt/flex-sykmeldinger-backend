@@ -6,6 +6,7 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeids
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
@@ -15,6 +16,15 @@ enum class AaregHendelseHandtering {
     OPPRETT_OPPDATER,
     SLETT,
     IGNORER,
+}
+
+data class RawHendelse(
+    val key: String = "",
+    val value: String,
+) {
+    companion object {
+        fun fraConsumerRecord(cr: ConsumerRecord<String, String>): RawHendelse = RawHendelse(key = cr.key(), value = cr.value())
+    }
 }
 
 @Component
@@ -30,25 +40,22 @@ class AaregHendelserConsumer(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        var totalByteSize = 0
         val time =
             measureTimeMillis {
-                consumerRecords.forEach { consumerRecord ->
-                    try {
-                        totalByteSize += consumerRecord.serializedValueSize()
-                        val record = consumerRecord.value()
-                        val hendelse: ArbeidsforholdHendelse = objectMapper.readValue(record)
-                        handterHendelse(hendelse)
-                    } catch (e: Exception) {
-                        log.errorSecure(
-                            "Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.",
-                            secureMessage = "Rå hendelse verdi: ${consumerRecord.value()}",
-                            secureThrowable = e,
-                        )
-                        throw RuntimeException("Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.")
-                    }
+                val rawRecords = consumerRecords.map(RawHendelse::fraConsumerRecord)
+                try {
+                    handterHendelser(rawRecords)
+                } catch (e: Exception) {
+                    val message = "Klarte ikke prosessere aareg hendelser. Dette vil bli retryet. Keys: ${rawRecords.map { it.key }}"
+                    log.errorSecure(
+                        message,
+                        secureMessage = e.message ?: "",
+                        secureThrowable = e,
+                    )
+                    throw RuntimeException(message)
                 }
             }
+        val totalByteSize = consumerRecords.sumOf { it.serializedValueSize() }
         if (time >= 1000 || totalByteSize >= 20_000) {
             log.warn(
                 "Prossesserte unormalt mange records: ${consumerRecords.count()}" +
@@ -57,29 +64,35 @@ class AaregHendelserConsumer(
         }
     }
 
-    fun handterHendelse(hendelse: ArbeidsforholdHendelse) {
-        val fnr = hendelse.arbeidsforhold.arbeidstaker.getFnr()
+    internal fun handterHendelser(hendelser: List<RawHendelse>) {
+        val arbeidsforholdHendelser =
+            hendelser.map { hendelse ->
+                try {
+                    objectMapper.readValue<ArbeidsforholdHendelse>(hendelse.value)
+                } catch (e: Exception) {
+                    throw RuntimeException("Feil aareg hendelse format, rå hendelse: ${hendelse.value}", e)
+                }
+            }
+        handterArbeidsforholdHendelser(arbeidsforholdHendelser)
+    }
 
+    internal fun handterArbeidsforholdHendelser(arbeidsforholdHendelser: Collection<ArbeidsforholdHendelse>) {
+        val aktuelleArbeidsforholdHendelser =
+            arbeidsforholdHendelser.filter {
+                avgjorHendelseshandtering(it) != AaregHendelseHandtering.IGNORER
+            }
+
+        val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
+        for (fnr in personerFnr) {
+            synkroniserForPerson(fnr)
+        }
+    }
+
+    internal fun synkroniserForPerson(fnr: String) {
         if (!skalSynkroniseres(fnr)) {
             return
         }
-
-        val hendelseHandtering = avgjorHendelseshandtering(hendelse)
-
-        when (hendelseHandtering) {
-            AaregHendelseHandtering.OPPRETT_OPPDATER -> {
-                log.info("Synkroniserer arbeidsforhold ved aareg hendelse")
-                arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
-            }
-
-            AaregHendelseHandtering.SLETT -> {
-                val navArbeidsforholdId = hendelse.arbeidsforhold.navArbeidsforholdId
-                arbeidsforholdInnhentingService.slettArbeidsforhold(navArbeidsforholdId)
-                log.info("Arbeidsforhold slettet ved aareg hendelse: $navArbeidsforholdId")
-            }
-
-            else -> {}
-        }
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
