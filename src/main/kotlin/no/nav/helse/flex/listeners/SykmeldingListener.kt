@@ -29,10 +29,6 @@ class SykmeldingListener(
         acknowledgment: Acknowledgment,
     ) {
         try {
-            if (cr.value() == null) {
-                log.warn("Mottok sykmelding tombstone, key: ${cr.key()}. Ikke implementert, hopper over denne uten ack")
-                return
-            }
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
         } catch (e: Exception) {
@@ -41,24 +37,41 @@ class SykmeldingListener(
     }
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
-        val value = cr.value()
-        val sykmeldingRecord: SykmeldingKafkaRecord =
-            try {
-                objectMapper.readValue(value)
-            } catch (e: Exception) {
-                log.errorSecure(
-                    "Feil sykmelding format. Melding key: ${cr.key()}",
-                    secureMessage = "Rå sykmelding: ${cr.value()}",
-                    secureThrowable = e,
-                )
-                throw e
+        val sykmeldingId = cr.key()
+        val serialisertHendelse = cr.value()
+        val sykmeldingRecord: SykmeldingKafkaRecord? =
+            if (serialisertHendelse == null) {
+                null
+            } else {
+                try {
+                    objectMapper.readValue(serialisertHendelse)
+                } catch (e: Exception) {
+                    log.errorSecure(
+                        "Feil sykmelding format. Melding key: ${cr.key()}",
+                        secureMessage = "Rå sykmelding: ${cr.value()}",
+                        secureThrowable = e,
+                    )
+                    throw e
+                }
             }
-        log.info("Mottok sykmelding med id ${sykmeldingRecord.sykmelding.id} fra topic $SYKMELDING_TOPIC")
+
+        if (sykmeldingRecord != null) {
+            if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
+                val message = "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, value: ${sykmeldingRecord.sykmelding.id}"
+                log.error(message)
+                throw IllegalArgumentException(message)
+            }
+        }
+
+        log.info("Prosesserer sykmelding $sykmeldingId fra topic $SYKMELDING_TOPIC")
         try {
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingRecord)
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+                sykmeldingId = sykmeldingId,
+                sykmeldingKafkaRecord = sykmeldingRecord,
+            )
         } catch (e: Exception) {
             log.errorSecure(
-                "Feil ved sykmelding håndtering. sykmeldingId: ${sykmeldingRecord.sykmelding.id}, meldingKey: ${cr.key()}",
+                "Feil ved håndtering av sykmelding $sykmeldingId",
                 secureThrowable = e,
             )
             throw e

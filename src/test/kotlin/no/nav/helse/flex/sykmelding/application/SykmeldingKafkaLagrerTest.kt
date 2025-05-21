@@ -45,6 +45,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     @Test
     fun `burde lagre sykmelding`() {
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingId = "_",
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
@@ -58,10 +59,11 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             lagSykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr")),
             )
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", kafkaMelding)
 
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingId = "_",
             kafkaMelding.copy(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("ny_fnr")),
             ),
@@ -86,11 +88,11 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
 
         val førsteMeldingTid = Instant.parse("2024-01-01T00:00:00Z")
         nowFactoryFake.setNow(førsteMeldingTid)
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", kafkaMelding)
 
         val nyMeldingTid = førsteMeldingTid.plus(1, ChronoUnit.DAYS)
         nowFactoryFake.setNow(nyMeldingTid)
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding.copy())
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", kafkaMelding.copy())
 
         sykmeldingRepository
             .findBySykmeldingId("1")
@@ -109,10 +111,11 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(status = RuleType.PENDING),
             )
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(kafkaMelding)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", kafkaMelding)
 
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingId = "_",
             kafkaMelding.copy(
                 validation = lagValidation(status = RuleType.OK),
             ),
@@ -133,7 +136,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         val now = Instant.parse("2024-01-01T00:00:00Z")
         nowFactoryFake.setNow(now)
         val sykmeldingKafkaRecord = lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1"))
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingKafkaRecord)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding
@@ -166,7 +169,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
                 validation = lagValidation(),
             )
 
-        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
@@ -183,6 +186,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         )
 
         sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingId = "_",
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
@@ -190,5 +194,14 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         sykmelding.hendelser.size `should be equal to` 2
         sykmelding.hendelser[0].status `should be equal to` HendelseStatus.APEN
         sykmelding.hendelser[1].status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+    }
+
+    @Test
+    fun `burde slette sykmelding dersom hendelse er null`() {
+        sykmeldingRepository.save(
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
+        )
+        sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingId = "1", sykmeldingKafkaRecord = null)
+        sykmeldingRepository.findAll().shouldHaveSize(0)
     }
 }

@@ -2,10 +2,12 @@ package no.nav.helse.flex.listeners
 
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
+import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -44,5 +46,25 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         }
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [TEST_SYKMELDING_TOPIC, SYKMELDING_TOPIC])
+    fun `burde tombstone sykmelding fra kafka`(topic: String) {
+        sykmeldingRepository.save(
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
+        )
+
+        val key = "1"
+        val value = null
+        kafkaProducer
+            .send(ProducerRecord(topic, null, key, value))
+            .get()
+
+        await().atMost(Duration.ofSeconds(2)).until {
+            sykmeldingRepository.findBySykmeldingId("1") == null
+        }
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
     }
 }

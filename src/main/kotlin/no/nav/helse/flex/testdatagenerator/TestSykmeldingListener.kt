@@ -28,10 +28,19 @@ class TestSykmeldingListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
+        val sykmeldingId = cr.key()
+        val serialisertHendelse = cr.value()
         try {
-            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord =
-                objectMapper.readValue(cr.value())
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(sykmeldingMedBehandlingsutfall)
+            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord? =
+                if (serialisertHendelse == null) {
+                    null
+                } else {
+                    objectMapper.readValue(serialisertHendelse)
+                }
+            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+                sykmeldingId = sykmeldingId,
+                sykmeldingKafkaRecord = sykmeldingMedBehandlingsutfall,
+            )
             log.info(
                 "Motatt sykmelding med behandlingsutfall: \n${
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
