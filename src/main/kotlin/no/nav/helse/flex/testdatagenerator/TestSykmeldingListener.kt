@@ -31,20 +31,20 @@ class TestSykmeldingListener(
         val sykmeldingId = cr.key()
         val serialisertHendelse = cr.value()
         try {
-            val sykmeldingMedBehandlingsutfall: SykmeldingKafkaRecord? =
+            val sykmeldingRecord: SykmeldingKafkaRecord? =
                 if (serialisertHendelse == null) {
                     null
                 } else {
                     objectMapper.readValue(serialisertHendelse)
                 }
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
-                sykmeldingKafkaRecord = sykmeldingMedBehandlingsutfall,
+                sykmeldingKafkaRecord = sykmeldingRecord,
             )
             log.info(
                 "Motatt sykmelding med behandlingsutfall: \n${
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
-                        sykmeldingMedBehandlingsutfall,
+                        sykmeldingRecord,
                     )
                 }",
             )

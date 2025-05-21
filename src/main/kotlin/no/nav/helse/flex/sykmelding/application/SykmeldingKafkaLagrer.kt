@@ -20,18 +20,18 @@ class SykmeldingKafkaLagrer(
     val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
-    fun lagreSykmeldingMedBehandlingsutfall(
+    fun lagreSykmeldingFraKafka(
         sykmeldingId: String,
         sykmeldingKafkaRecord: SykmeldingKafkaRecord?,
     ) {
         if (sykmeldingKafkaRecord == null) {
             slettSykmelding(sykmeldingId = sykmeldingId)
         } else {
-            lagreSykmelding(sykmeldingKafkaRecord)
+            opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord)
         }
     }
 
-    internal fun lagreSykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
+    internal fun opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
         val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
         if (eksisterendeSykmelding != null) {
             val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, sykmeldingKafkaRecord)

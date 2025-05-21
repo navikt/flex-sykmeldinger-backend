@@ -65,7 +65,7 @@ class SykmeldingListener(
 
         log.info("Prosesserer sykmelding $sykmeldingId fra topic $SYKMELDING_TOPIC")
         try {
-            sykmeldingKafkaLagrer.lagreSykmeldingMedBehandlingsutfall(
+            sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
                 sykmeldingKafkaRecord = sykmeldingRecord,
             )
