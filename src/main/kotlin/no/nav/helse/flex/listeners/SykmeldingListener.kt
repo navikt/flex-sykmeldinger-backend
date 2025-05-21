@@ -57,7 +57,9 @@ class SykmeldingListener(
 
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
-                val message = "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, value: ${sykmeldingRecord.sykmelding.id}"
+                val message =
+                    "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
+                        "value: ${sykmeldingRecord.sykmelding.id}"
                 log.error(message)
                 throw IllegalArgumentException(message)
             }
