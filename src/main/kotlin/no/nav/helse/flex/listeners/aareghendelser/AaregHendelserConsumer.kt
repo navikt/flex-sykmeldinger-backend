@@ -42,7 +42,7 @@ class AaregHendelserConsumer(
                     } catch (e: Exception) {
                         log.errorSecure(
                             "Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.",
-                            secureMessage = e.message ?: "",
+                            secureMessage = "Rå hendelse verdi: ${consumerRecord.value()}",
                             secureThrowable = e,
                         )
                         throw RuntimeException("Klarte ikke prosessere record med key: ${consumerRecord.key()}. Dette vil bli retryet.")
