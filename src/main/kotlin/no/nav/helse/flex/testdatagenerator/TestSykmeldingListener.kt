@@ -42,7 +42,7 @@ class TestSykmeldingListener(
                 sykmeldingKafkaRecord = sykmeldingRecord,
             )
             log.info(
-                "Motatt sykmelding med behandlingsutfall: \n${
+                "Motatt sykmelding fra $TEST_SYKMELDING_TOPIC: \n${
                     objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
                         sykmeldingRecord,
                     )
