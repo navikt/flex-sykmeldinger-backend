@@ -45,7 +45,6 @@ class SykmeldingStatusHandterer(
             sykmeldingStatusBuffer.leggTil(status)
             return false
         } else {
-            validerStatusForSykmelding(sykmelding, status)
             return when (val statusEvent = status.event.statusEvent) {
                 StatusEventKafkaDTO.SLETTET -> {
                     log.info("Sletter sykmelding '$sykmeldingId' fordi mottok status $statusEvent")
@@ -57,6 +56,7 @@ class SykmeldingStatusHandterer(
                     true
                 }
                 else -> {
+                    validerStatusForSykmelding(sykmelding, status)
                     return lagreStatusForEksisterendeSykmelding(sykmelding, status)
                 }
             }
@@ -72,12 +72,9 @@ class SykmeldingStatusHandterer(
         }
         val statusFraKafkaOpprettet = status.kafkaMetadata.timestamp.toInstant()
         if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
-            log.errorSecure(
+            log.error(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
                     "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
-                secureMessage =
-                    "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
-                        "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
             )
             throw SykmeldingHendelseException(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka",

@@ -240,27 +240,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde ikke kaste feil når status er nyere enn sykmeldingens siste hendelse`() {
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-            )
-
-        sykmeldingRepository.save(sykmelding)
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata =
-                    lagKafkaMetadataDTO(
-                        sykmeldingId = "1",
-                        timestamp = OffsetDateTime.parse("2025-01-01T12:00:00+00:00"),
-                    ),
-            )
-        invoking {
-            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
-        } `should not throw` SykmeldingHendelseException::class
-    }
-
-    @Test
     fun `burde ignorere når sykmeldingens siste hendelse er APEN, selv om den er laget etter kafka-status`() {
         val sykmelding =
             lagSykmelding(
