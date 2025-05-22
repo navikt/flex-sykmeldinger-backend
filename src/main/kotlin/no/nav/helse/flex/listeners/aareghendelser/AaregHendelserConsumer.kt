@@ -42,7 +42,7 @@ class AaregHendelserConsumer(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        val time =
+        val timeMs =
             measureTimeMillis {
                 val rawRecords = consumerRecords.map(RawHendelse::fraConsumerRecord)
                 try {
@@ -58,10 +58,10 @@ class AaregHendelserConsumer(
                 }
             }
         val totalByteSize = consumerRecords.sumOf { it.serializedValueSize() }
-        if (time >= 1000 || totalByteSize >= 20_000) {
+        if (timeMs >= 10_000 || totalByteSize >= 20_000) {
             log.warn(
-                "Prossesserte unormalt mange records: ${consumerRecords.count()}" +
-                    ", med størrelse $totalByteSize bytes, iløpet av $time millisekunder",
+                "Unormal prosessering av Aareg hendelser. Antall: ${consumerRecords.count()}" +
+                    ", tid: $timeMs ms, totalByteSize: $totalByteSize bytes",
             )
         }
     }
