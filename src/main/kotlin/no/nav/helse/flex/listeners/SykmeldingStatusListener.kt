@@ -1,7 +1,6 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component
 @Component
 class SykmeldingStatusListener(
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
-    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -30,10 +28,6 @@ class SykmeldingStatusListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        if (environmentToggles.isProduction()) {
-            log.info("SykmeldingStatus listener er skrudd av i prod. Hopper over melding, meldingKey: ${cr.key()}")
-            return
-        }
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
