@@ -9,7 +9,10 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.Timeout
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
@@ -272,5 +275,54 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         invoking {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status)
         } `should not throw` SykmeldingHendelseException::class
+    }
+
+    @Nested
+    inner class Companion {
+        @Test
+        fun `erHendelseDuplikat burde returnere true dersom hendelse er lik`() {
+            val hendelse1 = lagSykmeldingHendelse()
+            val hendelse2 = lagSykmeldingHendelse()
+            SykmeldingStatusHandterer.erHendelseDuplikat(hendelse1, hendelse2).shouldBeTrue()
+        }
+
+        @TestFactory
+        fun `erHendelseDuplikat burde returnere false dersom`() =
+            mapOf(
+                "status er forskjellig" to lagSykmeldingHendelse(status = HendelseStatus.AVBRUTT),
+                "tilleggsinfo er forskjellig" to lagSykmeldingHendelse(tilleggsinfo = lagAnnetArbeidssituasjonTilleggsinfo()),
+                "brukerSvar er forskjellig" to lagSykmeldingHendelse(brukerSvar = lagAnnetArbeidssituasjonBrukerSvar()),
+            ).map { (name, hendelse) ->
+                DynamicTest.dynamicTest(name) {
+                    val hendelse2 = lagSykmeldingHendelse()
+                    SykmeldingStatusHandterer.erHendelseDuplikat(hendelse, hendelse2).shouldBeFalse()
+                }
+            }
+
+        @Test
+        fun `erHendelseDuplikat burde returnere true dersom hendelseOpprettet er litt forskjellig`() {
+            val hendelse1 =
+                lagSykmeldingHendelse(
+                    hendelseOpprettet = Instant.parse("2024-01-01T12:00:00Z"),
+                )
+            val hendelse2 =
+                lagSykmeldingHendelse(
+                    hendelseOpprettet = Instant.parse("2024-01-01T12:04:00Z"),
+                )
+            SykmeldingStatusHandterer.erHendelseDuplikat(hendelse1, hendelse2).shouldBeTrue()
+        }
+
+        @Test
+        fun `erHendelseDuplikat burde returnere false dersom hendelseOpprettet er veldig forskjellig`() {
+            val hendelse1 =
+                lagSykmeldingHendelse(
+                    hendelseOpprettet = Instant.parse("2024-01-01T12:00:00Z"),
+                )
+            val hendelse2 =
+                lagSykmeldingHendelse(
+                    hendelseOpprettet = Instant.parse("2024-01-01T13:00:00Z"),
+                )
+            SykmeldingStatusHandterer.erHendelseDuplikat(hendelse1, hendelse2).shouldBeFalse()
+        }
     }
 }
