@@ -55,6 +55,8 @@ class SykmeldingStatusListener(
         } catch (e: Exception) {
             log.errorSecure(
                 "Feil ved håndtering av sykmelding status, sykmeldingId: ${status.kafkaMetadata.sykmeldingId}, status: ${status.event.statusEvent}, meldingKey: ${cr.key()}",
+                "Rå sykmelding status: ${cr.value()}",
+                secureThrowable = e,
             )
             throw e
         }
