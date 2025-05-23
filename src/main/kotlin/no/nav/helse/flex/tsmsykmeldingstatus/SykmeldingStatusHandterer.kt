@@ -15,6 +15,7 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -71,7 +72,7 @@ class SykmeldingStatusHandterer(
         if (sykmelding.sisteHendelse().status == HendelseStatus.APEN) {
             return
         }
-        val statusFraKafkaOpprettet = status.kafkaMetadata.timestamp.toInstant()
+        val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
         if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
             log.error(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
@@ -173,10 +174,12 @@ class SykmeldingStatusHandterer(
         fun erHendelseDuplikat(
             hendelse1: SykmeldingHendelse,
             hendelse2: SykmeldingHendelse,
-        ): Boolean =
-            hendelse1.status == hendelse2.status &&
-                hendelse1.hendelseOpprettet == hendelse2.hendelseOpprettet &&
+        ): Boolean {
+            val hendelseOpprettelseForskjell = Duration.between(hendelse1.hendelseOpprettet, hendelse2.hendelseOpprettet).abs()
+            return hendelse1.status == hendelse2.status &&
                 hendelse1.brukerSvar == hendelse2.brukerSvar &&
-                hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
+                hendelse1.tilleggsinfo == hendelse2.tilleggsinfo &&
+                hendelseOpprettelseForskjell < Duration.ofMinutes(5)
+        }
     }
 }
