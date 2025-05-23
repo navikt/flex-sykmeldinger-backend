@@ -236,6 +236,9 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                 kafkaMetadata =
                     lagKafkaMetadataDTO(
                         sykmeldingId = "1",
+                    ),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
                         timestamp = OffsetDateTime.parse("2024-01-01T12:00:00+00:00"),
                     ),
             )
