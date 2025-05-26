@@ -136,7 +136,6 @@ class SykmeldingStatusHandterer(
             )
         }
 
-        sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = hendelse.status)
         sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
 
