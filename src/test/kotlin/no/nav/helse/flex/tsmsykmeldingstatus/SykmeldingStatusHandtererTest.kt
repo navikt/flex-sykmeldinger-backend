@@ -1,7 +1,6 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
-import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
@@ -141,25 +140,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde respektere regler for status endring`() {
-        sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
-                .leggTilHendelse(
-                    lagSykmeldingHendelse(
-                        status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                    ),
-                ),
-        )
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-            )
-        invoking {
-            sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
-        } `should throw` UgyldigSykmeldingStatusException::class
-    }
-
-    @Test
     fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
         val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
         val sammenstillSykmeldingStatusKafkaMessageDTO =
@@ -236,6 +216,9 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                 kafkaMetadata =
                     lagKafkaMetadataDTO(
                         sykmeldingId = "1",
+                    ),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
                         timestamp = OffsetDateTime.parse("2024-01-01T12:00:00+00:00"),
                     ),
             )
