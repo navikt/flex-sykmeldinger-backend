@@ -14,7 +14,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Component
-class SykmeldingHendelseKonverterer(
+class SykmeldingHendelseFraKafkaKonverterer(
     private val nowFactory: Supplier<Instant>,
 ) {
     fun konverterStatusTilSykmeldingHendelse(
