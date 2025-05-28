@@ -15,8 +15,8 @@ object SykmeldingHendelseTilKafkaKonverterer {
     private val logger = this.logger()
 
     fun konverterSykmeldingHendelseTilKafkaDTO(
-        sykmeldingId: String,
         sykmeldingHendelse: SykmeldingHendelse,
+        sykmeldingId: String,
     ): SykmeldingStatusKafkaDTO =
         when (sykmeldingHendelse.status) {
             HendelseStatus.SENDT_TIL_NAV,

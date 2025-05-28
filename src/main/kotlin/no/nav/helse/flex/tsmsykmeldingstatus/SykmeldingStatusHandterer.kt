@@ -98,8 +98,8 @@ class SykmeldingStatusHandterer(
                 fnr = sykmelding.pasientFnr,
                 sykmeldingStatusKafkaDTO =
                     SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingId = sykmelding.sykmeldingId,
                         sykmeldingHendelse = sykmelding.sisteHendelse(),
+                        sykmeldingId = sykmelding.sykmeldingId,
                     ),
             )
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
