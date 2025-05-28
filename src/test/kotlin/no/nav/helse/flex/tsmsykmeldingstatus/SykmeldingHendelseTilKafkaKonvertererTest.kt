@@ -24,7 +24,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
         val sykmeldingStatusKafkaDTO =
-            SykmeldingHendelseTilKafkaKonverterer.fraSykmeldingHendelse(
+            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                 sykmeldingId = "1",
                 sykmeldingHendelse = hendelse,
             )
@@ -40,7 +40,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     @Test
     fun `Mapper status AVBRUTT riktig`() {
         val sykmeldingStatusKafkaDTO =
-            SykmeldingHendelseTilKafkaKonverterer.fraSykmeldingHendelse(
+            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                 sykmeldingId = "1",
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
@@ -60,7 +60,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     @Test
     fun `Mapper status APEN riktig`() {
         val sykmeldingStatusKafkaDTO =
-            SykmeldingHendelseTilKafkaKonverterer.fraSykmeldingHendelse(
+            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                 sykmeldingId = "1",
                 sykmeldingHendelse =
                     lagSykmeldingHendelse(
@@ -82,7 +82,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         @Test
         fun `Mapper arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
-                SykmeldingHendelseTilKafkaKonverterer.fraSykmeldingHendelse(
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "1",
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(

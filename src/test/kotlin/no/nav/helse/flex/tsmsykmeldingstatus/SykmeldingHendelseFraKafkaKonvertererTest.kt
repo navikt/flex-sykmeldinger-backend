@@ -56,7 +56,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
                     ),
             )
 
-        sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status).run {
+        sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status).run {
             this.status `should be equal to` HendelseStatus.APEN
             hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
             source `should be equal to` "TEST_SOURCE"
@@ -71,7 +71,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         val sykmelding = lagSykmelding()
         val status = lagSykmeldingStatusKafkaMessageDTO()
 
-        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status)
         hendelse.lokaltOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
     }
 
@@ -89,7 +89,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
                     ),
             )
 
-        invoking { sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status) } `should throw`
+        invoking { sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status) } `should throw`
             IllegalArgumentException::class
     }
 

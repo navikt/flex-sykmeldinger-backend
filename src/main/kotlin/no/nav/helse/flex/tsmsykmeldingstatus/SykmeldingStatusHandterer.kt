@@ -95,7 +95,7 @@ class SykmeldingStatusHandterer(
             sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = sykmelding.pasientFnr,
                 sykmeldingStatusKafkaDTO =
-                    SykmeldingHendelseTilKafkaKonverterer.fraSykmeldingHendelse(
+                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                         sykmeldingId = sykmelding.sykmeldingId,
                         sykmeldingHendelse = sykmelding.sisteHendelse(),
                     ),
@@ -109,7 +109,7 @@ class SykmeldingStatusHandterer(
     ): Boolean {
         val hendelse =
             try {
-                sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+                sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status)
             } catch (e: Exception) {
                 log.errorSecure(
                     "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${status.event.statusEvent}, " +
