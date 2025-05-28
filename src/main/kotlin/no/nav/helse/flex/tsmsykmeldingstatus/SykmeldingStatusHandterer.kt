@@ -109,7 +109,11 @@ class SykmeldingStatusHandterer(
     ): Boolean {
         val hendelse =
             try {
-                sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status)
+                sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(
+                    status = status.event,
+                    erSykmeldingAvvist = sykmelding.erAvvist,
+                    source = status.kafkaMetadata.source,
+                )
             } catch (e: Exception) {
                 log.errorSecure(
                     "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${status.event.statusEvent}, " +

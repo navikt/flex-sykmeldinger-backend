@@ -3,11 +3,11 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
 import no.nav.helse.flex.api.dto.JaEllerNei
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -18,36 +18,37 @@ class SykmeldingHendelseFraKafkaKonverterer(
     private val nowFactory: Supplier<Instant>,
 ) {
     fun konverterSykmeldingHendelseFraKafkaDTO(
-        sykmelding: Sykmelding,
-        status: SykmeldingStatusKafkaMessageDTO,
+        status: SykmeldingStatusKafkaDTO,
+        erSykmeldingAvvist: Boolean = false,
+        source: String? = null,
     ): SykmeldingHendelse {
-        val hendelseStatus = konverterStatusTilHendelseStatus(status.event.statusEvent, sykmelding.erAvvist)
+        val hendelseStatus = konverterStatusTilHendelseStatus(status.statusEvent, erAvvist = erSykmeldingAvvist)
         when (hendelseStatus) {
             HendelseStatus.SENDT_TIL_NAV,
             HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
             -> {
-                requireNotNull(status.event.brukerSvar) {
+                requireNotNull(status.brukerSvar) {
                     "Brukersvar er påkrevd for SENDT_TIL_NAV og SENDT_TIL_ARBEIDSGIVER"
                 }
             }
             else -> {}
         }
-        val brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) }
+        val brukerSvar = status.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) }
         val tilleggsinfo =
             brukerSvar?.let { brukerSvar ->
                 konverterTilTilleggsinfo(
                     arbeidssituasjon = brukerSvar.arbeidssituasjon,
-                    arbeidsgiver = status.event.arbeidsgiver,
-                    tidligereArbeidsgiver = status.event.tidligereArbeidsgiver,
+                    arbeidsgiver = status.arbeidsgiver,
+                    tidligereArbeidsgiver = status.tidligereArbeidsgiver,
                 )
             }
 
         return SykmeldingHendelse(
             status = hendelseStatus,
-            brukerSvar = status.event.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
+            brukerSvar = status.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
             tilleggsinfo = tilleggsinfo,
-            source = status.kafkaMetadata.source,
-            hendelseOpprettet = status.event.timestamp.toInstant(),
+            source = source,
+            hendelseOpprettet = status.timestamp.toInstant(),
             lokaltOpprettet = nowFactory.get(),
         )
     }

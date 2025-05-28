@@ -7,8 +7,6 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
 import org.amshove.kluent.*
@@ -43,53 +41,45 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
-        val sykmelding = lagSykmelding()
-
         val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "TEST_SOURCE"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "APEN",
-                        timestamp = Instant.parse("2021-01-01T00:00:00Z").atOffset(ZoneOffset.UTC),
-                        brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
-                    ),
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = "APEN",
+                timestamp = Instant.parse("2021-01-01T00:00:00Z").atOffset(ZoneOffset.UTC),
+                brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
             )
 
-        sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status).run {
-            this.status `should be equal to` HendelseStatus.APEN
-            hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
-            source `should be equal to` "TEST_SOURCE"
-            brukerSvar.`should not be null`()
-        }
+        sykmeldingHendelseFraKafkaKonverterer
+            .konverterSykmeldingHendelseFraKafkaDTO(
+                status = status,
+                source = "TEST_SOURCE",
+            ).run {
+                this.status `should be equal to` HendelseStatus.APEN
+                hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
+                source `should be equal to` "TEST_SOURCE"
+                brukerSvar.`should not be null`()
+            }
     }
 
     @Test
     fun `burde sette lokaltOpprettet til nå`() {
         nowFactory.setNow(Instant.parse("2021-01-01T00:00:00Z"))
 
-        val sykmelding = lagSykmelding()
-        val status = lagSykmeldingStatusKafkaMessageDTO()
+        val status = lagSykmeldingStatusKafkaDTO()
 
-        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status)
+        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status = status)
         hendelse.lokaltOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["SENDT", "BEKREFTET"])
     fun `burde feile uten brukerSvar når `(statusEvent: String) {
-        val sykmelding = lagSykmelding()
         val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "tsm"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = statusEvent,
-                        brukerSvarKafkaDTO = null,
-                    ),
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = statusEvent,
+                brukerSvarKafkaDTO = null,
             )
 
-        invoking { sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(sykmelding, status) } `should throw`
+        invoking { sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status) } `should throw`
             IllegalArgumentException::class
     }
 
