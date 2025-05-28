@@ -7,8 +7,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.amshove.kluent.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
@@ -181,6 +180,42 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
                 val annetBrukerSvar = konvertert as? AnnetArbeidssituasjonBrukerSvar
                 annetBrukerSvar.`should not be null`()
             }
+        }
+    }
+
+    @Nested
+    inner class KonverterSporsmalsTilBrukerSvar {
+        @Test
+        fun `burde returnere null dersom ingen spørmål`() {
+            sykmeldingHendelseFraKafkaKonverterer.konverterSporsmalTilBrukerSvar(emptyList()).shouldBeNull()
+        }
+
+        @Test
+        fun `burde konvertere minimalt antall spørsmål til brukerSvar`() {
+            val sporsmals =
+                listOf(
+                    SporsmalKafkaDTO(
+                        tekst = "Jeg er sykmeldt som",
+                        shortName = ShortNameKafkaDTO.ARBEIDSSITUASJON,
+                        svartype = SvartypeKafkaDTO.ARBEIDSSITUASJON,
+                        svar = "ARBEIDSTAKER",
+                    ),
+                )
+            val brukerSvar = sykmeldingHendelseFraKafkaKonverterer.konverterSporsmalTilBrukerSvar(sporsmals)
+            brukerSvar
+                .shouldNotBeNull()
+                .shouldBeInstanceOf<ArbeidstakerBrukerSvar>()
+                .run {
+                    arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+                    arbeidssituasjonSporsmal.run {
+                        sporsmaltekst `should be equal to` "Jeg er sykmeldt som"
+                        svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+                    }
+                    arbeidsgiverOrgnummer.run {
+                        sporsmaltekst shouldBeEqualTo ""
+                        svar shouldBeEqualTo ""
+                    }
+                }
         }
     }
 

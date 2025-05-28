@@ -1,14 +1,11 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO.*
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.api.dto.JaEllerNei
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.function.Supplier
@@ -90,14 +87,14 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     sporsmaltekst = arbeidssituasjon.sporsmaltekst,
                     svar =
                         when (arbeidssituasjon.svar) {
-                            ARBEIDSTAKER -> Arbeidssituasjon.ARBEIDSTAKER
-                            FRILANSER -> Arbeidssituasjon.FRILANSER
-                            NAERINGSDRIVENDE -> Arbeidssituasjon.NAERINGSDRIVENDE
-                            FISKER -> Arbeidssituasjon.FISKER
-                            JORDBRUKER -> Arbeidssituasjon.JORDBRUKER
-                            ARBEIDSLEDIG -> Arbeidssituasjon.ARBEIDSLEDIG
-                            ANNET -> Arbeidssituasjon.ANNET
-                            PERMITTERT -> Arbeidssituasjon.PERMITTERT
+                            ArbeidssituasjonDTO.ARBEIDSTAKER -> Arbeidssituasjon.ARBEIDSTAKER
+                            ArbeidssituasjonDTO.FRILANSER -> Arbeidssituasjon.FRILANSER
+                            ArbeidssituasjonDTO.NAERINGSDRIVENDE -> Arbeidssituasjon.NAERINGSDRIVENDE
+                            ArbeidssituasjonDTO.FISKER -> Arbeidssituasjon.FISKER
+                            ArbeidssituasjonDTO.JORDBRUKER -> Arbeidssituasjon.JORDBRUKER
+                            ArbeidssituasjonDTO.ARBEIDSLEDIG -> Arbeidssituasjon.ARBEIDSLEDIG
+                            ArbeidssituasjonDTO.ANNET -> Arbeidssituasjon.ANNET
+                            ArbeidssituasjonDTO.PERMITTERT -> Arbeidssituasjon.PERMITTERT
                         },
                 )
             }
@@ -206,7 +203,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             }
 
         return when (brukerSvarKafkaDTO.arbeidssituasjon.svar) {
-            ARBEIDSTAKER -> {
+            ArbeidssituasjonDTO.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiverOrgnummer) { "Arbeidsgiver orgnummer er påkrevd for ARBEIDSTAKER" }
                 ArbeidstakerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
@@ -218,7 +215,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     egenmeldingsdager = egenmeldingsdager,
                 )
             }
-            FISKER -> {
+            ArbeidssituasjonDTO.FISKER -> {
                 requireNotNull(lottOgHyre) { "Lott eller hyre er påkrevd for FISKER" }
                 requireNotNull(blad) { "Blad er påkrevd for FISKER" }
                 FiskerBrukerSvar(
@@ -237,7 +234,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                 )
             }
 
-            FRILANSER -> {
+            ArbeidssituasjonDTO.FRILANSER -> {
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -247,7 +244,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
-            NAERINGSDRIVENDE -> {
+            ArbeidssituasjonDTO.NAERINGSDRIVENDE -> {
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -257,7 +254,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
-            JORDBRUKER -> {
+            ArbeidssituasjonDTO.JORDBRUKER -> {
                 JordbrukerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -267,7 +264,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     harForsikring = harForsikring,
                 )
             }
-            ARBEIDSLEDIG -> {
+            ArbeidssituasjonDTO.ARBEIDSLEDIG -> {
                 ArbeidsledigBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -275,7 +272,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
-            PERMITTERT -> {
+            ArbeidssituasjonDTO.PERMITTERT -> {
                 PermittertBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -283,13 +280,55 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
-            ANNET -> {
+            ArbeidssituasjonDTO.ANNET -> {
                 AnnetArbeidssituasjonBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
+        }
+    }
+
+    internal fun konverterSporsmalTilBrukerSvar(sporsmal: List<SporsmalKafkaDTO>): BrukerSvar? {
+        if (sporsmal.isEmpty()) return null
+
+        val arbeidssituasjonSporsmal =
+            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.ARBEIDSSITUASJON }
+                ?: throw IllegalArgumentException("Arbeidssituasjon er påkrevd i bruker svar")
+
+        val arbeidssituasjon =
+            when (arbeidssituasjonSporsmal.svar) {
+                "ARBEIDSTAKER" -> Arbeidssituasjon.ARBEIDSTAKER
+                "FRILANSER" -> Arbeidssituasjon.FRILANSER
+                "NAERINGSDRIVENDE" -> Arbeidssituasjon.NAERINGSDRIVENDE
+                "ARBEIDSLEDIG" -> Arbeidssituasjon.ARBEIDSLEDIG
+                "PERMITTERT" -> Arbeidssituasjon.PERMITTERT
+                "ANNET" -> Arbeidssituasjon.ANNET
+                else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: ${arbeidssituasjonSporsmal.svar}")
+            }
+
+        return when (arbeidssituasjon) {
+            Arbeidssituasjon.ARBEIDSTAKER ->
+                ArbeidstakerBrukerSvar(
+                    erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "", svar = true),
+                    arbeidssituasjonSporsmal =
+                        SporsmalSvar(
+                            sporsmaltekst = arbeidssituasjonSporsmal.tekst,
+                            svar = arbeidssituasjon,
+                        ),
+                    arbeidsgiverOrgnummer =
+                        SporsmalSvar(
+                            sporsmaltekst = "",
+                            svar = "",
+                        ),
+                )
+            Arbeidssituasjon.FRILANSER -> TODO()
+            Arbeidssituasjon.NAERINGSDRIVENDE -> TODO()
+            Arbeidssituasjon.ARBEIDSLEDIG -> TODO()
+            Arbeidssituasjon.PERMITTERT -> TODO()
+            Arbeidssituasjon.ANNET -> TODO()
+            else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: $arbeidssituasjon")
         }
     }
 
