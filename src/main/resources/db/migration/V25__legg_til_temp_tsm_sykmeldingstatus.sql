@@ -2,5 +2,5 @@ CREATE TABLE TEMP_TSM_HISTORISK_SYKMELDINGSTATUS
 (
     TIMESTAMP     TIMESTAMP WITH TIME ZONE NOT NULL,
     SYKMELDING_ID TEXT                     NOT NULL,
-    EVENT         TEXT                     NOT NULL,
+    EVENT         TEXT                     NOT NULL
 );
