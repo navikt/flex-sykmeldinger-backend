@@ -284,14 +284,21 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere arbeidsgiver, en arbeidsgiver har ikke info`() {
+    fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
         val enArbeidsgiver =
             EnArbeidsgiver(
+                navn = "Navn",
+                yrkesbetegnelse = "_",
+                stillingsprosent = 50,
                 meldingTilArbeidsgiver = "_",
                 tiltakArbeidsplassen = "_",
             )
 
-        enArbeidsgiver.tilArbeidsgiverDTO().`should be null`()
+        enArbeidsgiver.tilArbeidsgiverDTO() shouldBeEqualTo
+            ArbeidsgiverDTO(
+                navn = "Navn",
+                stillingsprosent = 50,
+            )
     }
 
     @Test
@@ -489,6 +496,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Test
     fun `burde konvertere tiltak arbeidsplassen`() {
         EnArbeidsgiver(
+            navn = "_",
+            yrkesbetegnelse = "_",
+            stillingsprosent = 0,
             meldingTilArbeidsgiver = "_",
             tiltakArbeidsplassen = "tiltak",
         ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
@@ -509,6 +519,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         EnArbeidsgiver(
             meldingTilArbeidsgiver = "Melding",
             tiltakArbeidsplassen = "_",
+            navn = "_",
+            yrkesbetegnelse = "_",
+            stillingsprosent = 0,
         ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
 
         FlereArbeidsgivere(

@@ -445,6 +445,11 @@ fun ArbeidsgiverInfo.getTiltakArbeidsplassen(): String? =
 
 fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
     when (this) {
+        is EnArbeidsgiver ->
+            ArbeidsgiverDTO(
+                navn = this.navn,
+                stillingsprosent = this.stillingsprosent,
+            )
         is FlereArbeidsgivere ->
             ArbeidsgiverDTO(
                 navn = this.navn,
