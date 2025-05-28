@@ -17,7 +17,7 @@ import java.util.function.Supplier
 class SykmeldingHendelseFraKafkaKonverterer(
     private val nowFactory: Supplier<Instant>,
 ) {
-    fun konverterStatusTilSykmeldingHendelse(
+    fun konverterSykmeldingHendelseFraKafkaDTO(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
     ): SykmeldingHendelse {

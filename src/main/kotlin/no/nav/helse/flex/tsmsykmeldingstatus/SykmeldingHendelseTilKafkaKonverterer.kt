@@ -14,7 +14,7 @@ import no.nav.helse.flex.utils.serialisertTilString
 object SykmeldingHendelseTilKafkaKonverterer {
     private val logger = this.logger()
 
-    fun fraSykmeldingHendelse(
+    fun konverterSykmeldingHendelseTilKafkaDTO(
         sykmeldingId: String,
         sykmeldingHendelse: SykmeldingHendelse,
     ): SykmeldingStatusKafkaDTO =
