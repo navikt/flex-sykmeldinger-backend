@@ -23,18 +23,20 @@ data class SykmeldingFormResponse(
 
  */
 
+fun JaEllerNei.tilBoolean(): Boolean = this == JaEllerNei.JA
+
 data class SendSykmeldingRequestDTO(
-    val erOpplysningeneRiktige: SporsmalSvar<YesOrNoDTO>,
+    val erOpplysningeneRiktige: SporsmalSvar<JaEllerNei>,
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
-    val arbeidsgiverOrgnummer: String? = null,
-    val harEgenmeldingsdager: SporsmalSvar<YesOrNoDTO>? = null,
-    val riktigNarmesteLeder: SporsmalSvar<YesOrNoDTO>? = null,
+    val arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
+    val harEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
+    val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>? = null,
     val arbeidsledig: SporsmalSvar<ArbeidsledigDTO>? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<EgenmeldingsperiodeDTO>>? = null,
     val fisker: FiskerDTO? = null,
-    val harBruktEgenmelding: SporsmalSvar<YesOrNoDTO>? = null,
-    val harForsikring: SporsmalSvar<YesOrNoDTO>,
+    val harBruktEgenmelding: SporsmalSvar<JaEllerNei>? = null,
+    val harForsikring: SporsmalSvar<JaEllerNei>? = null,
     val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysningDTO>>? = null,
 ) {
     fun tilBrukerSvar(): BrukerSvar =
@@ -45,7 +47,7 @@ data class SendSykmeldingRequestDTO(
                     arbeidssituasjonSporsmal = arbeidssituasjon.svar.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.somUkjentSporsmal(),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.svar.somUkjentSporsmal(),
                     riktigNarmesteLeder = riktigNarmesteLeder?.svar?.tilBoolean()?.somUkjentSporsmal(),
                     harEgenmeldingsdager = harEgenmeldingsdager?.svar?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsdager = egenmeldingsdager?.svar?.somUkjentSporsmal(),
@@ -76,7 +78,7 @@ data class SendSykmeldingRequestDTO(
                     erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
                     lottOgHyre = fisker.lottOgHyre.tilFiskerLottOgHyre().somUkjentSporsmal(),
                     blad = fisker.blad.tilFiskerBlad().somUkjentSporsmal(),
-                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer?.somUkjentSporsmal(),
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer?.svar?.somUkjentSporsmal(),
                     riktigNarmesteLeder = riktigNarmesteLeder?.svar?.tilBoolean()?.somUkjentSporsmal(),
                     harEgenmeldingsdager = harEgenmeldingsdager?.svar?.tilBoolean()?.somUkjentSporsmal(),
                     egenmeldingsdager = egenmeldingsdager?.svar?.somUkjentSporsmal(),

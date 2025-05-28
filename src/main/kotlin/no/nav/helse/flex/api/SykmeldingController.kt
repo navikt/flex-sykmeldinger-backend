@@ -164,6 +164,8 @@ class SykmeldingController(
 
         val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
 
+        logger.info("Bruker svar: $brukerSvar")
+
         val sykmelding =
             sykmeldingHandterer.sendSykmelding(
                 sykmeldingId = sykmeldingId,
