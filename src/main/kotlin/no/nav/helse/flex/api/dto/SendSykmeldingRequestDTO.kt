@@ -49,12 +49,12 @@ data class SendSykmeldingRequestDTO(
                 requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
                 ArbeidstakerBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon, // arbeidssituasjon.svar.somUkjentSporsmal(),
-                    erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
-                    uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.svar.somUkjentSporsmal(),
-                    riktigNarmesteLeder = riktigNarmesteLeder?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    harEgenmeldingsdager = harEgenmeldingsdager?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    egenmeldingsdager = egenmeldingsdager?.svar?.somUkjentSporsmal(),
+                    erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()) ,
+                    uriktigeOpplysninger = uriktigeOpplysninger?.let { SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe()) }, // uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal() }
+                    arbeidsgiverOrgnummer = SporsmalSvar(arbeidsgiverOrgnummer.sporsmaltekst, arbeidsgiverOrgnummer.svar),
+                    riktigNarmesteLeder = riktigNarmesteLeder?.let{ SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())} ,
+                    harEgenmeldingsdager = harEgenmeldingsdager?.let{ SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())} ,
+                    egenmeldingsdager = egenmeldingsdager?.let{ SporsmalSvar(it.sporsmaltekst, it.svar) },
                 )
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
