@@ -48,7 +48,7 @@ data class SendSykmeldingRequestDTO(
             Arbeidssituasjon.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
                 ArbeidstakerBrukerSvar(
-                    arbeidssituasjonSporsmal = arbeidssituasjon.svar.somUkjentSporsmal(),
+                    arbeidssituasjonSporsmal = arbeidssituasjon, // arbeidssituasjon.svar.somUkjentSporsmal(),
                     erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
                     uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer.svar.somUkjentSporsmal(),
