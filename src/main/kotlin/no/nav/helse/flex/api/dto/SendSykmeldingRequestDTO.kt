@@ -63,10 +63,12 @@ data class SendSykmeldingRequestDTO(
             Arbeidssituasjon.ARBEIDSLEDIG -> {
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig" }
                 ArbeidsledigBrukerSvar(
-                    arbeidssituasjonSporsmal = arbeidssituasjon.svar.somUkjentSporsmal(),
-                    erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = arbeidsledig.svar.arbeidsledigFraOrgnummer?.somUkjentSporsmal(),
-                    uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                    },
                 )
             }
             Arbeidssituasjon.PERMITTERT -> {
