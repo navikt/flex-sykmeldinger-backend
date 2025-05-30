@@ -48,13 +48,16 @@ data class SendSykmeldingRequestDTO(
             Arbeidssituasjon.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
                 ArbeidstakerBrukerSvar(
-                    arbeidssituasjonSporsmal = arbeidssituasjon, // arbeidssituasjon.svar.somUkjentSporsmal(),
-                    erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()) ,
-                    uriktigeOpplysninger = uriktigeOpplysninger?.let { SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe()) }, // uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal() }
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
+                    uriktigeOpplysninger =
+                        uriktigeOpplysninger?.let {
+                            SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                        },
                     arbeidsgiverOrgnummer = SporsmalSvar(arbeidsgiverOrgnummer.sporsmaltekst, arbeidsgiverOrgnummer.svar),
-                    riktigNarmesteLeder = riktigNarmesteLeder?.let{ SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())} ,
-                    harEgenmeldingsdager = harEgenmeldingsdager?.let{ SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())} ,
-                    egenmeldingsdager = egenmeldingsdager?.let{ SporsmalSvar(it.sporsmaltekst, it.svar) },
+                    riktigNarmesteLeder = riktigNarmesteLeder?.let { SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean()) },
+                    harEgenmeldingsdager = harEgenmeldingsdager?.let { SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean()) },
+                    egenmeldingsdager = egenmeldingsdager?.let { SporsmalSvar(it.sporsmaltekst, it.svar) },
                 )
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
