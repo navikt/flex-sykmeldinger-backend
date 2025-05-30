@@ -23,12 +23,20 @@ data class SykmeldingFormResponse(
 
  */
 
+/*
+
+Internal server error - JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`) - POST: /api/v1/sykmeldinger/609e84cc-1435-46b1-a478-42309838e70a/send
+
+
+
+ */
+
 fun JaEllerNei.tilBoolean(): Boolean = this == JaEllerNei.JA
 
 data class SendSykmeldingRequestDTO(
     val erOpplysningeneRiktige: SporsmalSvar<JaEllerNei>,
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
-    val arbeidsgiverOrgnummer: String? = null,
+    val arbeidsgiverOrgnummer: SporsmalSvar<Arbeidssituasjon>,
     val harEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
     val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>? = null,
     val arbeidsledig: SporsmalSvar<ArbeidsledigDTO>? = null,
