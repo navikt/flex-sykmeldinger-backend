@@ -23,18 +23,20 @@ data class SykmeldingFormResponse(
 
  */
 
+fun JaEllerNei.tilBoolean(): Boolean = this == JaEllerNei.JA
+
 data class SendSykmeldingRequestDTO(
-    val erOpplysningeneRiktige: SporsmalSvar<YesOrNoDTO>,
+    val erOpplysningeneRiktige: SporsmalSvar<JaEllerNei>,
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsgiverOrgnummer: String? = null,
-    val harEgenmeldingsdager: SporsmalSvar<YesOrNoDTO>? = null,
-    val riktigNarmesteLeder: SporsmalSvar<YesOrNoDTO>? = null,
+    val harEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
+    val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>? = null,
     val arbeidsledig: SporsmalSvar<ArbeidsledigDTO>? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<EgenmeldingsperiodeDTO>>? = null,
     val fisker: FiskerDTO? = null,
-    val harBruktEgenmelding: SporsmalSvar<YesOrNoDTO>? = null,
-    val harForsikring: SporsmalSvar<YesOrNoDTO>,
+    val harBruktEgenmelding: SporsmalSvar<JaEllerNei>? = null,
+    val harForsikring: SporsmalSvar<JaEllerNei>,
     val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysningDTO>>? = null,
 ) {
     fun tilBrukerSvar(): BrukerSvar =
