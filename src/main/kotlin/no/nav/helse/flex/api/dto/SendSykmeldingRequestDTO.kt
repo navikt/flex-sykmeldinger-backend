@@ -21,10 +21,6 @@ data class SykmeldingFormResponse(
     val fisker: FiskerSvar?,
 )
 
- */
-
-/*
-
 Internal server error - JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`) - POST: /api/v1/sykmeldinger/609e84cc-1435-46b1-a478-42309838e70a/send
 
 
