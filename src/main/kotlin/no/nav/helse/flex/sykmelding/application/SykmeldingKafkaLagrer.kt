@@ -91,7 +91,9 @@ class SykmeldingKafkaLagrer(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
                             source = SykmeldingHendelse.LOKAL_SOURCE,
-                            hendelseOpprettet = now,
+                            hendelseOpprettet =
+                                sykmeldingKafkaRecord.sykmelding.metadata.mottattDato
+                                    .toInstant(),
                             lokaltOpprettet = now,
                         ),
                     ),

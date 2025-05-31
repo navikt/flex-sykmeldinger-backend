@@ -17,6 +17,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
 class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
@@ -135,7 +136,14 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     fun `burde legge til hendelse med status APEN`() {
         val now = Instant.parse("2024-01-01T00:00:00Z")
         nowFactoryFake.setNow(now)
-        val sykmeldingKafkaRecord = lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1"))
+        val sykmeldingKafkaRecord =
+            lagSykmeldingKafkaRecord(
+                sykmelding =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        metadata = lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2023-01-01T00:00:00Z")),
+                    ),
+            )
         sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
@@ -146,7 +154,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             .first()
             .run {
                 status `should be equal to` HendelseStatus.APEN
-                hendelseOpprettet `should be equal to` now
+                hendelseOpprettet `should be equal to` Instant.parse("2023-01-01T00:00:00Z")
                 lokaltOpprettet `should be equal to` now
                 source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
             }

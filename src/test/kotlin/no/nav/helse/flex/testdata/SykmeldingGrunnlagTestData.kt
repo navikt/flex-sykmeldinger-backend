@@ -100,10 +100,11 @@ fun lagSykmeldingMetadata(
             navn = AvsenderSystemNavn.PRIDOK_EPJ,
             versjon = "2.1.0",
         ),
+    mottattDato: OffsetDateTime = OffsetDateTime.now(),
 ): SykmeldingMetadata {
     val avsenderSystem = avsenderSystem
     return SykmeldingMetadata(
-        mottattDato = OffsetDateTime.now(),
+        mottattDato = mottattDato,
         genDate = OffsetDateTime.now().minusDays(1),
         behandletTidspunkt = OffsetDateTime.now().minusHours(2),
         regelsettVersjon = "1.0",
