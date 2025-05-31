@@ -8,7 +8,6 @@ import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.domain.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
-import no.nav.helse.flex.sykmelding.domain.SykmeldingStatusEndrer
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.errorSecure
@@ -25,7 +24,6 @@ const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 class SykmeldingStatusHandterer(
     private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
-    private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
 ) {
