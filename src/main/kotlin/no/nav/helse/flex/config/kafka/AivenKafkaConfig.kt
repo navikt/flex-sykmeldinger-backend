@@ -74,7 +74,7 @@ class AivenKafkaConfig(
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
+                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "500",
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
             ) + commonConfig()
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
@@ -97,7 +97,7 @@ class AivenKafkaConfig(
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "10",
+                ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "500",
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
             ) + commonConfig()
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
