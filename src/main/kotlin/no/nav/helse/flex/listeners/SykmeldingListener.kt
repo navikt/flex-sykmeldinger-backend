@@ -23,6 +23,7 @@ class SykmeldingListener(
         // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
         groupId = "flex-sykmeldinger-backend-1",
+        concurrency = "3",
     )
     fun listen(
         cr: ConsumerRecord<String, String>,
