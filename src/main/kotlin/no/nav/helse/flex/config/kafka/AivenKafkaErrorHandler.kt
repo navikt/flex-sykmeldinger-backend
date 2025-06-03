@@ -27,13 +27,13 @@ class AivenKafkaErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-        records.forEach { record ->
+        val failingRecord = records.firstOrNull()
+        if (failingRecord != null) {
             log.error(
-                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+                "Feil i prossesseringen av record med offset: ${failingRecord.offset()}, key: ${failingRecord.key()} på topic ${failingRecord.topic()}",
                 thrownException,
             )
-        }
-        if (records.isEmpty()) {
+        } else {
             log.error("Feil i listener uten noen records", thrownException)
         }
 
