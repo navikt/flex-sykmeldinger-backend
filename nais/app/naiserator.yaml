@@ -79,6 +79,7 @@ spec:
           - name: flex-sykmeldinger-backend-db
             users:
               - name: bigquery-datastream
+              - name: bigquery-dataprodukt
             envVarPrefix: DATABASE
         maintenance:
           day: 2
