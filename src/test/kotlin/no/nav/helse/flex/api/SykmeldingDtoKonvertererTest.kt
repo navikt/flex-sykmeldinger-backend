@@ -376,7 +376,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                         DiagnoseInfo(
                             system = DiagnoseSystem.ICPC2,
                             kode = "bi diagnose",
-                            tekst = "tekst",
+                            tekst = null,
                         ),
                     ),
                 svangerskap = true,
@@ -406,7 +406,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                         DiagnoseDTO(
                             kode = "bi diagnose",
                             system = "ICPC2",
-                            tekst = "tekst",
+                            tekst = null,
                         ),
                     ),
                 annenFraversArsak =
