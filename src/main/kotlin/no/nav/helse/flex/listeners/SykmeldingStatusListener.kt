@@ -23,7 +23,7 @@ class SykmeldingStatusListener(
         containerFactory = "aivenKafkaListenerContainerFactory",
         // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
-        concurrency = "3",
+        concurrency = "4",
     )
     fun listen(
         cr: ConsumerRecord<String, String>,
