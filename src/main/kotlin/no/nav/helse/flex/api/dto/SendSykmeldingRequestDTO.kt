@@ -114,6 +114,55 @@ data class SendSykmeldingRequestDTO(
                     uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
                 )
             }
+
+            Arbeidssituasjon.FISKER -> {
+                requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
+
+                // Always use SporsmalSvar with the incoming sporsmaltekst for every field
+                FiskerBrukerSvar(
+                    arbeidssituasjonSporsmal = SporsmalSvar(arbeidssituasjon.sporsmaltekst, arbeidssituasjon.svar),
+                    erOpplysningeneRiktige = SporsmalSvar(
+                        erOpplysningeneRiktige.sporsmaltekst,
+                        erOpplysningeneRiktige.svar.tilBoolean()
+                    ),
+                    uriktigeOpplysninger = uriktigeOpplysninger?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                    },
+                    lottOgHyre = SporsmalSvar(
+                        fisker.lottOgHyre.sporsmaltekst,
+                        FiskerLottOgHyre.valueOf(fisker.lottOgHyre.svar)
+                    ),
+                    blad = SporsmalSvar(
+                        fisker.blad.sporsmaltekst,
+                        FiskerBlad.valueOf(fisker.blad.svar)
+                    ),
+
+
+                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar)
+                    },
+                    riktigNarmesteLeder = riktigNarmesteLeder?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())
+                    },
+                    harEgenmeldingsdager = harEgenmeldingsdager?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())
+                    },
+                    egenmeldingsdager = egenmeldingsdager?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar)
+                    },
+                    harBruktEgenmelding = harBruktEgenmelding?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())
+                    },
+                    egenmeldingsperioder = egenmeldingsperioder?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilEgenmeldingsperioder())
+                    },
+                    harForsikring = harForsikring?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean())
+                    }
+                )
+            }
+
+
             Arbeidssituasjon.FRILANSER -> {
                 FrilanserBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon,
@@ -234,8 +283,8 @@ data class ArbeidsledigDTO(
 )
 
 data class FiskerDTO(
-    val blad: Blad,
-    val lottOgHyre: LottOgHyre,
+    val blad: SporsmalSvar<String>,
+    val lottOgHyre: SporsmalSvar<String>
 )
 
 enum class UriktigeOpplysningDTO {
