@@ -61,6 +61,7 @@ data class SendSykmeldingRequestDTO(
                 )
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
+                // todo det skal være mulig å sende inn permittert uten at de har svart på arbeidsledig fra spørsmålet
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig (ArbeidsledigDTO details)" }
                 requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer)
                 val arbeidsledigFra = arbeidsledig.arbeidsledigFraOrgnummer.svar
@@ -79,8 +80,8 @@ data class SendSykmeldingRequestDTO(
                 )
             }
             Arbeidssituasjon.PERMITTERT -> {
+                // todo det skal være mulig å sende inn permittert uten at de har svart på arbeidsledig fra spørsmålet
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig (ArbeidsledigDTO details)" }
-
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig (ArbeidsledigDTO details)" }
                 requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer)
                 val arbeidsledigFra = arbeidsledig.arbeidsledigFraOrgnummer.svar
