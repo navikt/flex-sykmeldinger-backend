@@ -97,24 +97,7 @@ data class SendSykmeldingRequestDTO(
                         },
                 )
             }
-    /*        Arbeidssituasjon.FISKER -> {
-                requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
-                FiskerBrukerSvar(
-                    arbeidssituasjonSporsmal = arbeidssituasjon.svar.somUkjentSporsmal(),
-                    erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
-                    lottOgHyre = fisker.lottOgHyre.tilFiskerLottOgHyre().somUkjentSporsmal(),
-                    blad = fisker.blad.tilFiskerBlad().somUkjentSporsmal(),
-                    arbeidsgiverOrgnummer = arbeidsgiverOrgnummer?.svar?.somUkjentSporsmal(),
-                    riktigNarmesteLeder = riktigNarmesteLeder?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    harEgenmeldingsdager = harEgenmeldingsdager?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    egenmeldingsdager = egenmeldingsdager?.svar?.somUkjentSporsmal(),
-                    harBruktEgenmelding = harBruktEgenmelding?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    egenmeldingsperioder = egenmeldingsperioder?.svar?.tilEgenmeldingsperioder()?.somUkjentSporsmal(),
-                    harForsikring = harForsikring?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
-                )
-            }
-*/
+
             Arbeidssituasjon.FISKER -> {
                 requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
 
