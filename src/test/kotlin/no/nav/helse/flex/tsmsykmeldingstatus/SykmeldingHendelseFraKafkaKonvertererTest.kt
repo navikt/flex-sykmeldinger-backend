@@ -184,42 +184,6 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
     }
 
     @Nested
-    inner class KonverterSporsmalsTilBrukerSvar {
-        @Test
-        fun `burde returnere null dersom ingen spørmål`() {
-            sykmeldingHendelseFraKafkaKonverterer.konverterSporsmalTilBrukerSvar(emptyList()).shouldBeNull()
-        }
-
-        @Test
-        fun `burde konvertere minimalt antall spørsmål til brukerSvar`() {
-            val sporsmals =
-                listOf(
-                    SporsmalKafkaDTO(
-                        tekst = "Jeg er sykmeldt som",
-                        shortName = ShortNameKafkaDTO.ARBEIDSSITUASJON,
-                        svartype = SvartypeKafkaDTO.ARBEIDSSITUASJON,
-                        svar = "ARBEIDSTAKER",
-                    ),
-                )
-            val brukerSvar = sykmeldingHendelseFraKafkaKonverterer.konverterSporsmalTilBrukerSvar(sporsmals)
-            brukerSvar
-                .shouldNotBeNull()
-                .shouldBeInstanceOf<ArbeidstakerBrukerSvar>()
-                .run {
-                    arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
-                    arbeidssituasjonSporsmal.run {
-                        sporsmaltekst `should be equal to` "Jeg er sykmeldt som"
-                        svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
-                    }
-                    arbeidsgiverOrgnummer.run {
-                        sporsmaltekst shouldBeEqualTo ""
-                        svar shouldBeEqualTo ""
-                    }
-                }
-        }
-    }
-
-    @Nested
     inner class KonverterTilleggsinfo {
         @Test
         fun `arbeidstaker burde konverteres riktig med arbeidsgiver`() {

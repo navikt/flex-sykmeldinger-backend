@@ -30,7 +30,21 @@ class SykmeldingHendelseFraKafkaKonverterer(
             }
             else -> {}
         }
-        val brukerSvar = status.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) }
+        val statusBrukerSvar =
+            if (status.brukerSvar != null) {
+                status.brukerSvar
+            } else if (status.sporsmals != null) {
+                StatusSporsmalListeKonverterer.konverterSporsmalTilBrukerSvar(status.sporsmals)
+            } else {
+                null
+            }
+        val brukerSvar =
+            if (statusBrukerSvar != null) {
+                konverterBrukerSvarKafkaDtoTilBrukerSvar(statusBrukerSvar)
+            } else {
+                null
+            }
+
         val tilleggsinfo =
             brukerSvar?.let { brukerSvar ->
                 konverterTilTilleggsinfo(
@@ -287,48 +301,6 @@ class SykmeldingHendelseFraKafkaKonverterer(
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }
-        }
-    }
-
-    internal fun konverterSporsmalTilBrukerSvar(sporsmal: List<SporsmalKafkaDTO>): BrukerSvar? {
-        if (sporsmal.isEmpty()) return null
-
-        val arbeidssituasjonSporsmal =
-            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.ARBEIDSSITUASJON }
-                ?: throw IllegalArgumentException("Arbeidssituasjon er påkrevd i bruker svar")
-
-        val arbeidssituasjon =
-            when (arbeidssituasjonSporsmal.svar) {
-                "ARBEIDSTAKER" -> Arbeidssituasjon.ARBEIDSTAKER
-                "FRILANSER" -> Arbeidssituasjon.FRILANSER
-                "NAERINGSDRIVENDE" -> Arbeidssituasjon.NAERINGSDRIVENDE
-                "ARBEIDSLEDIG" -> Arbeidssituasjon.ARBEIDSLEDIG
-                "PERMITTERT" -> Arbeidssituasjon.PERMITTERT
-                "ANNET" -> Arbeidssituasjon.ANNET
-                else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: ${arbeidssituasjonSporsmal.svar}")
-            }
-
-        return when (arbeidssituasjon) {
-            Arbeidssituasjon.ARBEIDSTAKER ->
-                ArbeidstakerBrukerSvar(
-                    erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "", svar = true),
-                    arbeidssituasjonSporsmal =
-                        SporsmalSvar(
-                            sporsmaltekst = arbeidssituasjonSporsmal.tekst,
-                            svar = arbeidssituasjon,
-                        ),
-                    arbeidsgiverOrgnummer =
-                        SporsmalSvar(
-                            sporsmaltekst = "",
-                            svar = "",
-                        ),
-                )
-            Arbeidssituasjon.FRILANSER -> TODO()
-            Arbeidssituasjon.NAERINGSDRIVENDE -> TODO()
-            Arbeidssituasjon.ARBEIDSLEDIG -> TODO()
-            Arbeidssituasjon.PERMITTERT -> TODO()
-            Arbeidssituasjon.ANNET -> TODO()
-            else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: $arbeidssituasjon")
         }
     }
 
