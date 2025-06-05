@@ -2,61 +2,82 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SvartypeKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 
 object StatusSporsmalListeKonverterer {
-    //    val erOpplysningeneRiktige: FormSporsmalSvar<JaEllerNei>,
-//    val uriktigeOpplysninger: FormSporsmalSvar<List<UriktigeOpplysningerType>>?,
-//    val arbeidssituasjon: FormSporsmalSvar<ArbeidssituasjonDTO>,
-//    val arbeidsgiverOrgnummer: FormSporsmalSvar<String>?,
-//    val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
-//    val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>?,
-//    val egenmeldingsperioder: FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>?,
-//    val harForsikring: FormSporsmalSvar<JaEllerNei>?,
-//    val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>?,
-//    val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>?,
-//    val fisker: FiskereSvarKafkaDTO?,
+    private val DEFAULT_BRUKER_SVAR =
+        BrukerSvarKafkaDTO(
+            erOpplysningeneRiktige = lagErOpplysningeneRiktigeSporsmal(svar = JaEllerNei.JA),
+            arbeidssituasjon =
+                FormSporsmalSvar(
+                    sporsmaltekst = "Jeg er sykmeldt som",
+                    svar = ArbeidssituasjonDTO.ANNET,
+                ),
+            uriktigeOpplysninger = null,
+            arbeidsgiverOrgnummer = null,
+            riktigNarmesteLeder = null,
+            harBruktEgenmelding = null,
+            egenmeldingsperioder = null,
+            harForsikring = null,
+            egenmeldingsdager = null,
+            harBruktEgenmeldingsdager = null,
+            fisker = null,
+        )
 
-    fun konverterSporsmalTilBrukerSvar(sporsmal: List<SporsmalKafkaDTO>): BrukerSvarKafkaDTO? {
-        if (sporsmal.isEmpty()) return null
-
+    fun konverterSporsmalTilBrukerSvar(
+        sporsmal: List<SporsmalKafkaDTO>,
+        statusEvent: String = StatusEventKafkaDTO.SENDT,
+        arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
+    ): BrukerSvarKafkaDTO? {
+        if (sporsmal.isEmpty()) {
+            return if (statusEvent in setOf(StatusEventKafkaDTO.SENDT, StatusEventKafkaDTO.BEKREFTET)) {
+                DEFAULT_BRUKER_SVAR
+            } else {
+                null
+            }
+        }
         return BrukerSvarKafkaDTO(
-            erOpplysningeneRiktige = lagErOpplysningeneRiktige(),
+            // Dersom bruker har sendt inn, har brukeren bekreftet at opplysningene er riktige
+            erOpplysningeneRiktige = lagErOpplysningeneRiktigeSporsmal(svar = JaEllerNei.JA),
             uriktigeOpplysninger = null,
             arbeidssituasjon =
-                konverterTilArbeidssituasjon(sporsmal)
+                konverterArbeidssituasjonTilArbeidssituasjon(sporsmal)
                     ?: throw IllegalArgumentException("Arbeidssituasjon er påkrevd i bruker svar, men ikke funnet i sporsmal"),
-            // TODO
-            arbeidsgiverOrgnummer = null,
-            riktigNarmesteLeder = konverterTilRiktigNarmesteLeder(sporsmal),
-            // TODO
-            harBruktEgenmelding = null,
-            egenmeldingsperioder = konverterTilEgenmeldingsperioder(sporsmal),
-            // TODO
-            harForsikring = null,
-            egenmeldingsdager = konverterTilEgenmeldingsdager(sporsmal),
-            harBruktEgenmeldingsdager = konverterTilHarBruktEgenmeldingsdager(sporsmal),
-            // Fisker finnes ikke i tidligere representasjon
+            arbeidsgiverOrgnummer =
+                arbeidsgiver?.let {
+                    lagArbeidsgiverOrgnummerSporsmal(svar = it.orgnummer)
+                },
+            riktigNarmesteLeder = konverterNyNarmesteLederTilRiktigNarmesteLeder(sporsmal),
+            // For frilansere
+            harBruktEgenmelding = konverterFravaerTilHarBruktEgenmelding(sporsmal),
+            // For frilansere
+            egenmeldingsperioder = konverterPerioderTilEgenmeldingsperioder(sporsmal),
+            harForsikring = konverterForsikringTilHarForsikring(sporsmal),
+            // For arbeidstakere
+            // Spørsmål om arbeidstaker har brukt egenmelding finnes ikke
+            harBruktEgenmeldingsdager = null,
+            // For arbeidstakere
+            egenmeldingsdager = konverterEgenmeldingsdagerTilEgenmeldingsdager(sporsmal),
+            // Fisker finnes ikke
             fisker = null,
         )
     }
 
-    internal fun lagErOpplysningeneRiktige(): FormSporsmalSvar<JaEllerNei> {
-        // Dersom bruker har sendt inn, har brukeren bekreftet at opplysningene er riktige
-        return FormSporsmalSvar(
-            // TODO: Blir det feil å si at brukeren har svart på dette spørsmålet? Kan vi evt sette spørsmålstekst til tom streng?
-            sporsmaltekst = "Er opplysningene riktige?",
-            svar = JaEllerNei.JA,
+    internal fun lagErOpplysningeneRiktigeSporsmal(svar: JaEllerNei): FormSporsmalSvar<JaEllerNei> =
+        FormSporsmalSvar(
+            sporsmaltekst = "Stemmer opplysningene?",
+            svar = svar,
         )
-    }
 
-    internal fun konverterTilArbeidssituasjon(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<ArbeidssituasjonDTO>? {
+    internal fun lagArbeidsgiverOrgnummerSporsmal(svar: String): FormSporsmalSvar<String> =
+        FormSporsmalSvar(
+            sporsmaltekst = "Velg arbeidsgiver",
+            svar = svar,
+        )
+
+    internal fun konverterArbeidssituasjonTilArbeidssituasjon(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<ArbeidssituasjonDTO>? {
         val originaltArbeidssituasjonSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.ARBEIDSSITUASJON }
                 ?: return null
@@ -78,7 +99,7 @@ object StatusSporsmalListeKonverterer {
         )
     }
 
-    internal fun konverterTilRiktigNarmesteLeder(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<JaEllerNei>? {
+    internal fun konverterNyNarmesteLederTilRiktigNarmesteLeder(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<JaEllerNei>? {
         // Spørsmålshistorikk:
         //   - 29.04.2020 (ved opprettelse): Tekst "Skal finne ny nærmeste leder".decf3
         //       JA betyr at bruker ikke har riktig nærmeste leder.
@@ -117,7 +138,9 @@ object StatusSporsmalListeKonverterer {
         fun tilEgenmeldingsperiodeFormDTO() = EgenmeldingsperiodeFormDTO(fom = fom, tom = tom)
     }
 
-    internal fun konverterTilEgenmeldingsperioder(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>? {
+    internal fun konverterPerioderTilEgenmeldingsperioder(
+        sporsmal: List<SporsmalKafkaDTO>,
+    ): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>? {
         val originaltSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.PERIODE }
                 ?: return null
@@ -132,7 +155,7 @@ object StatusSporsmalListeKonverterer {
         )
     }
 
-    internal fun konverterTilHarBruktEgenmeldingsdager(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<JaEllerNei>? {
+    internal fun konverterFravaerTilHarBruktEgenmelding(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<JaEllerNei>? {
         val originaltSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FRAVAER }
                 ?: return null
@@ -145,7 +168,7 @@ object StatusSporsmalListeKonverterer {
         )
     }
 
-    internal fun konverterTilEgenmeldingsdager(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<List<LocalDate>>? {
+    internal fun konverterEgenmeldingsdagerTilEgenmeldingsdager(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<List<LocalDate>>? {
         val originaltSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.EGENMELDINGSDAGER }
                 ?: return null
@@ -162,101 +185,20 @@ object StatusSporsmalListeKonverterer {
         )
     }
 
+    internal fun konverterForsikringTilHarForsikring(sporsmal: List<SporsmalKafkaDTO>): FormSporsmalSvar<JaEllerNei>? {
+        val originaltSporsmal =
+            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FORSIKRING }
+                ?: return null
+        return FormSporsmalSvar(
+            sporsmaltekst = originaltSporsmal.tekst,
+            svar = konverterTilJaEllerNei(originaltSporsmal.svar),
+        )
+    }
+
     internal fun konverterTilJaEllerNei(svar: String): JaEllerNei =
         when (svar) {
             "JA" -> JaEllerNei.JA
             "NEI" -> JaEllerNei.NEI
             else -> throw IllegalArgumentException("Ugyldig JaEllerNei svar: $svar")
         }
-
-//    internal fun konverterSporsmalTilBrukerSvar(sporsmal: List<SporsmalKafkaDTO>): BrukerSvar? {
-//        if (sporsmal.isEmpty()) return null
-//
-//        val originaltArbeidssituasjonSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.ARBEIDSSITUASJON }
-//                ?: throw IllegalArgumentException("Arbeidssituasjon er påkrevd i bruker svar")
-//
-//        val originaltNyNarmesteLederSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.NY_NARMESTE_LEDER }
-//
-//        val originaltFravaerSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FRAVAER }
-//
-//        val originaltPeriodeSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.PERIODE }
-//
-//        val originaltForsikringSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FORSIKRING }
-//
-//        val originaltEgenmeldingsdagerSporsmal =
-//            sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.EGENMELDINGSDAGER }
-//
-// //        ARBEIDSSITUASJON,
-// //        NY_NARMESTE_LEDER,
-// //        FRAVAER,
-// //        PERIODE,
-// //        FORSIKRING,
-// //        EGENMELDINGSDAGER,
-//
-//        val arbeidssituasjon =
-//            when (originaltArbeidssituasjonSporsmal.svar) {
-//                "ARBEIDSTAKER" -> Arbeidssituasjon.ARBEIDSTAKER
-//                "FRILANSER" -> Arbeidssituasjon.FRILANSER
-//                "NAERINGSDRIVENDE" -> Arbeidssituasjon.NAERINGSDRIVENDE
-//                "ARBEIDSLEDIG" -> Arbeidssituasjon.ARBEIDSLEDIG
-//                "PERMITTERT" -> Arbeidssituasjon.PERMITTERT
-//                "ANNET" -> Arbeidssituasjon.ANNET
-//                else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: ${arbeidssituasjonSporsmal.svar}")
-//            }
-//
-//        val arbeidssituasjonSporsmal =
-//            SporsmalSvar(
-//                sporsmaltekst = originaltArbeidssituasjonSporsmal.tekst,
-//                svar = arbeidssituasjon,
-//            )
-//        val erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "", svar = true)
-//        val uriktigeOpplysninger = null
-//        // TODO: Hvordan håndtere nærmeste leder?
-//        val riktigNarmesteLeder =
-//            originaltNyNarmesteLederSporsmal?.let {
-//                SporsmalSvar(
-//                    sporsmaltekst = it.tekst,
-//                    svar =
-//                        when (it.svar) {
-//                            "JA" -> true
-//                            "NEI" -> false
-//                            else -> throw IllegalArgumentException("Ugyldig svar på narmeste leder: ${it.svar}")
-//                        },
-//                )
-//            }
-//        val egenmeldingsdager
-//
-//        return when (arbeidssituasjon) {
-//            Arbeidssituasjon.ARBEIDSTAKER ->
-//                ArbeidstakerBrukerSvar(
-//                    erOpplysningeneRiktige = erOpplysningeneRiktige,
-//                    arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
-//                    uriktigeOpplysninger = uriktigeOpplysninger,
-//                    arbeidsgiverOrgnummer =
-//                        SporsmalSvar(
-//                            sporsmaltekst = "",
-//                            svar = "",
-//                        ),
-//                )
-//            Arbeidssituasjon.FRILANSER ->
-//                FrilanserBrukerSvar(
-//                    erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "", svar = true),
-//                    arbeidssituasjonSporsmal =
-//                        SporsmalSvar(
-//                            sporsmaltekst = arbeidssituasjonSporsmal.tekst,
-//                            svar = arbeidssituasjon,
-//                        ),
-//                )
-//            Arbeidssituasjon.NAERINGSDRIVENDE -> TODO()
-//            Arbeidssituasjon.ARBEIDSLEDIG -> TODO()
-//            Arbeidssituasjon.PERMITTERT -> TODO()
-//            Arbeidssituasjon.ANNET -> TODO()
-//            else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: $arbeidssituasjon")
-//        }
-//    }
 }
