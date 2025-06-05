@@ -840,6 +840,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             ).andExpect(MockMvcResultMatchers.status().isUnauthorized)
     }
 }
+
 fun lagSendSykmeldingRequestDTO(
     erOpplysningeneRiktige: JaEllerNei = JaEllerNei.JA,
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ANNET,
@@ -854,45 +855,52 @@ fun lagSendSykmeldingRequestDTO(
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
         erOpplysningeneRiktige = SporsmalSvar("Stemmer opplysningene?", erOpplysningeneRiktige),
-        arbeidssituasjon = SporsmalSvar(
-            sporsmaltekst = "Jeg er sykmeldt som",
-            svar = arbeidssituasjon
-        ),
-        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer?.let {
+        arbeidssituasjon =
             SporsmalSvar(
-                sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
-                svar = it
-            )
-        },
-        riktigNarmesteLeder = riktigNarmesteLeder?.let {
-            SporsmalSvar(
-                sporsmaltekst = "Er dette riktig nærmeste leder?",
-                svar = it
-            )
-        },
-        harEgenmeldingsdager = harEgenmeldingsdager?.let {
-            SporsmalSvar(
-                sporsmaltekst = "Har du egenmeldingsdager?",
-                svar = it
-            )
-        },
+                sporsmaltekst = "Jeg er sykmeldt som",
+                svar = arbeidssituasjon,
+            ),
+        arbeidsgiverOrgnummer =
+            arbeidsgiverOrgnummer?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
+                    svar = it,
+                )
+            },
+        riktigNarmesteLeder =
+            riktigNarmesteLeder?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Er dette riktig nærmeste leder?",
+                    svar = it,
+                )
+            },
+        harEgenmeldingsdager =
+            harEgenmeldingsdager?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Har du egenmeldingsdager?",
+                    svar = it,
+                )
+            },
         arbeidsledig = arbeidsledig,
         egenmeldingsdager = null,
         egenmeldingsperioder = null,
-        fisker = if (fiskerBladSvar != null && fiskerLottOgHyreSvar != null) {
-            FiskerDTO(
-                blad = SporsmalSvar(
-                    sporsmaltekst = fiskerBladSporsmaltekst,
-                    svar = fiskerBladSvar
-                ),
-                lottOgHyre = SporsmalSvar(
-                    sporsmaltekst = fiskerLottOgHyreSporsmaltekst,
-                    svar = fiskerLottOgHyreSvar
+        fisker =
+            if (fiskerBladSvar != null && fiskerLottOgHyreSvar != null) {
+                FiskerDTO(
+                    blad =
+                        SporsmalSvar(
+                            sporsmaltekst = fiskerBladSporsmaltekst,
+                            svar = fiskerBladSvar,
+                        ),
+                    lottOgHyre =
+                        SporsmalSvar(
+                            sporsmaltekst = fiskerLottOgHyreSporsmaltekst,
+                            svar = fiskerLottOgHyreSvar,
+                        ),
                 )
-            )
-        } else {
-            null
-        },
+            } else {
+                null
+            },
         harBruktEgenmelding = null,
         harForsikring = null,
         uriktigeOpplysninger = null,

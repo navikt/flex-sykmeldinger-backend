@@ -39,33 +39,37 @@ data class SendSykmeldingRequestDTO(
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
                 // arbeidsledig and arbeidsledigFraOrgnummer can now be null!
-                val arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
-                    SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
-                }
+                val arbeidsledigFraOrgnummer =
+                    arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
+                        SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
+                    }
 
                 ArbeidsledigBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
-                    uriktigeOpplysninger = uriktigeOpplysninger?.let {
-                        SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
-                    },
+                    uriktigeOpplysninger =
+                        uriktigeOpplysninger?.let {
+                            SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                        },
                 )
             }
 
             Arbeidssituasjon.PERMITTERT -> {
                 // arbeidsledig and arbeidsledigFraOrgnummer can now be null!
-                val arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
-                    SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
-                }
+                val arbeidsledigFraOrgnummer =
+                    arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
+                        SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
+                    }
 
                 PermittertBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
-                    uriktigeOpplysninger = uriktigeOpplysninger?.let {
-                        SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
-                    },
+                    uriktigeOpplysninger =
+                        uriktigeOpplysninger?.let {
+                            SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                        },
                 )
             }
 
