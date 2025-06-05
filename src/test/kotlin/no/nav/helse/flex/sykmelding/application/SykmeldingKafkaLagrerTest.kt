@@ -14,6 +14,7 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
@@ -160,6 +161,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             }
     }
 
+    @Disabled("Leser historiske sykmeldinger uten å hente arbeidsforhold")
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
         aaregClient.setArbeidsforholdoversikt(

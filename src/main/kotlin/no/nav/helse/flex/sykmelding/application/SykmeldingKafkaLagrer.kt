@@ -41,7 +41,8 @@ class SykmeldingKafkaLagrer(
             val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
-            arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
+            // TODO: Legg inn igjen etter historisk sykmelding innlesing
+            // arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
             log.info("Sykmelding lagret: ${sykmeldingKafkaRecord.sykmelding.id}")
         }
     }
