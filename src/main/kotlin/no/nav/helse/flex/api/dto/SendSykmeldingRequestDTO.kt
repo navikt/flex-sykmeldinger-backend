@@ -38,24 +38,21 @@ data class SendSykmeldingRequestDTO(
                 )
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
-                // todo det skal være mulig å sende inn permittert uten at de har svart på arbeidsledig fra spørsmålet
-                requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig (ArbeidsledigDTO details)" }
-                requireNotNull(arbeidsledig.arbeidsledigFraOrgnummer)
-                val arbeidsledigFra = arbeidsledig.arbeidsledigFraOrgnummer.svar
-                val sporsmalOmArbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer.sporsmaltekst
-
-                // error out if arbeidsledigFraOrgnummer is null
+                // arbeidsledig and arbeidsledigFraOrgnummer can now be null!
+                val arbeidsledigFraOrgnummer = arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
+                    SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
+                }
 
                 ArbeidsledigBrukerSvar(
                     arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
-                    arbeidsledigFraOrgnummer = SporsmalSvar(sporsmalOmArbeidsledigFraOrgnummer, arbeidsledigFra),
-                    uriktigeOpplysninger =
-                        uriktigeOpplysninger?.let {
-                            SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
-                        },
+                    arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
+                    uriktigeOpplysninger = uriktigeOpplysninger?.let {
+                        SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                    },
                 )
             }
+
             Arbeidssituasjon.PERMITTERT -> {
                 // todo det skal være mulig å sende inn permittert uten at de har svart på arbeidsledig fra spørsmålet
                 requireNotNull(arbeidsledig) { "$arbeidssituasjon må ha satt arbeidsledig (ArbeidsledigDTO details)" }
