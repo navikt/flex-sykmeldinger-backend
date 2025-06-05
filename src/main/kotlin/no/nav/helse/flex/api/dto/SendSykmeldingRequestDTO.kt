@@ -4,29 +4,6 @@ import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
 import java.time.LocalDate
 
-/*
-
-data class SykmeldingFormResponse(
-    val erOpplysningeneRiktige: SporsmalSvar<JaEllerNei>,
-    val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysningerType>>?,
-    val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
-    val arbeidsgiverOrgnummer: SporsmalSvar<String>?,
-    val arbeidsledig: ArbeidsledigFraOrgnummer?,
-    val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>?,
-    val harBruktEgenmelding: SporsmalSvar<JaEllerNei>?,
-    val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>?,
-    val harForsikring: SporsmalSvar<JaEllerNei>?,
-    val egenmeldingsdager: SporsmalSvar<List<LocalDate>>?,
-    val harBruktEgenmeldingsdager: SporsmalSvar<JaEllerNei>?,
-    val fisker: FiskerSvar?,
-)
-
-Internal server error - JSON parse error: Cannot deserialize value of type `java.lang.String` from Object value (token `JsonToken.START_OBJECT`) - POST: /api/v1/sykmeldinger/609e84cc-1435-46b1-a478-42309838e70a/send
-
-
-
- */
-
 fun JaEllerNei.tilBoolean(): Boolean = this == JaEllerNei.JA
 
 data class SendSykmeldingRequestDTO(
