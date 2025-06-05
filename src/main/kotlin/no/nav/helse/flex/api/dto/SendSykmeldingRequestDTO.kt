@@ -87,10 +87,13 @@ data class SendSykmeldingRequestDTO(
                 val sporsmalOmArbeidsledigFraOrgnummer = arbeidsledig.arbeidsledigFraOrgnummer.sporsmaltekst
 
                 PermittertBrukerSvar(
-                    arbeidssituasjonSporsmal = arbeidssituasjon.svar.somUkjentSporsmal(),
-                    erOpplysningeneRiktige = erOpplysningeneRiktige.svar.tilBoolean().somUkjentSporsmal(),
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = SporsmalSvar(sporsmalOmArbeidsledigFraOrgnummer, arbeidsledigFra),
-                    uriktigeOpplysninger = uriktigeOpplysninger?.svar?.tilUriktigeOpplysningerListe()?.somUkjentSporsmal(),
+                    uriktigeOpplysninger =
+                        uriktigeOpplysninger?.let {
+                            SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
+                        },
                 )
             }
             Arbeidssituasjon.FISKER -> {
