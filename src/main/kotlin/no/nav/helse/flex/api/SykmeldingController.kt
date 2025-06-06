@@ -14,7 +14,6 @@ import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.objectMapper
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
