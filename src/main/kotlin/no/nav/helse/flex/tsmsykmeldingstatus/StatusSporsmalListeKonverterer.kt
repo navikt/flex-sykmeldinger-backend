@@ -50,17 +50,11 @@ object StatusSporsmalListeKonverterer {
                     lagArbeidsgiverOrgnummerSporsmal(svar = it.orgnummer)
                 },
             riktigNarmesteLeder = konverterNyNarmesteLederTilRiktigNarmesteLeder(sporsmal),
-            // For frilansere
             harBruktEgenmelding = konverterFravaerTilHarBruktEgenmelding(sporsmal),
-            // For frilansere
             egenmeldingsperioder = konverterPerioderTilEgenmeldingsperioder(sporsmal),
             harForsikring = konverterForsikringTilHarForsikring(sporsmal),
-            // For arbeidstakere
-            // Spørsmål om arbeidstaker har brukt egenmelding finnes ikke
             harBruktEgenmeldingsdager = null,
-            // For arbeidstakere
             egenmeldingsdager = konverterEgenmeldingsdagerTilEgenmeldingsdager(sporsmal),
-            // Fisker finnes ikke
             fisker = null,
         )
     }
@@ -81,6 +75,10 @@ object StatusSporsmalListeKonverterer {
         val originaltArbeidssituasjonSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.ARBEIDSSITUASJON }
                 ?: return null
+
+        require(originaltArbeidssituasjonSporsmal.svartype == SvartypeKafkaDTO.ARBEIDSSITUASJON) {
+            "Ugyldig svartype for ARBEIDSSITUASJON: ${originaltArbeidssituasjonSporsmal.svartype}"
+        }
 
         val arbeidssituasjon =
             when (originaltArbeidssituasjonSporsmal.svar) {
@@ -112,12 +110,11 @@ object StatusSporsmalListeKonverterer {
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.NY_NARMESTE_LEDER }
                 ?: return null
 
-        val originaltSvar: JaEllerNei =
-            when (originaltNyNarmesteLederSporsmal.svar) {
-                "JA" -> JaEllerNei.JA
-                "NEI" -> JaEllerNei.NEI
-                else -> throw IllegalArgumentException("Ugyldig svar på narmeste leder: ${originaltNyNarmesteLederSporsmal.svar}")
-            }
+        require(originaltNyNarmesteLederSporsmal.svartype == SvartypeKafkaDTO.JA_NEI) {
+            "Ugyldig svartype for NY_NARMESTE_LEDER: ${originaltNyNarmesteLederSporsmal.svartype}"
+        }
+
+        val originaltSvar: JaEllerNei = konverterTilJaEllerNei(originaltNyNarmesteLederSporsmal.svar)
 
         val flippetSvar =
             when (originaltSvar) {
@@ -145,6 +142,10 @@ object StatusSporsmalListeKonverterer {
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.PERIODE }
                 ?: return null
 
+        require(originaltSporsmal.svartype == SvartypeKafkaDTO.PERIODER) {
+            "Ugyldig svartype for PERIODE: ${originaltSporsmal.svartype}"
+        }
+
         val svarSerialisert = originaltSporsmal.svar
         val svarDeserialisert: List<EgenmeldingsperiodeKafkaDTO> = objectMapper.readValue(svarSerialisert)
         val svar = svarDeserialisert.map { it.tilEgenmeldingsperiodeFormDTO() }
@@ -159,6 +160,10 @@ object StatusSporsmalListeKonverterer {
         val originaltSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FRAVAER }
                 ?: return null
+
+        require(originaltSporsmal.svartype == SvartypeKafkaDTO.JA_NEI) {
+            "Ugyldig svartype for FRAVAER: ${originaltSporsmal.svartype}"
+        }
 
         val svar = konverterTilJaEllerNei(originaltSporsmal.svar)
 
@@ -189,6 +194,11 @@ object StatusSporsmalListeKonverterer {
         val originaltSporsmal =
             sporsmal.firstOrNull { it.shortName == ShortNameKafkaDTO.FORSIKRING }
                 ?: return null
+
+        require(originaltSporsmal.svartype == SvartypeKafkaDTO.JA_NEI) {
+            "Ugyldig svartype for FORSIKRING: ${originaltSporsmal.svartype}"
+        }
+
         return FormSporsmalSvar(
             sporsmaltekst = originaltSporsmal.tekst,
             svar = konverterTilJaEllerNei(originaltSporsmal.svar),
