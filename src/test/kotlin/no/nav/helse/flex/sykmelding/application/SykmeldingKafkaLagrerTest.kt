@@ -8,6 +8,7 @@ import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
+import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
@@ -37,11 +38,15 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     @Autowired
     private lateinit var sykmeldignHendelseBuffer: SykmeldingStatusBuffer
 
+    @Autowired
+    private lateinit var environmentToggles: EnvironmentTogglesFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
         aaregClient.reset()
         nowFactoryFake.reset()
+        environmentToggles.reset()
     }
 
     @Test
@@ -184,6 +189,43 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
         arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
+    }
+
+    @Test
+    fun `burde ikke hente arbeidsforhold nar sykmelding lagres i prod`() {
+        environmentToggles.setEnvironment("prod")
+
+        val sykmeldingMedBehandlingsutfall =
+            SykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                validation = lagValidation(),
+            )
+
+        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
+
+        arbeidsforholdRepository.findAll().shouldBeEmpty()
+    }
+
+    @Test
+    fun `burde hente arbeidsforhold nar sykmelding lagres i dev`() {
+        environmentToggles.setEnvironment("dev")
+        aaregClient.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(lagArbeidsforholdOversikt(arbeidstakerIdenter = listOf("fnr"), arbeidsstedOrgnummer = "910825518")),
+            ),
+            "fnr",
+        )
+        eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
+
+        val sykmeldingMedBehandlingsutfall =
+            SykmeldingKafkaRecord(
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                validation = lagValidation(),
+            )
+
+        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
+
+        arbeidsforholdRepository.getAllByFnrIn(listOf("fnr")).shouldNotBeEmpty()
     }
 
     @Test
