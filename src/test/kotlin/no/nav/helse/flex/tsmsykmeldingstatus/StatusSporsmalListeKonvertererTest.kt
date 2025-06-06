@@ -3,6 +3,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.api.dto.EgenmeldingsperiodeFormDTO
 import no.nav.helse.flex.api.dto.JaEllerNei
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest
@@ -14,12 +15,12 @@ class StatusSporsmalListeKonvertererTest {
     @TestFactory
     fun `burde produsere arbeidssituasjon ANNET dersom ingen spørsmål og status SENDT eller BEKREFTET`() =
         listOf(
-            StatusEventKafkaDTO.SENDT,
-            StatusEventKafkaDTO.BEKREFTET,
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
         ).map {
             DynamicTest.dynamicTest("Status: $it") {
                 StatusSporsmalListeKonverterer
-                    .konverterSporsmalTilBrukerSvar(emptyList(), statusEvent = it)
+                    .konverterSporsmalTilBrukerSvar(emptyList(), hendelseStatus = it)
                     .shouldNotBeNull()
                     .run {
                         erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.JA
@@ -31,14 +32,14 @@ class StatusSporsmalListeKonvertererTest {
     @TestFactory
     fun `burde returnere null dersom ingen spørsmål og ikke status SENDT eller BEKREFTET`() =
         listOf(
-            StatusEventKafkaDTO.APEN,
-            StatusEventKafkaDTO.AVBRUTT,
-            StatusEventKafkaDTO.UTGATT,
-            StatusEventKafkaDTO.SLETTET,
+            HendelseStatus.APEN,
+            HendelseStatus.AVBRUTT,
+            HendelseStatus.UTGATT,
+            HendelseStatus.BEKREFTET_AVVIST,
         ).map {
             DynamicTest.dynamicTest("Status: $it") {
                 StatusSporsmalListeKonverterer
-                    .konverterSporsmalTilBrukerSvar(emptyList(), statusEvent = it)
+                    .konverterSporsmalTilBrukerSvar(emptyList(), hendelseStatus = it)
                     .shouldBeNull()
             }
         }

@@ -20,30 +20,23 @@ class SykmeldingHendelseFraKafkaKonverterer(
         source: String? = null,
     ): SykmeldingHendelse {
         val hendelseStatus = konverterStatusTilHendelseStatus(status.statusEvent, erAvvist = erSykmeldingAvvist)
-        when (hendelseStatus) {
-            HendelseStatus.SENDT_TIL_NAV,
-            HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-            -> {
-                requireNotNull(status.brukerSvar) {
-                    "Brukersvar er påkrevd for SENDT_TIL_NAV og SENDT_TIL_ARBEIDSGIVER"
-                }
-            }
-            else -> {}
-        }
         val statusBrukerSvar =
-            if (status.brukerSvar != null) {
-                status.brukerSvar
-            } else if (status.sporsmals != null) {
-                StatusSporsmalListeKonverterer.konverterSporsmalTilBrukerSvar(status.sporsmals)
-            } else {
-                null
+            when {
+                status.brukerSvar != null -> status.brukerSvar
+                status.sporsmals != null ->
+                    StatusSporsmalListeKonverterer.konverterSporsmalTilBrukerSvar(
+                        sporsmal = status.sporsmals,
+                        hendelseStatus = hendelseStatus,
+                        arbeidsgiver = status.arbeidsgiver,
+                    )
+                else -> null
             }
-        val brukerSvar =
-            if (statusBrukerSvar != null) {
-                konverterBrukerSvarKafkaDtoTilBrukerSvar(statusBrukerSvar)
-            } else {
-                null
+        if (hendelseStatus in setOf(HendelseStatus.SENDT_TIL_NAV, HendelseStatus.SENDT_TIL_ARBEIDSGIVER)) {
+            requireNotNull(statusBrukerSvar) {
+                "Brukersvar er påkrevd for SENDT_TIL_NAV og SENDT_TIL_ARBEIDSGIVER"
             }
+        }
+        val brukerSvar = statusBrukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) }
 
         val tilleggsinfo =
             brukerSvar?.let { brukerSvar ->
@@ -56,7 +49,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
 
         return SykmeldingHendelse(
             status = hendelseStatus,
-            brukerSvar = status.brukerSvar?.let { konverterBrukerSvarKafkaDtoTilBrukerSvar(it) },
+            brukerSvar = brukerSvar,
             tilleggsinfo = tilleggsinfo,
             source = source,
             hendelseOpprettet = status.timestamp.toInstant(),

@@ -3,10 +3,7 @@ package no.nav.helse.flex.testdata
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.producers.KafkaMetadataDTO
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.FiskereSvarKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -37,6 +34,7 @@ fun lagSykmeldingStatusKafkaDTO(
     timestamp: OffsetDateTime = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
     statusEvent: String = "SENDT",
     brukerSvarKafkaDTO: BrukerSvarKafkaDTO? = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
+    sporsmals: List<SporsmalKafkaDTO>? = null,
     arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = lagArbeidsgiverStatusKafkaDTO(),
 ): SykmeldingStatusKafkaDTO =
     SykmeldingStatusKafkaDTO(
@@ -44,7 +42,7 @@ fun lagSykmeldingStatusKafkaDTO(
         timestamp = timestamp,
         statusEvent = statusEvent,
         arbeidsgiver = arbeidsgiver,
-        sporsmals = null,
+        sporsmals = sporsmals,
         brukerSvar = brukerSvarKafkaDTO,
         tidligereArbeidsgiver = null,
     )

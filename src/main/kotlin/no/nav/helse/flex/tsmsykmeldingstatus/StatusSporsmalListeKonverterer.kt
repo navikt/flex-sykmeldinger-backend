@@ -2,6 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
@@ -28,11 +29,11 @@ object StatusSporsmalListeKonverterer {
 
     fun konverterSporsmalTilBrukerSvar(
         sporsmal: List<SporsmalKafkaDTO>,
-        statusEvent: String = StatusEventKafkaDTO.SENDT,
+        hendelseStatus: HendelseStatus = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
         arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
     ): BrukerSvarKafkaDTO? {
         if (sporsmal.isEmpty()) {
-            return if (statusEvent in setOf(StatusEventKafkaDTO.SENDT, StatusEventKafkaDTO.BEKREFTET)) {
+            return if (hendelseStatus in setOf(HendelseStatus.SENDT_TIL_ARBEIDSGIVER, HendelseStatus.SENDT_TIL_NAV)) {
                 DEFAULT_BRUKER_SVAR
             } else {
                 null

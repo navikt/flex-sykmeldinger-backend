@@ -82,6 +82,34 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
             IllegalArgumentException::class
     }
 
+    @Test
+    fun `burde konvertere sporsmal liste istedetfor brukerSvar dersom brukerSvar ikke er definert`() {
+        val status =
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = "SENDT",
+                brukerSvarKafkaDTO = null,
+                sporsmals =
+                    listOf(
+                        SporsmalKafkaDTO(
+                            shortName = ShortNameKafkaDTO.ARBEIDSSITUASJON,
+                            tekst = "",
+                            svartype = SvartypeKafkaDTO.ARBEIDSSITUASJON,
+                            svar = "ARBEIDSTAKER",
+                        ),
+                    ),
+                arbeidsgiver =
+                    ArbeidsgiverStatusKafkaDTO(
+                        orgnummer = "org-nr",
+                        juridiskOrgnummer = "",
+                        orgNavn = "",
+                    ),
+            )
+        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status)
+        hendelse.brukerSvar.shouldNotBeNull().run {
+            arbeidssituasjonSporsmal.svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+        }
+    }
+
     @TestFactory
     fun `burde konvertere status til hendelse status - erAvvist = false`() =
         listOf(
