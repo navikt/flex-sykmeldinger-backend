@@ -88,12 +88,12 @@ data class SendSykmeldingRequestDTO(
                     lottOgHyre =
                         SporsmalSvar(
                             fisker.lottOgHyre.sporsmaltekst,
-                            FiskerLottOgHyre.valueOf(fisker.lottOgHyre.svar),
+                            fisker.lottOgHyre.svar.tilFiskerLottOgHyre(),
                         ),
                     blad =
                         SporsmalSvar(
                             fisker.blad.sporsmaltekst,
-                            FiskerBlad.valueOf(fisker.blad.svar),
+                            fisker.blad.svar.tilFiskerBlad(),
                         ),
                     arbeidsgiverOrgnummer =
                         arbeidsgiverOrgnummer?.let {
@@ -246,8 +246,8 @@ data class ArbeidsledigDTO(
 )
 
 data class FiskerDTO(
-    val blad: SporsmalSvar<String>,
-    val lottOgHyre: SporsmalSvar<String>,
+    val blad: SporsmalSvar<Blad>,
+    val lottOgHyre: SporsmalSvar<LottOgHyre>,
 )
 
 enum class UriktigeOpplysningDTO {
