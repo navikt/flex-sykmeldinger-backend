@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
@@ -16,6 +17,7 @@ class SykmeldingKafkaLagrer(
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val nowFactory: Supplier<Instant>,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -41,8 +43,10 @@ class SykmeldingKafkaLagrer(
             val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
-            // TODO: Legg inn igjen etter historisk sykmelding innlesing
-            // arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
+            if (environmentToggles.isDevelopment()) {
+                // TODO: Aktiver i prod etter historisk sykmelding innlesing
+                arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
+            }
             log.info("Sykmelding lagret: ${sykmeldingKafkaRecord.sykmelding.id}")
         }
     }

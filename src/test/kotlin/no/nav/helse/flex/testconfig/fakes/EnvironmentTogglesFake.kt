@@ -3,7 +3,11 @@ package no.nav.helse.flex.testconfig.fakes
 import no.nav.helse.flex.config.EnvironmentToggles
 
 class EnvironmentTogglesFake : EnvironmentToggles {
-    private var environment = "dev"
+    companion object {
+        private const val DEFAULT_ENVIRONMENT = "dev"
+    }
+
+    private var environment = DEFAULT_ENVIRONMENT
 
     override fun isProduction(): Boolean = environment == "prod"
 
@@ -11,5 +15,9 @@ class EnvironmentTogglesFake : EnvironmentToggles {
 
     fun setEnvironment(environment: String) {
         this.environment = environment
+    }
+
+    fun reset() {
+        this.environment = DEFAULT_ENVIRONMENT
     }
 }
