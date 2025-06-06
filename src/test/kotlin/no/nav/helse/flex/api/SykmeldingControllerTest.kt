@@ -848,9 +848,9 @@ fun lagSendSykmeldingRequestDTO(
     harEgenmeldingsdager: JaEllerNei? = null,
     riktigNarmesteLeder: JaEllerNei? = null,
     arbeidsledig: ArbeidsledigDTO? = null,
-    fiskerBladSvar: String? = null,
+    fiskerBladSvar: Blad? = null,
     fiskerBladSporsmaltekst: String = "Velg blad",
-    fiskerLottOgHyreSvar: String? = null,
+    fiskerLottOgHyreSvar: LottOgHyre? = null,
     fiskerLottOgHyreSporsmaltekst: String = "Mottar du lott eller er du på hyre?",
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
