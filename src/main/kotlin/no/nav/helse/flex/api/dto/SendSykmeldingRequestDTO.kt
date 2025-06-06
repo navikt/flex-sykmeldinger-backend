@@ -12,7 +12,7 @@ data class SendSykmeldingRequestDTO(
     val arbeidsgiverOrgnummer: SporsmalSvar<String>?,
     val harEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
     val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>? = null,
-    val arbeidsledig: ArbeidsledigDTO? = null, // Changed from SporsmalSvar<ArbeidsledigDTO>?
+    val arbeidsledig: ArbeidsledigDTO? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<EgenmeldingsperiodeDTO>>? = null,
     val fisker: FiskerDTO? = null,
@@ -38,7 +38,6 @@ data class SendSykmeldingRequestDTO(
                 )
             }
             Arbeidssituasjon.ARBEIDSLEDIG -> {
-                // arbeidsledig and arbeidsledigFraOrgnummer can now be null!
                 val arbeidsledigFraOrgnummer =
                     arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
                         SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
@@ -56,7 +55,6 @@ data class SendSykmeldingRequestDTO(
             }
 
             Arbeidssituasjon.PERMITTERT -> {
-                // arbeidsledig and arbeidsledigFraOrgnummer can now be null!
                 val arbeidsledigFraOrgnummer =
                     arbeidsledig?.arbeidsledigFraOrgnummer?.let { fraOrgnummer ->
                         SporsmalSvar(fraOrgnummer.sporsmaltekst, fraOrgnummer.svar)
@@ -76,7 +74,6 @@ data class SendSykmeldingRequestDTO(
             Arbeidssituasjon.FISKER -> {
                 requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
 
-                // Always use SporsmalSvar with the incoming sporsmaltekst for every field
                 FiskerBrukerSvar(
                     arbeidssituasjonSporsmal = SporsmalSvar(arbeidssituasjon.sporsmaltekst, arbeidssituasjon.svar),
                     erOpplysningeneRiktige =
