@@ -7,6 +7,7 @@ import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
+import no.nav.helse.flex.sykmelding.application.SporsmalSvar
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -467,8 +468,8 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                 lagSendSykmeldingRequestDTO(
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
                                     arbeidsgiverOrgnummer = "orgnummer",
-                                    riktigNarmesteLeder = YesOrNoDTO.YES,
-                                    harEgenmeldingsdager = YesOrNoDTO.YES,
+                                    riktigNarmesteLeder = JaEllerNei.JA,
+                                    harEgenmeldingsdager = JaEllerNei.JA,
                                 ).serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
@@ -841,23 +842,65 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 }
 
 fun lagSendSykmeldingRequestDTO(
-    erOpplysningeneRiktige: YesOrNoDTO = YesOrNoDTO.YES,
+    erOpplysningeneRiktige: JaEllerNei = JaEllerNei.JA,
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ANNET,
     arbeidsgiverOrgnummer: String? = null,
-    harEgenmeldingsdager: YesOrNoDTO? = null,
-    riktigNarmesteLeder: YesOrNoDTO? = null,
+    harEgenmeldingsdager: JaEllerNei? = null,
+    riktigNarmesteLeder: JaEllerNei? = null,
     arbeidsledig: ArbeidsledigDTO? = null,
+    fiskerBladSvar: Blad? = null,
+    fiskerBladSporsmaltekst: String = "Velg blad",
+    fiskerLottOgHyreSvar: LottOgHyre? = null,
+    fiskerLottOgHyreSporsmaltekst: String = "Mottar du lott eller er du på hyre?",
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
-        erOpplysningeneRiktige = erOpplysningeneRiktige,
-        arbeidssituasjon = arbeidssituasjon,
-        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
-        riktigNarmesteLeder = riktigNarmesteLeder,
-        harEgenmeldingsdager = harEgenmeldingsdager,
+        erOpplysningeneRiktige = SporsmalSvar("Stemmer opplysningene?", erOpplysningeneRiktige),
+        arbeidssituasjon =
+            SporsmalSvar(
+                sporsmaltekst = "Jeg er sykmeldt som",
+                svar = arbeidssituasjon,
+            ),
+        arbeidsgiverOrgnummer =
+            arbeidsgiverOrgnummer?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Hva er arbeidsgiverens organisasjonsnummer?",
+                    svar = it,
+                )
+            },
+        riktigNarmesteLeder =
+            riktigNarmesteLeder?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Er dette riktig nærmeste leder?",
+                    svar = it,
+                )
+            },
+        harEgenmeldingsdager =
+            harEgenmeldingsdager?.let {
+                SporsmalSvar(
+                    sporsmaltekst = "Har du egenmeldingsdager?",
+                    svar = it,
+                )
+            },
         arbeidsledig = arbeidsledig,
         egenmeldingsdager = null,
         egenmeldingsperioder = null,
-        fisker = null,
+        fisker =
+            if (fiskerBladSvar != null && fiskerLottOgHyreSvar != null) {
+                FiskerDTO(
+                    blad =
+                        SporsmalSvar(
+                            sporsmaltekst = fiskerBladSporsmaltekst,
+                            svar = fiskerBladSvar,
+                        ),
+                    lottOgHyre =
+                        SporsmalSvar(
+                            sporsmaltekst = fiskerLottOgHyreSporsmaltekst,
+                            svar = fiskerLottOgHyreSvar,
+                        ),
+                )
+            } else {
+                null
+            },
         harBruktEgenmelding = null,
         harForsikring = null,
         uriktigeOpplysninger = null,
