@@ -81,16 +81,18 @@ object StatusSporsmalListeKonverterer {
             "Ugyldig svartype for ARBEIDSSITUASJON: ${originaltArbeidssituasjonSporsmal.svartype}"
         }
 
-        val arbeidssituasjon =
-            when (originaltArbeidssituasjonSporsmal.svar) {
-                "ARBEIDSTAKER" -> ArbeidssituasjonDTO.ARBEIDSTAKER
-                "FRILANSER" -> ArbeidssituasjonDTO.FRILANSER
-                "NAERINGSDRIVENDE" -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
-                "ARBEIDSLEDIG" -> ArbeidssituasjonDTO.ARBEIDSLEDIG
-                "PERMITTERT" -> ArbeidssituasjonDTO.PERMITTERT
-                "ANNET" -> ArbeidssituasjonDTO.ANNET
-                else -> throw IllegalArgumentException("Ugyldig arbeidssituasjon: ${originaltArbeidssituasjonSporsmal.svar}")
-            }
+        val arbeidssituasjon = ArbeidssituasjonDTO.valueOf(originaltArbeidssituasjonSporsmal.svar)
+        require(
+            arbeidssituasjon in
+                setOf(
+                    ArbeidssituasjonDTO.ARBEIDSTAKER,
+                    ArbeidssituasjonDTO.FRILANSER,
+                    ArbeidssituasjonDTO.NAERINGSDRIVENDE,
+                    ArbeidssituasjonDTO.ARBEIDSLEDIG,
+                    ArbeidssituasjonDTO.PERMITTERT,
+                    ArbeidssituasjonDTO.ANNET,
+                ),
+        ) { "Ugyldig arbeidssituasjon i sporsmal liste: $arbeidssituasjon" }
 
         return FormSporsmalSvar(
             sporsmaltekst = originaltArbeidssituasjonSporsmal.tekst,
