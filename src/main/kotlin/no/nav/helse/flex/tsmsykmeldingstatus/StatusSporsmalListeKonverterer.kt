@@ -82,17 +82,19 @@ object StatusSporsmalListeKonverterer {
         }
 
         val arbeidssituasjon = ArbeidssituasjonDTO.valueOf(originaltArbeidssituasjonSporsmal.svar)
+
+        val gyldigeArbeidssituasjoner =
+            setOf(
+                ArbeidssituasjonDTO.ARBEIDSTAKER,
+                ArbeidssituasjonDTO.FRILANSER,
+                ArbeidssituasjonDTO.NAERINGSDRIVENDE,
+                ArbeidssituasjonDTO.ARBEIDSLEDIG,
+                ArbeidssituasjonDTO.PERMITTERT,
+                ArbeidssituasjonDTO.ANNET,
+            )
         require(
-            arbeidssituasjon in
-                setOf(
-                    ArbeidssituasjonDTO.ARBEIDSTAKER,
-                    ArbeidssituasjonDTO.FRILANSER,
-                    ArbeidssituasjonDTO.NAERINGSDRIVENDE,
-                    ArbeidssituasjonDTO.ARBEIDSLEDIG,
-                    ArbeidssituasjonDTO.PERMITTERT,
-                    ArbeidssituasjonDTO.ANNET,
-                ),
-        ) { "Ugyldig arbeidssituasjon i sporsmal liste: $arbeidssituasjon" }
+            arbeidssituasjon in gyldigeArbeidssituasjoner,
+        ) { "Ugyldig arbeidssituasjon i sporsmal liste: $arbeidssituasjon. Forventer en av: $gyldigeArbeidssituasjoner" }
 
         return FormSporsmalSvar(
             sporsmaltekst = originaltArbeidssituasjonSporsmal.tekst,
