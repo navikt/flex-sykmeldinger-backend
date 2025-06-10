@@ -11,12 +11,12 @@ import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 
-object SykmeldingStatusKafkaDTOKonverterer {
+object SykmeldingHendelseTilKafkaKonverterer {
     private val logger = this.logger()
 
-    fun fraSykmeldingHendelse(
-        sykmeldingId: String,
+    fun konverterSykmeldingHendelseTilKafkaDTO(
         sykmeldingHendelse: SykmeldingHendelse,
+        sykmeldingId: String,
     ): SykmeldingStatusKafkaDTO =
         when (sykmeldingHendelse.status) {
             HendelseStatus.SENDT_TIL_NAV,

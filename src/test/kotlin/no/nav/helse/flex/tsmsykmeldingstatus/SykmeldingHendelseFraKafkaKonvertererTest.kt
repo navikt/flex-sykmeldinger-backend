@@ -7,10 +7,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.ArbeidsgiverStatusKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.TidligereArbeidsgiverKafkaDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.amshove.kluent.*
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
@@ -29,9 +26,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
-class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
+class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
     @Autowired
-    lateinit var sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer
+    lateinit var sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer
 
     @Autowired
     lateinit var nowFactory: NowFactoryFake
@@ -43,54 +40,74 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere status til sykmelding hendelse`() {
-        val sykmelding = lagSykmelding()
-
         val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "TEST_SOURCE"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "APEN",
-                        timestamp = Instant.parse("2021-01-01T00:00:00Z").atOffset(ZoneOffset.UTC),
-                        brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
-                    ),
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = "APEN",
+                timestamp = Instant.parse("2021-01-01T00:00:00Z").atOffset(ZoneOffset.UTC),
+                brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.ARBEIDSTAKER),
             )
 
-        sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status).run {
-            this.status `should be equal to` HendelseStatus.APEN
-            hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
-            source `should be equal to` "TEST_SOURCE"
-            brukerSvar.`should not be null`()
-        }
+        sykmeldingHendelseFraKafkaKonverterer
+            .konverterSykmeldingHendelseFraKafkaDTO(
+                status = status,
+                source = "TEST_SOURCE",
+            ).run {
+                this.status `should be equal to` HendelseStatus.APEN
+                hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
+                source `should be equal to` "TEST_SOURCE"
+                brukerSvar.`should not be null`()
+            }
     }
 
     @Test
     fun `burde sette lokaltOpprettet til nå`() {
         nowFactory.setNow(Instant.parse("2021-01-01T00:00:00Z"))
 
-        val sykmelding = lagSykmelding()
-        val status = lagSykmeldingStatusKafkaMessageDTO()
+        val status = lagSykmeldingStatusKafkaDTO()
 
-        val hendelse = sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status = status)
         hendelse.lokaltOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00Z")
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["SENDT", "BEKREFTET"])
     fun `burde feile uten brukerSvar når `(statusEvent: String) {
-        val sykmelding = lagSykmelding()
         val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr", source = "tsm"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = statusEvent,
-                        brukerSvarKafkaDTO = null,
-                    ),
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = statusEvent,
+                brukerSvarKafkaDTO = null,
             )
 
-        invoking { sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status) } `should throw`
+        invoking { sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status) } `should throw`
             IllegalArgumentException::class
+    }
+
+    @Test
+    fun `burde konvertere sporsmal liste istedetfor brukerSvar dersom brukerSvar ikke er definert`() {
+        val status =
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = "SENDT",
+                brukerSvarKafkaDTO = null,
+                sporsmals =
+                    listOf(
+                        SporsmalKafkaDTO(
+                            shortName = ShortNameKafkaDTO.ARBEIDSSITUASJON,
+                            tekst = "",
+                            svartype = SvartypeKafkaDTO.ARBEIDSSITUASJON,
+                            svar = "ARBEIDSTAKER",
+                        ),
+                    ),
+                arbeidsgiver =
+                    ArbeidsgiverStatusKafkaDTO(
+                        orgnummer = "org-nr",
+                        juridiskOrgnummer = "",
+                        orgNavn = "",
+                    ),
+            )
+        val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status)
+        hendelse.brukerSvar.shouldNotBeNull().run {
+            arbeidssituasjonSporsmal.svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+        }
     }
 
     @TestFactory
@@ -103,7 +120,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
             "UTGATT" to HendelseStatus.UTGATT,
         ).map { (originalStatus, forventetStatusEvent) ->
             DynamicTest.dynamicTest("$originalStatus -> $forventetStatusEvent") {
-                sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus(originalStatus, false) `should be equal to`
+                sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilHendelseStatus(originalStatus, false) `should be equal to`
                     forventetStatusEvent
             }
         }
@@ -114,7 +131,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
             "BEKREFTET" to HendelseStatus.BEKREFTET_AVVIST,
         ).map { (originalStatus, forventetStatusEvent) ->
             DynamicTest.dynamicTest("$originalStatus -> $forventetStatusEvent") {
-                sykmeldingHendelseKonverterer.konverterStatusTilHendelseStatus(originalStatus, true) `should be equal to`
+                sykmeldingHendelseFraKafkaKonverterer.konverterStatusTilHendelseStatus(originalStatus, true) `should be equal to`
                     forventetStatusEvent
             }
         }
@@ -124,7 +141,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
     fun `burde konvertere BrukerSvarKafkaDto til BrukerSvar`(arbeidssituasjonDTO: ArbeidssituasjonDTO) {
         val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonDTO)
 
-        val konvertert = sykmeldingHendelseKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
+        val konvertert = sykmeldingHendelseFraKafkaKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
         konvertert.uriktigeOpplysninger?.svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
         konvertert.erOpplysningeneRiktige.svar `should be equal to` true
         konvertert.arbeidssituasjonSporsmal.svar.name `should be equal to` arbeidssituasjonDTO.name
@@ -199,7 +216,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `arbeidstaker burde konverteres riktig med arbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
                     arbeidsgiver =
                         ArbeidsgiverStatusKafkaDTO(
@@ -219,7 +236,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `arbeidstaker burde feile uten arbeidsgiver`() {
             invoking {
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
                     arbeidsgiver = null,
                 )
@@ -229,7 +246,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `arbeidsledig burde konverteres riktig med tidligereArbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                     tidligereArbeidsgiver =
                         TidligereArbeidsgiverKafkaDTO(
@@ -250,7 +267,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `arbeidsledig burde konverteres riktig uten tidligereArbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
                     tidligereArbeidsgiver = null,
                 )
@@ -262,7 +279,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `permittert burde konverteres riktig med tidligereArbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
                     tidligereArbeidsgiver =
                         TidligereArbeidsgiverKafkaDTO(
@@ -283,7 +300,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `permittert burde konverteres riktig uten tidligereArbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
                     tidligereArbeidsgiver = null,
                 )
@@ -295,7 +312,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `fisker burde konverteres riktig med arbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.FISKER,
                     arbeidsgiver =
                         ArbeidsgiverStatusKafkaDTO(
@@ -317,7 +334,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `fisker burde konverteres riktig uten arbeidsgiver`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.FISKER,
                     arbeidsgiver = null,
                 )
@@ -330,7 +347,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `frilanser burde konverteres riktig`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.FRILANSER,
                 )
 
@@ -340,7 +357,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `naringsdrivende burde konverteres riktig`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
                 )
 
@@ -350,7 +367,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `jordbruker burde konverteres riktig`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
                 )
 
@@ -360,7 +377,7 @@ class SykmeldingHendelseKonvertererTest : FakesTestOppsett() {
         @Test
         fun `annet arbeidssituasjon burde konverteres riktig`() {
             val tilleggsinfo =
-                sykmeldingHendelseKonverterer.konverterTilTilleggsinfo(
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
                     arbeidssituasjon = Arbeidssituasjon.ANNET,
                 )
 

@@ -22,7 +22,7 @@ const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 
 @Service
 class SykmeldingStatusHandterer(
-    private val sykmeldingHendelseKonverterer: SykmeldingHendelseKonverterer,
+    private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
@@ -95,9 +95,9 @@ class SykmeldingStatusHandterer(
             sammenstillSykmeldingStatusKafkaMessageDTO(
                 fnr = sykmelding.pasientFnr,
                 sykmeldingStatusKafkaDTO =
-                    SykmeldingStatusKafkaDTOKonverterer.fraSykmeldingHendelse(
-                        sykmeldingId = sykmelding.sykmeldingId,
+                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                         sykmeldingHendelse = sykmelding.sisteHendelse(),
+                        sykmeldingId = sykmelding.sykmeldingId,
                     ),
             )
         sykmeldingStatusProducer.produserSykmeldingStatus(status)
@@ -109,7 +109,11 @@ class SykmeldingStatusHandterer(
     ): Boolean {
         val hendelse =
             try {
-                sykmeldingHendelseKonverterer.konverterStatusTilSykmeldingHendelse(sykmelding, status)
+                sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(
+                    status = status.event,
+                    erSykmeldingAvvist = sykmelding.erAvvist,
+                    source = status.kafkaMetadata.source,
+                )
             } catch (e: Exception) {
                 log.errorSecure(
                     "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${status.event.statusEvent}, " +
