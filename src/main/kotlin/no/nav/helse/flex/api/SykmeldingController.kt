@@ -158,6 +158,7 @@ class SykmeldingController(
         @RequestBody sendSykmeldingRequestDTO: SendSykmeldingRequestDTO,
     ): ResponseEntity<SykmeldingDTO> {
         val identer = tokenxValidering.hentIdenter()
+
         val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
 
         val sykmelding =
