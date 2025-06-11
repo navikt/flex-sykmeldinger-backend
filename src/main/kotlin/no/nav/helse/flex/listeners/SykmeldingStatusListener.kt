@@ -21,7 +21,6 @@ class SykmeldingStatusListener(
     @KafkaListener(
         topics = [SYKMELDINGSTATUS_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
         concurrency = "4",
     )

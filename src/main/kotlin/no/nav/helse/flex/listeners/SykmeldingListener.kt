@@ -9,8 +9,9 @@ import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
+import org.springframework.stereotype.Component
 
-// @Component
+@Component
 class SykmeldingListener(
     private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
 ) {
@@ -19,9 +20,8 @@ class SykmeldingListener(
     @KafkaListener(
         topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        // TODO: Hvordan offset?
-        properties = ["auto.offset.reset = latest"],
-        groupId = "flex-sykmeldinger-backend-1",
+        properties = ["auto.offset.reset = earliest"],
+        id = "flex-sykmeldinger-backend-2",
         concurrency = "4",
     )
     fun listen(

@@ -12,12 +12,10 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.Duration
 
-@Disabled
 class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @AfterEach
     fun afterEach() {
