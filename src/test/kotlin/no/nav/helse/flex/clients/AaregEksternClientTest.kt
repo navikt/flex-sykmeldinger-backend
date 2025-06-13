@@ -20,7 +20,7 @@ import org.springframework.web.client.RestClientException
 
 @RestClientOppsett
 @Import(AaregEksternClient::class)
-class AaregClientTest {
+class AaregEksternClientTest {
     @Autowired
     private lateinit var aaregMockWebServer: MockWebServer
 
@@ -40,7 +40,7 @@ class AaregClientTest {
                     .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
             }
-        aaregEksternClient.getArbeidsforholdoversikt("_") `should not be` null
+        aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_") `should not be` null
     }
 
     @Test
@@ -54,7 +54,7 @@ class AaregClientTest {
             }
 
         invoking {
-            aaregEksternClient.getArbeidsforholdoversikt("_")
+            aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_")
         } `should throw` RestClientException::class
     }
 
@@ -66,7 +66,7 @@ class AaregClientTest {
                     .addHeader("Content-Type", "application/json")
             }
         invoking {
-            aaregEksternClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
+            aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("suksess_uten_body_fnr")
         } `should throw` RuntimeException::class
     }
 
@@ -81,7 +81,7 @@ class AaregClientTest {
                     .addHeader("Content-Type", "application/json")
             }
 
-        aaregEksternClient.getArbeidsforholdoversikt("_")
+        aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_")
         recordedReq.shouldNotBeNull().run {
             headers["Content-Type"] `should be equal to` "application/json"
         }

@@ -15,7 +15,7 @@ class AaregEksternClient(
     val log = logger()
 
     @Retryable
-    override fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
+    override fun getArbeidstakerArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
         val res =
             aaregRestClient
                 .post()

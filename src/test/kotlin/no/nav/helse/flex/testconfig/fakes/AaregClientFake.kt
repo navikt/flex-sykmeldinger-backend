@@ -29,7 +29,7 @@ class AaregClientFake : AaregClient {
         arbeidsforholdOversikter.clear()
     }
 
-    override fun getArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
+    override fun getArbeidstakerArbeidsforholdoversikt(fnr: String): ArbeidsforholdoversiktResponse {
         if (arbeidsforholdOversikter.isEmpty()) {
             return defaultArbeidsforholdoversiktResponse
         }
