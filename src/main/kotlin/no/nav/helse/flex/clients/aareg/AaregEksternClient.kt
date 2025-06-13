@@ -34,4 +34,8 @@ class AaregEksternClient(
 
         return res ?: throw RuntimeException("getArbeidsforholdoversikt response inneholdt ikke data")
     }
+
+    override fun getArbeidsstedArbeidsforholdoversikt(arbeidsstedOrgnummer: String): ArbeidsforholdoversiktResponse {
+        TODO("Not yet implemented")
+    }
 }
