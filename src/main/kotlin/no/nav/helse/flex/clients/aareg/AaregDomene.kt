@@ -2,8 +2,14 @@ package no.nav.helse.flex.clients.aareg
 
 import java.time.LocalDate
 
-data class ArbeidsforholdRequest(
+data class FinnArbeidsforholdoversikterPrArbeidstakerAPIRequest(
     val arbeidstakerId: String,
+    val arbeidsforholdtyper: List<String>,
+    val arbeidsforholdstatuser: List<String>,
+)
+
+data class FinnArbeidsforholdoversikterPrArbeidsstedAPIRequest(
+    val arbeidsstedId: String,
     val arbeidsforholdtyper: List<String>,
     val arbeidsforholdstatuser: List<String>,
 )

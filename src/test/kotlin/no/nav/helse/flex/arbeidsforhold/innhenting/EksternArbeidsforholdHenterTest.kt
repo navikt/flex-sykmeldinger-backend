@@ -24,7 +24,7 @@ class EksternArbeidsforholdHenterTest {
 
     fun aaregClientMock(): AaregClient =
         mock {
-            on { getArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
+            on { getArbeidstakerArbeidsforholdoversikt(any()) } doReturn ArbeidsforholdoversiktResponse(listOf(lagArbeidsforholdOversikt()))
         }
 
     fun environmentTogglesMock(): EnvironmentToggles =
@@ -36,7 +36,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde bruke arbeidsforholdInfo fra Aareg`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt("fnr") } doReturn
+                on { getArbeidstakerArbeidsforholdoversikt("fnr") } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
@@ -85,7 +85,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde bruke tom liste når AAREG er nede i dev`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt("fnr") } doThrow RestClientException("AAREG er nede")
+                on { getArbeidstakerArbeidsforholdoversikt("fnr") } doThrow RestClientException("AAREG er nede")
             }
         val environmentToggles: EnvironmentToggles =
             mock {
@@ -125,7 +125,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde returnere riktig orgnummer`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt(any()) } doReturn
+                on { getArbeidstakerArbeidsforholdoversikt(any()) } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
@@ -153,7 +153,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde returnere riktig juridisk orgnummer`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt(any()) } doReturn
+                on { getArbeidstakerArbeidsforholdoversikt(any()) } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
@@ -181,7 +181,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde returnere riktig arbeidsforholdType`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt(any()) } doReturn
+                on { getArbeidstakerArbeidsforholdoversikt(any()) } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(
@@ -205,7 +205,7 @@ class EksternArbeidsforholdHenterTest {
     fun `burde filtrere vekk arbeidsstedType som ikke er Underenhet`() {
         val aaregClient: AaregClient =
             mock {
-                on { getArbeidsforholdoversikt(any()) } doReturn
+                on { getArbeidstakerArbeidsforholdoversikt(any()) } doReturn
                     ArbeidsforholdoversiktResponse(
                         listOf(
                             lagArbeidsforholdOversikt(

@@ -25,11 +25,36 @@ fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatc
         override fun dispatch(request: RecordedRequest): MockResponse = dispatcherFunc(request)
     }
 
+fun singlePathDispatcher(
+    path: String,
+    dispatcherFunc: (RecordedRequest) -> MockResponse,
+): Dispatcher =
+    object : Dispatcher() {
+        override fun dispatch(request: RecordedRequest): MockResponse =
+            if (request.path == path) {
+                dispatcherFunc(request)
+            } else {
+                MockResponse().setResponseCode(404)
+            }
+    }
+
 val defaultAaregDispatcher =
     simpleDispatcher {
-        MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+        when (it.path) {
+            "/api/v2/arbeidstaker/arbeidsforholdoversikt" -> {
+                MockResponse()
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+            }
+            "/api/v2/arbeidssted/arbeidsforholdoversikt" -> {
+                MockResponse()
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+            }
+            else -> {
+                MockResponse().setResponseCode(404)
+            }
+        }
     }
 
 val defaultEregDispatcher =

@@ -36,7 +36,7 @@ class EksternArbeidsforholdHenter(
     fun hentEksterneArbeidsforholdForPerson(fnr: String): IdenterOgEksterneArbeidsforhold {
         val result =
             try {
-                aaregClient.getArbeidsforholdoversikt(fnr)
+                aaregClient.getArbeidstakerArbeidsforholdoversikt(fnr)
             } catch (e: Exception) {
                 if (environmentToggles.isProduction()) {
                     log.errorSecure("Feil ved getArbeidsforholdoversikt i AaregClient", secureThrowable = e)
