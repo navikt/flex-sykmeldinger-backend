@@ -6,11 +6,10 @@ import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 
-@Controller
+// @Controller
 class TestController(
     private val aaregClient: AaregClient,
     private val environmentToggles: EnvironmentToggles,
