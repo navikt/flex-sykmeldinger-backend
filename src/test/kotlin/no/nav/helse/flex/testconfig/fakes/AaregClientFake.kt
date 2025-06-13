@@ -15,14 +15,14 @@ class AaregClientFake : AaregClient {
             defaultResponse = { lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()) },
         )
 
-    fun setArbeidsforholdoversikt(
+    fun setArbeidstakerArbeidsforholdoversikt(
         arbeidsforhold: ArbeidsforholdoversiktResponse,
         fnr: String = FakeResponseCollection.DEFAULT_ACCEPT_ANY_PARAM,
     ) {
         arbeidstakerArbeidsforholdOversikter.setSuccessResponse(response = arbeidsforhold, requestParam = fnr)
     }
 
-    fun setArbeidsforholdoversikt(
+    fun setArbeidstakerArbeidsforholdoversikt(
         failure: Exception,
         fnr: String = FakeResponseCollection.DEFAULT_ACCEPT_ANY_PARAM,
     ) {

@@ -40,7 +40,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
     @Test
     fun `burde opprette arbeidsforhold som ikke finnes fra før`() {
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(
@@ -64,7 +64,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 orgnummer = "org-1",
             ),
         )
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(
@@ -88,7 +88,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
     @Test
     fun `lagrer riktig data for nytt arbeidsforhold`() {
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(
@@ -139,7 +139,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 arbeidsforholdType = ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD,
             ),
         )
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(
@@ -180,7 +180,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
     fun `burde opprette et arbeidsforhold når personen har endret ident og fått nytt arbeidsforhold`() {
         arbeidsforholdRepository.save(lagArbeidsforhold(navArbeidsforholdId = "første", fnr = "første-ident"))
 
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(
@@ -215,7 +215,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 navArbeidsforholdId = "originaltArbeidsforhold",
                 arbeidstakerIdenter = listOf("første-ident", "ny-ident"),
             )
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     oppdatertArbeidsforholdMedNyIdent,
@@ -252,7 +252,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             ident = "kjent_ident",
         )
 
-        aaregClientFake.setArbeidsforholdoversikt(
+        aaregClientFake.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(
                     lagArbeidsforholdOversikt(

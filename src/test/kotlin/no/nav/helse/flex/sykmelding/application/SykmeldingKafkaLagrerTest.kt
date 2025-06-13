@@ -169,7 +169,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     @Disabled("Leser historiske sykmeldinger uten å hente arbeidsforhold")
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
-        aaregClient.setArbeidsforholdoversikt(
+        aaregClient.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(lagArbeidsforholdOversikt(arbeidstakerIdenter = listOf("fnr"), arbeidsstedOrgnummer = "910825518")),
             ),
@@ -209,7 +209,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres i dev`() {
         environmentToggles.setEnvironment("dev")
-        aaregClient.setArbeidsforholdoversikt(
+        aaregClient.setArbeidstakerArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(lagArbeidsforholdOversikt(arbeidstakerIdenter = listOf("fnr"), arbeidsstedOrgnummer = "910825518")),
             ),
