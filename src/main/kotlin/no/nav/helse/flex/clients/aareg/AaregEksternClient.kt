@@ -23,7 +23,7 @@ class AaregEksternClient(
                 .headers {
                     it.contentType = MediaType.APPLICATION_JSON
                 }.body(
-                    ArbeidsforholdRequest(
+                    FinnArbeidsforholdoversikterPrArbeidstakerAPIRequest(
                         arbeidstakerId = fnr,
                         arbeidsforholdtyper = listOf("ordinaertArbeidsforhold"),
                         arbeidsforholdstatuser = listOf("AKTIV", "AVSLUTTET"),
@@ -32,10 +32,26 @@ class AaregEksternClient(
                 .toEntity<ArbeidsforholdoversiktResponse>()
                 .body
 
-        return res ?: throw RuntimeException("getArbeidsforholdoversikt response inneholdt ikke data")
+        return res ?: throw RuntimeException("getArbeidstakerArbeidsforholdoversikt response inneholdt ikke data")
     }
 
     override fun getArbeidsstedArbeidsforholdoversikt(arbeidsstedOrgnummer: String): ArbeidsforholdoversiktResponse {
-        TODO("Not yet implemented")
+        val res =
+            aaregRestClient
+                .post()
+                .uri { uriBuilder -> uriBuilder.path("/api/v2/arbeidssted/arbeidsforholdoversikt").build() }
+                .headers {
+                    it.contentType = MediaType.APPLICATION_JSON
+                }.body(
+                    FinnArbeidsforholdoversikterPrArbeidsstedAPIRequest(
+                        arbeidsstedId = arbeidsstedOrgnummer,
+                        arbeidsforholdtyper = listOf("ordinaertArbeidsforhold"),
+                        arbeidsforholdstatuser = listOf("AKTIV", "AVSLUTTET"),
+                    ).serialisertTilString(),
+                ).retrieve()
+                .toEntity<ArbeidsforholdoversiktResponse>()
+                .body
+
+        return res ?: throw RuntimeException("getArbeidsstedArbeidsforholdoversikt response inneholdt ikke data")
     }
 }

@@ -4,7 +4,7 @@ import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.clients.aareg.AaregEksternClient
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
-import no.nav.helse.flex.testconfig.simpleDispatcher
+import no.nav.helse.flex.testconfig.singlePathDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
@@ -12,6 +12,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -32,58 +33,119 @@ class AaregEksternClientTest {
         aaregMockWebServer.dispatcher = defaultAaregDispatcher
     }
 
-    @Test
-    fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
-            }
-        aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_") `should not be` null
-    }
+    @Nested
+    inner class GetArbeidstakerArbeidsforholdoversikt {
+        @Test
+        fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidstaker/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                }
+            aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_") `should not be` null
+        }
 
-    @Test
-    fun `burde kaste feil ved error response`() {
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
-                    .setResponseCode(HttpStatus.NOT_FOUND.value())
-            }
+        @Test
+        fun `burde kaste feil ved error response`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidstaker/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                        .setResponseCode(HttpStatus.NOT_FOUND.value())
+                }
 
-        invoking {
+            invoking {
+                aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_")
+            } `should throw` RestClientException::class
+        }
+
+        @Test
+        fun `burde kaste RuntimeException ved tom respons body`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidstaker/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .addHeader("Content-Type", "application/json")
+                }
+            invoking {
+                aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("suksess_uten_body_fnr")
+            } `should throw` RuntimeException::class
+        }
+
+        @Test
+        fun `burde ha riktig headers`() {
+            var recordedReq: RecordedRequest? = null
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidstaker/arbeidsforholdoversikt") { req ->
+                    recordedReq = req
+                    MockResponse()
+                        .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                }
+
             aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_")
-        } `should throw` RestClientException::class
+            recordedReq.shouldNotBeNull().run {
+                headers["Content-Type"] `should be equal to` "application/json"
+            }
+        }
     }
 
-    @Test
-    fun `burde kaste RuntimeException ved tom respons body`() {
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse()
-                    .addHeader("Content-Type", "application/json")
-            }
-        invoking {
-            aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("suksess_uten_body_fnr")
-        } `should throw` RuntimeException::class
-    }
+    @Nested
+    inner class GetArbeidsstedArbeidsforholdoversikt {
+        @Test
+        fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidssted/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                }
+            aaregEksternClient.getArbeidsstedArbeidsforholdoversikt("_") `should not be` null
+        }
 
-    @Test
-    fun `burde ha riktig headers`() {
-        var recordedReq: RecordedRequest? = null
-        aaregMockWebServer.dispatcher =
-            simpleDispatcher { req ->
-                recordedReq = req
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
-            }
+        @Test
+        fun `burde kaste feil ved error response`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidssted/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                        .setResponseCode(HttpStatus.NOT_FOUND.value())
+                }
 
-        aaregEksternClient.getArbeidstakerArbeidsforholdoversikt("_")
-        recordedReq.shouldNotBeNull().run {
-            headers["Content-Type"] `should be equal to` "application/json"
+            invoking {
+                aaregEksternClient.getArbeidsstedArbeidsforholdoversikt("_")
+            } `should throw` RestClientException::class
+        }
+
+        @Test
+        fun `burde kaste RuntimeException ved tom respons body`() {
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidssted/arbeidsforholdoversikt") {
+                    MockResponse()
+                        .addHeader("Content-Type", "application/json")
+                }
+            invoking {
+                aaregEksternClient.getArbeidsstedArbeidsforholdoversikt("_")
+            } `should throw` RuntimeException::class
+        }
+
+        @Test
+        fun `burde ha riktig headers`() {
+            var recordedReq: RecordedRequest? = null
+            aaregMockWebServer.dispatcher =
+                singlePathDispatcher("/api/v2/arbeidssted/arbeidsforholdoversikt") { req ->
+                    recordedReq = req
+                    MockResponse()
+                        .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                        .addHeader("Content-Type", "application/json")
+                }
+
+            aaregEksternClient.getArbeidsstedArbeidsforholdoversikt("_")
+            recordedReq.shouldNotBeNull().run {
+                headers["Content-Type"] `should be equal to` "application/json"
+            }
         }
     }
 }
