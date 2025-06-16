@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class SjekkForsteSykmeldingstatusListener {
     private val log = logger()
-    private var harLestForste: Boolean = false
+    private val harLestPartition: MutableSet<Int> = mutableSetOf()
 
     @KafkaListener(
         topics = [SYKMELDINGSTATUS_TOPIC],
@@ -26,7 +26,8 @@ class SjekkForsteSykmeldingstatusListener {
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        if (harLestForste) {
+        val partition = cr.partition()
+        if (partition in harLestPartition) {
             return
         }
 
@@ -36,7 +37,7 @@ class SjekkForsteSykmeldingstatusListener {
             throw RuntimeException("Feil ved behandling av sykmelding status på kafka, meldingKey: ${cr.key()}")
         }
 
-        harLestForste = true
+        harLestPartition.add(partition)
     }
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
@@ -53,6 +54,8 @@ class SjekkForsteSykmeldingstatusListener {
                 throw e
             }
 
-        log.info("Første sykmeldingstatus på kafka, kafkaMetadata: ${status.kafkaMetadata.timestamp}, event: ${status.event.timestamp}")
+        log.info(
+            "Første sykmeldingstatus på kafka partition: ${cr.partition()}, kafkaMetadata: ${status.kafkaMetadata.timestamp}, event: ${status.event.timestamp}",
+        )
     }
 }
