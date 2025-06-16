@@ -47,11 +47,15 @@ fun lagSykmeldingStatusKafkaDTO(
         tidligereArbeidsgiver = null,
     )
 
-fun lagArbeidsgiverStatusKafkaDTO(): ArbeidsgiverStatusKafkaDTO =
+fun lagArbeidsgiverStatusKafkaDTO(
+    orgnummer: String = "test-orgnummer",
+    juridiskOrgnummer: String? = "test-juridisk-orgnummer",
+    orgNavn: String = "test-orgnavn",
+): ArbeidsgiverStatusKafkaDTO =
     ArbeidsgiverStatusKafkaDTO(
-        orgnummer = "test-orgnummer",
-        juridiskOrgnummer = "test-juridisk-orgnummer",
-        orgNavn = "test-orgnavn",
+        orgnummer = orgnummer,
+        juridiskOrgnummer = juridiskOrgnummer,
+        orgNavn = orgNavn,
     )
 
 fun lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO: ArbeidssituasjonDTO) =

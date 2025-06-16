@@ -1,5 +1,6 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
+import no.nav.helse.flex.clients.aareg.AaregClient
 import no.nav.helse.flex.producers.KafkaMetadataDTO
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.SykmeldingStatusProducer
@@ -26,6 +27,7 @@ class SykmeldingStatusHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
+    private val aaregClient: AaregClient,
 ) {
     private val log = logger()
 
@@ -107,16 +109,22 @@ class SykmeldingStatusHandterer(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
     ): Boolean {
+        val statusEvent =
+            korrigerManglendeJuridiskOrgnummer(
+                statusEvent = status.event,
+                fnr = sykmelding.pasientFnr,
+            )
+
         val hendelse =
             try {
                 sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(
-                    status = status.event,
+                    status = statusEvent,
                     erSykmeldingAvvist = sykmelding.erAvvist,
                     source = status.kafkaMetadata.source,
                 )
             } catch (e: Exception) {
                 log.errorSecure(
-                    "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${status.event.statusEvent}, " +
+                    "Feil ved konvertering av sykmeldingstatus fra kafka, status: ${statusEvent.statusEvent}, " +
                         "sykmeldingId: ${status.kafkaMetadata.sykmeldingId}",
                     secureMessage = "Sykmeldingstatus: $status",
                     secureThrowable = e,
@@ -142,6 +150,29 @@ class SykmeldingStatusHandterer(
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
 
         return true
+    }
+
+    private fun korrigerManglendeJuridiskOrgnummer(
+        statusEvent: SykmeldingStatusKafkaDTO,
+        fnr: String,
+    ): SykmeldingStatusKafkaDTO {
+        val arbeidsgiver = statusEvent.arbeidsgiver
+        if (arbeidsgiver == null || arbeidsgiver.juridiskOrgnummer != null) {
+            return statusEvent
+        }
+        val alleArbeidsforhold = aaregClient.getArbeidsforholdoversikt(fnr = fnr)
+        val relatertArbeidsforhold =
+            alleArbeidsforhold.arbeidsforholdoversikter.find {
+                it.arbeidssted.finnOrgnummer() == arbeidsgiver.orgnummer
+            }
+        val juridiskOrgnummer =
+            when (relatertArbeidsforhold) {
+                null -> arbeidsgiver.orgnummer
+                else -> relatertArbeidsforhold.opplysningspliktig.finnOrgnummer()
+            }
+        return statusEvent.copy(
+            arbeidsgiver = arbeidsgiver.copy(juridiskOrgnummer = juridiskOrgnummer),
+        )
     }
 
     companion object {

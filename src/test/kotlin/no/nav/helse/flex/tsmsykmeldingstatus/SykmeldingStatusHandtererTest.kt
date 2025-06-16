@@ -1,8 +1,12 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
+import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
+import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
+import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
@@ -25,9 +29,14 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Autowired
     lateinit var advisoryLockFake: AdvisoryLockFake
 
+    @Autowired
+    lateinit var aaregClient: AaregClientFake
+
     @AfterEach
     fun cleanUp() {
         slettDatabase()
+        advisoryLockFake.reset()
+        aaregClient.reset()
     }
 
     @Test
@@ -252,5 +261,52 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         invoking {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status)
         } `should not throw` SykmeldingHendelseException::class
+    }
+
+    @Test
+    fun `burde korrigere manglende juridiskOrgnummer`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+            ),
+        )
+
+        aaregClient.setArbeidsforholdoversikt(
+            arbeidsforhold =
+                lagArbeidsforholdOversiktResponse(
+                    arbeidsforholdoversikter =
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidstakerIdenter = listOf("fnr"),
+                                arbeidsstedOrgnummer = "org-nr",
+                                opplysningspliktigOrgnummer = "juridisk-org-nr",
+                            ),
+                        ),
+                ),
+            fnr = "fnr",
+        )
+
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                    ),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "SENDT",
+                        sykmeldingId = "1",
+                        arbeidsgiver =
+                            lagArbeidsgiverStatusKafkaDTO(
+                                orgnummer = "org-nr",
+                                juridiskOrgnummer = null,
+                            ),
+                    ),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        val oppdatertSykmelding = sykmeldingRepository.findBySykmeldingId("1")
+        oppdatertSykmelding.shouldNotBeNull().sisteHendelse().tilleggsinfo.shouldBeInstanceOf<ArbeidstakerTilleggsinfo>().run {
+            arbeidsgiver.juridiskOrgnummer shouldBeEqualTo "juridisk-org-nr"
+        }
     }
 }
