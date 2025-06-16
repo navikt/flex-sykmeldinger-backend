@@ -213,8 +213,6 @@ data class SendSykmeldingRequestDTO(
             Egenmeldingsperiode(fom = it.fom, tom = it.tom)
         }
 
-    private fun YesOrNoDTO.tilBoolean(): Boolean = this == YesOrNoDTO.YES
-
     private fun LottOgHyre.tilFiskerLottOgHyre(): FiskerLottOgHyre =
         when (this) {
             LottOgHyre.LOTT -> FiskerLottOgHyre.LOTT
@@ -229,11 +227,6 @@ data class SendSykmeldingRequestDTO(
         }
 
     private fun <T : Any> T.somUkjentSporsmal(): SporsmalSvar<T> = SporsmalSvar("<ukjent sporsmal>", this)
-}
-
-enum class YesOrNoDTO {
-    YES,
-    NO,
 }
 
 data class EgenmeldingsperiodeDTO(
