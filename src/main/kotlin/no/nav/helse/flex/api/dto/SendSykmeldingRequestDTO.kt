@@ -176,9 +176,12 @@ data class SendSykmeldingRequestDTO(
                         uriktigeOpplysninger?.let {
                             SporsmalSvar(it.sporsmaltekst, it.svar.tilUriktigeOpplysningerListe())
                         },
-                    harBruktEgenmelding = harBruktEgenmelding?.svar?.tilBoolean()?.somUkjentSporsmal(),
-                    egenmeldingsperioder = egenmeldingsperioder?.svar?.tilEgenmeldingsperioder()?.somUkjentSporsmal(),
-                    harForsikring = harForsikring?.svar?.tilBoolean()?.somUkjentSporsmal(),
+                    harBruktEgenmelding = harBruktEgenmelding?.let { SporsmalSvar(it.sporsmaltekst, it.svar.tilBoolean()) },
+                    egenmeldingsperioder =
+                        egenmeldingsperioder?.let {
+                            SporsmalSvar(it.sporsmaltekst, it.svar.tilEgenmeldingsperioder())
+                        },
+                    harForsikring = harForsikring?.let { SporsmalSvar(harForsikring.sporsmaltekst, harForsikring.svar.tilBoolean()) },
                 )
             }
             Arbeidssituasjon.ANNET -> {
@@ -225,8 +228,6 @@ data class SendSykmeldingRequestDTO(
             Blad.A -> FiskerBlad.A
             Blad.B -> FiskerBlad.B
         }
-
-    private fun <T : Any> T.somUkjentSporsmal(): SporsmalSvar<T> = SporsmalSvar("<ukjent sporsmal>", this)
 }
 
 data class EgenmeldingsperiodeDTO(
