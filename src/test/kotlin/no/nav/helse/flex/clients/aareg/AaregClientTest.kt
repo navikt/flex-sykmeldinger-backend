@@ -1,7 +1,5 @@
-package no.nav.helse.flex.clients
+package no.nav.helse.flex.clients.aareg
 
-import no.nav.helse.flex.clients.aareg.AaregClient
-import no.nav.helse.flex.clients.aareg.AaregEksternClient
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

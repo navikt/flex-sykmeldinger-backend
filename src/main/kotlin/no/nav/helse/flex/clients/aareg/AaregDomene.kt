@@ -38,7 +38,13 @@ data class Arbeidstaker(
 data class Arbeidssted(
     val type: ArbeidsstedType,
     val identer: List<Ident>,
-)
+) {
+    fun finnOrgnummer(): String =
+        this.identer
+            .firstOrNull { it.type == IdentType.ORGANISASJONSNUMMER }
+            ?.ident
+            ?: throw IllegalStateException("Arbeidssted mangler organisasjonsnummer")
+}
 
 enum class ArbeidsstedType {
     Underenhet,
@@ -48,7 +54,13 @@ enum class ArbeidsstedType {
 data class Opplysningspliktig(
     val type: String,
     val identer: List<Ident>,
-)
+) {
+    fun finnOrgnummer(): String =
+        this.identer
+            .firstOrNull { it.type == IdentType.ORGANISASJONSNUMMER }
+            ?.ident
+            ?: throw IllegalStateException("Opplysningspliktig mangler organisasjonsnummer")
+}
 
 data class Ident(
     val type: IdentType,

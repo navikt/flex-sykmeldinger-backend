@@ -51,13 +51,13 @@ class EksternArbeidsforholdHenter(
             result.arbeidsforholdoversikter
                 .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
                 .map { arbeidsforholdOversikt ->
-                    val orgnummer = getOrgnummerFraArbeidssted(arbeidsforholdOversikt.arbeidssted)
+                    val orgnummer = arbeidsforholdOversikt.arbeidssted.finnOrgnummer()
                     val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
                     val orgnavn = orgNokkelinfo.navn.sammensattnavn
                     EksterntArbeidsforhold(
                         navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
                         orgnummer = orgnummer,
-                        juridiskOrgnummer = getJuridiskOrgnummerFraOpplysningspliktig(arbeidsforholdOversikt.opplysningspliktig),
+                        juridiskOrgnummer = arbeidsforholdOversikt.opplysningspliktig.finnOrgnummer(),
                         orgnavn = orgnavn,
                         fom = arbeidsforholdOversikt.startdato,
                         tom = arbeidsforholdOversikt.sluttdato,
@@ -81,18 +81,6 @@ class EksternArbeidsforholdHenter(
     }
 
     companion object {
-        fun getOrgnummerFraArbeidssted(arbeidssted: Arbeidssted): String =
-            arbeidssted.identer
-                .first {
-                    it.type == IdentType.ORGANISASJONSNUMMER
-                }.ident
-
-        fun getJuridiskOrgnummerFraOpplysningspliktig(opplysningspliktig: Opplysningspliktig): String =
-            opplysningspliktig.identer
-                .first {
-                    it.type == IdentType.ORGANISASJONSNUMMER
-                }.ident
-
         fun parseArbeidsforholdType(kode: String): ArbeidsforholdType =
             when (kode) {
                 "forenkletOppgjoersordning" -> ArbeidsforholdType.FORENKLET_OPPGJOERSORDNING
