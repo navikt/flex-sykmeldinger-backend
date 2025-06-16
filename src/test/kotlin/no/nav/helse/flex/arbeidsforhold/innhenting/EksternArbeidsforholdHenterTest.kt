@@ -5,7 +5,6 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.arbeidsforhold.innhenting.EksternArbeidsforholdHenter.Companion.getOrgnummerFraArbeidssted
 import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.clients.ereg.EregClient
 import no.nav.helse.flex.clients.ereg.Navn
@@ -222,40 +221,6 @@ class EksternArbeidsforholdHenterTest {
                 environmentToggles = environmentTogglesMock(),
             )
         eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_").eksterneArbeidsforhold shouldHaveSize 0
-    }
-
-    @Test
-    fun `getOrgnummerFraArbeidssted finner orgnummer i arbeidssted med én ident`() {
-        val arbeidssted =
-            Arbeidssted(
-                type = ArbeidsstedType.Underenhet,
-                identer =
-                    listOf(
-                        Ident(
-                            type = IdentType.ORGANISASJONSNUMMER,
-                            ident = "orgnummer",
-                        ),
-                    ),
-            )
-        getOrgnummerFraArbeidssted(arbeidssted) `should be equal to` "orgnummer"
-    }
-
-    @Test
-    fun `getOrgnummerFraArbeidssted finner ikke orgnummer i arbeidssted dersom feil ident type`() {
-        val arbeidssted =
-            Arbeidssted(
-                type = ArbeidsstedType.Underenhet,
-                identer =
-                    listOf(
-                        Ident(
-                            type = IdentType.FOLKEREGISTERIDENT,
-                            ident = "orgnummer",
-                        ),
-                    ),
-            )
-        invoking {
-            getOrgnummerFraArbeidssted(arbeidssted) `should be equal to` "orgnummer"
-        } shouldThrow (Exception::class)
     }
 
     private fun lagArbeidsforholdOversikt(
