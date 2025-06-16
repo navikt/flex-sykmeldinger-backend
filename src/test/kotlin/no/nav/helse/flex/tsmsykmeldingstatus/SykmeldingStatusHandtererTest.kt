@@ -309,4 +309,51 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
             arbeidsgiver.juridiskOrgnummer shouldBeEqualTo "juridisk-org-nr"
         }
     }
+
+    @Test
+    fun `burde ikke korrigere juridiskOrgnummer dersom satt`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+            ),
+        )
+
+        aaregClient.setArbeidsforholdoversikt(
+            arbeidsforhold =
+                lagArbeidsforholdOversiktResponse(
+                    arbeidsforholdoversikter =
+                        listOf(
+                            lagArbeidsforholdOversikt(
+                                arbeidstakerIdenter = listOf("fnr"),
+                                arbeidsstedOrgnummer = "org-nr",
+                                opplysningspliktigOrgnummer = "oppdatert-juridisk-orgnr",
+                            ),
+                        ),
+                ),
+            fnr = "fnr",
+        )
+
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                    ),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "SENDT",
+                        sykmeldingId = "1",
+                        arbeidsgiver =
+                            lagArbeidsgiverStatusKafkaDTO(
+                                orgnummer = "originalt-juridisk-orgnr",
+                                juridiskOrgnummer = null,
+                            ),
+                    ),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
+        val oppdatertSykmelding = sykmeldingRepository.findBySykmeldingId("1")
+        oppdatertSykmelding.shouldNotBeNull().sisteHendelse().tilleggsinfo.shouldBeInstanceOf<ArbeidstakerTilleggsinfo>().run {
+            arbeidsgiver.juridiskOrgnummer shouldBeEqualTo "originalt-juridisk-orgnr"
+        }
+    }
 }
