@@ -10,11 +10,15 @@ import no.nav.helse.flex.utils.objectMapper
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.function.Supplier
 
 @Component
 class ImporterteHistoriskeStatuserProsessor(
@@ -22,6 +26,7 @@ class ImporterteHistoriskeStatuserProsessor(
     private val advisoryLock: AdvisoryLock,
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
+    private val nowFactory: Supplier<Instant>,
 ) {
     private val log = logger()
 
@@ -47,12 +52,15 @@ class ImporterteHistoriskeStatuserProsessor(
             return Resultat.PROV_IGJEN
         }
 
-        val statuser = tsmHistoriskeSykmeldingstatusDao.lesAlleFor(sykmeldingId)
+        val statuser = tsmHistoriskeSykmeldingstatusDao.lesAlleStatuserForSykmelding(sykmeldingId)
 
         for (status in statuser) {
             leggTilStatus(status)
         }
-        tsmHistoriskeSykmeldingstatusDao.settAlleLestInnFor(sykmeldingId)
+        tsmHistoriskeSykmeldingstatusDao.settAlleStatuserForSykmeldingLest(
+            sykmeldingId,
+            tidspunkt = nowFactory.get(),
+        )
         return Resultat.OK
     }
 
@@ -105,7 +113,6 @@ class TsmHistoriskeSykmeldingstatusDao(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) {
     companion object {
-        private val classHash: Int = this::class.qualifiedName?.hashCode() ?: error("Klarte ikke lage en hash for klassenavn")
         private val sisteDato: LocalDate = LocalDate.parse("2020-05-01")
     }
 
@@ -113,14 +120,23 @@ class TsmHistoriskeSykmeldingstatusDao(
         jdbcTemplate.queryForList(
             """
             WITH
+            status as (
+                SELECT * FROM temp_tsm_historisk_sykmeldingstatus
+            ),
+            innlesing AS (
+                SELECT * FROM temp_tsm_historisk_sykmeldingstatus_innlesing
+            ),
             relevante_sykmelding_id AS (
-                SELECT DISTINCT ON (sykmelding_id)
+                SELECT
                     sykmelding_id,
-                    timestamp
-                FROM TEMP_TSM_HISTORISK_SYKMELDINGSTATUS
+                    min(status.timestamp) as timestamp
+                FROM status
+                LEFT JOIN innlesing
+                    USING (sykmelding_id)
                 WHERE 
-                    NOT lest_inn
-                    AND timestamp <= :sisteDato
+                    innlesing.sykmelding_id IS NULL
+                    AND status.timestamp <= :sisteDato
+                GROUP BY sykmelding_id
             )
             SELECT sykmelding_id
             FROM relevante_sykmelding_id
@@ -133,11 +149,11 @@ class TsmHistoriskeSykmeldingstatusDao(
             String::class.java,
         )
 
-    fun lesAlleFor(sykmeldingId: String): List<SykmeldingStatusKafkaDTO> =
+    fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO> =
         jdbcTemplate.query(
             """
             SELECT *
-            FROM TEMP_TSM_HISTORISK_SYKMELDINGSTATUS
+            FROM temp_tsm_historisk_sykmeldingstatus
             WHERE sykmelding_id = :sykmeldingId
             ORDER BY timestamp ASC
             """.trimIndent(),
@@ -145,14 +161,19 @@ class TsmHistoriskeSykmeldingstatusDao(
             TsmSykmeldingerRowMapper,
         )
 
-    fun settAlleLestInnFor(sykmeldingId: String) {
-        jdbcTemplate.update(
-            """
-            UPDATE TEMP_TSM_HISTORISK_SYKMELDINGSTATUS
-            SET lest_inn = TRUE
-            WHERE sykmelding_id = :sykmeldingId
-            """.trimIndent(),
-            mapOf("sykmeldingId" to sykmeldingId),
+    fun settAlleStatuserForSykmeldingLest(
+        sykmeldingId: String,
+        tidspunkt: Instant = Instant.now(),
+    ) {
+        val inserter: SimpleJdbcInsert =
+            SimpleJdbcInsert(jdbcTemplate.jdbcTemplate)
+                .withTableName("temp_tsm_historisk_sykmeldingstatus_innlesing")
+
+        inserter.execute(
+            mapOf(
+                "sykmelding_id" to sykmeldingId,
+                "lest_tidspunkt" to Timestamp.from(tidspunkt),
+            ),
         )
     }
 }
