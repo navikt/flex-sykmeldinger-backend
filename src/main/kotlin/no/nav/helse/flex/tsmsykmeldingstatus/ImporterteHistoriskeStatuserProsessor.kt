@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -20,7 +21,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.function.Supplier
 
-@Component
+@Service
 class ImporterteHistoriskeStatuserProsessor(
     private val tsmHistoriskeSykmeldingstatusDao: TsmHistoriskeSykmeldingstatusDao,
     private val advisoryLock: AdvisoryLock,
@@ -30,10 +31,20 @@ class ImporterteHistoriskeStatuserProsessor(
 ) {
     private val log = logger()
 
-    enum class Resultat {
+    enum class ResultatStatus {
         OK,
         PROV_IGJEN,
         FERDIG,
+    }
+
+    data class Resultat(
+        val status: ResultatStatus,
+        val antallProsessert: Int = 0,
+        val antallLagtTil: Int = 0,
+    )
+
+    companion object {
+        const val SERVICE_LOCK_KEY = "ImporterteHistoriskeStatuserProsessor"
     }
 
     @Transactional(rollbackFor = [Exception::class])
@@ -41,27 +52,30 @@ class ImporterteHistoriskeStatuserProsessor(
         val sykmeldingIder: List<String> =
             tsmHistoriskeSykmeldingstatusDao.lesNesteSykmeldingIderForBehandling()
         if (sykmeldingIder.isEmpty()) {
-            return Resultat.FERDIG
+            return Resultat(status = ResultatStatus.FERDIG)
         }
 
         val sykmeldingId =
             sykmeldingIder.firstOrNull { id ->
-                advisoryLock.tryAcquire("ImporterteHistoriskeStatuserProsessor", id)
+                advisoryLock.tryAcquire(SERVICE_LOCK_KEY, id)
             }
         if (sykmeldingId == null) {
-            return Resultat.PROV_IGJEN
+            return Resultat(status = ResultatStatus.PROV_IGJEN)
         }
 
         val statuser = tsmHistoriskeSykmeldingstatusDao.lesAlleStatuserForSykmelding(sykmeldingId)
-
+        var statuserLagtTil = 0
         for (status in statuser) {
-            leggTilStatus(status)
+            val lagtTil = leggTilStatus(status)
+            if (lagtTil) {
+                statuserLagtTil++
+            }
         }
         tsmHistoriskeSykmeldingstatusDao.settAlleStatuserForSykmeldingLest(
             sykmeldingId,
             tidspunkt = nowFactory.get(),
         )
-        return Resultat.OK
+        return Resultat(status = ResultatStatus.OK, antallLagtTil = statuserLagtTil, antallProsessert = statuser.size)
     }
 
     private fun leggTilStatus(status: SykmeldingStatusKafkaDTO): Boolean {
@@ -146,6 +160,16 @@ class TsmHistoriskeSykmeldingstatusDao(
             mapOf(
                 "sisteDato" to sisteDato,
             ),
+            String::class.java,
+        )
+
+    fun lesAlleBehandledeSykmeldingIder(): List<String> =
+        jdbcTemplate.queryForList(
+            """
+            SELECT sykmelding_id
+            FROM temp_tsm_historisk_sykmeldingstatus_innlesing
+            """.trimIndent(),
+            emptyMap<String, Any>(),
             String::class.java,
         )
 
