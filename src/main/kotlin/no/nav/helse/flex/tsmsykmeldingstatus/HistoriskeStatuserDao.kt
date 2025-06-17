@@ -7,22 +7,35 @@ import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-@Component
-class HistoriskeStatuserDao(
+interface HistoriskeStatuserDao {
+    fun lesNesteSykmeldingIderForBehandling(): List<String>
+
+    fun lesAlleBehandledeSykmeldingIder(): List<String>
+
+    fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO>
+
+    fun settAlleStatuserForSykmeldingLest(
+        sykmeldingId: String,
+        tidspunkt: Instant = Instant.now(),
+    )
+}
+
+@Repository("historiskeStatuserDao")
+class HistoriskeStatuserDbDao(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
-) {
+) : HistoriskeStatuserDao {
     companion object {
         private val sisteDato: LocalDate = LocalDate.parse("2020-05-01")
     }
 
-    fun lesNesteSykmeldingIderForBehandling(): List<String> =
+    override fun lesNesteSykmeldingIderForBehandling(): List<String> =
         jdbcTemplate.queryForList(
             """
             WITH
@@ -55,7 +68,7 @@ class HistoriskeStatuserDao(
             String::class.java,
         )
 
-    fun lesAlleBehandledeSykmeldingIder(): List<String> =
+    override fun lesAlleBehandledeSykmeldingIder(): List<String> =
         jdbcTemplate.queryForList(
             """
             SELECT sykmelding_id
@@ -65,7 +78,7 @@ class HistoriskeStatuserDao(
             String::class.java,
         )
 
-    fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO> =
+    override fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO> =
         jdbcTemplate.query(
             """
             SELECT *
@@ -77,9 +90,9 @@ class HistoriskeStatuserDao(
             TsmSykmeldingerRowMapper,
         )
 
-    fun settAlleStatuserForSykmeldingLest(
+    override fun settAlleStatuserForSykmeldingLest(
         sykmeldingId: String,
-        tidspunkt: Instant = Instant.now(),
+        tidspunkt: Instant,
     ) {
         val inserter: SimpleJdbcInsert =
             SimpleJdbcInsert(jdbcTemplate.jdbcTemplate)
