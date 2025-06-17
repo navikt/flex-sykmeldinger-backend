@@ -1,13 +1,12 @@
 package no.nav.helse.flex.jobber
 
-import no.nav.helse.flex.tsmsykmeldingstatus.ImporterteHistoriskeStatuserProsessor
+import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessor
 import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 
-@Component
+// @Component
 class ImporterHistoriskeStatuserJobb(
-    private val importerteHistoriskeStatuserProsessor: ImporterteHistoriskeStatuserProsessor,
+    private val historiskeStatuserProsessor: HistoriskeStatuserProsessor,
 ) {
     private val log = logger()
     private var erFerdig = false
@@ -20,11 +19,11 @@ class ImporterHistoriskeStatuserJobb(
         }
 
         try {
-            val result = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-            if (result.status == ImporterteHistoriskeStatuserProsessor.ResultatStatus.FERDIG) {
+            val result = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+            if (result.status == HistoriskeStatuserProsessor.ResultatStatus.FERDIG) {
                 erFerdig = true
                 log.info("ImporterHistoriskeStatuserJobb ferdig")
-            } else if (result.status == ImporterteHistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN) {
+            } else if (result.status == HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN) {
                 log.warn("ImporterHistoriskeStatuserJobb må kjøre på nytt, går fint om dette ikke skjer mange ganger på rad")
             }
         } catch (ex: Exception) {

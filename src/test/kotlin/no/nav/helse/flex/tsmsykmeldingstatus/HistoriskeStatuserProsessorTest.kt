@@ -21,15 +21,15 @@ import org.springframework.transaction.support.TransactionTemplate
 import java.time.LocalDateTime
 import java.util.concurrent.CountDownLatch
 
-class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
+class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
-    lateinit var importerteHistoriskeStatuserProsessor: ImporterteHistoriskeStatuserProsessor
+    lateinit var historiskeStatuserProsessor: HistoriskeStatuserProsessor
 
     @Autowired
-    lateinit var tsmHistoriskeSykmeldingstatusDao: TsmHistoriskeSykmeldingstatusDao
+    lateinit var historiskeStatuserDao: HistoriskeStatuserDao
 
     @Autowired
     lateinit var txTemplate: TransactionTemplate
@@ -43,47 +43,47 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde prosessere en status`() {
         insertStatus(sykmeldingId = "1")
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 1
 
-        tsmHistoriskeSykmeldingstatusDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        tsmHistoriskeSykmeldingstatusDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
+        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
+        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
     }
 
     @Test
     fun `burde prosessere alle statuser for samme sykmelding`() {
         insertStatus(sykmeldingId = "1", event = "APEN")
         insertStatus(sykmeldingId = "1", event = "SENDT")
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 2
 
-        tsmHistoriskeSykmeldingstatusDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        tsmHistoriskeSykmeldingstatusDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
+        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
+        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
     }
 
     @Test
     fun `burde prosessere status fra forskjellige sykmeldinger etter hverandre`() {
         insertStatus(sykmeldingId = "1")
         insertStatus(sykmeldingId = "2")
-        importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
+            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         }
-        importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
+            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         }
-        importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.FERDIG
+        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
+            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
         }
-        tsmHistoriskeSykmeldingstatusDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        tsmHistoriskeSykmeldingstatusDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 2
+        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
+        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 2
     }
 
     @Test
     fun `burde returnere status FERDIG dersom alle prosessert`() {
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.FERDIG
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
     }
 
     @Test
@@ -97,7 +97,7 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
         val otherProcess =
             Thread {
                 txTemplate.execute {
-                    importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+                    historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
                     otherProcessProcessedLatch.countDown()
                     otherProcessCompleteLatch.await()
                 }
@@ -105,14 +105,14 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
         otherProcess.start()
         otherProcessProcessedLatch.await()
 
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
 
         otherProcessCompleteLatch.countDown()
         otherProcess.join()
 
-        val resultatEtter = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultatEtter.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.FERDIG
+        val resultatEtter = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultatEtter.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
     }
 
     @Test
@@ -125,7 +125,7 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
         val lockThread =
             Thread {
                 txTemplate.execute {
-                    importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+                    historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
                     lockThreadProcessedLatch.countDown()
                     lockThreadCompleteLatch.await()
                 }
@@ -133,8 +133,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
         lockThread.start()
         lockThreadProcessedLatch.await()
 
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN
 
         lockThreadCompleteLatch.countDown()
         lockThread.join()
@@ -153,8 +153,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ARBEIDSTAKER),
             arbeidsgiver = lagArbeidsgiverStatusKafkaDTO(),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
         sykmeldingRepository
@@ -176,8 +176,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
         sykmeldingRepository
@@ -198,8 +198,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             sykmeldingId = "1",
             event = "AVBRUTT",
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
         sykmeldingRepository
@@ -226,8 +226,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 2
         resultat.antallLagtTil shouldBeEqualTo 1
     }
@@ -239,8 +239,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 0
     }
 
@@ -250,8 +250,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             sykmeldingId = "1",
             timestamp = LocalDateTime.parse("2020-05-02T00:00:00"),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.FERDIG
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
         resultat.antallProsessert shouldBeEqualTo 0
     }
 
@@ -265,8 +265,8 @@ class ImporterteHistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             sykmeldingId = "1",
             timestamp = LocalDateTime.parse("2020-05-02T00:00:00"),
         )
-        val resultat = importerteHistoriskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo ImporterteHistoriskeStatuserProsessor.ResultatStatus.OK
+        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 2
     }
 
