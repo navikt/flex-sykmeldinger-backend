@@ -12,8 +12,10 @@ class ImporterHistoriskeStatuserJobb(
     private val log = logger()
     private var erFerdig = false
     private var exceptionCount: Int = 0
+    private var batchAntallProsessert: Int = 0
+    private var batchAntallLagtTil: Int = 0
 
-    @Scheduled(fixedDelay = 1)
+    @Scheduled(fixedDelay = 1, initialDelay = 10_000)
     fun run() {
         if (erFerdig) {
             Thread.sleep(100)
@@ -27,6 +29,16 @@ class ImporterHistoriskeStatuserJobb(
                 log.info("ImporterHistoriskeStatuserJobb ferdig")
             } else if (result.status == HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN) {
                 log.warn("ImporterHistoriskeStatuserJobb må kjøre på nytt, går fint om dette ikke skjer mange ganger på rad")
+            }
+            batchAntallProsessert += result.antallProsessert
+            batchAntallLagtTil += result.antallLagtTil
+            if (batchAntallProsessert >= 10_000) {
+                log.info(
+                    "ImporterHistoriskeStatuserJobb prosessert batch: " +
+                        "antallProsessert=$batchAntallProsessert, antallLagtTil=$batchAntallLagtTil",
+                )
+                batchAntallProsessert = 0
+                batchAntallLagtTil = 0
             }
         } catch (ex: Exception) {
             exceptionCount++
