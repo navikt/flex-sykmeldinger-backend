@@ -13,7 +13,7 @@ class ImporterHistoriskeStatuserJobb(
     private var erFerdig = false
     private var exceptionCount: Int = 0
 
-    @Scheduled(fixedDelay = 0)
+    @Scheduled(fixedDelay = 1)
     fun run() {
         if (erFerdig) {
             Thread.sleep(100)
