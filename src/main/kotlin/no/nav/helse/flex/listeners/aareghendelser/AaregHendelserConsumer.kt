@@ -58,7 +58,8 @@ class AaregHendelserConsumer(
                 }
             }
         val totalByteSize = consumerRecords.sumOf { it.serializedValueSize() }
-        if (timeMs >= 10_000 || totalByteSize >= 20_000) {
+        val totalBytesThreshold = 1000 * consumerRecords.count()
+        if (timeMs >= 10_000 || totalByteSize >= totalBytesThreshold) {
             log.warn(
                 "Unormal prosessering av Aareg hendelser. Antall: ${consumerRecords.count()}" +
                     ", tid: $timeMs ms, totalByteSize: $totalByteSize bytes",
