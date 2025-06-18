@@ -47,14 +47,24 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        data.forEach { record ->
+        if (data.isEmpty) {
+            log.error("Feil i batch listener uten noen records", thrownException)
+        } else {
+            val alleTopics = data.map { it.topic() }.distinct()
+            val antallRecords = data.count()
+            val forsteOffset = data.first().offset()
+            val forsteKey = data.first().key()
+            val topicStr =
+                if (alleTopics.size == 1) {
+                    "topic: ${alleTopics.first()}"
+                } else {
+                    "topics: [${alleTopics.joinToString(", ")}]"
+                }
             log.error(
-                "Feil i prossesseringen av record med offset: ${record.offset()}, key: ${record.key()} på topic ${record.topic()}",
+                "Feil i batch prossesseringen av record på $topicStr, " +
+                    "første offset: $forsteOffset, antall records: $antallRecords, førsteKey: $forsteKey",
                 thrownException,
             )
-        }
-        if (data.isEmpty()) {
-            log.error("Feil i listener uten noen records", thrownException)
         }
         super.handleBatch(thrownException, data, consumer, container, invokeListener)
     }
