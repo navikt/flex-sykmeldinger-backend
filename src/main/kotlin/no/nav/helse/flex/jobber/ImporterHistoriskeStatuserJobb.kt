@@ -16,6 +16,7 @@ class ImporterHistoriskeStatuserJobb(
     @Scheduled(fixedDelay = 0)
     fun run() {
         if (erFerdig) {
+            Thread.sleep(100)
             return
         }
 
