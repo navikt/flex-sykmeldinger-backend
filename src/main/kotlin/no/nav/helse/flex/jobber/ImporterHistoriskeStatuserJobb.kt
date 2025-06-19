@@ -3,9 +3,8 @@ package no.nav.helse.flex.jobber
 import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessor
 import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 
-@Component
+// @Component
 class ImporterHistoriskeStatuserJobb(
     private val historiskeStatuserProsessor: HistoriskeStatuserProsessor,
 ) {
