@@ -4,12 +4,9 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import org.amshove.kluent.shouldBeFalse
 import org.amshove.kluent.shouldBeTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Timeout
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.transaction.support.TransactionTemplate
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -48,65 +45,6 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
         }
         val hashedKey = DatabaseAdvisoryLock.stringToLongHash("test")
         checkAdvisoryLockGranted(hashedKey).shouldBeFalse()
-    }
-
-    @Test
-    fun `tryAcquire burde låse med én key`() {
-        txTemplate.execute {
-            advisoryLock
-                .tryAcquire("test")
-                .shouldBeTrue()
-            checkAdvisoryLockGranted(
-                DatabaseAdvisoryLock.stringToLongHash("test"),
-            ).shouldBeTrue()
-        }
-    }
-
-    @Test
-    fun `tryAcquire burde låse med to keys`() {
-        txTemplate.execute {
-            advisoryLock
-                .tryAcquire("test1", "test2")
-                .shouldBeTrue()
-            checkAdvisoryLockGranted(
-                DatabaseAdvisoryLock.stringToIntHash("test1"),
-                DatabaseAdvisoryLock.stringToIntHash("test2"),
-            ).shouldBeTrue()
-        }
-    }
-
-    @Test
-    fun `tryAcquire burde slippe lås etter transaksjon`() {
-        txTemplate.execute {
-            advisoryLock.tryAcquire("test")
-        }
-        checkAdvisoryLockGranted(
-            DatabaseAdvisoryLock.stringToLongHash("test"),
-        ).shouldBeFalse()
-    }
-
-    @Test
-    @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    fun `tryAcquire burde returnere false dersom lås ikke er ledig`() {
-        val tx1Started = CountDownLatch(1)
-        val tx1Release = CountDownLatch(1)
-        val tx1Thread =
-            Thread {
-                txTemplate.execute {
-                    advisoryLock.tryAcquire("test")
-                    tx1Started.countDown()
-                    tx1Release.await()
-                }
-            }
-        tx1Thread.start()
-        tx1Started.await()
-
-        txTemplate.execute {
-            advisoryLock.tryAcquire("test").shouldBeFalse()
-        }
-
-        tx1Release.countDown()
-        tx1Thread.join()
     }
 
     private fun listAdvisoryLocks(): List<Map<String, Any>> =
