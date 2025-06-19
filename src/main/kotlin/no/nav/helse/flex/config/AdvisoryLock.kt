@@ -2,7 +2,6 @@ package no.nav.helse.flex.config
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 interface AdvisoryLock {
     fun acquire(
@@ -11,13 +10,19 @@ interface AdvisoryLock {
     )
 
     fun acquire(key: String)
+
+    fun tryAcquire(
+        key1: String,
+        key2: String,
+    ): Boolean
+
+    fun tryAcquire(key: String): Boolean
 }
 
 @Component("advisoryLock")
 class DatabaseAdvisoryLock(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) : AdvisoryLock {
-    @Transactional(rollbackFor = [Exception::class])
     override fun acquire(
         key1: String,
         key2: String,
@@ -25,10 +30,16 @@ class DatabaseAdvisoryLock(
         acquire(stringToIntHash(key1), stringToIntHash(key2))
     }
 
-    @Transactional(rollbackFor = [Exception::class])
     override fun acquire(key: String) {
         acquire(stringToLongHash(key))
     }
+
+    override fun tryAcquire(key: String): Boolean = tryAcquire(stringToLongHash(key))
+
+    override fun tryAcquire(
+        key1: String,
+        key2: String,
+    ): Boolean = tryAcquire(stringToIntHash(key1), stringToIntHash(key2))
 
     companion object {
         fun stringToIntHash(value: String): Int = value.hashCode()
@@ -54,4 +65,21 @@ class DatabaseAdvisoryLock(
             Any::class.java,
         )
     }
+
+    internal fun tryAcquire(
+        key1: Int,
+        key2: Int,
+    ): Boolean =
+        jdbcTemplate.queryForObject(
+            "SELECT pg_try_advisory_xact_lock(:key1, :key2)",
+            mapOf("key1" to key1, "key2" to key2),
+            Boolean::class.java,
+        ) ?: error("Kunne ikke hente resultat av pg_try_advisory_xact_lock")
+
+    internal fun tryAcquire(key: Long): Boolean =
+        jdbcTemplate.queryForObject(
+            "SELECT pg_try_advisory_xact_lock(:key)",
+            mapOf("key" to key),
+            Boolean::class.java,
+        ) ?: error("Kunne ikke hente resultat av pg_try_advisory_xact_lock")
 }

@@ -16,6 +16,13 @@ class AdvisoryLockFake : AdvisoryLock {
         internalAcquire(FakeLock(key, null))
     }
 
+    override fun tryAcquire(key: String): Boolean = internalTryAcquire(FakeLock(key, null))
+
+    override fun tryAcquire(
+        key1: String,
+        key2: String,
+    ): Boolean = internalTryAcquire(FakeLock(key1, key2))
+
     fun hasLocks(): Boolean = lockCount() > 0
 
     fun hasLock(key: String): Boolean = lockCount(key) > 0
@@ -41,6 +48,15 @@ class AdvisoryLockFake : AdvisoryLock {
     private fun internalAcquire(lock: FakeLock) {
         heldLocks.merge(lock, 1) { oldValue, _ ->
             oldValue + 1
+        }
+    }
+
+    private fun internalTryAcquire(lock: FakeLock): Boolean {
+        if (heldLocks.containsKey(lock)) {
+            return false
+        } else {
+            internalAcquire(lock)
+            return true
         }
     }
 }
