@@ -26,6 +26,7 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  leaderElection: true
   resources:
     limits:
       memory: {{memory}}

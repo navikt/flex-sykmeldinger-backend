@@ -71,3 +71,4 @@ no.nav.security.jwt:
           audience: ${FLEX_SYKETILFELLE_TOKENX_CLIENT_ID}
 
 pdl.api.url: ${PDL_BASE_URL}
+elector.get_url: ${ELECTOR_GET_URL}

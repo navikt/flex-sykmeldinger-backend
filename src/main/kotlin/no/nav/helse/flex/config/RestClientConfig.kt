@@ -75,7 +75,7 @@ class RestClientConfig {
 
     @Bean
     fun leaderElectionRestClient(
-        @Value("\${elector.path}") electorPath: String,
+        @Value("\${elector.get_url}") electorPath: String,
         requestFactory: HttpComponentsClientHttpRequestFactory,
     ): RestClient {
         val uriString =

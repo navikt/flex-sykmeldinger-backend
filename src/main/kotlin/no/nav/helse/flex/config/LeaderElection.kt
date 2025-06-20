@@ -18,7 +18,7 @@ interface LeaderElection {
 @Component
 class KubernetesLeaderElection(
     private val leaderElectionRestClient: RestClient,
-    @param:Value("\${elector.path}") private val electorPath: String,
+    @param:Value("\${elector.get_url}") private val electorPath: String,
     private val applicationAvailability: ApplicationAvailability,
 ) : LeaderElection {
     val log = logger()
