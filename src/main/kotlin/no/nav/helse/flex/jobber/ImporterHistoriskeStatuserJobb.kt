@@ -22,12 +22,10 @@ class ImporterHistoriskeStatuserJobb(
         }
 
         try {
-            val result = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+            val result = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1000)
             if (result.status == HistoriskeStatuserProsessor.ResultatStatus.FERDIG) {
                 erFerdig = true
                 log.info("ImporterHistoriskeStatuserJobb ferdig")
-            } else if (result.status == HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN) {
-                log.warn("ImporterHistoriskeStatuserJobb må kjøre på nytt, går fint om dette ikke skjer mange ganger på rad")
             }
             batchAntallProsessert += result.antallProsessert
             batchAntallLagtTil += result.antallLagtTil

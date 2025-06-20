@@ -6,103 +6,74 @@ import no.nav.helse.flex.utils.objectMapper
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
-import java.time.LocalDate
 import java.time.OffsetDateTime
 
 interface HistoriskeStatuserDao {
-    fun lesNesteSykmeldingIderForBehandling(): List<String>
+    fun lesAlleStatuserEldstTilNyest(
+        fraTimestamp: Instant,
+        tilTimestamp: Instant,
+        antall: Int = 1000,
+    ): List<SykmeldingStatusKafkaDTO>
 
-    fun lesAlleBehandledeSykmeldingIder(): List<String>
+    fun lesCheckpointStatusTimestamp(): Instant?
 
-    fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO>
-
-    fun settAlleStatuserForSykmeldingLest(
-        sykmeldingId: String,
-        tidspunkt: Instant = Instant.now(),
-    )
+    fun oppdaterCheckpointStatusTimestamp(statusTimestamp: Instant)
 }
 
 @Repository("historiskeStatuserDao")
 class HistoriskeStatuserDbDao(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) : HistoriskeStatuserDao {
-    companion object {
-        private val sisteDato: LocalDate = LocalDate.parse("2020-05-01")
-    }
-
-    override fun lesNesteSykmeldingIderForBehandling(): List<String> =
-        jdbcTemplate.queryForList(
-            """
-            WITH
-            status as (
-                SELECT * FROM temp_tsm_historisk_sykmeldingstatus
-            ),
-            innlesing AS (
-                SELECT * FROM temp_tsm_historisk_sykmeldingstatus_innlesing
-            ),
-            relevante_sykmelding_id AS (
-                SELECT
-                    sykmelding_id,
-                    min(status.timestamp) as timestamp
-                FROM status
-                LEFT JOIN innlesing
-                    USING (sykmelding_id)
-                WHERE 
-                    innlesing.sykmelding_id IS NULL
-                    AND status.timestamp <= :sisteDato
-                GROUP BY sykmelding_id
-            )
-            SELECT sykmelding_id
-            FROM relevante_sykmelding_id
-            ORDER BY timestamp ASC
-            LIMIT 100
-            """.trimIndent(),
-            mapOf(
-                "sisteDato" to sisteDato,
-            ),
-            String::class.java,
-        )
-
-    override fun lesAlleBehandledeSykmeldingIder(): List<String> =
-        jdbcTemplate.queryForList(
-            """
-            SELECT sykmelding_id
-            FROM temp_tsm_historisk_sykmeldingstatus_innlesing
-            """.trimIndent(),
-            emptyMap<String, Any>(),
-            String::class.java,
-        )
-
-    override fun lesAlleStatuserForSykmelding(sykmeldingId: String): List<SykmeldingStatusKafkaDTO> =
+    override fun lesAlleStatuserEldstTilNyest(
+        fraTimestamp: Instant,
+        tilTimestamp: Instant,
+        antall: Int,
+    ): List<SykmeldingStatusKafkaDTO> =
         jdbcTemplate.query(
             """
             SELECT *
             FROM temp_tsm_historisk_sykmeldingstatus
-            WHERE sykmelding_id = :sykmeldingId
+            WHERE 
+                timestamp > :fraTimestamp
+                and timestamp <= :tilTimestamp
             ORDER BY timestamp ASC
+            LIMIT :antall
             """.trimIndent(),
-            mapOf("sykmeldingId" to sykmeldingId),
+            mapOf(
+                "fraTimestamp" to Timestamp.from(fraTimestamp),
+                "tilTimestamp" to Timestamp.from(tilTimestamp),
+                "antall" to antall,
+            ),
             TsmSykmeldingerRowMapper,
         )
 
-    override fun settAlleStatuserForSykmeldingLest(
-        sykmeldingId: String,
-        tidspunkt: Instant,
-    ) {
-        val inserter: SimpleJdbcInsert =
-            SimpleJdbcInsert(jdbcTemplate.jdbcTemplate)
-                .withTableName("temp_tsm_historisk_sykmeldingstatus_innlesing")
+    override fun lesCheckpointStatusTimestamp(): Instant? =
+        jdbcTemplate
+            .query(
+                """
+                select status_timestamp
+                FROM temp_tsm_historisk_sykmeldingstatus_checkpoint
+                where id = '1'
+                limit 1
+                """.trimIndent(),
+                emptyMap<String, Any>(),
+            ) { rs, _ -> rs.getTimestamp("status_timestamp").toInstant() }
+            .firstOrNull()
 
-        inserter.execute(
-            mapOf(
-                "sykmelding_id" to sykmeldingId,
-                "lest_tidspunkt" to Timestamp.from(tidspunkt),
-            ),
+    override fun oppdaterCheckpointStatusTimestamp(statusTimestamp: Instant) {
+        jdbcTemplate.update(
+            """
+            INSERT INTO temp_tsm_historisk_sykmeldingstatus_checkpoint (id, status_timestamp)
+            VALUES ('1', :statusTimestamp)
+            ON CONFLICT (id)
+                DO UPDATE SET
+                    status_timestamp = EXCLUDED.status_timestamp
+            """.trimIndent(),
+            mapOf("statusTimestamp" to Timestamp.from(statusTimestamp)),
         )
     }
 }
