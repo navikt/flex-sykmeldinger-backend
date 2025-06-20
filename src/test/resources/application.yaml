@@ -68,7 +68,7 @@ no.nav.security.jwt:
           client-secret: secretzz
           client-auth-method: client_secret_basic
 
-elector.path: dont_look_for_leader
+elector.get_url: dont_look_for_leader
 
 AAREG_HENDELSE_TOPIC: "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
 REGISTRERT_FOR_ARBEIDSFORHOLD: true
