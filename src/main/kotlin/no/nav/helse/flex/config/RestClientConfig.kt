@@ -15,6 +15,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestClient
+import org.springframework.web.util.UriComponentsBuilder
 import java.time.Duration
 
 const val API_CONNECT_TIMEOUT = 3L
@@ -73,6 +74,23 @@ class RestClientConfig {
             .build()
 
     @Bean
+    fun leaderElectionRestClient(
+        @Value("\${elector.path}") electorPath: String,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+    ): RestClient {
+        val uriString =
+            UriComponentsBuilder
+                .fromUriString(prependHttpIfNotPresent(electorPath))
+                .toUriString()
+
+        return RestClient
+            .builder()
+            .baseUrl(uriString)
+            .requestFactory(requestFactory)
+            .build()
+    }
+
+    @Bean
     fun syketilfelleRestClient(
         @Value("\${FLEX_SYKETILFELLE_URL}") url: String,
         oAuth2AccessTokenService: OAuth2AccessTokenService,
@@ -114,6 +132,12 @@ class RestClientConfig {
     @Bean
     fun oAuth2AccessTokenServiceRestClientBuilder(requestFactory: HttpComponentsClientHttpRequestFactory): RestClient.Builder =
         RestClient.builder().requestFactory(requestFactory)
+
+    private fun prependHttpIfNotPresent(url: String): String =
+        when (url.startsWith("http://")) {
+            true -> url
+            else -> "http://$url"
+        }
 }
 
 class BearerTokenInterceptor(
