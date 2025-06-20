@@ -1,12 +1,15 @@
 package no.nav.helse.flex.jobber
 
+import no.nav.helse.flex.config.LeaderElection
 import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessor
 import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
-// @Component
+@Component
 class ImporterHistoriskeStatuserJobb(
     private val historiskeStatuserProsessor: HistoriskeStatuserProsessor,
+    private val leaderElection: LeaderElection,
 ) {
     private val log = logger()
     private var erFerdig = false
@@ -16,18 +19,21 @@ class ImporterHistoriskeStatuserJobb(
 
     @Scheduled(fixedDelay = 1, initialDelay = 10_000)
     fun run() {
+        if (!leaderElection.isLeader()) {
+            log.info("ImporterHistoriskeStatuserJobb er ikke leder, hopper over kjøring")
+            Thread.sleep(10_000)
+            return
+        }
         if (erFerdig) {
             Thread.sleep(100)
             return
         }
 
         try {
-            val result = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+            val result = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1000)
             if (result.status == HistoriskeStatuserProsessor.ResultatStatus.FERDIG) {
                 erFerdig = true
                 log.info("ImporterHistoriskeStatuserJobb ferdig")
-            } else if (result.status == HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN) {
-                log.warn("ImporterHistoriskeStatuserJobb må kjøre på nytt, går fint om dette ikke skjer mange ganger på rad")
             }
             batchAntallProsessert += result.antallProsessert
             batchAntallLagtTil += result.antallLagtTil
