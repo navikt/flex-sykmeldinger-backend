@@ -1,6 +1,5 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.config.AdvisoryLock
 import no.nav.helse.flex.sykmelding.domain.SykmeldingRepository
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
@@ -8,21 +7,21 @@ import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.util.function.Supplier
 
 @Service
 class HistoriskeStatuserProsessor(
     private val historiskeStatuserDao: HistoriskeStatuserDao,
-    private val advisoryLock: AdvisoryLock,
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
-    private val nowFactory: Supplier<Instant>,
 ) {
     private val log = logger()
 
+    companion object {
+        private val sisteDato: Instant = Instant.parse("2020-05-01T00:00:00Z")
+    }
+
     enum class ResultatStatus {
         OK,
-        PROV_IGJEN,
         FERDIG,
     }
 
@@ -32,27 +31,20 @@ class HistoriskeStatuserProsessor(
         val antallLagtTil: Int = 0,
     )
 
-    companion object {
-        const val SERVICE_LOCK_KEY = "ImporterteHistoriskeStatuserProsessor"
-    }
-
     @Transactional(rollbackFor = [Exception::class])
-    fun prosesserNesteSykmeldingStatuser(): Resultat {
-        val sykmeldingIder: List<String> =
-            historiskeStatuserDao.lesNesteSykmeldingIderForBehandling()
-        if (sykmeldingIder.isEmpty()) {
+    fun prosesserNesteBatch(antall: Int = 1000): Resultat {
+        val checkpointTimestamp: Instant =
+            historiskeStatuserDao.lesCheckpointStatusTimestamp()
+                ?: Instant.EPOCH
+        val statuser =
+            historiskeStatuserDao.lesAlleStatuserEldstTilNyest(
+                fraTimestamp = checkpointTimestamp,
+                tilTimestamp = sisteDato,
+                antall = antall,
+            )
+        if (statuser.isEmpty()) {
             return Resultat(status = ResultatStatus.FERDIG)
         }
-
-        val sykmeldingId =
-            sykmeldingIder.firstOrNull { id ->
-                advisoryLock.tryAcquire(SERVICE_LOCK_KEY, id)
-            }
-        if (sykmeldingId == null) {
-            return Resultat(status = ResultatStatus.PROV_IGJEN)
-        }
-
-        val statuser = historiskeStatuserDao.lesAlleStatuserForSykmelding(sykmeldingId)
         var statuserLagtTil = 0
         for (status in statuser) {
             val lagtTil = leggTilStatus(status)
@@ -60,10 +52,8 @@ class HistoriskeStatuserProsessor(
                 statuserLagtTil++
             }
         }
-        historiskeStatuserDao.settAlleStatuserForSykmeldingLest(
-            sykmeldingId,
-            tidspunkt = nowFactory.get(),
-        )
+        val nyCheckpointTimestamp = statuser.last().timestamp.toInstant()
+        historiskeStatuserDao.oppdaterCheckpointStatusTimestamp(nyCheckpointTimestamp)
         return Resultat(status = ResultatStatus.OK, antallLagtTil = statuserLagtTil, antallProsessert = statuser.size)
     }
 

@@ -17,9 +17,8 @@ import org.postgresql.util.PGobject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
-import org.springframework.transaction.support.TransactionTemplate
-import java.time.LocalDateTime
-import java.util.concurrent.CountDownLatch
+import java.sql.Timestamp
+import java.time.Instant
 
 class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -31,9 +30,6 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var historiskeStatuserDao: HistoriskeStatuserDao
 
-    @Autowired
-    lateinit var txTemplate: TransactionTemplate
-
     @AfterEach
     fun afterEach() {
         super.slettDatabase()
@@ -43,101 +39,57 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde prosessere en status`() {
         insertStatus(sykmeldingId = "1")
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 1
 
-        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
+        historiskeStatuserDao.lesCheckpointStatusTimestamp().shouldNotBeNull()
     }
 
     @Test
-    fun `burde prosessere alle statuser for samme sykmelding`() {
+    fun `burde prosessere flere statuser`() {
         insertStatus(sykmeldingId = "1", event = "APEN")
         insertStatus(sykmeldingId = "1", event = "SENDT")
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 2
-
-        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 1
     }
 
     @Test
-    fun `burde prosessere status fra forskjellige sykmeldinger etter hverandre`() {
-        insertStatus(sykmeldingId = "1")
-        insertStatus(sykmeldingId = "2")
-        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
-        }
-        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
-        }
-        historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser().run {
-            status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
-        }
-        historiskeStatuserDao.lesNesteSykmeldingIderForBehandling() shouldHaveSize 0
-        historiskeStatuserDao.lesAlleBehandledeSykmeldingIder() shouldHaveSize 2
+    fun `burde prosessere maks antall`() {
+        insertStatus(sykmeldingId = "1", event = "APEN")
+        insertStatus(sykmeldingId = "1", event = "SENDT")
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
+        resultat.antallProsessert shouldBeEqualTo 1
+    }
+
+    @Test
+    fun `burde oppdatere checkpoint timestamp`() {
+        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2020-01-01T00:00:00Z"))
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
+        resultat.antallProsessert shouldBeEqualTo 1
+
+        historiskeStatuserDao.lesCheckpointStatusTimestamp().shouldNotBeNull() shouldBeEqualTo Instant.parse("2020-01-01T00:00:00Z")
+    }
+
+    @Test
+    fun `burde starte på checkpoint timestamp`() {
+        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2018-01-01T00:00:00Z"))
+        insertStatus(sykmeldingId = "2", timestamp = Instant.parse("2019-01-01T00:00:00Z"))
+        historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 2)
+        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
+        resultat.antallProsessert shouldBeEqualTo 1
     }
 
     @Test
     fun `burde returnere status FERDIG dersom alle prosessert`() {
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        insertStatus(sykmeldingId = "1")
+        historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
-    }
-
-    @Test
-    fun `burde prosessere neste statuser dersom første blir prosessert av parallelle prosesser`() {
-        insertStatus(sykmeldingId = "1")
-        insertStatus(sykmeldingId = "2")
-
-        val otherProcessProcessedLatch = CountDownLatch(1)
-        val otherProcessCompleteLatch = CountDownLatch(1)
-
-        val otherProcess =
-            Thread {
-                txTemplate.execute {
-                    historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-                    otherProcessProcessedLatch.countDown()
-                    otherProcessCompleteLatch.await()
-                }
-            }
-        otherProcess.start()
-        otherProcessProcessedLatch.await()
-
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
-
-        otherProcessCompleteLatch.countDown()
-        otherProcess.join()
-
-        val resultatEtter = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultatEtter.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
-    }
-
-    @Test
-    fun `burde returnere status PROV_IGJEN dersom alle statuser er låst av parallelle prosesser`() {
-        insertStatus(sykmeldingId = "1")
-
-        val lockThreadProcessedLatch = CountDownLatch(1)
-        val lockThreadCompleteLatch = CountDownLatch(1)
-
-        val lockThread =
-            Thread {
-                txTemplate.execute {
-                    historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-                    lockThreadProcessedLatch.countDown()
-                    lockThreadCompleteLatch.await()
-                }
-            }
-        lockThread.start()
-        lockThreadProcessedLatch.await()
-
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.PROV_IGJEN
-
-        lockThreadCompleteLatch.countDown()
-        lockThread.join()
     }
 
     @Test
@@ -153,7 +105,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ARBEIDSTAKER),
             arbeidsgiver = lagArbeidsgiverStatusKafkaDTO(),
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
@@ -176,7 +128,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
@@ -198,7 +150,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             sykmeldingId = "1",
             event = "AVBRUTT",
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 1
 
@@ -226,7 +178,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 2
         resultat.antallLagtTil shouldBeEqualTo 1
@@ -239,7 +191,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             event = "BEKREFTET",
             alleSporsmal = lagBrukerSvarKafkaDto(arbeidssituasjonKafkaDTO = ArbeidssituasjonDTO.ANNET),
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallLagtTil shouldBeEqualTo 0
     }
@@ -248,33 +200,18 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
     fun `burde ikke prosessere statuser som er nyere enn 2020-05-01`() {
         insertStatus(
             sykmeldingId = "1",
-            timestamp = LocalDateTime.parse("2020-05-02T00:00:00"),
+            timestamp = Instant.parse("2020-05-02T00:00:00Z"),
         )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
+        val resultat = historiskeStatuserProsessor.prosesserNesteBatch()
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.FERDIG
         resultat.antallProsessert shouldBeEqualTo 0
-    }
-
-    @Test
-    fun `burde prosessere alle statuser for sykmelding dersom første er eldre enn 2020-05-01`() {
-        insertStatus(
-            sykmeldingId = "1",
-            timestamp = LocalDateTime.parse("2020-05-01T00:00:00"),
-        )
-        insertStatus(
-            sykmeldingId = "1",
-            timestamp = LocalDateTime.parse("2020-05-02T00:00:00"),
-        )
-        val resultat = historiskeStatuserProsessor.prosesserNesteSykmeldingStatuser()
-        resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
-        resultat.antallProsessert shouldBeEqualTo 2
     }
 
     private fun slettStatusInnlesingFraDatabase() {
         jdbcTemplate.update(
             """
             TRUNCATE temp_tsm_historisk_sykmeldingstatus;
-            TRUNCATE temp_tsm_historisk_sykmeldingstatus_innlesing;
+            TRUNCATE temp_tsm_historisk_sykmeldingstatus_checkpoint;
             """.trimIndent(),
             emptyMap<String, Any?>(),
         )
@@ -282,7 +219,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
 
     private fun insertStatus(
         sykmeldingId: String,
-        timestamp: LocalDateTime = LocalDateTime.parse("2020-01-01T00:00:00"),
+        timestamp: Instant = Instant.parse("2020-01-01T00:00:00Z"),
         event: String = "APEN",
         arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
         sporsmal: List<SporsmalKafkaDTO>? = null,
@@ -298,7 +235,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
             mapOf(
                 "sykmelding_id" to sykmeldingId,
                 "event" to event,
-                "timestamp" to timestamp,
+                "timestamp" to Timestamp.from(timestamp),
                 "arbeidsgiver" to toPgJsonb(arbeidsgiver),
                 "sporsmal" to toPgJsonb(sporsmal),
                 "alle_sprosmal" to toPgJsonb(alleSporsmal),
