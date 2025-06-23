@@ -5,6 +5,7 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class TestSykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @AfterEach
     fun afterEach() {
         slettDatabase()
@@ -22,7 +23,7 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lagre sykmelding fra kafka`() {
-        val topic = SYKMELDING_TOPIC
+        val topic = TEST_SYKMELDING_TOPIC
         val kafkaMelding =
             SykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
@@ -48,7 +49,7 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde tombstone sykmelding fra kafka`() {
-        val topic = SYKMELDING_TOPIC
+        val topic = TEST_SYKMELDING_TOPIC
         sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
