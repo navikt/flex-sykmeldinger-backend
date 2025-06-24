@@ -1,6 +1,7 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.errorSecure
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class SykmeldingListener(
     private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -38,7 +40,12 @@ class SykmeldingListener(
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         val sykmeldingId = cr.key()
-        val serialisertHendelse = cr.value()
+        val serialisertHendelse: String? = cr.value()
+
+        if (burdeIgnorereSykmelding(serialisertHendelse, sykmeldingId = sykmeldingId)) {
+            return
+        }
+
         val sykmeldingRecord: SykmeldingKafkaRecord? =
             if (serialisertHendelse == null) {
                 null
@@ -79,6 +86,47 @@ class SykmeldingListener(
             throw e
         }
     }
+
+    private fun burdeIgnorereSykmelding(
+        sykmeldingRecordJson: String?,
+        sykmeldingId: String? = null,
+    ): Boolean {
+        if (environmentToggles.isProduction()) {
+            return false
+        }
+        if (sykmeldingRecordJson == null) {
+            return false
+        }
+
+        val minimalSykmeldingKafkaRecord: MinimalSykmeldingKafkaRecord =
+            try {
+                objectMapper.readValue(sykmeldingRecordJson)
+            } catch (e: Exception) {
+                log.error(
+                    "Feil minimal sykmelding format. sykmeldingId: $sykmeldingId. Rå sykmelding: $sykmeldingRecordJson",
+                    e,
+                )
+                throw e
+            }
+        if (minimalSykmeldingKafkaRecord.sykmelding.type == "DIGITAL") {
+            log.info(
+                "Ignorerer sykmelding av type DIGITAL, sykmeldingId: ${minimalSykmeldingKafkaRecord.sykmelding.id}",
+            )
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private data class MinimalSykmeldingKafkaRecord(
+        val sykmelding: MinimalSykmelding,
+    )
+
+    private data class MinimalSykmelding(
+        val id: String,
+        val type: String,
+        val metadata: Map<String, Any?>? = null,
+    )
 }
 
 const val SYKMELDING_TOPIC = "tsm.sykmeldinger"
