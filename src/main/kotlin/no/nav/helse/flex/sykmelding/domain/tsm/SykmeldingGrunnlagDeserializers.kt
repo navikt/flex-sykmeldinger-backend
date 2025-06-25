@@ -3,7 +3,7 @@ package no.nav.helse.flex.sykmelding.domain.tsm
 import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
-val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE =
+val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE: SimpleModule =
     SimpleModule()
         .addPolymorphicDeserializer(ISykmeldingGrunnlag::type) {
             when (it) {
