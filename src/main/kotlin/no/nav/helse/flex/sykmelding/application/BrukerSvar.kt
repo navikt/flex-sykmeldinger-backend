@@ -4,38 +4,25 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 import java.time.LocalDate
 
-enum class BrukerSvarType {
-    ARBEIDSTAKER,
-    ARBEIDSLEDIG,
-    PERMITTERT,
-    FISKER,
-    FRILANSER,
-    JORDBRUKER,
-    NAERINGSDRIVENDE,
-    ANNET,
-    UTDATERT_FORMAT,
-}
-
 sealed interface BrukerSvar {
-    val type: BrukerSvarType
-    val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>
+    val arbeidssituasjon: Arbeidssituasjon
+    val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>
     val erOpplysningeneRiktige: SporsmalSvar<Boolean>
     val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>?
 
     companion object {
         val deserializerModule =
             SimpleModule()
-                .addPolymorphicDeserializer(BrukerSvar::type) {
+                .addPolymorphicDeserializer(BrukerSvar::arbeidssituasjon) {
                     when (it) {
-                        BrukerSvarType.ARBEIDSTAKER -> ArbeidstakerBrukerSvar::class
-                        BrukerSvarType.ARBEIDSLEDIG -> ArbeidsledigBrukerSvar::class
-                        BrukerSvarType.PERMITTERT -> PermittertBrukerSvar::class
-                        BrukerSvarType.FISKER -> FiskerBrukerSvar::class
-                        BrukerSvarType.FRILANSER -> FrilanserBrukerSvar::class
-                        BrukerSvarType.JORDBRUKER -> JordbrukerBrukerSvar::class
-                        BrukerSvarType.NAERINGSDRIVENDE -> NaringsdrivendeBrukerSvar::class
-                        BrukerSvarType.ANNET -> AnnetArbeidssituasjonBrukerSvar::class
-                        BrukerSvarType.UTDATERT_FORMAT -> UtdatertFormatBrukerSvar::class
+                        Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerBrukerSvar::class
+                        Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidsledigBrukerSvar::class
+                        Arbeidssituasjon.PERMITTERT -> PermittertBrukerSvar::class
+                        Arbeidssituasjon.FISKER -> FiskerBrukerSvar::class
+                        Arbeidssituasjon.FRILANSER -> FrilanserBrukerSvar::class
+                        Arbeidssituasjon.JORDBRUKER -> JordbrukerBrukerSvar::class
+                        Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeBrukerSvar::class
+                        Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonBrukerSvar::class
                     }
                 }
     }
@@ -43,37 +30,37 @@ sealed interface BrukerSvar {
 
 data class ArbeidstakerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsgiverOrgnummer: SporsmalSvar<String>,
     val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
     val harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.ARBEIDSTAKER
+    override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER
 }
 
 data class ArbeidsledigBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.ARBEIDSLEDIG
+    override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG
 }
 
 data class PermittertBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.PERMITTERT
+    override val arbeidssituasjon = Arbeidssituasjon.PERMITTERT
 }
 
 data class FiskerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val lottOgHyre: SporsmalSvar<FiskerLottOgHyre>,
     val blad: SporsmalSvar<FiskerBlad>,
     val arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
@@ -85,7 +72,7 @@ data class FiskerBrukerSvar(
     val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.FISKER
+    override val arbeidssituasjon = Arbeidssituasjon.FISKER
 
     private val erArbeidstaker = lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)
 
@@ -105,7 +92,7 @@ data class FiskerBrukerSvar(
         require(erArbeidstaker) { "Fisker er ikke arbeidstaker" }
         return ArbeidstakerBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
-            arbeidssituasjon = arbeidssituasjon,
+            arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
             arbeidsgiverOrgnummer = requireNotNull(arbeidsgiverOrgnummer) { "Fisker som er arbeidstaker må ha satt arbeidsgiverOrgnummer" },
             riktigNarmesteLeder = riktigNarmesteLeder,
             harEgenmeldingsdager = harEgenmeldingsdager,
@@ -118,7 +105,7 @@ data class FiskerBrukerSvar(
         require(!erArbeidstaker) { "Fisker er ikke naringsdrivende" }
         return NaringsdrivendeBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
-            arbeidssituasjon = arbeidssituasjon,
+            arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
             harBruktEgenmelding = harBruktEgenmelding,
             egenmeldingsperioder = egenmeldingsperioder,
             harForsikring = harForsikring,
@@ -129,58 +116,43 @@ data class FiskerBrukerSvar(
 
 data class FrilanserBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.FRILANSER
+    override val arbeidssituasjon = Arbeidssituasjon.FRILANSER
 }
 
 data class JordbrukerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.JORDBRUKER
+    override val arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
 }
 
 data class NaringsdrivendeBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.NAERINGSDRIVENDE
+    override val arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE
 }
 
 data class AnnetArbeidssituasjonBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    override val arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon>,
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
-    override val type = BrukerSvarType.ANNET
-}
-
-data class UtdatertFormatBrukerSvar(
-    override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
-    override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
-    val arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
-    val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
-    val harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
-    val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
-    val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
-    val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
-    val harForsikring: SporsmalSvar<Boolean>? = null,
-    override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
-) : BrukerSvar {
-    override val type = BrukerSvarType.UTDATERT_FORMAT
+    override val arbeidssituasjon = Arbeidssituasjon.ANNET
 }
 
 data class SporsmalSvar<T>(

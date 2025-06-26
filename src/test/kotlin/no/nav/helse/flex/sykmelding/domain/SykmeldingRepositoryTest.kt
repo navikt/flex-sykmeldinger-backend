@@ -174,9 +174,9 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         ).map { brukerSvar ->
             val caseId =
                 if (brukerSvar is FiskerBrukerSvar) {
-                    "${brukerSvar.type.name}-${brukerSvar.lottOgHyre.svar}"
+                    "${brukerSvar.arbeidssituasjon.name}-${brukerSvar.lottOgHyre.svar}"
                 } else {
-                    brukerSvar.type.name
+                    brukerSvar.arbeidssituasjon.name
                 }
 
             DynamicTest.dynamicTest("burde lagre hendelse med brukerSvar for $caseId") {

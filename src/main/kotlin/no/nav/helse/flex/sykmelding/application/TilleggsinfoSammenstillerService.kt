@@ -53,9 +53,6 @@ class TilleggsinfoSammenstillerService(
             is JordbrukerBrukerSvar -> JordbrukerTilleggsinfo
             is NaringsdrivendeBrukerSvar -> NaringsdrivendeTilleggsinfo
             is AnnetArbeidssituasjonBrukerSvar -> AnnetArbeidssituasjonTilleggsinfo
-            is UtdatertFormatBrukerSvar -> throw IllegalArgumentException(
-                "Kan ikke sammenstille tilleggsinfo for bruker svar av type: ${brukerSvar.type}",
-            )
         }
 
     fun sammenstillArbeidsledigTilleggsinfo(

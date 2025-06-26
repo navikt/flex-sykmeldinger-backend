@@ -71,9 +71,6 @@ class SykmeldingHandterer(
                 -> {
                     HendelseStatus.SENDT_TIL_NAV
                 }
-                is UtdatertFormatBrukerSvar -> throw IllegalArgumentException(
-                    "Kan ikke sende sykmelding med bruker svar av type ${brukerSvar.type}",
-                )
             }
 
         sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding = sykmelding, nyStatus = nyStatus)
