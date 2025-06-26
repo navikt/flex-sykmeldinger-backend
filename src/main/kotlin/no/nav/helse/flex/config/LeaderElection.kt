@@ -6,7 +6,10 @@ import org.springframework.boot.availability.ApplicationAvailability
 import org.springframework.boot.availability.LivenessState
 import org.springframework.boot.availability.ReadinessState
 import org.springframework.http.HttpStatusCode
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
 import java.net.InetAddress
@@ -23,6 +26,7 @@ class KubernetesLeaderElection(
 ) : LeaderElection {
     val log = logger()
 
+    @Retryable(retryFor = [ResourceAccessException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     override fun isLeader(): Boolean {
         if (applicationAvailability.readinessState == ReadinessState.REFUSING_TRAFFIC ||
             applicationAvailability.livenessState == LivenessState.BROKEN
