@@ -25,7 +25,7 @@ data class SendSykmeldingRequestDTO(
             Arbeidssituasjon.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiverOrgnummer) { "$arbeidssituasjon må ha satt arbeidsgiverOrgnummer" }
                 ArbeidstakerBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     uriktigeOpplysninger =
                         uriktigeOpplysninger?.let {
@@ -44,7 +44,7 @@ data class SendSykmeldingRequestDTO(
                     }
 
                 ArbeidsledigBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
                     uriktigeOpplysninger =
@@ -61,7 +61,7 @@ data class SendSykmeldingRequestDTO(
                     }
 
                 PermittertBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
                     uriktigeOpplysninger =
@@ -75,7 +75,7 @@ data class SendSykmeldingRequestDTO(
                 requireNotNull(fisker) { "$arbeidssituasjon må ha satt fisker" }
 
                 FiskerBrukerSvar(
-                    arbeidssituasjon = SporsmalSvar(arbeidssituasjon.sporsmaltekst, arbeidssituasjon.svar),
+                    arbeidssituasjonSporsmal = SporsmalSvar(arbeidssituasjon.sporsmaltekst, arbeidssituasjon.svar),
                     erOpplysningeneRiktige =
                         SporsmalSvar(
                             erOpplysningeneRiktige.sporsmaltekst,
@@ -128,7 +128,7 @@ data class SendSykmeldingRequestDTO(
 
             Arbeidssituasjon.FRILANSER -> {
                 FrilanserBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige =
                         SporsmalSvar(
                             erOpplysningeneRiktige.sporsmaltekst,
@@ -154,7 +154,7 @@ data class SendSykmeldingRequestDTO(
             }
             Arbeidssituasjon.NAERINGSDRIVENDE -> {
                 NaringsdrivendeBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     uriktigeOpplysninger =
                         uriktigeOpplysninger?.let {
@@ -170,7 +170,7 @@ data class SendSykmeldingRequestDTO(
             }
             Arbeidssituasjon.JORDBRUKER -> {
                 JordbrukerBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     uriktigeOpplysninger =
                         uriktigeOpplysninger?.let {
@@ -186,7 +186,7 @@ data class SendSykmeldingRequestDTO(
             }
             Arbeidssituasjon.ANNET -> {
                 AnnetArbeidssituasjonBrukerSvar(
-                    arbeidssituasjon = arbeidssituasjon,
+                    arbeidssituasjonSporsmal = arbeidssituasjon,
                     erOpplysningeneRiktige = SporsmalSvar(erOpplysningeneRiktige.sporsmaltekst, erOpplysningeneRiktige.svar.tilBoolean()),
                     uriktigeOpplysninger =
                         uriktigeOpplysninger?.let {

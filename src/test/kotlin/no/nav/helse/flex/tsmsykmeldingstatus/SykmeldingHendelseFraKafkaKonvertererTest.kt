@@ -106,7 +106,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
             )
         val hendelse = sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status)
         hendelse.brukerSvar.shouldNotBeNull().run {
-            arbeidssituasjon.svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+            arbeidssituasjonSporsmal.svar `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
         }
     }
 
@@ -144,7 +144,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         val konvertert = sykmeldingHendelseFraKafkaKonverterer.konverterBrukerSvarKafkaDtoTilBrukerSvar(brukerSvarKafkaDTO)
         konvertert.uriktigeOpplysninger?.svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
         konvertert.erOpplysningeneRiktige.svar `should be equal to` true
-        konvertert.arbeidssituasjon.svar.name `should be equal to` arbeidssituasjonDTO.name
+        konvertert.arbeidssituasjonSporsmal.svar.name `should be equal to` arbeidssituasjonDTO.name
 
         when (arbeidssituasjonDTO) {
             ArbeidssituasjonDTO.ARBEIDSTAKER -> {
