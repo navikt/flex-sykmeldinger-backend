@@ -41,7 +41,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
         val tilleggsinfo =
             brukerSvar?.let { brukerSvar ->
                 konverterTilTilleggsinfo(
-                    arbeidssituasjon = brukerSvar.arbeidssituasjon,
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.svar,
                     arbeidsgiver = status.arbeidsgiver,
                     tidligereArbeidsgiver = status.tidligereArbeidsgiver,
                 )
@@ -214,7 +214,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                 requireNotNull(arbeidsgiverOrgnummer) { "Arbeidsgiver orgnummer er påkrevd for ARBEIDSTAKER" }
                 ArbeidstakerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
                     riktigNarmesteLeder = riktigNarmesteLeder,
@@ -227,7 +227,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
                 requireNotNull(blad) { "Blad er påkrevd for FISKER" }
                 FiskerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     lottOgHyre = lottOgHyre,
                     blad = blad,
                     arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
@@ -244,7 +244,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.FRILANSER -> {
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
                     harForsikring = harForsikring,
@@ -254,7 +254,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.NAERINGSDRIVENDE -> {
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
                     harForsikring = harForsikring,
@@ -264,7 +264,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.JORDBRUKER -> {
                 JordbrukerBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                     harBruktEgenmelding = harBruktEgenmelding,
                     egenmeldingsperioder = egenmeldingsperioder,
@@ -274,7 +274,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.ARBEIDSLEDIG -> {
                 ArbeidsledigBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     arbeidsledigFraOrgnummer = arbeidsgiverOrgnummer,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
@@ -282,7 +282,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.PERMITTERT -> {
                 PermittertBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     arbeidsledigFraOrgnummer = arbeidsgiverOrgnummer,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
@@ -290,7 +290,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             ArbeidssituasjonDTO.ANNET -> {
                 AnnetArbeidssituasjonBrukerSvar(
                     erOpplysningeneRiktige = erOpplysningeneRiktige,
-                    arbeidssituasjonSporsmal = arbeidssituasjon,
+                    arbeidssituasjon = arbeidssituasjon,
                     uriktigeOpplysninger = uriktigeOpplysninger,
                 )
             }

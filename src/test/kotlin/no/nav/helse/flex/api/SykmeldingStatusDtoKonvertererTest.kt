@@ -107,7 +107,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.ARBEIDSTAKER,
@@ -183,7 +183,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 ArbeidstakerBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
                     arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"),
                     riktigNarmesteLeder = lagSporsmalSvar(false),
                     harEgenmeldingsdager = lagSporsmalSvar(false),
@@ -218,7 +218,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.ARBEIDSLEDIG,
@@ -269,7 +269,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 ArbeidsledigBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSLEDIG),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSLEDIG),
                 )
 
             val konvertertStatus: SykmeldingSporsmalSvarDto =
@@ -298,7 +298,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.PERMITTERT,
@@ -349,7 +349,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 PermittertBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.PERMITTERT),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.PERMITTERT),
                 )
 
             val konvertertStatus: SykmeldingSporsmalSvarDto =
@@ -378,7 +378,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.FISKER,
@@ -503,7 +503,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 FiskerBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.FISKER),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.FISKER),
                     arbeidsgiverOrgnummer = null,
                     riktigNarmesteLeder = lagSporsmalSvar(false),
                     harEgenmeldingsdager = lagSporsmalSvar(false),
@@ -546,7 +546,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.FRILANSER,
@@ -614,7 +614,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -648,7 +648,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.JORDBRUKER,
@@ -716,7 +716,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 JordbrukerBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -750,7 +750,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.NAERINGSDRIVENDE,
@@ -818,7 +818,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -852,7 +852,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Er opplysningene riktige?",
                             svar = true,
                         ),
-                    arbeidssituasjonSporsmal =
+                    arbeidssituasjon =
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.ANNET,
@@ -896,7 +896,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val brukerSvar =
                 AnnetArbeidssituasjonBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
-                    arbeidssituasjonSporsmal = lagSporsmalSvar(Arbeidssituasjon.ANNET),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.ANNET),
                     uriktigeOpplysninger = null,
                 )
 

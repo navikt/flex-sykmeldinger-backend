@@ -50,7 +50,7 @@ class SykmeldingStatusDtoKonverterer {
             is ArbeidstakerBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                     arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.tilFritekstFormSvar(),
                     riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.tilJaEllerNeiFormSvar(),
@@ -61,20 +61,20 @@ class SykmeldingStatusDtoKonverterer {
             is AnnetArbeidssituasjonBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                 )
             is ArbeidsledigBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     arbeidsgiverOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.tilFritekstFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                 )
             is PermittertBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     arbeidsgiverOrgnummer = brukerSvar.arbeidsledigFraOrgnummer?.tilFritekstFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
                 )
@@ -82,7 +82,7 @@ class SykmeldingStatusDtoKonverterer {
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer?.tilFritekstFormSvar(),
                     riktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.tilJaEllerNeiFormSvar(),
                     egenmeldingsdager = brukerSvar.egenmeldingsdager?.tilDatolisteFormSvar(),
@@ -100,7 +100,7 @@ class SykmeldingStatusDtoKonverterer {
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
                     harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
@@ -109,7 +109,7 @@ class SykmeldingStatusDtoKonverterer {
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
                     harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
@@ -118,11 +118,12 @@ class SykmeldingStatusDtoKonverterer {
                 SykmeldingSporsmalSvarDto(
                     erOpplysningeneRiktige = brukerSvar.erOpplysningeneRiktige.tilJaEllerNeiFormSvar(),
                     uriktigeOpplysninger = brukerSvar.uriktigeOpplysninger?.tilUriktigeOpplysningerFormSvar(),
-                    arbeidssituasjon = brukerSvar.arbeidssituasjonSporsmal.tilArbeidssituasjonFormSvar(),
+                    arbeidssituasjon = brukerSvar.arbeidssituasjon.tilArbeidssituasjonFormSvar(),
                     harBruktEgenmelding = brukerSvar.harBruktEgenmelding?.tilJaEllerNeiFormSvar(),
                     egenmeldingsperioder = brukerSvar.egenmeldingsperioder?.tilEgenmeldingsperioderFormSvar(),
                     harForsikring = brukerSvar.harForsikring?.tilJaEllerNeiFormSvar(),
                 )
+            is UtdatertFormatBrukerSvar -> error("Ikke implementert for UtdatertFormatBrukerSvar")
         }
 
     private fun SporsmalSvar<Boolean>.tilJaEllerNeiFormSvar(): FormSporsmalSvar<JaEllerNei> =
