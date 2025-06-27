@@ -111,6 +111,18 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             }
         }
 
+    @Test
+    fun `burde ikke konvertere brukerSvar fra UtdatertFormatBrukerSvar`() {
+        val originalHendelse =
+            lagSykmeldingHendelse(
+                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                brukerSvar = lagUtdatertFormatBrukerSvar(),
+            )
+
+        val konvertertStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(originalHendelse)
+        konvertertStatus.brukerSvar.shouldBeNull()
+    }
+
     @Nested
     inner class KonverterSykmeldingSporsmalSvar {
         @Test

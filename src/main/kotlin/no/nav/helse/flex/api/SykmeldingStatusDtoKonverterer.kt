@@ -18,7 +18,12 @@ class SykmeldingStatusDtoKonverterer {
             // TODO
             sporsmalOgSvarListe = emptyList(),
             arbeidsgiver = hendelse.tilleggsinfo?.let(::konverterArbeidsgiver),
-            brukerSvar = hendelse.brukerSvar?.let { konverterSykmeldingSporsmalSvar(it) },
+            brukerSvar = hendelse.brukerSvar?.let { konverterSykmeldingSporsmalSvarForBruker(it) },
+        )
+
+    fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
+        konverterAlleSykmeldingSporsmalSvar(
+            brukerSvar = brukerSvar,
         )
 
     private fun konverterHendelseStatus(status: HendelseStatus): String =
@@ -46,7 +51,13 @@ class SykmeldingStatusDtoKonverterer {
             orgNavn = arbeidsgiver.orgnavn,
         )
 
-    fun konverterSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
+    private fun konverterSykmeldingSporsmalSvarForBruker(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto? =
+        when (brukerSvar) {
+            is UtdatertFormatBrukerSvar -> null
+            else -> konverterSykmeldingSporsmalSvar(brukerSvar)
+        }
+
+    private fun konverterAlleSykmeldingSporsmalSvar(brukerSvar: BrukerSvar): SykmeldingSporsmalSvarDto =
         when (brukerSvar) {
             is ArbeidstakerBrukerSvar ->
                 SykmeldingSporsmalSvarDto(
@@ -149,7 +160,6 @@ class SykmeldingStatusDtoKonverterer {
             svar = svar,
         )
 
-    @Suppress("ktlint:standard:max-line-length")
     private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>> =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
