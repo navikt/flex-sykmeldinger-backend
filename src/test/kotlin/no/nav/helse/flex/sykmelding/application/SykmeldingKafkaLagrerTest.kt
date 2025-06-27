@@ -15,7 +15,6 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
@@ -166,7 +165,6 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             }
     }
 
-    @Disabled("Leser historiske sykmeldinger uten å hente arbeidsforhold")
     @Test
     fun `burde hente arbeidsforhold nar sykmelding lagres`() {
         aaregClient.setArbeidsforholdoversikt(
@@ -189,43 +187,6 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
         arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
-    }
-
-    @Test
-    fun `burde ikke hente arbeidsforhold nar sykmelding lagres i prod`() {
-        environmentToggles.setEnvironment("prod")
-
-        val sykmeldingMedBehandlingsutfall =
-            SykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
-                validation = lagValidation(),
-            )
-
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
-
-        arbeidsforholdRepository.findAll().shouldBeEmpty()
-    }
-
-    @Test
-    fun `burde hente arbeidsforhold nar sykmelding lagres i dev`() {
-        environmentToggles.setEnvironment("dev")
-        aaregClient.setArbeidsforholdoversikt(
-            lagArbeidsforholdOversiktResponse(
-                listOf(lagArbeidsforholdOversikt(arbeidstakerIdenter = listOf("fnr"), arbeidsstedOrgnummer = "910825518")),
-            ),
-            "fnr",
-        )
-        eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
-
-        val sykmeldingMedBehandlingsutfall =
-            SykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
-                validation = lagValidation(),
-            )
-
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
-
-        arbeidsforholdRepository.getAllByFnrIn(listOf("fnr")).shouldNotBeEmpty()
     }
 
     @Test
