@@ -1,6 +1,8 @@
 package no.nav.helse.flex.jobber
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.config.LeaderElection
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Repository
 class LesArbeidsforholdTilAlleMedSykmelding(
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val historiskArbeidsforholdCheckpointRepository: HistoriskArbeidsforholdCheckpointRepository,
+    private val leaderElection: LeaderElection,
 ) {
     private val log = logger()
     private var erFerdig = false
@@ -21,6 +24,11 @@ class LesArbeidsforholdTilAlleMedSykmelding(
 
     @Scheduled(fixedDelay = 1, initialDelay = 10_000)
     fun run() {
+        if (!leaderElection.isLeader()) {
+            log.info("LesArbeidsforholdTilAlleMedSykmelding er ikke leder, hopper over kjøring")
+            Thread.sleep(10_000)
+            return
+        }
         if (erFerdig) {
             Thread.sleep(100)
             return
@@ -38,10 +46,16 @@ class LesArbeidsforholdTilAlleMedSykmelding(
         } catch (ex: Exception) {
             exceptionCount++
             if (exceptionCount > 500) {
-                log.error("LesArbeidsforholdTilAlleMedSykmelding har feilet mer enn 500 ganger, stopper jobben", ex)
+                log.errorSecure(
+                    message = "LesArbeidsforholdTilAlleMedSykmelding har feilet mer enn 500 ganger, stopper jobben",
+                    secureThrowable = ex,
+                )
                 erFerdig = true
             } else {
-                log.warn("LesArbeidsforholdTilAlleMedSykmelding feilet, prøver igjen", ex)
+                log.errorSecure(
+                    message = "LesArbeidsforholdTilAlleMedSykmelding feilet, prøver igjen",
+                    secureThrowable = ex,
+                )
             }
         }
     }
