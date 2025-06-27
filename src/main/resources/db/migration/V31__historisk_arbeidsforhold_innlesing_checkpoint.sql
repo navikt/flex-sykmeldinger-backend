@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS TEMP_HISTORISK_ARBEIDSFORHOLD_CHECKPOINT
+(
+    fnr                   VARCHAR(36) PRIMARY KEY,
+    hentet_arbeidsforhold BOOLEAN
+);
