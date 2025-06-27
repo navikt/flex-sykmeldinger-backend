@@ -154,6 +154,31 @@ fun lagAnnetArbeidssituasjonBrukerSvar(
         uriktigeOpplysninger = uriktigeOpplysninger,
     )
 
+fun lagUtdatertFormatBrukerSvar(
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
+    erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
+    arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
+    riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
+    harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
+    egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
+    harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
+    egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
+    harForsikring: SporsmalSvar<Boolean>? = null,
+    uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
+): UtdatertFormatBrukerSvar =
+    UtdatertFormatBrukerSvar(
+        arbeidssituasjon = arbeidssituasjon,
+        erOpplysningeneRiktige = erOpplysningeneRiktige,
+        harBruktEgenmelding = harBruktEgenmelding,
+        egenmeldingsperioder = egenmeldingsperioder,
+        harForsikring = harForsikring,
+        uriktigeOpplysninger = uriktigeOpplysninger,
+        arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
+        riktigNarmesteLeder = riktigNarmesteLeder,
+        harEgenmeldingsdager = harEgenmeldingsdager,
+        egenmeldingsdager = egenmeldingsdager,
+    )
+
 fun <T> lagSporsmalSvar(
     svar: T,
     sporsmaltekst: String = "<ukjent sporsmal>",

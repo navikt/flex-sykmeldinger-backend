@@ -140,6 +140,21 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 orgNavn shouldBeEqualTo "orgnavn"
             }
         }
+
+        @Test
+        fun `Burde ikke godta UtdatertFormatBrukerSvar`() {
+            invoking {
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "1",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            brukerSvar = lagUtdatertFormatBrukerSvar(),
+                        ),
+                )
+            } shouldThrow IllegalArgumentException::class
+        }
     }
 
     @Nested

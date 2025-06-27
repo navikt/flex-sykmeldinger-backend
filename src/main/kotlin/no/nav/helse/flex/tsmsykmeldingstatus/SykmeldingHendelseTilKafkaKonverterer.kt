@@ -6,6 +6,7 @@ import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
+import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
@@ -24,6 +25,9 @@ object SykmeldingHendelseTilKafkaKonverterer {
             -> {
                 requireNotNull(sykmeldingHendelse.brukerSvar) {
                     "BrukerSvar kan ikke være null for hendelsestatus ${sykmeldingHendelse.status}. For sykmelding: $sykmeldingId"
+                }
+                require(sykmeldingHendelse.brukerSvar !is UtdatertFormatBrukerSvar) {
+                    "UtdatertFormatBrukerSvar er ikke støttet. For sykmelding: $sykmeldingId"
                 }
 
                 val arbeidsgiver: Arbeidsgiver? =
