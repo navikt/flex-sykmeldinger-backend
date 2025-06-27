@@ -2,24 +2,34 @@ package no.nav.helse.flex.sykmelding.domain
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
+enum class TilleggsinfoType {
+    ARBEIDSTAKER,
+    ARBEIDSLEDIG,
+    PERMITTERT,
+    FISKER,
+    FRILANSER,
+    NAERINGSDRIVENDE,
+    JORDBRUKER,
+    ANNET,
+}
+
 sealed interface Tilleggsinfo {
-    val arbeidssituasjon: Arbeidssituasjon
+    val type: TilleggsinfoType
 
     companion object {
         val deserializerModule =
-            SimpleModule().addPolymorphicDeserializer(Tilleggsinfo::arbeidssituasjon) {
+            SimpleModule().addPolymorphicDeserializer(Tilleggsinfo::type) {
                 when (it) {
-                    Arbeidssituasjon.ARBEIDSTAKER -> ArbeidstakerTilleggsinfo::class
-                    Arbeidssituasjon.FRILANSER -> FrilanserTilleggsinfo::class
-                    Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo::class
-                    Arbeidssituasjon.ARBEIDSLEDIG -> ArbeidsledigTilleggsinfo::class
-                    Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonTilleggsinfo::class
-                    Arbeidssituasjon.PERMITTERT -> PermittertTilleggsinfo::class
-                    Arbeidssituasjon.FISKER -> FiskerTilleggsinfo::class
-                    Arbeidssituasjon.JORDBRUKER -> JordbrukerTilleggsinfo::class
+                    TilleggsinfoType.ARBEIDSTAKER -> ArbeidstakerTilleggsinfo::class
+                    TilleggsinfoType.FRILANSER -> FrilanserTilleggsinfo::class
+                    TilleggsinfoType.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo::class
+                    TilleggsinfoType.ARBEIDSLEDIG -> ArbeidsledigTilleggsinfo::class
+                    TilleggsinfoType.ANNET -> AnnetArbeidssituasjonTilleggsinfo::class
+                    TilleggsinfoType.PERMITTERT -> PermittertTilleggsinfo::class
+                    TilleggsinfoType.FISKER -> FiskerTilleggsinfo::class
+                    TilleggsinfoType.JORDBRUKER -> JordbrukerTilleggsinfo::class
                 }
             }
     }
@@ -28,41 +38,41 @@ sealed interface Tilleggsinfo {
 data class ArbeidstakerTilleggsinfo(
     val arbeidsgiver: Arbeidsgiver,
 ) : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER
+    override val type: TilleggsinfoType = TilleggsinfoType.ARBEIDSTAKER
 }
 
 data class ArbeidsledigTilleggsinfo(
     val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ) : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG
+    override val type: TilleggsinfoType = TilleggsinfoType.ARBEIDSLEDIG
 }
 
 data class PermittertTilleggsinfo(
     val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ) : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.PERMITTERT
+    override val type: TilleggsinfoType = TilleggsinfoType.PERMITTERT
 }
 
 data class FiskerTilleggsinfo(
     val arbeidsgiver: Arbeidsgiver? = null,
 ) : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.FISKER
+    override val type: TilleggsinfoType = TilleggsinfoType.FISKER
 }
 
 data object FrilanserTilleggsinfo : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.FRILANSER
+    override val type: TilleggsinfoType = TilleggsinfoType.FRILANSER
 }
 
 data object JordbrukerTilleggsinfo : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.JORDBRUKER
+    override val type: TilleggsinfoType = TilleggsinfoType.JORDBRUKER
 }
 
 data object NaringsdrivendeTilleggsinfo : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE
+    override val type: TilleggsinfoType = TilleggsinfoType.NAERINGSDRIVENDE
 }
 
 data object AnnetArbeidssituasjonTilleggsinfo : Tilleggsinfo {
-    override val arbeidssituasjon = Arbeidssituasjon.ANNET
+    override val type: TilleggsinfoType = TilleggsinfoType.ANNET
 }
 
 data class Arbeidsgiver(

@@ -66,7 +66,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidstakerTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSTAKER
+                    it.type `should be equal to` TilleggsinfoType.ARBEIDSTAKER
                     it.arbeidsgiver.orgnummer `should be equal to` "orgnr"
                     it.arbeidsgiver.juridiskOrgnummer `should be equal to` "jorgnr"
                     it.arbeidsgiver.orgnavn `should be equal to` "Orgnavn"
@@ -194,7 +194,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
+                    it.type `should be equal to` TilleggsinfoType.ARBEIDSLEDIG
                     it.tidligereArbeidsgiver.`should not be null`()
                     it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
                 }
@@ -225,7 +225,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ARBEIDSLEDIG
+                    it.type `should be equal to` TilleggsinfoType.ARBEIDSLEDIG
                     it.tidligereArbeidsgiver.`should be null`()
                 }
         }
@@ -315,7 +315,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<PermittertTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.PERMITTERT
+                    it.type `should be equal to` TilleggsinfoType.PERMITTERT
                     it.tidligereArbeidsgiver.`should not be null`()
                     it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
                 }
@@ -346,7 +346,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<PermittertTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.PERMITTERT
+                    it.type `should be equal to` TilleggsinfoType.PERMITTERT
                     it.tidligereArbeidsgiver.`should be null`()
                 }
         }
@@ -421,7 +421,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldNotBeNull()
                     .shouldBeInstanceOf<FiskerTilleggsinfo>()
                     .run {
-                        arbeidssituasjon `should be equal to` Arbeidssituasjon.FISKER
+                        type `should be equal to` TilleggsinfoType.FISKER
                         arbeidsgiver
                             .`should not be null`()
                             .run {
@@ -523,7 +523,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldNotBeNull()
                     .shouldBeInstanceOf<FiskerTilleggsinfo>()
                     .also {
-                        it.arbeidssituasjon `should be equal to` Arbeidssituasjon.FISKER
+                        it.type `should be equal to` TilleggsinfoType.FISKER
                         it.arbeidsgiver.`should be null`()
                     }
             }
@@ -553,7 +553,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<FrilanserTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.FRILANSER
+                    it.type `should be equal to` TilleggsinfoType.FRILANSER
                 }
         }
     }
@@ -581,7 +581,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<NaringsdrivendeTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.NAERINGSDRIVENDE
+                    it.type `should be equal to` TilleggsinfoType.NAERINGSDRIVENDE
                 }
         }
     }
@@ -609,7 +609,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<JordbrukerTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.JORDBRUKER
+                    it.type `should be equal to` TilleggsinfoType.JORDBRUKER
                 }
         }
     }
@@ -637,7 +637,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<AnnetArbeidssituasjonTilleggsinfo>()
                 .also {
-                    it.arbeidssituasjon `should be equal to` Arbeidssituasjon.ANNET
+                    it.type `should be equal to` TilleggsinfoType.ANNET
                 }
         }
     }
