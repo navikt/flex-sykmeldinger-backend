@@ -114,8 +114,8 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
         @Test
-        fun `Mapper UtdatertFormatTilleggsinfo til arbeidstaker riktig`() {
-            val sykmeldingStatusKafkaDTO =
+        fun `Burde ikke godta hendelser med UtdatertFormatTilleggsinfo`() {
+            invoking {
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "1",
                     sykmeldingHendelse =
@@ -123,22 +123,25 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
                             hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                             brukerSvar = lagArbeidstakerBrukerSvar(),
-                            tilleggsinfo =
-                                lagUtdatertFormatTilleggsinfo(
-                                    arbeidsgiver =
-                                        lagArbeidsgiver(
-                                            orgnummer = "orgnr",
-                                            juridiskOrgnummer = "juridiskOrgnr",
-                                            orgnavn = "orgnavn",
-                                        ),
-                                ),
+                            tilleggsinfo = lagUtdatertFormatTilleggsinfo(),
                         ),
                 )
-            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
-            }
+            } shouldThrow IllegalArgumentException::class
+        }
+
+        @Test
+        fun `Burde ikke godta hendelser med UtdatertFormatBrukerSvar`() {
+            invoking {
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "1",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            brukerSvar = lagUtdatertFormatBrukerSvar(),
+                        ),
+                )
+            } shouldThrow IllegalArgumentException::class
         }
     }
 

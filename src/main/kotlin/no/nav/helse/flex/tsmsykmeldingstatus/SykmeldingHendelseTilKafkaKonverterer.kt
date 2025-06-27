@@ -6,7 +6,10 @@ import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
 import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
+import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer.tilBakoverkompatibelSendtStatus
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer.tilStatusEventDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
@@ -22,41 +25,9 @@ object SykmeldingHendelseTilKafkaKonverterer {
             HendelseStatus.SENDT_TIL_NAV,
             HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
             -> {
-                requireNotNull(sykmeldingHendelse.brukerSvar) {
-                    "BrukerSvar kan ikke være null for hendelsestatus ${sykmeldingHendelse.status}. For sykmelding: $sykmeldingId"
-                }
-
-                val arbeidsgiver: Arbeidsgiver? =
-                    when (sykmeldingHendelse.tilleggsinfo) {
-                        is ArbeidstakerTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
-                        is FiskerTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
-                        is UtdatertFormatTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
-                        else -> null
-                    }
-                val tidligereArbeidsgiver: TidligereArbeidsgiver? =
-                    when (sykmeldingHendelse.tilleggsinfo) {
-                        is ArbeidsledigTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
-                        is PermittertTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
-                        is UtdatertFormatTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
-                        else -> null
-                    }
-                val sporsmalSvarDto = SykmeldingStatusDtoKonverterer().konverterSykmeldingSporsmalSvar(sykmeldingHendelse.brukerSvar)
-                SykmeldingStatusKafkaDTO(
+                konverterSykmeldinghendelseStatusSendt(
+                    hendelse = sykmeldingHendelse,
                     sykmeldingId = sykmeldingId,
-                    timestamp = sykmeldingHendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
-                    statusEvent =
-                        sykmeldingHendelse.status
-                            .tilBakoverkompatibelSendtStatus(sykmeldingHendelse.brukerSvar)
-                            .tilStatusEventDTO(),
-                    sporsmals =
-                        konverterTilSporsmalsKafkaDto(
-                            sporsmalSvarDto = sporsmalSvarDto,
-                            sykmeldingId = sykmeldingId,
-                            harAktivtArbeidsforhold = arbeidsgiver?.erAktivtArbeidsforhold,
-                        ),
-                    brukerSvar = konverterTilBrukerSvarKafkaDTO(sporsmalSvarDto),
-                    arbeidsgiver = arbeidsgiver?.tilArbeidsgiverKafkaDto(),
-                    tidligereArbeidsgiver = tidligereArbeidsgiver?.tilTidligereArbeidsgiverKafkaDto(sykmeldingId),
                 )
             }
             HendelseStatus.BEKREFTET_AVVIST -> {
@@ -83,6 +54,52 @@ object SykmeldingHendelseTilKafkaKonverterer {
                 "HendelseStatus.UTGATT er ikke implementert. Vi har ikke funnet kilden til hvordan denne håndeteres. For sykmelding: $sykmeldingId",
             )
         }
+
+    internal fun konverterSykmeldinghendelseStatusSendt(
+        hendelse: SykmeldingHendelse,
+        sykmeldingId: String,
+    ): SykmeldingStatusKafkaDTO {
+        requireNotNull(hendelse.brukerSvar) {
+            "BrukerSvar kan ikke være null for hendelsestatus ${hendelse.status}. For sykmelding: $sykmeldingId"
+        }
+        require(hendelse.brukerSvar !is UtdatertFormatBrukerSvar) {
+            "UtdatertFormatBrukerSvar er ikke støttet. For sykmelding: $sykmeldingId"
+        }
+        require(hendelse.tilleggsinfo !is UtdatertFormatTilleggsinfo) {
+            "UtdatertFormatTilleggsinfo er ikke støttet. For sykmelding: $sykmeldingId"
+        }
+
+        val arbeidsgiver: Arbeidsgiver? =
+            when (hendelse.tilleggsinfo) {
+                is ArbeidstakerTilleggsinfo -> hendelse.tilleggsinfo.arbeidsgiver
+                is FiskerTilleggsinfo -> hendelse.tilleggsinfo.arbeidsgiver
+                else -> null
+            }
+        val tidligereArbeidsgiver: TidligereArbeidsgiver? =
+            when (hendelse.tilleggsinfo) {
+                is ArbeidsledigTilleggsinfo -> hendelse.tilleggsinfo.tidligereArbeidsgiver
+                is PermittertTilleggsinfo -> hendelse.tilleggsinfo.tidligereArbeidsgiver
+                else -> null
+            }
+        val sporsmalSvarDto = SykmeldingStatusDtoKonverterer().konverterSykmeldingSporsmalSvar(hendelse.brukerSvar)
+        return SykmeldingStatusKafkaDTO(
+            sykmeldingId = sykmeldingId,
+            timestamp = hendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
+            statusEvent =
+                hendelse.status
+                    .tilBakoverkompatibelSendtStatus(hendelse.brukerSvar)
+                    .tilStatusEventDTO(),
+            sporsmals =
+                konverterTilSporsmalsKafkaDto(
+                    sporsmalSvarDto = sporsmalSvarDto,
+                    sykmeldingId = sykmeldingId,
+                    harAktivtArbeidsforhold = arbeidsgiver?.erAktivtArbeidsforhold,
+                ),
+            brukerSvar = konverterTilBrukerSvarKafkaDTO(sporsmalSvarDto),
+            arbeidsgiver = arbeidsgiver?.tilArbeidsgiverKafkaDto(),
+            tidligereArbeidsgiver = tidligereArbeidsgiver?.tilTidligereArbeidsgiverKafkaDto(sykmeldingId),
+        )
+    }
 
     internal fun konverterTilBrukerSvarKafkaDTO(sykmeldingSporsmalSvarDto: SykmeldingSporsmalSvarDto): BrukerSvarKafkaDTO =
         BrukerSvarKafkaDTO(
