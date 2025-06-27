@@ -4,7 +4,7 @@ import no.nav.helse.flex.sykmelding.application.*
 import java.time.LocalDate
 
 fun lagArbeidstakerBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSTAKER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     arbeidsgiverOrgnummer: SporsmalSvar<String> = lagSporsmalSvar("test-orgnummer"),
     riktigNarmesteLeder: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
@@ -13,7 +13,7 @@ fun lagArbeidstakerBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): ArbeidstakerBrukerSvar =
     ArbeidstakerBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         arbeidsgiverOrgnummer = arbeidsgiverOrgnummer,
         riktigNarmesteLeder = riktigNarmesteLeder,
@@ -23,33 +23,33 @@ fun lagArbeidstakerBrukerSvar(
     )
 
 fun lagArbeidsledigBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSLEDIG),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ARBEIDSLEDIG),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): ArbeidsledigBrukerSvar =
     ArbeidsledigBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
         uriktigeOpplysninger = uriktigeOpplysninger,
     )
 
 fun lagPermittertBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.PERMITTERT),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.PERMITTERT),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     arbeidsledigFraOrgnummer: SporsmalSvar<String>? = null,
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): PermittertBrukerSvar =
     PermittertBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         arbeidsledigFraOrgnummer = arbeidsledigFraOrgnummer,
         uriktigeOpplysninger = uriktigeOpplysninger,
     )
 
 fun lagFiskerHyreBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FISKER),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FISKER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     lottOgHyre: SporsmalSvar<FiskerLottOgHyre> = lagSporsmalSvar(FiskerLottOgHyre.HYRE),
     blad: SporsmalSvar<FiskerBlad> = lagSporsmalSvar(FiskerBlad.A),
@@ -60,7 +60,7 @@ fun lagFiskerHyreBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): FiskerBrukerSvar =
     FiskerBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         lottOgHyre = lottOgHyre,
         blad = blad,
@@ -72,7 +72,7 @@ fun lagFiskerHyreBrukerSvar(
     )
 
 fun lagFiskerLottBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FISKER),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FISKER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     lottOgHyre: SporsmalSvar<FiskerLottOgHyre> = lagSporsmalSvar(FiskerLottOgHyre.LOTT),
     blad: SporsmalSvar<FiskerBlad> = lagSporsmalSvar(FiskerBlad.A),
@@ -82,7 +82,7 @@ fun lagFiskerLottBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): FiskerBrukerSvar =
     FiskerBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         lottOgHyre = lottOgHyre,
         blad = blad,
@@ -93,7 +93,7 @@ fun lagFiskerLottBrukerSvar(
     )
 
 fun lagFrilanserBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
@@ -101,7 +101,7 @@ fun lagFrilanserBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): FrilanserBrukerSvar =
     FrilanserBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
@@ -110,7 +110,7 @@ fun lagFrilanserBrukerSvar(
     )
 
 fun lagJordbrukerBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
@@ -118,7 +118,7 @@ fun lagJordbrukerBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): JordbrukerBrukerSvar =
     JordbrukerBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
@@ -127,7 +127,7 @@ fun lagJordbrukerBrukerSvar(
     )
 
 fun lagNaringsdrivendeBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
@@ -135,7 +135,7 @@ fun lagNaringsdrivendeBrukerSvar(
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): NaringsdrivendeBrukerSvar =
     NaringsdrivendeBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
@@ -144,12 +144,12 @@ fun lagNaringsdrivendeBrukerSvar(
     )
 
 fun lagAnnetArbeidssituasjonBrukerSvar(
-    arbeidssituasjonSporsmal: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ANNET),
+    arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> = lagSporsmalSvar(Arbeidssituasjon.ANNET),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ): AnnetArbeidssituasjonBrukerSvar =
     AnnetArbeidssituasjonBrukerSvar(
-        arbeidssituasjonSporsmal = arbeidssituasjonSporsmal,
+        arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         uriktigeOpplysninger = uriktigeOpplysninger,
     )
