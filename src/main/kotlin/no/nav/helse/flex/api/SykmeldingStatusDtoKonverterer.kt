@@ -160,7 +160,9 @@ class SykmeldingStatusDtoKonverterer {
             svar = svar,
         )
 
-    private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>> =
+    private fun SporsmalSvar<List<Egenmeldingsperiode>>.tilEgenmeldingsperioderFormSvar(): FormSporsmalSvar<
+        List<EgenmeldingsperiodeFormDTO>,
+    > =
         FormSporsmalSvar(
             sporsmaltekst = sporsmaltekst,
             svar = svar.map { EgenmeldingsperiodeFormDTO(it.fom, it.tom) },
