@@ -22,9 +22,7 @@ spec:
     path: /internal/health
   startup:
     path: /internal/health
-    initialDelay: 480  # 8 min
-    failureThreshold: 12
-    periodSeconds: 30
+    initialDelay: 40
   prometheus:
     enabled: true
     path: /internal/prometheus
