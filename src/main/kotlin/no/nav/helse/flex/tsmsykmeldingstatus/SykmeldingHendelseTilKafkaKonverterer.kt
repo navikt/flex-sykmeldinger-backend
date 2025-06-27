@@ -29,19 +29,20 @@ object SykmeldingHendelseTilKafkaKonverterer {
                 require(sykmeldingHendelse.brukerSvar !is UtdatertFormatBrukerSvar) {
                     "UtdatertFormatBrukerSvar er ikke støttet. For sykmelding: $sykmeldingId"
                 }
+                require(sykmeldingHendelse.tilleggsinfo !is UtdatertFormatTilleggsinfo) {
+                    "UtdatertFormatTilleggsinfo er ikke støttet. For sykmelding: $sykmeldingId"
+                }
 
                 val arbeidsgiver: Arbeidsgiver? =
                     when (sykmeldingHendelse.tilleggsinfo) {
                         is ArbeidstakerTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
                         is FiskerTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
-                        is UtdatertFormatTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.arbeidsgiver
                         else -> null
                     }
                 val tidligereArbeidsgiver: TidligereArbeidsgiver? =
                     when (sykmeldingHendelse.tilleggsinfo) {
                         is ArbeidsledigTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
                         is PermittertTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
-                        is UtdatertFormatTilleggsinfo -> sykmeldingHendelse.tilleggsinfo.tidligereArbeidsgiver
                         else -> null
                     }
                 val sporsmalSvarDto = SykmeldingStatusDtoKonverterer().konverterSykmeldingSporsmalSvar(sykmeldingHendelse.brukerSvar)
