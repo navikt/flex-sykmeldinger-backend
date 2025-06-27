@@ -13,6 +13,7 @@ enum class TilleggsinfoType {
     NAERINGSDRIVENDE,
     JORDBRUKER,
     ANNET,
+    UTDATERT_FORMAT,
 }
 
 sealed interface Tilleggsinfo {
@@ -30,6 +31,7 @@ sealed interface Tilleggsinfo {
                     TilleggsinfoType.PERMITTERT -> PermittertTilleggsinfo::class
                     TilleggsinfoType.FISKER -> FiskerTilleggsinfo::class
                     TilleggsinfoType.JORDBRUKER -> JordbrukerTilleggsinfo::class
+                    TilleggsinfoType.UTDATERT_FORMAT -> UtdatertFormatTilleggsinfo::class
                 }
             }
     }
@@ -73,6 +75,13 @@ data object NaringsdrivendeTilleggsinfo : Tilleggsinfo {
 
 data object AnnetArbeidssituasjonTilleggsinfo : Tilleggsinfo {
     override val type: TilleggsinfoType = TilleggsinfoType.ANNET
+}
+
+data class UtdatertFormatTilleggsinfo(
+    val arbeidsgiver: Arbeidsgiver? = null,
+    val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
+) : Tilleggsinfo {
+    override val type: TilleggsinfoType = TilleggsinfoType.UTDATERT_FORMAT
 }
 
 data class Arbeidsgiver(

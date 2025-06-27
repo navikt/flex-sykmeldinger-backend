@@ -78,7 +78,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     }
 
     @Nested
-    inner class SendTilArbeidsgiver {
+    inner class StatusSendtTilArbeidsgiver {
         @Test
         fun `Mapper arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
@@ -106,6 +106,34 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "SENDT"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
+                orgnummer shouldBeEqualTo "orgnr"
+                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
+                orgNavn shouldBeEqualTo "orgnavn"
+            }
+        }
+
+        @Test
+        fun `Mapper UtdatertFormatTilleggsinfo til arbeidstaker riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "1",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
+                            brukerSvar = lagArbeidstakerBrukerSvar(),
+                            tilleggsinfo =
+                                lagUtdatertFormatTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnummer = "orgnr",
+                                            juridiskOrgnummer = "juridiskOrgnr",
+                                            orgnavn = "orgnavn",
+                                        ),
+                                ),
+                        ),
+                )
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
                 orgnummer shouldBeEqualTo "orgnr"
                 juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"

@@ -35,6 +35,7 @@ class SykmeldingStatusDtoKonverterer {
         when (tilleggsinfo) {
             is ArbeidstakerTilleggsinfo -> konverterArbeidsgiver(tilleggsinfo.arbeidsgiver)
             is FiskerTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterArbeidsgiver)
+            is UtdatertFormatTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterArbeidsgiver)
             else -> null
         }
 
