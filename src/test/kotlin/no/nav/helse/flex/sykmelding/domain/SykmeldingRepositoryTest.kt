@@ -140,8 +140,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             lagJordbrukerTilleggsinfo(),
             lagAnnetArbeidssituasjonTilleggsinfo(),
         ).map { tilleggsinfo ->
-            DynamicTest.dynamicTest("burde lagre hendelse med tilleggsinfo for ${tilleggsinfo.arbeidssituasjon}") {
-                val sykmeldingId = tilleggsinfo.arbeidssituasjon.name
+            DynamicTest.dynamicTest("burde lagre hendelse med tilleggsinfo for ${tilleggsinfo.type}") {
+                val sykmeldingId = tilleggsinfo.type.name
                 val hendelse =
                     lagSykmeldingHendelse(
                         tilleggsinfo = tilleggsinfo,
