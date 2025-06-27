@@ -43,6 +43,15 @@ fun lagNaringsdrivendeTilleggsinfo(): NaringsdrivendeTilleggsinfo = Naringsdrive
 
 fun lagAnnetArbeidssituasjonTilleggsinfo(): AnnetArbeidssituasjonTilleggsinfo = AnnetArbeidssituasjonTilleggsinfo
 
+fun lagUtdatertFormatTilleggsinfo(
+    arbeidsgiver: Arbeidsgiver? = null,
+    tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
+): UtdatertFormatTilleggsinfo =
+    UtdatertFormatTilleggsinfo(
+        arbeidsgiver = arbeidsgiver,
+        tidligereArbeidsgiver = tidligereArbeidsgiver,
+    )
+
 fun lagArbeidsgiver(
     orgnummer: String = "orgnummer",
     juridiskOrgnummer: String = "juridiskOrgnummer",

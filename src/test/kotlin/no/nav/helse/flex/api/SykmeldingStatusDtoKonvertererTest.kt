@@ -50,7 +50,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
         }
 
     @TestFactory
-    fun `burde konvertere arbeidsgiver for ARBEIDSTAKER`() =
+    fun `burde konvertere arbeidsgiver fra tilleggsinfo type`() =
         mapOf(
             "ARBEIDSTAKER" to (
                 lagArbeidstakerTilleggsinfo(
@@ -87,6 +87,21 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             ),
             "ANNET" to (
                 lagArbeidsledigTilleggsinfo() to null
+            ),
+            "UTDATERT_FORMAT" to (
+                lagUtdatertFormatTilleggsinfo(
+                    arbeidsgiver =
+                        lagArbeidsgiver(
+                            orgnummer = "orgnr",
+                            juridiskOrgnummer = "jurorgnr",
+                            orgnavn = "orgnavn",
+                        ),
+                ) to
+                    ArbeidsgiverStatusDTO(
+                        orgnummer = "orgnr",
+                        juridiskOrgnummer = "jurorgnr",
+                        orgNavn = "orgnavn",
+                    )
             ),
         ).map { (testNavn, testData) ->
             val (tilleggsinfo, forventetArbeidsgiver) = testData
