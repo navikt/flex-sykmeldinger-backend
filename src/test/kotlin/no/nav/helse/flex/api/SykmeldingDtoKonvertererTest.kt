@@ -101,7 +101,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     SykmeldingStatusDTO(
                         statusEvent = "APEN",
                         timestamp = OffsetDateTime.ofInstant(sykmelding.opprettet, ZoneOffset.UTC),
-                        sporsmalOgSvarListe = emptyList(),
                         brukerSvar = null,
                         arbeidsgiver = null,
                     ),
