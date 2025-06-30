@@ -23,6 +23,7 @@ class ArbeidsgiverDetaljerService(
     private val nowFactory: Supplier<Instant>,
 ) {
     private val log = LoggerFactory.getLogger(ArbeidsgiverDetaljerService::class.java)
+
     fun hentArbeidsgiverDetaljerForPerson(
         identer: PersonIdenter,
         periode: Pair<LocalDate, LocalDate>? = null,
@@ -41,6 +42,7 @@ class ArbeidsgiverDetaljerService(
 
     companion object {
         private val log = LoggerFactory.getLogger(ArbeidsgiverDetaljerService::class.java)
+
         fun sammenstillArbeidsgiverDetaljer(
             arbeidsforhold: Iterable<Arbeidsforhold>,
             narmesteLedere: Iterable<NarmesteLeder>,
@@ -54,31 +56,33 @@ class ArbeidsgiverDetaljerService(
             }
 
             // Group by orgnummer to handle duplicates better
-            val duplicateOrgs = gyldigeArbeidsforhold
-                .groupBy { it.orgnummer }
-                .filter { it.value.size > 1 }
-                
+            val duplicateOrgs =
+                gyldigeArbeidsforhold
+                    .groupBy { it.orgnummer }
+                    .filter { it.value.size > 1 }
+
             if (duplicateOrgs.isNotEmpty()) {
                 log.info("Found duplicate arbeidsforhold for orgnummer(s): ${duplicateOrgs.keys.joinToString()}")
             }
-                
-            val gruppertArbeidsforhold = gyldigeArbeidsforhold
-                .groupBy { it.orgnummer }
-                .map { (orgnummer, arbeidsforholdListe) -> 
-                    if (arbeidsforholdListe.size > 1) {
-                        log.debug("Deduplicating ${arbeidsforholdListe.size} arbeidsforhold for orgnummer $orgnummer")
+
+            val gruppertArbeidsforhold =
+                gyldigeArbeidsforhold
+                    .groupBy { it.orgnummer }
+                    .map { (orgnummer, arbeidsforholdListe) ->
+                        if (arbeidsforholdListe.size > 1) {
+                            log.debug("Deduplicating ${arbeidsforholdListe.size} arbeidsforhold for orgnummer $orgnummer")
+                        }
+
+                        // First try to find an active employment relationship
+                        val idag = idagProvider()
+                        val aktivt = arbeidsforholdListe.find { erAktivtArbeidsforhold(it, idag) }
+                        if (aktivt != null) {
+                            return@map aktivt
+                        }
+
+                        // If no active found, take the most recently created
+                        arbeidsforholdListe.maxByOrNull { it.opprettet } ?: arbeidsforholdListe.first()
                     }
-                    
-                    // First try to find an active employment relationship
-                    val idag = idagProvider()
-                    val aktivt = arbeidsforholdListe.find { erAktivtArbeidsforhold(it, idag) }
-                    if (aktivt != null) {
-                        return@map aktivt
-                    }
-                    
-                    // If no active found, take the most recently created
-                    arbeidsforholdListe.maxByOrNull { it.opprettet } ?: arbeidsforholdListe.first()
-                }
 
             return gruppertArbeidsforhold.map { arbeidsforhold ->
                 ArbeidsgiverDetaljer(
