@@ -161,7 +161,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `arbeidstaker burde konverteres riktig med arbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+                    brukerSvarType = BrukerSvarType.ARBEIDSTAKER,
                     arbeidsgiver =
                         ArbeidsgiverStatusKafkaDTO(
                             orgnummer = "orgnummer",
@@ -181,7 +181,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `arbeidstaker burde feile uten arbeidsgiver`() {
             invoking {
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+                    brukerSvarType = BrukerSvarType.ARBEIDSTAKER,
                     arbeidsgiver = null,
                 )
             }.shouldThrow(Exception::class)
@@ -191,7 +191,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `arbeidsledig burde konverteres riktig med tidligereArbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    brukerSvarType = BrukerSvarType.ARBEIDSLEDIG,
                     tidligereArbeidsgiver =
                         TidligereArbeidsgiverKafkaDTO(
                             orgnummer = "orgnummer",
@@ -212,7 +212,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `arbeidsledig burde konverteres riktig uten tidligereArbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    brukerSvarType = BrukerSvarType.ARBEIDSLEDIG,
                     tidligereArbeidsgiver = null,
                 )
             tilleggsinfo.shouldBeInstanceOf<ArbeidsledigTilleggsinfo>().run {
@@ -224,7 +224,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `permittert burde konverteres riktig med tidligereArbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
+                    brukerSvarType = BrukerSvarType.PERMITTERT,
                     tidligereArbeidsgiver =
                         TidligereArbeidsgiverKafkaDTO(
                             orgnummer = "orgnummer",
@@ -245,7 +245,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `permittert burde konverteres riktig uten tidligereArbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.PERMITTERT,
+                    brukerSvarType = BrukerSvarType.PERMITTERT,
                     tidligereArbeidsgiver = null,
                 )
             tilleggsinfo.shouldBeInstanceOf<PermittertTilleggsinfo>().run {
@@ -257,7 +257,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `fisker burde konverteres riktig med arbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.FISKER,
+                    brukerSvarType = BrukerSvarType.FISKER,
                     arbeidsgiver =
                         ArbeidsgiverStatusKafkaDTO(
                             orgnummer = "orgnummer",
@@ -279,7 +279,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `fisker burde konverteres riktig uten arbeidsgiver`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.FISKER,
+                    brukerSvarType = BrukerSvarType.FISKER,
                     arbeidsgiver = null,
                 )
 
@@ -292,7 +292,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `frilanser burde konverteres riktig`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                    brukerSvarType = BrukerSvarType.FRILANSER,
                 )
 
             tilleggsinfo.shouldBeInstanceOf<FrilanserTilleggsinfo>()
@@ -302,7 +302,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `naringsdrivende burde konverteres riktig`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    brukerSvarType = BrukerSvarType.NAERINGSDRIVENDE,
                 )
 
             tilleggsinfo.shouldBeInstanceOf<NaringsdrivendeTilleggsinfo>()
@@ -312,7 +312,7 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `jordbruker burde konverteres riktig`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.JORDBRUKER,
+                    brukerSvarType = BrukerSvarType.JORDBRUKER,
                 )
 
             tilleggsinfo.shouldBeInstanceOf<JordbrukerTilleggsinfo>()
@@ -322,10 +322,57 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         fun `annet arbeidssituasjon burde konverteres riktig`() {
             val tilleggsinfo =
                 sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
-                    arbeidssituasjon = Arbeidssituasjon.ANNET,
+                    brukerSvarType = BrukerSvarType.ANNET,
                 )
 
             tilleggsinfo.shouldBeInstanceOf<AnnetArbeidssituasjonTilleggsinfo>()
+        }
+
+        @Test
+        fun `utdatert format burde konverteres riktig med arbeidsgiver og tidlgiereArbeidsgiver`() {
+            val tilleggsinfo =
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
+                    brukerSvarType = BrukerSvarType.UTDATERT_FORMAT,
+                    arbeidsgiver =
+                        ArbeidsgiverStatusKafkaDTO(
+                            orgnummer = "orgnummer",
+                            juridiskOrgnummer = "juridiskOrgnummer",
+                            orgNavn = "orgNavn",
+                        ),
+                    tidligereArbeidsgiver =
+                        TidligereArbeidsgiverKafkaDTO(
+                            orgnummer = "tidligereOrgnumemr",
+                            orgNavn = "tidligereOrgNavn",
+                            sykmeldingsId = "id",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<UtdatertFormatTilleggsinfo>().run {
+                arbeidsgiver.shouldNotBeNull().run {
+                    orgnummer shouldBeEqualTo "orgnummer"
+                    juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
+                    orgnavn shouldBeEqualTo "orgNavn"
+                }
+                tidligereArbeidsgiver.shouldNotBeNull().run {
+                    orgnummer shouldBeEqualTo "tidligereOrgnumemr"
+                    orgNavn shouldBeEqualTo "tidligereOrgNavn"
+                }
+            }
+        }
+
+        @Test
+        fun `utdatert format burde konverteres riktig uten noe`() {
+            val tilleggsinfo =
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
+                    brukerSvarType = BrukerSvarType.UTDATERT_FORMAT,
+                    arbeidsgiver = null,
+                    tidligereArbeidsgiver = null,
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<UtdatertFormatTilleggsinfo>().run {
+                arbeidsgiver.shouldBeNull()
+                tidligereArbeidsgiver.shouldBeNull()
+            }
         }
     }
 }

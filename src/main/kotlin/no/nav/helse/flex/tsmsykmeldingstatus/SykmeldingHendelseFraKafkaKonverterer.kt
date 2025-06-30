@@ -37,7 +37,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
         val tilleggsinfo =
             brukerSvar?.let {
                 konverterTilTilleggsinfo(
-                    arbeidssituasjon = it.arbeidssituasjon.svar,
+                    brukerSvarType = it.type,
                     arbeidsgiver = status.arbeidsgiver,
                     tidligereArbeidsgiver = status.tidligereArbeidsgiver,
                 )
@@ -72,33 +72,38 @@ class SykmeldingHendelseFraKafkaKonverterer(
         }
 
     internal fun konverterTilTilleggsinfo(
-        arbeidssituasjon: Arbeidssituasjon,
+        brukerSvarType: BrukerSvarType,
         arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
         tidligereArbeidsgiver: TidligereArbeidsgiverKafkaDTO? = null,
     ): Tilleggsinfo =
-        when (arbeidssituasjon) {
-            Arbeidssituasjon.ARBEIDSTAKER -> {
+        when (brukerSvarType) {
+            BrukerSvarType.ARBEIDSTAKER -> {
                 requireNotNull(arbeidsgiver) { "Arbeidsgiver er påkrevd for arbeidstaker" }
                 ArbeidstakerTilleggsinfo(arbeidsgiver = konverterArbeidsgiver(arbeidsgiver))
             }
-            Arbeidssituasjon.ARBEIDSLEDIG -> {
+            BrukerSvarType.ARBEIDSLEDIG -> {
                 ArbeidsledigTilleggsinfo(
                     tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
                 )
             }
-            Arbeidssituasjon.PERMITTERT -> {
+            BrukerSvarType.PERMITTERT -> {
                 PermittertTilleggsinfo(
                     tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
                 )
             }
-            Arbeidssituasjon.FISKER ->
+            BrukerSvarType.FISKER ->
                 FiskerTilleggsinfo(
                     arbeidsgiver = arbeidsgiver?.let { konverterArbeidsgiver(it) },
                 )
-            Arbeidssituasjon.FRILANSER -> FrilanserTilleggsinfo
-            Arbeidssituasjon.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo
-            Arbeidssituasjon.JORDBRUKER -> JordbrukerTilleggsinfo
-            Arbeidssituasjon.ANNET -> AnnetArbeidssituasjonTilleggsinfo
+            BrukerSvarType.FRILANSER -> FrilanserTilleggsinfo
+            BrukerSvarType.NAERINGSDRIVENDE -> NaringsdrivendeTilleggsinfo
+            BrukerSvarType.JORDBRUKER -> JordbrukerTilleggsinfo
+            BrukerSvarType.ANNET -> AnnetArbeidssituasjonTilleggsinfo
+            BrukerSvarType.UTDATERT_FORMAT ->
+                UtdatertFormatTilleggsinfo(
+                    arbeidsgiver = arbeidsgiver?.let { konverterArbeidsgiver(it) },
+                    tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
+                )
         }
 
     internal fun konverterArbeidsgiver(arbeidsgiver: ArbeidsgiverStatusKafkaDTO): Arbeidsgiver {
