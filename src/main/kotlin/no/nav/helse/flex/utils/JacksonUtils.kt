@@ -3,6 +3,7 @@ package no.nav.helse.flex.utils
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlin.reflect.KClass
@@ -33,7 +34,19 @@ class ClassSwitchDeserializer<T : Any>(
         ctxt: DeserializationContext,
     ): T {
         val node: ObjectNode = p.codec.readTree(p)
-        val type = node.get(typeField).asText()
+        val typeNode: JsonNode? = node.get(typeField)
+
+        val type: String =
+            if (typeNode != null && !typeNode.isNull) {
+                typeNode.asText()
+            } else {
+                throw IllegalArgumentException("JSON is missing the required '$typeField' field or its value is null.")
+            }
+
+        if (type.isEmpty()) {
+            throw IllegalArgumentException("The '$typeField' field in JSON is empty.")
+        }
+
         val clazz = getClass(type)
         return p.codec.treeToValue(node, clazz.java)
     }
