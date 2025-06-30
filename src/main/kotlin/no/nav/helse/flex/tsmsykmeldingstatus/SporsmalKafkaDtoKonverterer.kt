@@ -8,8 +8,8 @@ import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 
-object StatusSporsmalListeKonverterer {
-    private val DEFAULT_BRUKER_SVAR =
+object SporsmalKafkaDtoKonverterer {
+    private val DEFAULT_BRUKER_SVAR_KAFKA_DTO =
         BrukerSvarKafkaDTO(
             erOpplysningeneRiktige = lagErOpplysningeneRiktigeSporsmal(svar = JaEllerNei.JA),
             arbeidssituasjon =
@@ -28,39 +28,41 @@ object StatusSporsmalListeKonverterer {
             fisker = null,
         )
 
-    fun konverterSporsmalTilBrukerSvar(
+    fun tilUtdatertFormatBrukerSvar(
         sporsmal: List<SporsmalKafkaDTO>,
         hendelseStatus: HendelseStatus = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-        arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
     ): UtdatertFormatBrukerSvar? {
-        val brukerSvarKafkaDTO = konverterSporsmalTilBrukerSvarKafkaDTO(sporsmal, hendelseStatus, arbeidsgiver)
-        if (brukerSvarKafkaDTO == null) {
-            return null
+        val brukerSvarKafkaDTO = konverterSporsmalTilBrukerSvarKafkaDTO(sporsmal, hendelseStatus)
+        return if (brukerSvarKafkaDTO == null) {
+            null
         } else {
-            val alleBrukerSvar = BrukerSvarKafkaDtoKonverterer.tilAlleBrukerSvar(brukerSvarKafkaDTO)
-            return UtdatertFormatBrukerSvar(
-                erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
-                arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
-                arbeidsgiverOrgnummer = alleBrukerSvar.arbeidsgiverOrgnummer,
-                riktigNarmesteLeder = alleBrukerSvar.riktigNarmesteLeder,
-                harEgenmeldingsdager = alleBrukerSvar.harEgenmeldingsdager,
-                egenmeldingsdager = alleBrukerSvar.egenmeldingsdager,
-                harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
-                egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
-                harForsikring = alleBrukerSvar.harForsikring,
-                uriktigeOpplysninger = alleBrukerSvar.uriktigeOpplysninger,
-            )
+            konverterBrukerSvarKafkaDtoTilUtdatertFormatBrukerSvar(brukerSvarKafkaDTO)
         }
     }
 
-    fun konverterSporsmalTilBrukerSvarKafkaDTO(
+    internal fun konverterBrukerSvarKafkaDtoTilUtdatertFormatBrukerSvar(brukerSvarKafkaDTO: BrukerSvarKafkaDTO): UtdatertFormatBrukerSvar {
+        val alleBrukerSvar = BrukerSvarKafkaDtoKonverterer.tilAlleBrukerSvar(brukerSvarKafkaDTO)
+        return UtdatertFormatBrukerSvar(
+            erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
+            arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
+            arbeidsgiverOrgnummer = alleBrukerSvar.arbeidsgiverOrgnummer,
+            riktigNarmesteLeder = alleBrukerSvar.riktigNarmesteLeder,
+            harEgenmeldingsdager = alleBrukerSvar.harEgenmeldingsdager,
+            egenmeldingsdager = alleBrukerSvar.egenmeldingsdager,
+            harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
+            egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
+            harForsikring = alleBrukerSvar.harForsikring,
+            uriktigeOpplysninger = alleBrukerSvar.uriktigeOpplysninger,
+        )
+    }
+
+    internal fun konverterSporsmalTilBrukerSvarKafkaDTO(
         sporsmal: List<SporsmalKafkaDTO>,
         hendelseStatus: HendelseStatus = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-        arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
     ): BrukerSvarKafkaDTO? {
         if (sporsmal.isEmpty()) {
             return if (hendelseStatus in setOf(HendelseStatus.SENDT_TIL_ARBEIDSGIVER, HendelseStatus.SENDT_TIL_NAV)) {
-                DEFAULT_BRUKER_SVAR
+                DEFAULT_BRUKER_SVAR_KAFKA_DTO
             } else {
                 null
             }
@@ -72,10 +74,7 @@ object StatusSporsmalListeKonverterer {
             arbeidssituasjon =
                 konverterArbeidssituasjonTilArbeidssituasjon(sporsmal)
                     ?: throw IllegalArgumentException("Arbeidssituasjon er påkrevd i bruker svar, men ikke funnet i sporsmal"),
-            arbeidsgiverOrgnummer =
-                arbeidsgiver?.let {
-                    lagArbeidsgiverOrgnummerSporsmal(svar = it.orgnummer)
-                },
+            arbeidsgiverOrgnummer = null,
             riktigNarmesteLeder = konverterNyNarmesteLederTilRiktigNarmesteLeder(sporsmal),
             harBruktEgenmelding = konverterFravaerTilHarBruktEgenmelding(sporsmal),
             egenmeldingsperioder = konverterPerioderTilEgenmeldingsperioder(sporsmal),
@@ -89,12 +88,6 @@ object StatusSporsmalListeKonverterer {
     internal fun lagErOpplysningeneRiktigeSporsmal(svar: JaEllerNei): FormSporsmalSvar<JaEllerNei> =
         FormSporsmalSvar(
             sporsmaltekst = "Stemmer opplysningene?",
-            svar = svar,
-        )
-
-    internal fun lagArbeidsgiverOrgnummerSporsmal(svar: String): FormSporsmalSvar<String> =
-        FormSporsmalSvar(
-            sporsmaltekst = "Velg arbeidsgiver",
             svar = svar,
         )
 

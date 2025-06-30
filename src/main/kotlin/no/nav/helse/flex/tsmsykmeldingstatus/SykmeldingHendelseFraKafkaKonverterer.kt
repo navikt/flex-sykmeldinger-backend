@@ -22,10 +22,9 @@ class SykmeldingHendelseFraKafkaKonverterer(
             when {
                 status.brukerSvar != null -> BrukerSvarKafkaDtoKonverterer.tilBrukerSvar(status.brukerSvar)
                 status.sporsmals != null ->
-                    StatusSporsmalListeKonverterer.konverterSporsmalTilBrukerSvar(
+                    SporsmalKafkaDtoKonverterer.tilUtdatertFormatBrukerSvar(
                         sporsmal = status.sporsmals,
                         hendelseStatus = hendelseStatus,
-                        arbeidsgiver = status.arbeidsgiver,
                     )
                 else -> null
             }
