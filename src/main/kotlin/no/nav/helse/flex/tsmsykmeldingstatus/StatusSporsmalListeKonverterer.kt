@@ -2,6 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
+import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.objectMapper
@@ -28,6 +29,31 @@ object StatusSporsmalListeKonverterer {
         )
 
     fun konverterSporsmalTilBrukerSvar(
+        sporsmal: List<SporsmalKafkaDTO>,
+        hendelseStatus: HendelseStatus = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+        arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
+    ): UtdatertFormatBrukerSvar? {
+        val brukerSvarKafkaDTO = konverterSporsmalTilBrukerSvarKafkaDTO(sporsmal, hendelseStatus, arbeidsgiver)
+        if (brukerSvarKafkaDTO == null) {
+            return null
+        } else {
+            val alleBrukerSvar = BrukerSvarKafkaDtoKonverterer.tilAlleBrukerSvar(brukerSvarKafkaDTO)
+            return UtdatertFormatBrukerSvar(
+                erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
+                arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
+                arbeidsgiverOrgnummer = alleBrukerSvar.arbeidsgiverOrgnummer,
+                riktigNarmesteLeder = alleBrukerSvar.riktigNarmesteLeder,
+                harEgenmeldingsdager = alleBrukerSvar.harEgenmeldingsdager,
+                egenmeldingsdager = alleBrukerSvar.egenmeldingsdager,
+                harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
+                egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
+                harForsikring = alleBrukerSvar.harForsikring,
+                uriktigeOpplysninger = alleBrukerSvar.uriktigeOpplysninger,
+            )
+        }
+    }
+
+    fun konverterSporsmalTilBrukerSvarKafkaDTO(
         sporsmal: List<SporsmalKafkaDTO>,
         hendelseStatus: HendelseStatus = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
         arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
