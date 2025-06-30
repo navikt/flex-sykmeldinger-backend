@@ -4,8 +4,9 @@ import no.nav.helse.flex.config.LeaderElection
 import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessor
 import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
-// @Component
+@Component
 class ImporterHistoriskeStatuserJobb(
     private val historiskeStatuserProsessor: HistoriskeStatuserProsessor,
     private val leaderElection: LeaderElection,
