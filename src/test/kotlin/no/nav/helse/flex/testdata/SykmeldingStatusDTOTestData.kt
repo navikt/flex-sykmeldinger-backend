@@ -8,14 +8,12 @@ fun lagSykmeldingStatusDTO(
     statusEvent: String = "APEN",
     timestamp: OffsetDateTime = OffsetDateTime.now(),
     arbeidsgiver: ArbeidsgiverStatusDTO? = null,
-    sporsmalOgSvarListe: List<SporsmalDTO> = emptyList(),
     brukerSvar: SykmeldingSporsmalSvarDto? = null,
 ): SykmeldingStatusDTO =
     SykmeldingStatusDTO(
         statusEvent = statusEvent,
         timestamp = timestamp,
         arbeidsgiver = arbeidsgiver,
-        sporsmalOgSvarListe = sporsmalOgSvarListe,
         brukerSvar = brukerSvar,
     )
 
