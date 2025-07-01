@@ -21,9 +21,9 @@ data class ArbeidsforholdOversikt(
     val startdato: LocalDate,
     val sluttdato: LocalDate? = null,
     val yrke: Kodeverksentitet,
-    val avtaltStillingsprosent: Int,
-    val permisjonsprosent: Int? = null,
-    val permitteringsprosent: Int? = null,
+    val avtaltStillingsprosent: Double,
+    val permisjonsprosent: Double? = null,
+    val permitteringsprosent: Double? = null,
 )
 
 data class Kodeverksentitet(

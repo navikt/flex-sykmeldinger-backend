@@ -282,8 +282,8 @@ class EksternArbeidsforholdHenterTest {
                     kode = "1231119",
                     beskrivelse = "KONTORLEDER",
                 ),
-            avtaltStillingsprosent = 100,
-            permisjonsprosent = 50,
-            permitteringsprosent = 50,
+            avtaltStillingsprosent = 100.0,
+            permisjonsprosent = 50.0,
+            permitteringsprosent = 50.0,
         )
 }
