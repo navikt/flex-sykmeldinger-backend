@@ -20,10 +20,6 @@ data class ArbeidsforholdOversikt(
     val opplysningspliktig: Opplysningspliktig,
     val startdato: LocalDate,
     val sluttdato: LocalDate? = null,
-    val yrke: Kodeverksentitet,
-    val avtaltStillingsprosent: Double,
-    val permisjonsprosent: Double? = null,
-    val permitteringsprosent: Double? = null,
 )
 
 data class Kodeverksentitet(
