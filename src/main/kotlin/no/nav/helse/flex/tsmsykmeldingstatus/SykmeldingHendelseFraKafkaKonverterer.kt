@@ -101,7 +101,7 @@ class SykmeldingHendelseFraKafkaKonverterer(
             BrukerSvarType.ANNET -> AnnetArbeidssituasjonTilleggsinfo
             BrukerSvarType.UTDATERT_FORMAT ->
                 UtdatertFormatTilleggsinfo(
-                    arbeidsgiver = arbeidsgiver?.let { konverterArbeidsgiver(it) },
+                    arbeidsgiver = arbeidsgiver?.let { konverterArbeidsgiverTilUtdatertFormatArbeidsgiver(it) },
                     tidligereArbeidsgiver = tidligereArbeidsgiver?.let { konverterTidligereArbeidsgiver(it) },
                 )
         }
@@ -118,6 +118,13 @@ class SykmeldingHendelseFraKafkaKonverterer(
             narmesteLeder = null,
         )
     }
+
+    internal fun konverterArbeidsgiverTilUtdatertFormatArbeidsgiver(arbeidsgiver: ArbeidsgiverStatusKafkaDTO): UtdatertFormatArbeidsgiver =
+        UtdatertFormatArbeidsgiver(
+            orgnummer = arbeidsgiver.orgnummer,
+            juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
+            orgnavn = arbeidsgiver.orgNavn,
+        )
 
     internal fun konverterTidligereArbeidsgiver(tidligereArbeidsgiver: TidligereArbeidsgiverKafkaDTO): TidligereArbeidsgiver {
         requireNotNull(tidligereArbeidsgiver.orgnummer) { "Tidligere arbeidsgiver orgnummer er påkrevd" }

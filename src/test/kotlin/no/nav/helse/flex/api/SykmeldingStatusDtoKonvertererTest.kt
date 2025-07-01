@@ -91,7 +91,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             "UTDATERT_FORMAT" to (
                 lagUtdatertFormatTilleggsinfo(
                     arbeidsgiver =
-                        lagArbeidsgiver(
+                        UtdatertFormatArbeidsgiver(
                             orgnummer = "orgnr",
                             juridiskOrgnummer = "jurorgnr",
                             orgnavn = "orgnavn",

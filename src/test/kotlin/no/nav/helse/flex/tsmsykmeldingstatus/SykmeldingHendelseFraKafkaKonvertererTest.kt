@@ -374,5 +374,25 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
                 tidligereArbeidsgiver.shouldBeNull()
             }
         }
+
+        @Test
+        fun `utdatert format burde konvertere arbeidsgiver uten juridiskOrgnummer`() {
+            val tilleggsinfo =
+                sykmeldingHendelseFraKafkaKonverterer.konverterTilTilleggsinfo(
+                    brukerSvarType = BrukerSvarType.UTDATERT_FORMAT,
+                    arbeidsgiver =
+                        ArbeidsgiverStatusKafkaDTO(
+                            orgnummer = "orgnummer",
+                            juridiskOrgnummer = null,
+                            orgNavn = "orgNavn",
+                        ),
+                )
+
+            tilleggsinfo.shouldBeInstanceOf<UtdatertFormatTilleggsinfo>().run {
+                arbeidsgiver.shouldNotBeNull().run {
+                    juridiskOrgnummer.shouldBeNull()
+                }
+            }
+        }
     }
 }
