@@ -24,7 +24,18 @@ class LesArbeidsforholdTilAlleMedSykmelding(
 
     @Scheduled(fixedDelay = 1, initialDelay = 1000 * 120)
     fun run() {
-        if (!leaderElection.isLeader()) {
+        val erLeder =
+            try {
+                leaderElection.isLeader()
+            } catch (e: Exception) {
+                log.error(
+                    "Feil ved sjekk av leder i LesArbeidsforholdTilAlleMedSykmelding",
+                    e,
+                )
+                false
+            }
+
+        if (!erLeder) {
             log.info("LesArbeidsforholdTilAlleMedSykmelding er ikke leder, hopper over kjøring")
             Thread.sleep(10_000)
             return
@@ -56,6 +67,7 @@ class LesArbeidsforholdTilAlleMedSykmelding(
                     message = "LesArbeidsforholdTilAlleMedSykmelding feilet, prøver igjen",
                     secureThrowable = ex,
                 )
+                Thread.sleep(1000)
             }
         }
     }
