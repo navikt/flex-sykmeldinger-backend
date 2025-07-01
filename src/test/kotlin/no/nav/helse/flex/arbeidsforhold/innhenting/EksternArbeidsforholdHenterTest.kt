@@ -277,13 +277,5 @@ class EksternArbeidsforholdHenterTest {
                 ),
             startdato = startdato,
             sluttdato = sluttdato,
-            yrke =
-                Kodeverksentitet(
-                    kode = "1231119",
-                    beskrivelse = "KONTORLEDER",
-                ),
-            avtaltStillingsprosent = 100.0,
-            permisjonsprosent = 50.0,
-            permitteringsprosent = 50.0,
         )
 }

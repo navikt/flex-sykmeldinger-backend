@@ -17,7 +17,7 @@ class ImporterHistoriskeStatuserJobb(
     private var batchAntallProsessert: Int = 0
     private var batchAntallLagtTil: Int = 0
 
-    @Scheduled(fixedDelay = 1, initialDelay = 10_000)
+    @Scheduled(fixedDelay = 1, initialDelay = 1000 * 120)
     fun run() {
         if (!leaderElection.isLeader()) {
             log.info("ImporterHistoriskeStatuserJobb er ikke leder, hopper over kjøring")
