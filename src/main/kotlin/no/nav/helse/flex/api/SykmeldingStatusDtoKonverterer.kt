@@ -39,11 +39,18 @@ class SykmeldingStatusDtoKonverterer {
         when (tilleggsinfo) {
             is ArbeidstakerTilleggsinfo -> konverterArbeidsgiver(tilleggsinfo.arbeidsgiver)
             is FiskerTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterArbeidsgiver)
-            is UtdatertFormatTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterArbeidsgiver)
+            is UtdatertFormatTilleggsinfo -> tilleggsinfo.arbeidsgiver?.let(::konverterUtdatertFormatArbeidsgiver)
             else -> null
         }
 
-    internal fun konverterArbeidsgiver(arbeidsgiver: Arbeidsgiver): ArbeidsgiverStatusDTO =
+    private fun konverterArbeidsgiver(arbeidsgiver: Arbeidsgiver): ArbeidsgiverStatusDTO =
+        ArbeidsgiverStatusDTO(
+            orgnummer = arbeidsgiver.orgnummer,
+            juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,
+            orgNavn = arbeidsgiver.orgnavn,
+        )
+
+    private fun konverterUtdatertFormatArbeidsgiver(arbeidsgiver: UtdatertFormatArbeidsgiver): ArbeidsgiverStatusDTO =
         ArbeidsgiverStatusDTO(
             orgnummer = arbeidsgiver.orgnummer,
             juridiskOrgnummer = arbeidsgiver.juridiskOrgnummer,

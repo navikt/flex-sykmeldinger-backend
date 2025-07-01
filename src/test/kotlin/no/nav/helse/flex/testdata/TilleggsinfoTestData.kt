@@ -44,7 +44,7 @@ fun lagNaringsdrivendeTilleggsinfo(): NaringsdrivendeTilleggsinfo = Naringsdrive
 fun lagAnnetArbeidssituasjonTilleggsinfo(): AnnetArbeidssituasjonTilleggsinfo = AnnetArbeidssituasjonTilleggsinfo
 
 fun lagUtdatertFormatTilleggsinfo(
-    arbeidsgiver: Arbeidsgiver? = null,
+    arbeidsgiver: UtdatertFormatArbeidsgiver? = null,
     tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ): UtdatertFormatTilleggsinfo =
     UtdatertFormatTilleggsinfo(

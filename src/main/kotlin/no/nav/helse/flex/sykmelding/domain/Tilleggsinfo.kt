@@ -78,11 +78,17 @@ data object AnnetArbeidssituasjonTilleggsinfo : Tilleggsinfo {
 }
 
 data class UtdatertFormatTilleggsinfo(
-    val arbeidsgiver: Arbeidsgiver? = null,
+    val arbeidsgiver: UtdatertFormatArbeidsgiver? = null,
     val tidligereArbeidsgiver: TidligereArbeidsgiver? = null,
 ) : Tilleggsinfo {
     override val type: TilleggsinfoType = TilleggsinfoType.UTDATERT_FORMAT
 }
+
+data class UtdatertFormatArbeidsgiver(
+    val orgnummer: String,
+    val juridiskOrgnummer: String?,
+    val orgnavn: String,
+)
 
 data class Arbeidsgiver(
     val orgnummer: String,
