@@ -22,7 +22,7 @@ class LesArbeidsforholdTilAlleMedSykmelding(
     private var exceptionCount: Int = 0
     private var batchAntallProsessert: Int = 0
 
-    @Scheduled(fixedDelay = 1, initialDelay = 10_000)
+    @Scheduled(fixedDelay = 1, initialDelay = 1000 * 120)
     fun run() {
         if (!leaderElection.isLeader()) {
             log.info("LesArbeidsforholdTilAlleMedSykmelding er ikke leder, hopper over kjøring")
