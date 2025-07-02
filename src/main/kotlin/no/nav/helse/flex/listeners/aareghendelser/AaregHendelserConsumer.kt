@@ -44,28 +44,17 @@ class AaregHendelserConsumer(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        val timeMs =
-            measureTimeMillis {
-                val rawRecords = consumerRecords.map(RawHendelse::fraConsumerRecord)
-                try {
-                    handterHendelser(rawRecords)
-                } catch (e: Exception) {
-                    val message = "Klarte ikke prosessere aareg hendelser. Dette vil bli retryet. Keys: ${rawRecords.map { it.key }}"
-                    log.errorSecure(
-                        message,
-                        secureMessage = e.message ?: "",
-                        secureThrowable = e,
-                    )
-                    throw RuntimeException(message)
-                }
-            }
-        val totalByteSize = consumerRecords.sumOf { it.serializedValueSize() }
-        val totalBytesThreshold = 1000 * consumerRecords.count()
-        if (timeMs >= 10_000 || totalByteSize >= totalBytesThreshold) {
-            log.warn(
-                "Unormal prosessering av Aareg hendelser. Antall: ${consumerRecords.count()}" +
-                    ", tid: $timeMs ms, totalByteSize: $totalByteSize bytes",
+        val rawRecords = consumerRecords.map(RawHendelse::fraConsumerRecord)
+        try {
+            handterHendelser(rawRecords)
+        } catch (e: Exception) {
+            val message = "Klarte ikke prosessere aareg hendelser. Dette vil bli retryet. Keys: ${rawRecords.map { it.key }}"
+            log.errorSecure(
+                message,
+                secureMessage = e.message ?: "",
+                secureThrowable = e,
             )
+            throw RuntimeException(message)
         }
     }
 
@@ -97,8 +86,12 @@ class AaregHendelserConsumer(
             }
 
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
-        for (fnr in personerFnr) {
-            synkroniserForPerson(fnr)
+        val timeMs = measureTimeMillis { personerFnr.forEach { synkroniserForPerson(it) } }
+
+        if (timeMs >= 2000 * personerFnr.size) {
+            log.warn(
+                "Tok lang tid for å synkronisere arbeidsforhold for ${personerFnr.size} unike fnr, tid: $timeMs ms",
+            )
         }
     }
 
