@@ -110,6 +110,11 @@ class SykmeldingController(
 
         val sykmeldingPeriode = sykmelding.fom to sykmelding.tom
         val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(identer, sykmeldingPeriode)
+        logger.info(
+            "Arbeidsgiverdetaljer: ${com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
+                arbeidsgiverDetaljer,
+            )}",
+        )
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(
