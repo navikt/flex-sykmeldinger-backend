@@ -1,5 +1,6 @@
 package no.nav.helse.flex.producers
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
@@ -21,6 +22,7 @@ class SykmeldingStatusProducerKafka(
 ) : SykmeldingStatusProducer {
     private val log = logger()
 
+    @WithSpan
     override fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean {
         if (environmentToggles.isProduction()) {
             log.warn("Sykmeldingstatus producer er skrudd av i prod. SykmeldingId: ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId}")

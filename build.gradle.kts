@@ -28,6 +28,8 @@ val kluentVersion = "1.73"
 val sykepengesoknadKafkaVersion = "2025.05.22-10.53-bffe1281"
 val commonsTextVersion = "1.13.1"
 val mockitoKotlinVersion = "2.2.0"
+val opentelemetryApiVersion = "1.48.0"
+val opentelemetryInstrumentationVersion = "2.14.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -50,6 +52,8 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
+    implementation("io.opentelemetry:opentelemetry-api:$opentelemetryApiVersion")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryInstrumentationVersion")
 
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))

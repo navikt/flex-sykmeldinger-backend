@@ -1,6 +1,7 @@
 package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
@@ -19,6 +20,7 @@ class SykmeldingListener(
 ) {
     val log = logger()
 
+    @WithSpan
     @KafkaListener(
         topics = [SYKMELDING_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
