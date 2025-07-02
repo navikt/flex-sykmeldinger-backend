@@ -110,8 +110,7 @@ class SykmeldingController(
 
         val sykmeldingPeriode = sykmelding.fom to sykmelding.tom
         val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(identer, sykmeldingPeriode)
-        logger.info("Arbeidsgiverdetaljer: $arbeidsgiverDetaljer")
-
+        logger.info("Arbeidsgiverdetaljer")
 
         return ResponseEntity.ok(
             BrukerinformasjonDTO(
