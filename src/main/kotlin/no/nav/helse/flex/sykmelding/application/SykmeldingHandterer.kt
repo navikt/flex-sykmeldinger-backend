@@ -31,7 +31,7 @@ class SykmeldingHandterer(
         return sykmeldinger
     }
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun sendSykmelding(
         sykmeldingId: String,
         identer: PersonIdenter,
@@ -86,7 +86,7 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun avbrytSykmelding(
         sykmeldingId: String,
         identer: PersonIdenter,
@@ -100,7 +100,7 @@ class SykmeldingHandterer(
         return lagretSykmelding
     }
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun bekreftAvvistSykmelding(
         sykmeldingId: String,
         identer: PersonIdenter,

@@ -35,7 +35,7 @@ class SykmeldingRepository(
     private val sykmeldingDbRepository: SykmeldingDbRepository,
     private val sykmeldingHendelseDbRepository: SykmeldingHendelseDbRepository,
 ) : ISykmeldingRepository {
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     override fun save(sykmelding: Sykmelding): Sykmelding {
         val hendelser = sykmelding.hendelser
 

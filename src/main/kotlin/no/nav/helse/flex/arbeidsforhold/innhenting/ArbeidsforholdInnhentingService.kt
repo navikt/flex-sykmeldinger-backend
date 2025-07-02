@@ -20,7 +20,7 @@ class ArbeidsforholdInnhentingService(
 ) {
     private val log = logger()
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
         val alleIdenter =

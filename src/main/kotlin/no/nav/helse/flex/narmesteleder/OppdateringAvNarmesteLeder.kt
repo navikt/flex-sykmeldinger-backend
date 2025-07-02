@@ -21,7 +21,7 @@ class OppdateringAvNarmesteLeder(
 ) {
     val log = logger()
 
-    @Transactional
+    @Transactional(rollbackFor = [Exception::class])
     fun behandleMeldingFraKafka(meldingString: String) {
         val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
