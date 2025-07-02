@@ -6,11 +6,16 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+import org.slf4j.LoggerFactory
+
 object TidligereArbeidsgivereHandterer {
+    private val logger = LoggerFactory.getLogger(TidligereArbeidsgivereHandterer::class.java)
+
     fun finnTidligereArbeidsgivere(
         alleSykmeldinger: List<Sykmelding>,
         gjeldendeSykmeldingId: String,
     ): List<TidligereArbeidsgiver> {
+        logger.info("finnTidligereArbeidsgivere: alleSykmeldinger=${alleSykmeldinger}, gjeldendeSykmeldingId=$gjeldendeSykmeldingId")
         val gjeldendeSykmelding =
             alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
                 ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")

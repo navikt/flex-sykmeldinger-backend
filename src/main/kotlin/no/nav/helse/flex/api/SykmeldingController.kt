@@ -62,6 +62,7 @@ class SykmeldingController(
 
         val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
         val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
+        logger.info("Hentet ${tidligereArbeidsgivere.size} tidligere arbeidsgivere for sykmeldingId: $sykmeldingId")
 
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
