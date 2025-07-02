@@ -1,5 +1,6 @@
 package no.nav.helse.flex.jobber
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.LeaderElection
 import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessor
 import no.nav.helse.flex.utils.logger
@@ -17,6 +18,7 @@ class ImporterHistoriskeStatuserJobb(
     private var batchAntallProsessert: Int = 0
     private var batchAntallLagtTil: Int = 0
 
+    @WithSpan
     @Scheduled(fixedDelay = 1, initialDelay = 1000 * 120)
     fun run() {
         val erLeder =
