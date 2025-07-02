@@ -3,6 +3,7 @@ package no.nav.helse.flex.listeners.aareghendelser
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.utils.errorSecure
@@ -36,6 +37,7 @@ class AaregHendelserConsumer(
 ) {
     val log = logger()
 
+    @WithSpan
     @KafkaListener(
         topics = ["\${AAREG_HENDELSE_TOPIC}"],
         containerFactory = "aivenKafkaBatchListenerContainerFactory",
