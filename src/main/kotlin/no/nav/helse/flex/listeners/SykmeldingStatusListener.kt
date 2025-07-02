@@ -31,7 +31,7 @@ class SykmeldingStatusListener(
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw RuntimeException("Feil ved behandling av sykmelding status på kafka, meldingKey: ${cr.key()}")
         }
     }
