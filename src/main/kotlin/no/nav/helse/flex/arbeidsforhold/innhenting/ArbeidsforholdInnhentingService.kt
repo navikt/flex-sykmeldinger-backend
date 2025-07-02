@@ -11,28 +11,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 import java.util.function.Supplier
 
-data class SynkroniserteArbeidsforhold(
-    val skalOpprettes: List<Arbeidsforhold> = emptyList(),
-    val skalOppdateres: List<Arbeidsforhold> = emptyList(),
-    val skalSlettes: List<Arbeidsforhold> = emptyList(),
-) {
-    fun toLogString(): String {
-        val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
-        val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
-        val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
-        return "SynkroniserteArbeidsforhold(" +
-            "antallOpprettet=${opprettetIds.count()}, " +
-            "antallOppdatert=${oppdatertIds.count()}, " +
-            "antallSlettet=${slettetIds.count()}, " +
-            "opprettet navArbeidsforholdId: $opprettetIds, " +
-            "oppdatert navArbeidsforholdId: $oppdatertIds, " +
-            "slettet navArbeidsforholdId: $slettetIds" +
-            ")"
-    }
-}
-
 @Service
-@Transactional
 class ArbeidsforholdInnhentingService(
     private val eksternArbeidsforholdHenter: EksternArbeidsforholdHenter,
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
@@ -41,6 +20,7 @@ class ArbeidsforholdInnhentingService(
 ) {
     private val log = logger()
 
+    @Transactional(rollbackFor = [Exception::class])
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
         val alleIdenter =
@@ -144,5 +124,25 @@ class ArbeidsforholdInnhentingService(
             val fireMndSiden = LocalDate.ofInstant(now, UTC).minusMonths(4)
             return sluttDato == null || sluttDato.isAfter(fireMndSiden)
         }
+    }
+}
+
+data class SynkroniserteArbeidsforhold(
+    val skalOpprettes: List<Arbeidsforhold> = emptyList(),
+    val skalOppdateres: List<Arbeidsforhold> = emptyList(),
+    val skalSlettes: List<Arbeidsforhold> = emptyList(),
+) {
+    fun toLogString(): String {
+        val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
+        val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
+        val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
+        return "SynkroniserteArbeidsforhold(" +
+            "antallOpprettet=${opprettetIds.count()}, " +
+            "antallOppdatert=${oppdatertIds.count()}, " +
+            "antallSlettet=${slettetIds.count()}, " +
+            "opprettet navArbeidsforholdId: $opprettetIds, " +
+            "oppdatert navArbeidsforholdId: $oppdatertIds, " +
+            "slettet navArbeidsforholdId: $slettetIds" +
+            ")"
     }
 }

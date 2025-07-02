@@ -10,6 +10,7 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Component
@@ -20,6 +21,7 @@ class OppdateringAvNarmesteLeder(
 ) {
     val log = logger()
 
+    @Transactional(rollbackFor = [Exception::class])
     fun behandleMeldingFraKafka(meldingString: String) {
         val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
@@ -28,14 +30,14 @@ class OppdateringAvNarmesteLeder(
             if (environmentToggles.isDevelopment()) {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
-                } catch (e: FunctionalPdlError) {
+                } catch (_: FunctionalPdlError) {
                     log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.narmesteLederFnr} i PDL. Bruker 'Navn Navnesen'.")
                     "Navn Navnesen"
                 }
             } else {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
-                } catch (e: PdlManglerNavnError) {
+                } catch (_: PdlManglerNavnError) {
                     log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL'.")
                     null
                 }

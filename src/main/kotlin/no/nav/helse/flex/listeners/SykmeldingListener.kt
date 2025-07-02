@@ -35,25 +35,25 @@ class SykmeldingListener(
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             throw RuntimeException("Feil ved behandling av sykmelding på kafka. Melding key: ${cr.key()}")
         }
     }
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         val sykmeldingId = cr.key()
-        val serialisertHendelse: String? = cr.value()
+        val serialisertSykmelding: String? = cr.value()
 
-        if (burdeIgnorereSykmelding(serialisertHendelse, sykmeldingId = sykmeldingId)) {
+        if (burdeIgnorereSykmelding(serialisertSykmelding, sykmeldingId = sykmeldingId)) {
             return
         }
 
         val sykmeldingRecord: SykmeldingKafkaRecord? =
-            if (serialisertHendelse == null) {
+            if (serialisertSykmelding == null) {
                 null
             } else {
                 try {
-                    objectMapper.readValue(serialisertHendelse)
+                    objectMapper.readValue(serialisertSykmelding)
                 } catch (e: Exception) {
                     log.errorSecure(
                         "Feil sykmelding format. Melding key: ${cr.key()}",
