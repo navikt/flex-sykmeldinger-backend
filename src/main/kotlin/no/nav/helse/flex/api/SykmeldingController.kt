@@ -17,10 +17,9 @@ import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-@Controller
+@RestController
 class SykmeldingController(
     private val tokenxValidering: TokenxValidering,
     private val identService: IdentService,
@@ -34,7 +33,6 @@ class SykmeldingController(
     private val logger = logger()
 
     @GetMapping("/api/v1/sykmeldinger")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
@@ -49,7 +47,6 @@ class SykmeldingController(
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/tidligere-arbeidsgivere")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
@@ -66,13 +63,12 @@ class SykmeldingController(
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }
 
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
-    @ResponseBody
     fun getSykmelding(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<SykmeldingDTO> {
@@ -90,7 +86,6 @@ class SykmeldingController(
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/brukerinformasjon")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
@@ -124,7 +119,6 @@ class SykmeldingController(
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/er-utenfor-ventetid")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
@@ -147,7 +141,6 @@ class SykmeldingController(
     }
 
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
@@ -174,7 +167,6 @@ class SykmeldingController(
     }
 
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingUuid}/change-status")
-    @ResponseBody
     @ProtectedWithClaims(
         issuer = TOKENX,
         combineWithOr = true,
