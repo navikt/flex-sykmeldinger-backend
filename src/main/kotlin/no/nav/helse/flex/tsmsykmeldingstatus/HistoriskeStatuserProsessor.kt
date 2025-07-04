@@ -17,7 +17,7 @@ class HistoriskeStatuserProsessor(
     private val log = logger()
 
     companion object {
-        private val sisteDato: Instant = Instant.parse("2020-05-01T00:00:00Z")
+        private val sisteDato: Instant = Instant.parse("2017-01-01T00:00:00Z")
     }
 
     enum class ResultatStatus {

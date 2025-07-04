@@ -66,18 +66,18 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde oppdatere checkpoint timestamp`() {
-        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2020-01-01T00:00:00Z"))
+        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2016-02-01T00:00:00Z"))
         val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
         resultat.antallProsessert shouldBeEqualTo 1
 
-        historiskeStatuserDao.lesCheckpointStatusTimestamp().shouldNotBeNull() shouldBeEqualTo Instant.parse("2020-01-01T00:00:00Z")
+        historiskeStatuserDao.lesCheckpointStatusTimestamp().shouldNotBeNull() shouldBeEqualTo Instant.parse("2016-02-01T00:00:00Z")
     }
 
     @Test
     fun `burde starte på checkpoint timestamp`() {
-        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2018-01-01T00:00:00Z"))
-        insertStatus(sykmeldingId = "2", timestamp = Instant.parse("2019-01-01T00:00:00Z"))
+        insertStatus(sykmeldingId = "1", timestamp = Instant.parse("2016-01-01T00:00:00Z"))
+        insertStatus(sykmeldingId = "2", timestamp = Instant.parse("2016-02-01T00:00:00Z"))
         historiskeStatuserProsessor.prosesserNesteBatch(antall = 1)
         val resultat = historiskeStatuserProsessor.prosesserNesteBatch(antall = 2)
         resultat.status shouldBeEqualTo HistoriskeStatuserProsessor.ResultatStatus.OK
@@ -219,7 +219,7 @@ class HistoriskeStatuserProsessorTest : IntegrasjonTestOppsett() {
 
     private fun insertStatus(
         sykmeldingId: String,
-        timestamp: Instant = Instant.parse("2020-01-01T00:00:00Z"),
+        timestamp: Instant = Instant.parse("2016-01-01T00:00:00Z"),
         event: String = "APEN",
         arbeidsgiver: ArbeidsgiverStatusKafkaDTO? = null,
         sporsmal: List<SporsmalKafkaDTO>? = null,
