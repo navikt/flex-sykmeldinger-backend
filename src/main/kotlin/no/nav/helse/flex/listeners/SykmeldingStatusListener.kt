@@ -11,9 +11,8 @@ import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
-import org.springframework.stereotype.Component
 
-@Component
+// @Component
 class SykmeldingStatusListener(
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
 ) {
@@ -23,8 +22,7 @@ class SykmeldingStatusListener(
     @KafkaListener(
         topics = [SYKMELDINGSTATUS_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        properties = ["auto.offset.reset = earliest"],
-        id = "flex-sykmeldinger-backend-consumer-earliest",
+        properties = ["auto.offset.reset = latest"],
         concurrency = "4",
     )
     fun listen(
