@@ -59,6 +59,17 @@ class HistoriskeStatuserProsessor(
 
     private fun leggTilStatus(status: SykmeldingStatusKafkaDTO): Boolean {
         val sykmeldingId = status.sykmeldingId
+
+        if (status.statusEvent in
+            setOf(
+                StatusEventKafkaDTO.SLETTET,
+                StatusEventKafkaDTO.APEN,
+            )
+        ) {
+            log.debug("Ignorerer importert status ${status.statusEvent} for sykmelding '$sykmeldingId'")
+            return false
+        }
+
         val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
         if (sykmelding == null) {
             log.warn(
@@ -66,37 +77,27 @@ class HistoriskeStatuserProsessor(
             )
             return false
         } else {
-            when (val statusEvent = status.statusEvent) {
-                StatusEventKafkaDTO.SLETTET,
-                StatusEventKafkaDTO.APEN,
-                -> {
-                    log.debug("Ignorerer importert status $statusEvent for sykmelding '$sykmeldingId'")
-                    return false
-                }
-                else -> {
-                    val hendelse =
-                        sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(
-                            status = status,
-                            erSykmeldingAvvist = sykmelding.erAvvist,
-                            source = "importert-historisk-status",
-                        )
-                    if (SykmeldingStatusHandterer.finnesDuplikatHendelsePaaSykmelding(
-                            sykmelding = sykmelding,
-                            sykmeldingHendelse = hendelse,
-                        )
-                    ) {
-                        log.info(
-                            "Importert sykmelding hendelse eksisterer allerede, sykmelding: $sykmeldingId, status: ${hendelse.status}. " +
-                                "Lagrer ikke hendelse",
-                        )
-                        return false
-                    }
-                    val oppdatertSykmelding = sykmelding.leggTilHendelse(hendelse)
-                    sykmeldingRepository.save(oppdatertSykmelding)
-                    log.info("Importert sykmelding hendelse lagret, sykmelding: $sykmeldingId, status: ${hendelse.status}")
-                    return true
-                }
+            val hendelse =
+                sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(
+                    status = status,
+                    erSykmeldingAvvist = sykmelding.erAvvist,
+                    source = "importert-historisk-status",
+                )
+            if (SykmeldingStatusHandterer.finnesDuplikatHendelsePaaSykmelding(
+                    sykmelding = sykmelding,
+                    sykmeldingHendelse = hendelse,
+                )
+            ) {
+                log.info(
+                    "Importert sykmelding hendelse eksisterer allerede, sykmelding: $sykmeldingId, status: ${hendelse.status}. " +
+                        "Lagrer ikke hendelse",
+                )
+                return false
             }
+            val oppdatertSykmelding = sykmelding.leggTilHendelse(hendelse)
+            sykmeldingRepository.save(oppdatertSykmelding)
+            log.info("Importert sykmelding hendelse lagret, sykmelding: $sykmeldingId, status: ${hendelse.status}")
+            return true
         }
     }
 }
