@@ -143,9 +143,11 @@ class SykmeldingStatusHandterer(
         }
         val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
         if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
-            log.error(
-                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
-                    "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
+            log.errorSecure(
+                message =
+                    "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
+                        "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
+                secureMessage = "Sykmeldingstatus: $status",
             )
             throw SykmeldingHendelseException(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka",
