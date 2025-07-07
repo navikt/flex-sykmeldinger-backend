@@ -88,7 +88,7 @@ class AaregHendelserConsumer(
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
         val timeMs = measureTimeMillis { personerFnr.forEach { synkroniserForPerson(it) } }
 
-        if (timeMs >= 2000 * personerFnr.size) {
+        if (timeMs > 2000 * personerFnr.size) {
             log.warn(
                 "Tok lang tid for å synkronisere arbeidsforhold for ${personerFnr.size} unike fnr, tid: $timeMs ms",
             )
