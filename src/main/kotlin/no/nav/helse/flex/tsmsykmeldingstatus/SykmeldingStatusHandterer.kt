@@ -15,6 +15,7 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -72,6 +73,9 @@ class SykmeldingStatusHandterer(
             return
         }
         val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
+        if (statusFraKafkaOpprettet.isBefore(Instant.parse("2021-01-01T00:00:00Z"))) {
+            return
+        }
         if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
             log.error(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
