@@ -63,25 +63,6 @@ class SykmeldingStatusHandterer(
         }
     }
 
-    fun validerStatusForSykmelding(
-        sykmelding: Sykmelding,
-        status: SykmeldingStatusKafkaMessageDTO,
-    ) {
-        if (sykmelding.sisteHendelse().status == HendelseStatus.APEN) {
-            return
-        }
-        val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
-        if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
-            log.error(
-                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
-                    "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
-            )
-            throw SykmeldingHendelseException(
-                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka",
-            )
-        }
-    }
-
     @Transactional(rollbackFor = [Exception::class])
     fun prosesserSykmeldingStatuserFraBuffer(sykmeldingId: String) {
         sykmeldingStatusBuffer.taLaasFor(sykmeldingId)
@@ -151,6 +132,25 @@ class SykmeldingStatusHandterer(
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
 
         return true
+    }
+
+    private fun validerStatusForSykmelding(
+        sykmelding: Sykmelding,
+        status: SykmeldingStatusKafkaMessageDTO,
+    ) {
+        if (sykmelding.sisteHendelse().status == HendelseStatus.APEN) {
+            return
+        }
+        val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
+        if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
+            log.error(
+                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
+                    "Hendelse: ${sykmelding.sisteHendelse().hendelseOpprettet}, status: $statusFraKafkaOpprettet",
+            )
+            throw SykmeldingHendelseException(
+                "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka",
+            )
+        }
     }
 
     private fun korrigerManglendeJuridiskOrgnummer(
