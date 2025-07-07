@@ -24,7 +24,7 @@ fun lagValidation(status: RuleType = RuleType.OK): ValidationResult =
                 rules =
                     listOf(
                         PendingRule(
-                            name = "UNDER_BEHANDLING",
+                            name = "TILBAKEDATERING_UNDER_BEHANDLING",
                             timestamp = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
                             reason =
                                 Reason(
