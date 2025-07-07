@@ -608,7 +608,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 rules =
                     listOf(
                         PendingRule(
-                            name = "DELVIS_GODKJENT",
+                            name = "TILBAKEDATERING_DELVIS_GODKJENT",
                             timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
                             reason =
                                 Reason(

@@ -130,11 +130,12 @@ class SykmeldingDtoKonverterer(
                 MerknadDTO(
                     type =
                         when (it.name) {
-                            "DELVIS_GODKJENT" -> MerknadtypeDTO.DELVIS_GODKJENT
+                            "TILBAKEDATERING_DELVIS_GODKJENT" -> MerknadtypeDTO.DELVIS_GODKJENT
                             "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" ->
                                 MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
-                            "UGYLDIG_TILBAKEDATERING" -> MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
-                            "UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
+                            "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING" -> MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
+                            "TILBAKEDATERING_UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
+                            "TILBAKEDATERING_TILBAKEDATERT_PAPIRSYKMELDING" -> MerknadtypeDTO.TILBAKEDATERT_PAPIRSYKMELDING
                             else -> MerknadtypeDTO.UKJENT_MERKNAD
                         },
                     beskrivelse =
