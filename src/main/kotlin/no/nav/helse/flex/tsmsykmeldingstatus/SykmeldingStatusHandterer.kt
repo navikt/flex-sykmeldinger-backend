@@ -15,7 +15,6 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -58,7 +57,6 @@ class SykmeldingStatusHandterer(
                     true
                 }
                 else -> {
-                    validerStatusForSykmelding(sykmelding, status)
                     return lagreStatusForEksisterendeSykmelding(sykmelding, status)
                 }
             }
@@ -73,9 +71,6 @@ class SykmeldingStatusHandterer(
             return
         }
         val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
-        if (statusFraKafkaOpprettet.isBefore(Instant.parse("2021-01-01T00:00:00Z"))) {
-            return
-        }
         if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
             log.error(
                 "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
@@ -143,12 +138,14 @@ class SykmeldingStatusHandterer(
                     "hopper over lagring av hendelse",
             )
             return false
-        } else {
-            log.info(
-                "Håndterer hendelse ${hendelse.status} for sykmelding $sykmeldingId, " +
-                    "fra source ${status.kafkaMetadata.source}",
-            )
         }
+
+        validerStatusForSykmelding(sykmelding, status)
+
+        log.info(
+            "Håndterer hendelse ${hendelse.status} for sykmelding $sykmeldingId, " +
+                "fra source ${status.kafkaMetadata.source}",
+        )
 
         sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")

@@ -264,41 +264,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde ikke kaste feil når status er før 2021, selv om det finnes nyere status for sykmeldingen`() {
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-                hendelser =
-                    listOf(
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.APEN,
-                            hendelseOpprettet = Instant.parse("2020-01-01T12:00:00Z"),
-                        ),
-                        lagSykmeldingHendelse(
-                            status = HendelseStatus.AVBRUTT,
-                            hendelseOpprettet = Instant.parse("2020-03-01T12:00:00Z"),
-                        ),
-                    ),
-            )
-        sykmeldingRepository.save(sykmelding)
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata =
-                    lagKafkaMetadataDTO(
-                        sykmeldingId = "1",
-                        timestamp = OffsetDateTime.parse("2020-02-01T12:00:00+00:00"),
-                    ),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "BEKREFTET",
-                    ),
-            )
-        invoking {
-            sykmeldingStatusHandterer.handterSykmeldingStatus(status)
-        } `should not throw` SykmeldingHendelseException::class
-    }
-
-    @Test
     fun `burde korrigere manglende juridiskOrgnummer`() {
         sykmeldingRepository.save(
             lagSykmelding(
