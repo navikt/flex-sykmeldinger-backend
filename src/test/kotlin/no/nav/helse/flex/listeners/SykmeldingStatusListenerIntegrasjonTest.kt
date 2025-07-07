@@ -8,11 +8,9 @@ import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeEqualTo
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-@Disabled("Midlertidig skrur av status listener")
 class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde lagre hendelse fra kafka`() {
