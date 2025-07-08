@@ -19,6 +19,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit
 
+@Suppress("ktlint:standard:max-line-length")
 class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusHandterer: SykmeldingStatusHandterer
@@ -191,6 +192,44 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
         val status = lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"))
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
+    }
+
+    @Test
+    fun `burde ikke kaste SykmeldingHendelseException status hvis hendelse har timestamp før siste hendelse på sykmeldingen, men har forskjellig millisekund i 2021`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        sykmeldingRepository.save(sykmelding)
+        val timestampSenestI2021 = OffsetDateTime.parse("2021-01-01T00:00:00.555Z")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event = lagSykmeldingStatusKafkaDTO(timestamp = timestampSenestI2021),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+
+        val timestampTidligstI2021 = OffsetDateTime.parse("2021-01-01T00:00:00.00Z")
+        val statusMedForskjelligMillisekund =
+            status.copy(event = status.event.copy(timestamp = timestampTidligstI2021))
+        sykmeldingStatusHandterer.handterSykmeldingStatus(statusMedForskjelligMillisekund).`should be false`()
+    }
+
+    @Test
+    fun `burde kaste SykmeldingHendelseException hvis hendelse har timestamp før siste hendelse på sykmeldingen, men har forskjellig millisekund i 2022`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        sykmeldingRepository.save(sykmelding)
+        val timestampSenestI2022 = OffsetDateTime.parse("2022-01-01T00:00:00.555Z")
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event = lagSykmeldingStatusKafkaDTO(timestamp = timestampSenestI2022),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+
+        val timestampTidligstI2022 = OffsetDateTime.parse("2022-01-01T00:00:00.123Z")
+        val statusMedForskjelligMillisekund =
+            status.copy(event = status.event.copy(timestamp = timestampTidligstI2022))
+        invoking {
+            sykmeldingStatusHandterer.handterSykmeldingStatus(statusMedForskjelligMillisekund)
+        } `should throw` SykmeldingHendelseException::class
     }
 
     @Test
