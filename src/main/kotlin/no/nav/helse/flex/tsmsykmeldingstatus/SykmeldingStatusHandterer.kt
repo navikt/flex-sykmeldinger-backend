@@ -15,6 +15,7 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -208,10 +209,28 @@ class SykmeldingStatusHandterer(
         fun erHendelseDuplikat(
             hendelse1: SykmeldingHendelse,
             hendelse2: SykmeldingHendelse,
-        ): Boolean =
-            hendelse1.status == hendelse2.status &&
-                hendelse1.hendelseOpprettet == hendelse2.hendelseOpprettet &&
-                hendelse1.brukerSvar == hendelse2.brukerSvar &&
-                hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
+        ): Boolean {
+            val hendelserErI2021 =
+                (
+                    hendelse1.hendelseOpprettet.isAfter(Instant.parse("2020-12-31T23:59:59.999Z")) &&
+                        hendelse2.hendelseOpprettet.isAfter(Instant.parse("2020-12-31T23:59:59.999Z"))
+                ) &&
+                    (
+                        hendelse1.hendelseOpprettet.isBefore(Instant.parse("2022-01-01T00:00:00Z")) &&
+                            hendelse2.hendelseOpprettet.isBefore(Instant.parse("2022-01-01T00:00:00Z"))
+                    )
+            return if (hendelserErI2021) {
+                hendelse1.status == hendelse2.status &&
+                    hendelse1.hendelseOpprettet.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) ==
+                    hendelse2.hendelseOpprettet.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) &&
+                    hendelse1.brukerSvar == hendelse2.brukerSvar &&
+                    hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
+            } else {
+                hendelse1.status == hendelse2.status &&
+                    hendelse1.hendelseOpprettet == hendelse2.hendelseOpprettet &&
+                    hendelse1.brukerSvar == hendelse2.brukerSvar &&
+                    hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
+            }
+        }
     }
 }
