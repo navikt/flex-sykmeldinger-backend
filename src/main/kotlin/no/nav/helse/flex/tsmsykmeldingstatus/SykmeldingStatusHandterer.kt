@@ -15,6 +15,7 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
@@ -89,6 +90,11 @@ class SykmeldingStatusHandterer(
         sykmelding: Sykmelding,
         status: SykmeldingStatusKafkaMessageDTO,
     ): Boolean {
+        log.info(
+            "Håndterer hendelse ${status.event.statusEvent} for sykmelding ${sykmelding.sykmeldingId}, " +
+                "fra source ${status.kafkaMetadata.source}",
+        )
+
         val statusEvent =
             korrigerManglendeJuridiskOrgnummer(
                 statusEvent = status.event,
@@ -113,21 +119,17 @@ class SykmeldingStatusHandterer(
             }
         val sykmeldingId = sykmelding.sykmeldingId
 
-        if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {
-            log.warn(
-                "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
-                    "hopper over lagring av hendelse",
-            )
-            return false
+        if (hendelse.hendelseOpprettet.isAfter(Instant.parse("2025-07-01T00:00:00Z"))) {
+            if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {
+                log.warn(
+                    "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
+                        "hopper over lagring av hendelse",
+                )
+                return false
+            }
+
+            validerStatusForSykmelding(sykmelding, status)
         }
-
-        validerStatusForSykmelding(sykmelding, status)
-
-        log.info(
-            "Håndterer hendelse ${hendelse.status} for sykmelding $sykmeldingId, " +
-                "fra source ${status.kafkaMetadata.source}",
-        )
-
         sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
 

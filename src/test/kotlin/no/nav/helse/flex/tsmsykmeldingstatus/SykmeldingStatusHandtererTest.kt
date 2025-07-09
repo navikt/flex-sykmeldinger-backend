@@ -1,5 +1,6 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
@@ -186,50 +187,16 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde ikke lagre status hvis hendelse eksisterer på sykmeldingen`() {
+    fun `burde alltid lagre status på sykmeldingen før juli 2025`() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
         sykmeldingRepository.save(sykmelding)
-        val status = lagSykmeldingStatusKafkaMessageDTO(kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"))
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be false`()
-    }
-
-    @Test
-    fun `burde ikke kaste SykmeldingHendelseException hvis hendelse har timestamp innenfor samme sekund som siste hendelse`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
-        sykmeldingRepository.save(sykmelding)
-        val timestampForste = OffsetDateTime.parse("2021-01-01T00:00:00.555Z")
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event = lagSykmeldingStatusKafkaDTO(timestamp = timestampForste),
+                event = lagSykmeldingStatusKafkaDTO(timestamp = OffsetDateTime.parse("2021-06-30T12:00:00+00:00")),
             )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-
-        val timestampInnenforSammeSekundIntervall = OffsetDateTime.parse("2021-01-01T00:00:00.123Z")
-        val statusMedTimestampInnenforSammeSekundIntervall =
-            status.copy(event = status.event.copy(timestamp = timestampInnenforSammeSekundIntervall))
-        sykmeldingStatusHandterer.handterSykmeldingStatus(statusMedTimestampInnenforSammeSekundIntervall).`should be false`()
-    }
-
-    @Test
-    fun `burde kaste SykmeldingHendelseException hvis hendelse har timestamp mer enn ett sekund før siste hendelse`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
-        sykmeldingRepository.save(sykmelding)
-        val timestampSenest = OffsetDateTime.parse("2022-01-01T00:00:02.000Z")
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event = lagSykmeldingStatusKafkaDTO(timestamp = timestampSenest),
-            )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-
-        val timestampMerEnnEttSekundTidligere = OffsetDateTime.parse("2022-01-01T00:00:00.500Z")
-        val statusMedGammelTimestamp =
-            status.copy(event = status.event.copy(timestamp = timestampMerEnnEttSekundTidligere))
-        invoking {
-            sykmeldingStatusHandterer.handterSykmeldingStatus(statusMedGammelTimestamp)
-        } `should throw` SykmeldingHendelseException::class
     }
 
     @Test
@@ -247,14 +214,38 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde kaste feil når status er eldre enn sykmeldingens siste hendelse`() {
+    fun `burde lagre status når brukerSvar har annen verdi, men samme timestamp, etter juli 2025`() {
+        val sykmelding =
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")).leggTilHendelse(
+                lagSykmeldingHendelse(
+                    status = HendelseStatus.SENDT_TIL_NAV,
+                    hendelseOpprettet = Instant.parse("2025-07-01T12:00:00Z"),
+                    brukerSvar = lagArbeidstakerBrukerSvar(),
+                ),
+            )
+        sykmeldingRepository.save(sykmelding)
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "BEKREFTET",
+                        brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.NAERINGSDRIVENDE),
+                        timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
+                    ),
+            )
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+    }
+
+    @Test
+    fun `burde kaste feil når ny status er eldre enn sykmeldingens siste hendelse, og av annen type, etter juli 2025`() {
         val sykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
             ).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.AVBRUTT,
-                    hendelseOpprettet = Instant.parse("2025-01-01T12:00:00Z"),
+                    hendelseOpprettet = Instant.parse("2025-07-01T17:00:00Z"),
                 ),
             )
 
@@ -267,7 +258,8 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                     ),
                 event =
                     lagSykmeldingStatusKafkaDTO(
-                        timestamp = OffsetDateTime.parse("2024-01-01T12:00:00+00:00"),
+                        statusEvent = "SENDT",
+                        timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
                     ),
             )
         invoking {
