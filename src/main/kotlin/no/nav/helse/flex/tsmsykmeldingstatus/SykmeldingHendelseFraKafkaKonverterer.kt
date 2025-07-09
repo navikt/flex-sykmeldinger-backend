@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.function.Supplier
 
 @Component
@@ -20,7 +21,14 @@ class SykmeldingHendelseFraKafkaKonverterer(
         val hendelseStatus = konverterStatusTilHendelseStatus(status.statusEvent, erAvvist = erSykmeldingAvvist)
         val brukerSvar =
             when {
-                status.brukerSvar != null -> BrukerSvarKafkaDtoKonverterer.tilBrukerSvar(status.brukerSvar)
+                status.brukerSvar != null ->
+                    BrukerSvarKafkaDtoKonverterer.tilBrukerSvar(status.brukerSvar).also {
+                        val etterFjerdeApril2024 = status.timestamp.isAfter(OffsetDateTime.parse("2024-04-04T00:00:00Z"))
+                        val erFiskerBrukerSvar = it is FiskerBrukerSvar
+                        if (etterFjerdeApril2024 && erFiskerBrukerSvar) {
+                            it.valider()
+                        }
+                    }
                 status.sporsmals != null ->
                     SporsmalKafkaDtoKonverterer.tilUtdatertFormatBrukerSvar(
                         sporsmal = status.sporsmals,

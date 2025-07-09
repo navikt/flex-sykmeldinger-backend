@@ -89,7 +89,7 @@ data class FiskerBrukerSvar(
 
     private val erArbeidstaker = lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)
 
-    init {
+    fun valider() {
         if (erArbeidstaker) {
             runCatching { somArbeidstaker() }.onFailure {
                 throw IllegalArgumentException("Fisker som arbeidstaker må ha satt felter tilknyttet arbeidsgiver")
