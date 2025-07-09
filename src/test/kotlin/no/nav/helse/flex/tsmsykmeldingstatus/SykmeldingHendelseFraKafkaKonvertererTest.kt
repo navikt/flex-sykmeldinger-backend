@@ -129,6 +129,20 @@ class SykmeldingHendelseFraKafkaKonvertererTest : FakesTestOppsett() {
         }
     }
 
+    @Test
+    fun `burde validere fiskerBrukerSvar etter 2024-04-04`() {
+        val status =
+            lagSykmeldingStatusKafkaDTO(
+                statusEvent = "APEN",
+                timestamp = Instant.parse("2024-04-05T00:00:00Z").atOffset(ZoneOffset.UTC),
+                brukerSvarKafkaDTO = lagFiskerArbeidstakerBrukerSvarKafkaDto(null),
+            )
+
+        invoking {
+            sykmeldingHendelseFraKafkaKonverterer.konverterSykmeldingHendelseFraKafkaDTO(status)
+        } `should throw` IllegalArgumentException::class
+    }
+
     @TestFactory
     fun `burde konvertere status til hendelse status - erAvvist = false`() =
         listOf(
