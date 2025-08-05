@@ -1,6 +1,5 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
@@ -135,22 +134,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde kun slette spesifikk sykmelding ved status SLETTET`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "SLETTET",
-                    ),
-            )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status)
-        sykmeldingRepository.findBySykmeldingId("2").shouldNotBeNull()
-    }
-
-    @Test
     fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
         val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
         val sammenstillSykmeldingStatusKafkaMessageDTO =
@@ -187,19 +170,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde alltid lagre status på sykmeldingen før juli 2025`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
-        sykmeldingRepository.save(sykmelding)
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event = lagSykmeldingStatusKafkaDTO(timestamp = OffsetDateTime.parse("2021-06-30T12:00:00+00:00")),
-            )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-    }
-
-    @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     fun `handterSykmeldingStatus og prosesserSykmeldingStatuserFraBuffer burde synkronisere ved buffer lås`() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
@@ -214,31 +184,59 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde lagre status når brukerSvar har annen verdi, men samme timestamp, etter juli 2025`() {
-        val sykmelding =
+    fun `burde deduplisere statuser`() {
+        sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.SENDT_TIL_NAV,
                     hendelseOpprettet = Instant.parse("2025-07-01T12:00:00Z"),
-                    brukerSvar = lagArbeidstakerBrukerSvar(),
                 ),
-            )
-        sykmeldingRepository.save(sykmelding)
-        val status =
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event =
-                    lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "BEKREFTET",
-                        brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(ArbeidssituasjonDTO.NAERINGSDRIVENDE),
-                        timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
-                    ),
-            )
-        sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
+            ),
+        )
+        sykmeldingStatusHandterer
+            .handterSykmeldingStatus(
+                lagSykmeldingStatusKafkaMessageDTO(
+                    kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                    event =
+                        lagSykmeldingStatusKafkaDTO(
+                            statusEvent = "BEKREFTET",
+                            timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
+                        ),
+                ),
+            ).`should be false`()
+
+        val lagretSykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        lagretSykmelding.hendelser.filter { it.status == HendelseStatus.SENDT_TIL_NAV } shouldHaveSize 1
     }
 
     @Test
-    fun `burde kaste feil når ny status er eldre enn sykmeldingens siste hendelse, og av annen type, etter juli 2025`() {
+    fun `burde deduplisere statuser med litt ulik timestamp`() {
+        sykmeldingRepository.save(
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")).leggTilHendelse(
+                lagSykmeldingHendelse(
+                    status = HendelseStatus.SENDT_TIL_NAV,
+                    hendelseOpprettet = Instant.parse("2025-07-01T12:00:00Z"),
+                ),
+            ),
+        )
+        sykmeldingStatusHandterer
+            .handterSykmeldingStatus(
+                lagSykmeldingStatusKafkaMessageDTO(
+                    kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
+                    event =
+                        lagSykmeldingStatusKafkaDTO(
+                            statusEvent = "BEKREFTET",
+                            timestamp = OffsetDateTime.parse("2025-07-01T12:00:01+00:00"),
+                        ),
+                ),
+            ).`should be false`()
+
+        val lagretSykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        lagretSykmelding.hendelser.filter { it.status == HendelseStatus.SENDT_TIL_NAV } shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde feile når ny status er eldre enn siste hendelse, og de er fra forskjellige systemer`() {
         val sykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
@@ -258,13 +256,44 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                     ),
                 event =
                     lagSykmeldingStatusKafkaDTO(
-                        statusEvent = "SENDT",
+                        statusEvent = "AVBRUTT",
                         timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
                     ),
             )
         invoking {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status)
         } `should throw` SykmeldingHendelseException::class
+    }
+
+    @Test
+    fun `burde akseptere at ny status er eldre enn siste hendelse, dersom begge er fra samme system`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+            ).leggTilHendelse(
+                lagSykmeldingHendelse(
+                    status = HendelseStatus.AVBRUTT,
+                    hendelseOpprettet = Instant.parse("2025-07-01T17:00:00Z"),
+                    source = "source",
+                ),
+            )
+
+        sykmeldingRepository.save(sykmelding)
+        val status =
+            lagSykmeldingStatusKafkaMessageDTO(
+                kafkaMetadata =
+                    lagKafkaMetadataDTO(
+                        sykmeldingId = "1",
+                        source = "source",
+                    ),
+                event =
+                    lagSykmeldingStatusKafkaDTO(
+                        statusEvent = "AVBRUTT",
+                        timestamp = OffsetDateTime.parse("2025-07-01T12:00:00+00:00"),
+                    ),
+            )
+
+        sykmeldingStatusHandterer.handterSykmeldingStatus(status).shouldBeTrue()
     }
 
     @Test

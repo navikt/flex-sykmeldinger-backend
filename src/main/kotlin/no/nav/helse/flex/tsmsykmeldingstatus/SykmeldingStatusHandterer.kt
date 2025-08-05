@@ -119,17 +119,15 @@ class SykmeldingStatusHandterer(
             }
         val sykmeldingId = sykmelding.sykmeldingId
 
-        if (hendelse.hendelseOpprettet.isAfter(Instant.parse("2025-07-01T00:00:00Z"))) {
-            if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {
-                log.warn(
-                    "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
-                        "hopper over lagring av hendelse",
-                )
-                return false
-            }
-
-            validerStatusForSykmelding(sykmelding, status)
+        if (finnesDuplikatHendelsePaaSykmelding(sykmelding, hendelse)) {
+            log.info(
+                "Hendelse ${hendelse.status} for sykmelding $sykmeldingId eksisterer allerede, " +
+                    "hopper over lagring av hendelse",
+            )
+            return false
         }
+
+        validerStatusForSykmelding(sykmelding, status)
         sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
         log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
 
@@ -143,8 +141,15 @@ class SykmeldingStatusHandterer(
         if (sykmelding.sisteHendelse().status == HendelseStatus.APEN) {
             return
         }
+        val sisteHendelse = sykmelding.sisteHendelse()
+
+        val erNyStatusFraSammeSystem = sisteHendelse.source == status.kafkaMetadata.source
+        if (erNyStatusFraSammeSystem) {
+            return
+        }
+
         val statusFraKafkaOpprettet = status.event.timestamp.toInstant()
-        if (sykmelding.sisteHendelse().hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
+        if (sisteHendelse.hendelseOpprettet.isAfter(statusFraKafkaOpprettet)) {
             log.errorSecure(
                 message =
                     "SykmeldingId: ${sykmelding.sykmeldingId} har en hendelse som er nyere enn statusen som kom fra kafka. " +
@@ -217,9 +222,7 @@ class SykmeldingStatusHandterer(
                 )
 
             return hendelse1.status == hendelse2.status &&
-                tidsDifferanse <= 1 &&
-                hendelse1.brukerSvar == hendelse2.brukerSvar &&
-                hendelse1.tilleggsinfo == hendelse2.tilleggsinfo
+                tidsDifferanse <= 1
         }
     }
 }
