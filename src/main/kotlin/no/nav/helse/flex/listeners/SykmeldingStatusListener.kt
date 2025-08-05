@@ -40,7 +40,7 @@ class SykmeldingStatusListener(
     }
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
-        log.info("Mottatt status for sykmelding: ${cr.key()}")
+        log.info("Mottatt status for sykmelding '${cr.key()}' på kafka topic '${cr.topic()}'")
         val status: SykmeldingStatusKafkaMessageDTO =
             try {
                 objectMapper.readValue(cr.value())
