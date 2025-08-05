@@ -48,13 +48,13 @@ class SykmeldingStatusHandterer(
         } else {
             return when (val statusEvent = status.event.statusEvent) {
                 StatusEventKafkaDTO.SLETTET -> {
-                    log.debug(
+                    log.info(
                         "Ignorerer status $statusEvent for sykmelding '$sykmeldingId'. Sykmelding slettes kun ved tombstone på sykmeldinger topic",
                     )
                     true
                 }
                 StatusEventKafkaDTO.APEN -> {
-                    log.debug("Ignorerer status $statusEvent for sykmelding '$sykmeldingId'")
+                    log.info("Ignorerer status $statusEvent for sykmelding '$sykmeldingId'")
                     true
                 }
                 else -> {
@@ -131,7 +131,7 @@ class SykmeldingStatusHandterer(
             validerStatusForSykmelding(sykmelding, status)
         }
         sykmeldingRepository.save(sykmelding.leggTilHendelse(hendelse))
-        log.info("Hendelse ${hendelse.status} for sykmelding $sykmeldingId lagret")
+        log.info("Lagret hendelse ${hendelse.status} for sykmelding $sykmeldingId")
 
         return true
     }
