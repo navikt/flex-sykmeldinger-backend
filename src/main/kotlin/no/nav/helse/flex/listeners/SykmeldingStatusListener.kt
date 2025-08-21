@@ -2,6 +2,7 @@ package no.nav.helse.flex.listeners
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
@@ -12,10 +13,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.util.function.Supplier
 
 @Component
 class SykmeldingStatusListener(
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
+    private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
+    private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
 
@@ -52,6 +57,16 @@ class SykmeldingStatusListener(
                 )
                 throw e
             }
+
+        val toManederSiden = nowFactory.get().minus(60, java.time.temporal.ChronoUnit.DAYS)
+        if (environmentToggles.isDevelopment() &&
+            status.event.timestamp
+                .toInstant()
+                .isBefore(toManederSiden)
+        ) {
+            log.warn("Sykmelding status er eldre enn to måneder, ignorerer: ${status.kafkaMetadata.sykmeldingId}")
+            return
+        }
 
         try {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status)
