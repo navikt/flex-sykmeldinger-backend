@@ -32,8 +32,11 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 @AutoConfigureObservability
 @EnableMockOAuth2Server
 @SpringBootTest(
+    properties = [
+        "spring.main.allow-bean-definition-overriding=true",
+    ],
     classes = [
-        Application::class, KafkaTestConfig::class, MockWebServereConfig::class, EnvironmentConfig::class,
+        Application::class, KafkaTestConfig::class, MockWebServereConfig::class, IntegrasjonsTestConfig::class,
     ],
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
