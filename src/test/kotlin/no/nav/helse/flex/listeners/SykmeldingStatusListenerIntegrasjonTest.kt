@@ -123,6 +123,25 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
+    fun `burde ignorere hendelse fra kafka som har null value`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    SYKMELDINGSTATUS_TOPIC,
+                    null,
+                    "1",
+                    null,
+                ),
+            ).get()
+
+        await().atMost(Duration.ofSeconds(1)).untilAsserted {
+            sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.APEN
+        }
+    }
+
+    @Test
     fun `burde ikke lagre hendelse fra kafka dersom sykmelding ikke finnes`() {
         val kafkamelding =
             lagSykmeldingStatusKafkaMessageDTO(
