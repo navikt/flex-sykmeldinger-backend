@@ -8,6 +8,7 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeEqualTo
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
@@ -24,6 +25,9 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired
     private lateinit var environmentToggles: EnvironmentTogglesFake
+
+    @Autowired
+    private lateinit var sykmeldingStatusListener: SykmeldingStatusListener
 
     @AfterEach
     fun tearDown() {
@@ -124,21 +128,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde ignorere hendelse fra kafka som har null value`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
-
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    SYKMELDINGSTATUS_TOPIC,
-                    null,
-                    "1",
-                    null,
-                ),
-            ).get()
-
-        await().atMost(Duration.ofSeconds(1)).untilAsserted {
-            sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.APEN
-        }
+        sykmeldingStatusListener.listen(
+            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "1", null),
+            acknowledgment = { },
+        )
+        sykmeldingRepository.findAll().size shouldBeEqualTo 0
     }
 
     @Test
