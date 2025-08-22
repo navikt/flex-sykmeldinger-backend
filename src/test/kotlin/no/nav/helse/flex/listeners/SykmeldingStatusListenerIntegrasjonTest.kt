@@ -8,6 +8,7 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeEqualTo
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
@@ -24,6 +25,9 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired
     private lateinit var environmentToggles: EnvironmentTogglesFake
+
+    @Autowired
+    private lateinit var sykmeldingStatusListener: SykmeldingStatusListener
 
     @AfterEach
     fun tearDown() {
@@ -120,6 +124,15 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         await().atMost(Duration.ofSeconds(2)).untilAsserted {
             sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
+    }
+
+    @Test
+    fun `burde ignorere hendelse fra kafka som har null value`() {
+        sykmeldingStatusListener.listen(
+            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "1", null),
+            acknowledgment = { },
+        )
+        sykmeldingRepository.findAll().size shouldBeEqualTo 0
     }
 
     @Test

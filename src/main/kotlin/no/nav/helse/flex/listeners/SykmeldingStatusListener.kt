@@ -50,6 +50,10 @@ class SykmeldingStatusListener(
             try {
                 objectMapper.readValue(cr.value())
             } catch (e: Exception) {
+                if (cr.value() == null) {
+                    log.error("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
+                    return
+                }
                 log.errorSecure(
                     "Feil sykmelding status format, meldingKey: ${cr.key()}",
                     secureMessage = "Rå sykmelding status: ${cr.value()}",
