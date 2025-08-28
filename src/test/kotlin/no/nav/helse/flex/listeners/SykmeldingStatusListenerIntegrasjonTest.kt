@@ -18,6 +18,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -66,7 +67,7 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde ikke lagre hendelse fra kafka i dev som er eldre enn 2 måneder`() {
         environmentToggles.setEnvironment("dev")
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00.00Z"))
-        val toManederSiden = nowFactoryFake.get().minus(61, java.time.temporal.ChronoUnit.DAYS)
+        val toManederSiden = nowFactoryFake.get().minus(61, ChronoUnit.DAYS)
 
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
@@ -79,26 +80,25 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
                     ),
             )
 
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    SYKMELDINGSTATUS_TOPIC,
-                    null,
-                    "1",
-                    kafkamelding.serialisertTilString(),
-                ),
-            ).get()
+        sykmeldingStatusListener.listen(
+            ConsumerRecord(
+                SYKMELDINGSTATUS_TOPIC,
+                0,
+                0,
+                "1",
+                kafkamelding.serialisertTilString(),
+            ),
+            acknowledgment = { },
+        )
 
-        await().atMost(Duration.ofSeconds(2)).untilAsserted {
-            sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.APEN
-        }
+        sykmeldingRepository.findBySykmeldingId("1")?.sisteHendelse()?.status shouldBeEqualTo HendelseStatus.APEN
     }
 
     @Test
     fun `burde lagre hendelse fra kafka i dev som er nyere enn 2 måneder`() {
         environmentToggles.setEnvironment("dev")
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00.00Z"))
-        val toManederSiden = nowFactoryFake.get().minus(60, java.time.temporal.ChronoUnit.DAYS)
+        val toManederSiden = nowFactoryFake.get().minus(60, ChronoUnit.DAYS)
 
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
