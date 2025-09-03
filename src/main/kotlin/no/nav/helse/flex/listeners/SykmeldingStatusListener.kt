@@ -46,17 +46,19 @@ class SykmeldingStatusListener(
 
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         log.info("Mottatt status for sykmelding '${cr.key()}' på kafka topic '${cr.topic()}'")
+        val verdi = cr.value()
+        if (verdi.isNullOrEmpty() || verdi == "null") {
+            log.error("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
+            return
+        }
+
         val status: SykmeldingStatusKafkaMessageDTO =
             try {
-                objectMapper.readValue(cr.value())
+                objectMapper.readValue(verdi)
             } catch (e: Exception) {
-                if (cr.value() == null) {
-                    log.error("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
-                    return
-                }
                 log.errorSecure(
                     "Feil sykmelding status format, meldingKey: ${cr.key()}",
-                    secureMessage = "Rå sykmelding status: ${cr.value()}",
+                    secureMessage = "Rå sykmelding status: $verdi",
                     secureThrowable = e,
                 )
                 throw e

@@ -127,11 +127,22 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde ignorere hendelse fra kafka som har null value`() {
+    fun `burde ignorere hendelse fra kafka som har null eller tom value`() {
         sykmeldingStatusListener.listen(
             cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "1", null),
             acknowledgment = { },
         )
+
+        sykmeldingStatusListener.listen(
+            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "2", ""),
+            acknowledgment = { },
+        )
+
+        sykmeldingStatusListener.listen(
+            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "3", "null"),
+            acknowledgment = { },
+        )
+
         sykmeldingRepository.findAll().size shouldBeEqualTo 0
     }
 
