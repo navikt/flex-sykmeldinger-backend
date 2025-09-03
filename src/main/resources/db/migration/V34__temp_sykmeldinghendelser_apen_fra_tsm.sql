@@ -1,4 +1,4 @@
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     "public".temp_sykmeldinghendelser_apen_fra_tsm
 (
     id                     varchar(36) DEFAULT uuid_generate_v4() NOT NULL
