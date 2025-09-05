@@ -48,7 +48,7 @@ class SykmeldingStatusListener(
         log.info("Mottatt status for sykmelding '${cr.key()}' på kafka topic '${cr.topic()}'")
         val verdi = cr.value()
         if (verdi == null || verdi == "null") {
-            log.info("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
+            log.info("Mottatt tombstone på sykmeldingstatus, vi ignorerer dette: ${cr.key()}")
             return
         }
 
