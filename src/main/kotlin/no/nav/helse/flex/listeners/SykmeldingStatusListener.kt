@@ -47,8 +47,8 @@ class SykmeldingStatusListener(
     internal fun prosesserKafkaRecord(cr: ConsumerRecord<String, String>) {
         log.info("Mottatt status for sykmelding '${cr.key()}' på kafka topic '${cr.topic()}'")
         val verdi = cr.value()
-        if (verdi.isNullOrEmpty() || verdi == "null") {
-            log.error("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
+        if (verdi == null || verdi == "null") {
+            log.info("Mottatt tom sykmelding status, ignorerer: ${cr.key()}")
             return
         }
 

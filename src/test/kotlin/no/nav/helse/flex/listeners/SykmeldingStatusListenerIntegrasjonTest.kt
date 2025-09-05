@@ -12,6 +12,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
@@ -30,6 +31,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     private lateinit var sykmeldingStatusListener: SykmeldingStatusListener
 
+    @BeforeEach
+    fun setup() {
+        environmentToggles.setEnvironment("prod")
+    }
+
     @AfterEach
     fun tearDown() {
         environmentToggles.reset()
@@ -39,8 +45,6 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lagre hendelse fra kafka`() {
-        environmentToggles.setEnvironment("prod")
-
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
             lagSykmeldingStatusKafkaMessageDTO(
@@ -127,19 +131,13 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde ignorere hendelse fra kafka som har null eller tom value`() {
+    fun `burde ignorere hendelse fra kafka som har null eller 'null'`() {
         sykmeldingStatusListener.listen(
             cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "1", null),
             acknowledgment = { },
         )
-
         sykmeldingStatusListener.listen(
-            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "2", ""),
-            acknowledgment = { },
-        )
-
-        sykmeldingStatusListener.listen(
-            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "3", "null"),
+            cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "2", "null"),
             acknowledgment = { },
         )
 
