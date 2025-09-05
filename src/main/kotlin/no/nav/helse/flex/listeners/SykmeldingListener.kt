@@ -35,7 +35,12 @@ class SykmeldingListener(
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (environmentToggles.isDevelopment()) {
+                log.error("Ignorerer feil i dev", e)
+                acknowledgment.acknowledge()
+                return
+            }
             throw RuntimeException("Feil ved behandling av sykmelding på kafka. Melding key: ${cr.key()}")
         }
     }
