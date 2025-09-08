@@ -22,6 +22,8 @@ interface HistoriskeStatuserDao {
     fun lesCheckpointStatusTimestamp(): Instant?
 
     fun oppdaterCheckpointStatusTimestamp(statusTimestamp: Instant)
+
+    fun lesAlleMedId(sykmeldingIder: Iterable<String>): List<SykmeldingStatusKafkaDTO>
 }
 
 @Repository("historiskeStatuserDao")
@@ -76,6 +78,19 @@ class HistoriskeStatuserDbDao(
             mapOf("statusTimestamp" to Timestamp.from(statusTimestamp)),
         )
     }
+
+    override fun lesAlleMedId(sykmeldingIder: Iterable<String>): List<SykmeldingStatusKafkaDTO> =
+        jdbcTemplate.query(
+            """
+            SELECT *
+            FROM temp_tsm_historisk_sykmeldingstatus
+            WHERE sykmelding_id IN (:sykmeldingIder)
+            """.trimIndent(),
+            mapOf(
+                "sykmeldingIder" to sykmeldingIder,
+            ),
+            TsmSykmeldingerRowMapper,
+        )
 }
 
 internal object TsmSykmeldingerRowMapper : RowMapper<SykmeldingStatusKafkaDTO> {

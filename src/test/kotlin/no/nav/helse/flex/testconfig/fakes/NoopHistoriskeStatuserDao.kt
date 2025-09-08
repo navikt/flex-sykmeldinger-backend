@@ -20,4 +20,8 @@ class NoopHistoriskeStatuserDao : HistoriskeStatuserDao {
     override fun lesCheckpointStatusTimestamp(): Instant? {
         TODO("Not yet implemented")
     }
+
+    override fun lesAlleMedId(sykmeldingIder: Iterable<String>): List<SykmeldingStatusKafkaDTO> {
+        TODO("Not yet implemented")
+    }
 }
