@@ -2,14 +2,14 @@ package no.nav.helse.flex.jobber
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.LeaderElection
-import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserProsessorManglendeStatuser
+import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeManglendeStatuserProsessor
 import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class ImporterHistoriskeStatuserJobbManglendeStatuser(
-    private val historiskeStatuserProsessorManglendeStatuser: HistoriskeStatuserProsessorManglendeStatuser,
+class ImporterHistoriskeManglendeStatuserJobb(
+    private val historiskeManglendeStatuserProsessor: HistoriskeManglendeStatuserProsessor,
     private val leaderElection: LeaderElection,
 ) {
     private val log = logger()
@@ -24,14 +24,14 @@ class ImporterHistoriskeStatuserJobbManglendeStatuser(
                 leaderElection.isLeader()
             } catch (e: Exception) {
                 log.error(
-                    "Feil ved sjekk av leder i ImporterHistoriskeStatuserManglendeStatuserJobb",
+                    "Feil ved sjekk av leder i ImporterHistoriskeManglendeStatuserJobb",
                     e,
                 )
                 false
             }
 
         if (!erLeder) {
-            log.info("ImporterHistoriskeStatuserManglendeStatuserJobb er ikke leder, hopper over kjøring")
+            log.info("ImporterHistoriskeManglendeStatuserJobb er ikke leder, hopper over kjøring")
             Thread.sleep(10_000)
             return
         }
@@ -41,21 +41,21 @@ class ImporterHistoriskeStatuserJobbManglendeStatuser(
         }
 
         try {
-            val result = historiskeStatuserProsessorManglendeStatuser.prosesser()
-            if (result.status == HistoriskeStatuserProsessorManglendeStatuser.ResultatStatus.FERDIG) {
+            val result = historiskeManglendeStatuserProsessor.prosesser()
+            if (result.status == HistoriskeManglendeStatuserProsessor.ResultatStatus.FERDIG) {
                 erFerdig = true
                 log.info(
-                    "ImporterHistoriskeStatuserManglendeStatuserJobb ferdig. Antall prosessert totalt:" +
+                    "ImporterHistoriskeManglendeStatuserJobb ferdig. Antall prosessert totalt:" +
                         " ${result.antallProsessert}, antall lagt til totalt: ${result.antallLagtTil}",
                 )
             }
         } catch (ex: Exception) {
             exceptionCount++
             if (exceptionCount > 500) {
-                log.error("ImporterHistoriskeStatuserManglendeStatuserJobb har feilet mer enn 500 ganger, stopper jobben", ex)
+                log.error("ImporterHistoriskeManglendeStatuserJobb har feilet mer enn 500 ganger, stopper jobben", ex)
                 erFerdig = true
             } else {
-                log.warn("ImporterHistoriskeStatuserManglendeStatuserJobb feilet, prøver igjen", ex)
+                log.warn("ImporterHistoriskeManglendeStatuserJobb feilet, prøver igjen", ex)
             }
         }
     }

@@ -6,10 +6,9 @@ import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
-class HistoriskeStatuserProsessorManglendeStatuser(
+class HistoriskeManglendeStatuserProsessor(
     private val historiskeStatuserDao: HistoriskeStatuserDao,
     private val sykmeldingRepository: SykmeldingRepository,
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
