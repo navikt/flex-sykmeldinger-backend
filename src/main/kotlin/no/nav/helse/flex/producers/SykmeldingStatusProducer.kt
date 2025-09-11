@@ -18,16 +18,11 @@ interface SykmeldingStatusProducer {
 @Component
 class SykmeldingStatusProducerKafka(
     private val meldingProducer: Producer<String, String>,
-    private val environmentToggles: EnvironmentToggles,
 ) : SykmeldingStatusProducer {
     private val log = logger()
 
     @WithSpan
     override fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean {
-        if (environmentToggles.isProduction()) {
-            log.warn("Sykmeldingstatus producer er skrudd av i prod. SykmeldingId: ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId}")
-            return false
-        }
         log.info(
             "Skriver statusendring ${sykmeldingStatusKafkaMessageDTO.event.statusEvent} " +
                 "for sykmelding med id ${sykmeldingStatusKafkaMessageDTO.event.sykmeldingId} til topic $SYKMELDINGSTATUS_TOPIC",

@@ -3,11 +3,10 @@ package no.nav.helse.flex.producers
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should be true`
+import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -16,9 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
 class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
-    @Autowired
-    lateinit var environmentToggles: EnvironmentTogglesFake
-
     @Autowired
     lateinit var sykmeldingStatusProducerKafka: SykmeldingStatusProducerKafka
 
@@ -37,20 +33,24 @@ class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
 
         sykmeldingStatusProducerKafka
             .produserSykmeldingStatus(
-                sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
+                sykmeldingStatusKafkaMessageDTO =
+                    lagSykmeldingStatusKafkaMessageDTO(
+                        event =
+                            lagSykmeldingStatusKafkaDTO(
+                                sykmeldingId = "1",
+                            ),
+                    ),
             ).`should be true`()
 
-        sykmeldingStatusConsumer
-            .poll(Duration.ofSeconds(1))
-            .count() `should be equal to` 1
-    }
+        val consumerRecords =
+            sykmeldingStatusConsumer
+                .poll(Duration.ofSeconds(1))
 
-    @Test
-    fun `burde ikke produsere meldinger til kafka i prod`() {
-        environmentToggles.setEnvironment("prod")
-        sykmeldingStatusProducerKafka
-            .produserSykmeldingStatus(
-                sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
-            ).`should be false`()
+        consumerRecords
+            .shouldHaveSingleItem()
+            .run {
+                key() shouldBeEqualTo "1"
+                value().shouldNotBeNull()
+            }
     }
 }
