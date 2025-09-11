@@ -22,8 +22,13 @@ class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
     lateinit var sykmeldingStatusConsumer: KafkaConsumer<String, String>
 
     @BeforeAll
+    fun beforeAll() {
+        // Workaround, andre integrasjonstester rydder ikke opp etter seg
+        sykmeldingStatusConsumer.lesFraTopics(SYKMELDINGSTATUS_TOPIC, ventetid = Duration.ofSeconds(1))
+    }
+
     @AfterEach
-    fun cleanUp() {
+    fun afterEach() {
         sykmeldingStatusConsumer.lesFraTopics(SYKMELDINGSTATUS_TOPIC, ventetid = Duration.ZERO)
     }
 
