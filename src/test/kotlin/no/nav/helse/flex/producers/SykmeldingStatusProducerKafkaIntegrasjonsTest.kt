@@ -1,7 +1,6 @@
 package no.nav.helse.flex.producers
 
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO

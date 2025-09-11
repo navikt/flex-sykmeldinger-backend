@@ -1,7 +1,6 @@
 package no.nav.helse.flex.producers
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.logger
