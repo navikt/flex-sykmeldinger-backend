@@ -1,6 +1,5 @@
 package no.nav.helse.flex.producers
 
-import no.nav.helse.flex.producers.SykmeldingStatusProducerKafka
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.lesFraTopics
@@ -34,18 +33,16 @@ class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde produsere sykmeldingstatus`() {
-        sykmeldingStatusConsumer.subscribe(listOf("teamsykmelding.sykmeldingstatus-leesah"))
-        val antallForProdusert = sykmeldingStatusConsumer.poll(Duration.ofSeconds(1)).count()
+        sykmeldingStatusConsumer.subscribe(listOf(SYKMELDINGSTATUS_TOPIC))
 
         sykmeldingStatusProducerKafka
             .produserSykmeldingStatus(
                 sykmeldingStatusKafkaMessageDTO = lagSykmeldingStatusKafkaMessageDTO(),
             ).`should be true`()
 
-        antallForProdusert +
-            sykmeldingStatusConsumer
-                .poll(Duration.ofSeconds(1))
-                .count() `should be equal to` antallForProdusert + 1
+        sykmeldingStatusConsumer
+            .poll(Duration.ofSeconds(1))
+            .count() `should be equal to` 1
     }
 
     @Test
