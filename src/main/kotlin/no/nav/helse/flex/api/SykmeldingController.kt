@@ -42,7 +42,7 @@ class SykmeldingController(
         val identer = tokenxValidering.hentIdenter()
 
         val sykmeldinger = sykmeldingHandterer.hentAlleSykmeldinger(identer)
-        val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverterSykmelding(it) }
+        val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
@@ -81,7 +81,7 @@ class SykmeldingController(
 
         val sykmelding = sykmeldingHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
 
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverter(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
     }
 
@@ -162,7 +162,7 @@ class SykmeldingController(
             )
         logger.info("Sender sykmelding ${sykmelding.sykmeldingId} med status ${sykmelding.sisteHendelse().status}")
 
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverter(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
     }
 
@@ -188,7 +188,7 @@ class SykmeldingController(
                 }
             }
 
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverterSykmelding(sykmelding)
+        val konvertertSykmelding = sykmeldingDtoKonverterer.konverter(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
     }
 

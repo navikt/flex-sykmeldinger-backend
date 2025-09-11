@@ -22,11 +22,11 @@ class SykmeldingDtoKonverterer(
 
     fun konverter(sykmelding: Sykmelding): SykmeldingDTO =
         when (sykmelding.sykmeldingGrunnlag) {
-            is NorskSykmeldingGrunnlag -> konverterSykmelding(sykmelding)
+            is NorskSykmeldingGrunnlag -> konverterNorskSykmelding(sykmelding)
             is UtenlandskSykmeldingGrunnlag -> konverterUtenlandskSykmelding(sykmelding)
         }
 
-    internal fun konverterSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+    private fun konverterNorskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
@@ -74,7 +74,7 @@ class SykmeldingDtoKonverterer(
         )
     }
 
-    internal fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+    private fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
         val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
