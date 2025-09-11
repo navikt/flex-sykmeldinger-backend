@@ -14,6 +14,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.function.Supplier
 
 @Component
@@ -64,13 +65,8 @@ class SykmeldingStatusListener(
                 throw e
             }
 
-        val toManederSiden = nowFactory.get().minus(60, java.time.temporal.ChronoUnit.DAYS)
-        if (environmentToggles.isDevelopment() &&
-            status.event.timestamp
-                .toInstant()
-                .isBefore(toManederSiden)
-        ) {
-            log.warn("Sykmelding status er eldre enn to måneder, ignorerer: ${status.kafkaMetadata.sykmeldingId}")
+        if (environmentToggles.isDevelopment() && status.erEldreEnn(dager = 60)) {
+            log.warn("Sykmelding status er eldre enn 60 dager, ignorerer: ${status.kafkaMetadata.sykmeldingId}")
             return
         }
 
@@ -84,5 +80,12 @@ class SykmeldingStatusListener(
             )
             throw e
         }
+    }
+
+    private fun SykmeldingStatusKafkaMessageDTO.erEldreEnn(dager: Long): Boolean {
+        val nåTid = nowFactory.get()
+        val tidsGrense = nåTid.minus(dager, ChronoUnit.DAYS)
+        val statusTid = this.event.timestamp
+        return statusTid.toInstant().isBefore(tidsGrense)
     }
 }
