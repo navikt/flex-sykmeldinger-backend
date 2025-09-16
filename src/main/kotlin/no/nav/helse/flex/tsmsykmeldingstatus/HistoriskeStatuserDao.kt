@@ -24,6 +24,8 @@ interface HistoriskeStatuserDao {
     fun oppdaterCheckpointStatusTimestamp(statusTimestamp: Instant)
 
     fun lesAlleMedId(sykmeldingIder: Iterable<String>): List<SykmeldingStatusKafkaDTO>
+
+    fun lesAlleTempResterendeSykmeldingstatuserFraTsm(): List<SykmeldingStatusKafkaDTO>
 }
 
 @Repository("historiskeStatuserDao")
@@ -91,6 +93,15 @@ class HistoriskeStatuserDbDao(
             ),
             TsmSykmeldingerRowMapper,
         )
+
+    override fun lesAlleTempResterendeSykmeldingstatuserFraTsm(): List<SykmeldingStatusKafkaDTO> =
+        jdbcTemplate.query(
+            """
+            SELECT *
+            FROM temp_resterende_sykmeldingstatuser_fra_tsm
+            """.trimIndent(),
+            TempResterendeSykmeldingstatuserFraTsmRowMapper,
+        )
 }
 
 internal object TsmSykmeldingerRowMapper : RowMapper<SykmeldingStatusKafkaDTO> {
@@ -116,6 +127,34 @@ internal object TsmSykmeldingerRowMapper : RowMapper<SykmeldingStatusKafkaDTO> {
                 },
             sporsmals =
                 rs.getObject("sporsmal", PGobject::class.java)?.value?.let {
+                    objectMapper.readValue(it)
+                },
+        )
+}
+
+internal object TempResterendeSykmeldingstatuserFraTsmRowMapper : RowMapper<SykmeldingStatusKafkaDTO> {
+    override fun mapRow(
+        rs: ResultSet,
+        rowNum: Int,
+    ): SykmeldingStatusKafkaDTO =
+        SykmeldingStatusKafkaDTO(
+            sykmeldingId = rs.getString("sykmelding_id"),
+            timestamp = rs.getObject("timestamp", OffsetDateTime::class.java),
+            statusEvent = rs.getString("event"),
+            arbeidsgiver =
+                rs.getObject("arbeidsgiver", PGobject::class.java)?.value?.let {
+                    objectMapper.readValue(it)
+                },
+            tidligereArbeidsgiver =
+                rs.getObject("tidligere_arbeidsgiver", PGobject::class.java)?.value?.let {
+                    objectMapper.readValue(it)
+                },
+            brukerSvar =
+                rs.getObject("bruker_svar", PGobject::class.java)?.value?.let {
+                    objectMapper.readValue(it)
+                },
+            sporsmals =
+                rs.getObject("sporsmal_liste", PGobject::class.java)?.value?.let {
                     objectMapper.readValue(it)
                 },
         )
