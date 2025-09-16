@@ -3,6 +3,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.objectMapper
+import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -142,8 +143,15 @@ internal object TempResterendeSykmeldingstatuserFraTsmRowMapper : RowMapper<Sykm
             timestamp = rs.getObject("timestamp", OffsetDateTime::class.java),
             statusEvent = rs.getString("event"),
             arbeidsgiver =
-                rs.getObject("arbeidsgiver", PGobject::class.java)?.value?.let {
-                    objectMapper.readValue(it)
+                rs.getObject("arbeidsgiver", PGobject::class.java)?.value?.let { value ->
+                    val json: Map<String, Any?> = objectMapper.readValue(value)
+                    val transformed =
+                        mapOf(
+                            "orgnummer" to json["orgnummer"],
+                            "juridiskOrgnummer" to json["juridisk_orgnummer"],
+                            "orgNavn" to json["navn"],
+                        )
+                    objectMapper.readValue(transformed.serialisertTilString())
                 },
             tidligereArbeidsgiver =
                 rs.getObject("tidligere_arbeidsgiver", PGobject::class.java)?.value?.let {
@@ -154,8 +162,18 @@ internal object TempResterendeSykmeldingstatuserFraTsmRowMapper : RowMapper<Sykm
                     objectMapper.readValue(it)
                 },
             sporsmals =
-                rs.getObject("sporsmal_liste", PGobject::class.java)?.value?.let {
-                    objectMapper.readValue(it)
+                rs.getObject("sporsmal_liste", PGobject::class.java)?.value?.let { value ->
+                    val json: List<Map<String, Any?>> = objectMapper.readValue(value)
+                    val transformed =
+                        json.map {
+                            mapOf(
+                                "svartype" to it["svartype"],
+                                "shortName" to it["shortname"],
+                                "tekst" to it["tekst"],
+                                "svar" to it["svar"],
+                            )
+                        }
+                    objectMapper.readValue(transformed.serialisertTilString())
                 },
         )
 }
