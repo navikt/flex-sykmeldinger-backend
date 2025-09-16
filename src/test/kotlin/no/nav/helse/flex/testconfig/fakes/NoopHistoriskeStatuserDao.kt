@@ -24,4 +24,8 @@ class NoopHistoriskeStatuserDao : HistoriskeStatuserDao {
     override fun lesAlleMedId(sykmeldingIder: Iterable<String>): List<SykmeldingStatusKafkaDTO> {
         TODO("Not yet implemented")
     }
+
+    override fun lesAlleTempResterendeSykmeldingstatuserFraTsm(): List<SykmeldingStatusKafkaDTO> {
+        TODO("Not yet implemented")
+    }
 }
