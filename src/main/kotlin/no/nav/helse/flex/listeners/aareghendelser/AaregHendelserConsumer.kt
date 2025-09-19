@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.utils.errorSecure
@@ -86,7 +90,17 @@ class AaregHendelserConsumer(
             }
 
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
-        val timeMs = measureTimeMillis { personerFnr.forEach { synkroniserForPerson(it) } }
+        val timeMs =
+            measureTimeMillis {
+                runBlocking {
+                    personerFnr
+                        .map { fnr ->
+                            async(Dispatchers.IO) {
+                                synkroniserForPerson(fnr)
+                            }
+                        }.awaitAll()
+                }
+            }
 
         if (timeMs > 2000 * personerFnr.size && timeMs > 100) {
             log.warn(
