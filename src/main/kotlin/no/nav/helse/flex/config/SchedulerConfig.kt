@@ -7,6 +7,7 @@ import org.springframework.core.task.TaskExecutor
 import org.springframework.core.task.support.TaskExecutorAdapter
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.annotation.EnableAsync
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 import java.util.concurrent.Executors
 
@@ -23,8 +24,8 @@ class SchedulerConfig {
         }
 
     @Bean
-    fun virtualThreadExecutor(): TaskExecutor =
-        TaskExecutorAdapter(
+    fun virtualThreadExecutor(): ConcurrentTaskExecutor =
+        ConcurrentTaskExecutor(
             Executors.newVirtualThreadPerTaskExecutor(),
         )
 }

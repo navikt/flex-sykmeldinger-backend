@@ -19,11 +19,12 @@ import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.util.concurrent.CompletableFuture
 
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
         mock {
-            on { synkroniserArbeidsforholdForPerson(any()) } doReturn SynkroniserteArbeidsforhold()
+            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn CompletableFuture.completedFuture(SynkroniserteArbeidsforhold())
         }
 
     @Test
@@ -79,7 +80,7 @@ class AaregHendelserListenerTest {
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterArbeidsforholdHendelser(listOf(hendelse))
-        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPerson("fnr_med_sykmelding")
+        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonAsync("fnr_med_sykmelding")
     }
 
     @Test

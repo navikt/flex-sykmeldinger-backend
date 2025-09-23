@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.utils.errorSecure
@@ -17,6 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import java.util.concurrent.CompletableFuture
 import kotlin.system.measureTimeMillis
 
 enum class AaregHendelseHandtering {
@@ -92,13 +89,10 @@ class AaregHendelserConsumer(
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
         val timeMs =
             measureTimeMillis {
-                runBlocking {
-                    personerFnr
-                        .map { fnr ->
-                            async(Dispatchers.IO) {
-                                synkroniserForPerson(fnr)
-                            }
-                        }.awaitAll()
+                val personerFnrBatcher = personerFnr.chunked(100)
+                personerFnrBatcher.forEach { fnrBatch ->
+                    val tasks = fnrBatch.map { synkroniserForPerson(it) }
+                    CompletableFuture.allOf(*tasks.toTypedArray()).join()
                 }
             }
 
@@ -109,11 +103,12 @@ class AaregHendelserConsumer(
         }
     }
 
-    internal fun synkroniserForPerson(fnr: String) {
+    internal fun synkroniserForPerson(fnr: String): CompletableFuture<Unit> {
         if (!skalSynkroniseres(fnr)) {
-            return
+            return CompletableFuture.completedFuture(Unit)
         }
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
+        return CompletableFuture.completedFuture(Unit)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
