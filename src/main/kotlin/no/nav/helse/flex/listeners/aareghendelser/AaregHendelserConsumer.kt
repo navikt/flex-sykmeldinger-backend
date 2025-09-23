@@ -89,7 +89,7 @@ class AaregHendelserConsumer(
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
         val timeMs =
             measureTimeMillis {
-                val personerFnrBatcher = personerFnr.chunked(100)
+                val personerFnrBatcher = personerFnr.chunked(10)
                 personerFnrBatcher.forEach { fnrBatch ->
                     val tasks = fnrBatch.map { synkroniserForPerson(it) }
                     CompletableFuture.allOf(*tasks.toTypedArray()).join()
