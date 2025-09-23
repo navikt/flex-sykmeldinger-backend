@@ -4,11 +4,13 @@ import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.utils.logger
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
+import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 
 @Service
@@ -19,6 +21,11 @@ class ArbeidsforholdInnhentingService(
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
     private val log = logger()
+
+    @Async("virtualThreadExecutor")
+    @Transactional(rollbackFor = [Exception::class])
+    fun synkroniserArbeidsforholdForPersonAsync(fnr: String): CompletableFuture<SynkroniserteArbeidsforhold> =
+        CompletableFuture.completedFuture(synkroniserArbeidsforholdForPerson(fnr))
 
     @Transactional(rollbackFor = [Exception::class])
     fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {

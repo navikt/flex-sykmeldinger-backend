@@ -13,6 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import java.util.concurrent.CompletableFuture
 import kotlin.system.measureTimeMillis
 
 enum class AaregHendelseHandtering {
@@ -86,7 +87,14 @@ class AaregHendelserConsumer(
             }
 
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
-        val timeMs = measureTimeMillis { personerFnr.forEach { synkroniserForPerson(it) } }
+        val timeMs =
+            measureTimeMillis {
+                val personerFnrBatcher = personerFnr.chunked(10)
+                personerFnrBatcher.forEach { fnrBatch ->
+                    val tasks = fnrBatch.map { synkroniserForPerson(it) }
+                    CompletableFuture.allOf(*tasks.toTypedArray()).join()
+                }
+            }
 
         if (timeMs > 2000 * personerFnr.size && timeMs > 100) {
             log.warn(
@@ -95,11 +103,12 @@ class AaregHendelserConsumer(
         }
     }
 
-    internal fun synkroniserForPerson(fnr: String) {
+    internal fun synkroniserForPerson(fnr: String): CompletableFuture<Unit> {
         if (!skalSynkroniseres(fnr)) {
-            return
+            return CompletableFuture.completedFuture(Unit)
         }
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(fnr)
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
+        return CompletableFuture.completedFuture(Unit)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
