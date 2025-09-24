@@ -101,13 +101,15 @@ fun lagSykmeldingMetadata(
             versjon = "2.1.0",
         ),
     mottattDato: OffsetDateTime = OffsetDateTime.now(),
+    behandletTidspunkt: OffsetDateTime = OffsetDateTime.now().minusHours(2),
+    regelsettVersjon: String? = "1.0",
 ): SykmeldingMetadata {
     val avsenderSystem = avsenderSystem
     return SykmeldingMetadata(
         mottattDato = mottattDato,
         genDate = OffsetDateTime.now().minusDays(1),
-        behandletTidspunkt = OffsetDateTime.now().minusHours(2),
-        regelsettVersjon = "1.0",
+        behandletTidspunkt = behandletTidspunkt,
+        regelsettVersjon = regelsettVersjon,
         avsenderSystem = avsenderSystem,
         strekkode = "ABC12345",
     )
@@ -115,16 +117,17 @@ fun lagSykmeldingMetadata(
 
 fun lagPasient(
     fnr: String = "01010112345",
+    navn: Navn =
+        Navn(
+            fornavn = "Ola",
+            mellomnavn = null,
+            etternavn = "Nordmann",
+        ),
     navnFastlege: String? = null,
 ): Pasient =
     Pasient(
         fnr = fnr,
-        navn =
-            Navn(
-                fornavn = "Ola",
-                mellomnavn = null,
-                etternavn = "Nordmann",
-            ),
+        navn = navn,
         kontaktinfo =
             listOf(
                 Kontaktinfo(type = KontaktinfoType.TLF, value = "11111111"),
