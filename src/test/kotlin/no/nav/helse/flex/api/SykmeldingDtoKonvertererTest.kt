@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
@@ -10,6 +11,7 @@ import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagTilbakedatering
+import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
@@ -746,6 +748,58 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                 ),
                         ),
                 )
+        }
+    }
+
+    @Test
+    fun `burde konvertere utenlandsk sykmelding`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagUtenlandskSykmeldingGrunnlag())
+
+        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+        dto.id `should be equal to` sykmelding.sykmeldingId
+        dto.pasient `should be equal to`
+            PasientDTO(
+                fnr = sykmelding.sykmeldingGrunnlag.pasient.fnr,
+                fornavn =
+                    sykmelding.sykmeldingGrunnlag.pasient.navn
+                        ?.fornavn,
+                mellomnavn =
+                    sykmelding.sykmeldingGrunnlag.pasient.navn
+                        ?.mellomnavn,
+                etternavn =
+                    sykmelding.sykmeldingGrunnlag.pasient.navn
+                        ?.etternavn,
+                overSyttiAar = false,
+            )
+        dto.mottattTidspunkt `should be equal to` sykmelding.sykmeldingGrunnlag.metadata.mottattDato
+        dto.behandlingsutfall `should be equal to` sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
+        dto.arbeidsgiver.`should be null`()
+        dto.sykmeldingsperioder `should be equal to`
+            sykmelding.sykmeldingGrunnlag.aktivitet.map { sykmeldingDtoKonverterer.konverterSykmeldingsperiode(it) }
+        dto.medisinskVurdering `should be equal to`
+            sykmeldingDtoKonverterer.konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        dto.prognose `should be equal to` null
+        dto.utdypendeOpplysninger `should be equal to` emptyMap<String, Map<String, SporsmalSvarDTO>>()
+        dto.tiltakArbeidsplassen `should be equal to` null
+        dto.tiltakNAV `should be equal to` null
+        dto.andreTiltak `should be equal to` null
+        dto.meldingTilNAV `should be equal to` null
+        dto.meldingTilArbeidsgiver `should be equal to` null
+        dto.kontaktMedPasient?.let {
+            it.kontaktDato `should be equal to` null
+            it.begrunnelseIkkeKontakt `should be equal to` null
+        }
+        dto.behandletTidspunkt `should be equal to` sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt
+        dto.behandler.`should be null`()
+        dto.syketilfelleStartDato `should be equal to` sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato
+        dto.navnFastlege `should be equal to` sykmelding.sykmeldingGrunnlag.pasient.navnFastlege
+        dto.egenmeldt `should be equal to` false
+        dto.papirsykmelding `should be equal to` false
+        dto.harRedusertArbeidsgiverperiode `should be equal to` false
+        dto.rulesetVersion `should be equal to` sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon
+        dto.utenlandskSykmelding?.let {
+            it.land `should be equal to` (sykmelding.sykmeldingGrunnlag as UtenlandskSykmeldingGrunnlag).utenlandskInfo.land
         }
     }
 }
