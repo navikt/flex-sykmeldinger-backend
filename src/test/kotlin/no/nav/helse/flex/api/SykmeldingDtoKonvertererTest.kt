@@ -84,40 +84,40 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     validation = lagValidation(status = RuleType.PENDING),
                 )
 
-            require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
+            val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag.shouldBeInstanceOf<NorskSykmeldingGrunnlag>()
 
             val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
 
             dto.pasient `should be equal to`
                 sykmeldingDtoKonverterer.konverterPasient(
-                    sykmelding.sykmeldingGrunnlag.pasient,
+                    sykmeldingGrunnlag.pasient,
                     dto.sykmeldingsperioder.minBy { it.fom }.fom,
                 )
             dto.medisinskVurdering `should be equal to`
                 sykmeldingDtoKonverterer.konverterMedisinskVurdering(
-                    sykmelding.sykmeldingGrunnlag.medisinskVurdering,
+                    sykmeldingGrunnlag.medisinskVurdering,
                 )
-            dto.arbeidsgiver `should be equal to` sykmelding.sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
+            dto.arbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
             dto.prognose `should be equal to`
-                sykmelding.sykmeldingGrunnlag.prognose?.let {
+                sykmeldingGrunnlag.prognose?.let {
                     sykmeldingDtoKonverterer.konverterPrognose(it)
                 }
             dto.utdypendeOpplysninger `should be equal to`
-                sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger)
+                sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
             dto.kontaktMedPasient `should be equal to`
-                sykmelding.sykmeldingGrunnlag.tilbakedatering?.let {
+                sykmeldingGrunnlag.tilbakedatering?.let {
                     sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
                 }
-            dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler)
+            dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
 
-            dto.tiltakArbeidsplassen `should be equal to` sykmelding.sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
-            dto.tiltakNAV `should be equal to` sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNav
-            dto.andreTiltak `should be equal to` sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak
+            dto.tiltakArbeidsplassen `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
+            dto.tiltakNAV `should be equal to` sykmeldingGrunnlag.tiltak?.tiltakNav
+            dto.andreTiltak `should be equal to` sykmeldingGrunnlag.tiltak?.andreTiltak
             dto.meldingTilNAV `should be equal to`
-                sykmelding.sykmeldingGrunnlag.bistandNav!!.let {
+                sykmeldingGrunnlag.bistandNav!!.let {
                     sykmeldingDtoKonverterer.konverterMeldingTilNAV(it)
                 }
-            dto.meldingTilArbeidsgiver `should be equal to` sykmelding.sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
+            dto.meldingTilArbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
 
             dto.utenlandskSykmelding.`should be null`()
         }
@@ -125,6 +125,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         @Test
         fun `burde konvertere utenlandsk sykmelding`() {
             val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagUtenlandskSykmeldingGrunnlag())
+            val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag.shouldBeInstanceOf<UtenlandskSykmeldingGrunnlag>()
 
             val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
 
@@ -137,8 +138,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingDtoKonverterer.konverterMedisinskVurdering(
                     sykmelding.sykmeldingGrunnlag.medisinskVurdering,
                 )
-            dto.utenlandskSykmelding!!.land `should be equal to`
-                (sykmelding.sykmeldingGrunnlag as UtenlandskSykmeldingGrunnlag).utenlandskInfo.land
+            dto.utenlandskSykmelding!!.land `should be equal to` sykmeldingGrunnlag.utenlandskInfo.land
 
             dto.arbeidsgiver.`should be null`()
             dto.prognose.`should be null`()
