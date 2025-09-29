@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.domain.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
@@ -10,6 +11,7 @@ import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagTilbakedatering
+import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     @Autowired
@@ -32,297 +33,170 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         pdlClient.reset()
     }
 
-    @Test
-    fun `burde konvertere sykmelding`() {
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(
-                        medisinskVurdering =
-                            lagMedisinskVurdering(
-                                syketilfelleStartDato = LocalDate.parse("2025-01-01"),
-                            ),
-                        pasient = lagPasient(navnFastlege = "Fastlege Navn"),
-                        tilbakedatering =
-                            lagTilbakedatering(
-                                LocalDate.parse("2025-04-25"),
-                            ),
-                    ),
-                validation = lagValidation(status = RuleType.PENDING),
-            )
+    @Nested
+    inner class KonverteringTest {
+        @Test
+        fun `burde mappe felles felter for alle sykmeldinger`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(),
+                    validation = lagValidation(status = RuleType.OK),
+                )
+            val sykmeldingsperioderDto =
+                sykmelding.sykmeldingGrunnlag.aktivitet.map {
+                    sykmeldingDtoKonverterer.konverterSykmeldingsperiode(it)
+                }
+            val medisinskVurderingDto =
+                sykmeldingDtoKonverterer.konverterMedisinskVurdering(
+                    sykmelding.sykmeldingGrunnlag.medisinskVurdering,
+                )
 
-        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+            val dto = sykmeldingDtoKonverterer.konverterTilSykmeldingDTO(sykmelding)
 
-        val forventetDTO =
-            SykmeldingDTO(
-                id = sykmelding.sykmeldingId,
-                pasient =
-                    PasientDTO(
-                        fnr = sykmelding.sykmeldingGrunnlag.pasient.fnr,
-                        fornavn =
-                            sykmelding.sykmeldingGrunnlag.pasient.navn
-                                ?.fornavn,
-                        mellomnavn =
-                            sykmelding.sykmeldingGrunnlag.pasient.navn
-                                ?.mellomnavn,
-                        etternavn =
-                            sykmelding.sykmeldingGrunnlag.pasient.navn
-                                ?.etternavn,
-                        overSyttiAar = false,
-                    ),
-                mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
-                behandlingsutfall =
-                    BehandlingsutfallDTO(
-                        status = RegelStatusDTO.OK,
-                        ruleHits = emptyList(),
-                    ),
-                sykmeldingsperioder =
-                    sykmelding.sykmeldingGrunnlag.aktivitet.map {
-                        SykmeldingsperiodeDTO(
-                            fom = it.fom,
-                            tom = it.tom,
-                            type = PeriodetypeDTO.AKTIVITET_IKKE_MULIG,
-                            aktivitetIkkeMulig =
-                                AktivitetIkkeMuligDTO(
-                                    medisinskArsak =
-                                        MedisinskArsakDTO(
-                                            beskrivelse = "Pasient er syk",
-                                            arsak = listOf(MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET),
-                                        ),
-                                    arbeidsrelatertArsak = null,
-                                ),
-                            gradert = null,
-                            behandlingsdager = null,
-                            reisetilskudd = false,
-                            innspillTilArbeidsgiver = null,
-                        )
-                    },
-                sykmeldingStatus =
-                    SykmeldingStatusDTO(
-                        statusEvent = "APEN",
-                        timestamp = OffsetDateTime.ofInstant(sykmelding.opprettet, ZoneOffset.UTC),
-                        brukerSvar = null,
-                        arbeidsgiver = null,
-                    ),
-                medisinskVurdering =
-                    MedisinskVurderingDTO(
-                        hovedDiagnose = DiagnoseDTO(kode = "R51", system = "ICPC2", tekst = "tekst"),
-                        biDiagnoser = listOf(DiagnoseDTO(kode = "J06.9", system = "ICD10", tekst = "tekst")),
-                        annenFraversArsak = null,
-                        svangerskap = false,
-                        yrkesskade = false,
-                        yrkesskadeDato = null,
-                    ),
-                prognose =
-                    PrognoseDTO(
-                        arbeidsforEtterPeriode = true,
-                        hensynArbeidsplassen = "Tilrettelegging på arbeidsplassen anbefales",
-                        erIArbeid = null,
-                        erIkkeIArbeid = null,
-                    ),
-                utdypendeOpplysninger =
-                    mapOf(
-                        "arbeidsforhold" to
-                            mapOf(
-                                "tilrettelegging" to
-                                    SporsmalSvarDTO(
-                                        sporsmal = "Har du behov for tilrettelegging?",
-                                        svar = "Ja",
-                                        restriksjoner = listOf(SvarRestriksjonDTO.SKJERMET_FOR_ARBEIDSGIVER),
-                                    ),
-                            ),
-                    ),
-                tiltakArbeidsplassen = "Dette er et tiltak",
-                tiltakNAV = "Behov for tilrettelegging",
-                andreTiltak = "Redusert arbeidstid",
-                meldingTilNAV =
-                    MeldingTilNavDTO(
-                        bistandUmiddelbart = false,
-                        beskrivBistand = "Ingen behov for bistand per nå",
-                    ),
-                meldingTilArbeidsgiver = "Melding til arbeidsgiver",
-                kontaktMedPasient =
-                    KontaktMedPasientDTO(
-                        kontaktDato = LocalDate.parse("2025-04-25"),
-                        begrunnelseIkkeKontakt = "Pasienten kunne ikke oppsøke lege tidligere",
-                    ),
-                behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-                behandler =
-                    BehandlerDTO(
-                        fornavn = "Kari",
-                        mellomnavn = null,
-                        etternavn = "Hansen",
-                        adresse =
-                            AdresseDTO(
-                                gate = "Hovedgaten 1",
-                                postnummer = 101,
-                                kommune = "Oslo",
-                                postboks = null,
-                                land = "Norge",
-                            ),
-                        tlf = "11111111",
-                    ),
-                syketilfelleStartDato = LocalDate.parse("2025-01-01"),
-                navnFastlege = "Fastlege Navn",
-                arbeidsgiver =
-                    ArbeidsgiverDTO(
-                        navn = "Arbeidsgivernavn",
-                        stillingsprosent = 99,
-                    ),
-                skjermesForPasient = false,
-                egenmeldt = false,
-                papirsykmelding = false,
-                harRedusertArbeidsgiverperiode = false,
-                rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-                merknader =
-                    listOf(
-                        MerknadDTO(
-                            type = MerknadtypeDTO.UNDER_BEHANDLING,
-                            beskrivelse = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+            dto.pasient `should be equal to`
+                sykmeldingDtoKonverterer.konverterPasient(
+                    sykmelding.sykmeldingGrunnlag.pasient,
+                    sykmeldingsperioderDto.minBy { it.fom }.fom,
+                )
+            dto.medisinskVurdering `should be equal to` medisinskVurderingDto
+            dto.sykmeldingsperioder `should be equal to` sykmeldingsperioderDto
+            dto.behandlingsutfall `should be equal to` sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
+            dto.merknader `should be equal to` sykmeldingDtoKonverterer.konverterMerknader(sykmelding.validation)
+
+            dto.arbeidsgiver.`should be null`()
+            dto.prognose.`should be null`()
+            dto.behandler.`should be null`()
+            dto.utenlandskSykmelding.`should be null`()
+        }
+
+        @Test
+        fun `burde konvertere norsk sykmelding`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            medisinskVurdering = lagMedisinskVurdering(syketilfelleStartDato = LocalDate.parse("2025-01-01")),
+                            pasient = lagPasient(navnFastlege = "Fastlege Navn"),
+                            tilbakedatering = lagTilbakedatering(LocalDate.parse("2025-04-25")),
                         ),
-                    ),
-                utenlandskSykmelding = null,
-                legekontorOrgnummer = null,
-            )
+                    validation = lagValidation(status = RuleType.PENDING),
+                )
 
-        dto.id `should be equal to` forventetDTO.id
-        dto.pasient `should be equal to` forventetDTO.pasient
-        dto.mottattTidspunkt `should be equal to` forventetDTO.mottattTidspunkt
-        dto.behandlingsutfall `should be equal to` forventetDTO.behandlingsutfall
-        dto.legekontorOrgnummer `should be equal to` forventetDTO.legekontorOrgnummer
-        dto.arbeidsgiver `should be equal to` forventetDTO.arbeidsgiver
-        dto.sykmeldingsperioder `should be equal to` forventetDTO.sykmeldingsperioder
-        dto.sykmeldingStatus `should be equal to` forventetDTO.sykmeldingStatus
-        dto.medisinskVurdering `should be equal to` forventetDTO.medisinskVurdering
-        dto.skjermesForPasient `should be equal to` forventetDTO.skjermesForPasient
-        dto.prognose `should be equal to` forventetDTO.prognose
-        dto.utdypendeOpplysninger `should be equal to` forventetDTO.utdypendeOpplysninger
-        dto.tiltakArbeidsplassen `should be equal to` forventetDTO.tiltakArbeidsplassen
-        dto.tiltakNAV `should be equal to` forventetDTO.tiltakNAV
-        dto.andreTiltak `should be equal to` forventetDTO.andreTiltak
-        dto.meldingTilNAV `should be equal to` forventetDTO.meldingTilNAV
-        dto.meldingTilArbeidsgiver `should be equal to` forventetDTO.meldingTilArbeidsgiver
-        dto.kontaktMedPasient `should be equal to` forventetDTO.kontaktMedPasient
-        dto.behandletTidspunkt `should be equal to` forventetDTO.behandletTidspunkt
-        dto.behandler `should be equal to` forventetDTO.behandler
-        dto.syketilfelleStartDato `should be equal to` forventetDTO.syketilfelleStartDato
-        dto.navnFastlege `should be equal to` forventetDTO.navnFastlege
-        dto.egenmeldt `should be equal to` forventetDTO.egenmeldt
-        dto.papirsykmelding `should be equal to` forventetDTO.papirsykmelding
-        dto.harRedusertArbeidsgiverperiode `should be equal to` forventetDTO.harRedusertArbeidsgiverperiode
-        dto.merknader `should be equal to` forventetDTO.merknader
-        dto.rulesetVersion `should be equal to` forventetDTO.rulesetVersion
-        dto.utenlandskSykmelding `should be equal to` forventetDTO.utenlandskSykmelding
+            val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag.shouldBeInstanceOf<NorskSykmeldingGrunnlag>()
+
+            val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+            dto.pasient `should be equal to`
+                sykmeldingDtoKonverterer.konverterPasient(
+                    sykmeldingGrunnlag.pasient,
+                    dto.sykmeldingsperioder.minBy { it.fom }.fom,
+                )
+            dto.medisinskVurdering `should be equal to`
+                sykmeldingDtoKonverterer.konverterMedisinskVurdering(
+                    sykmeldingGrunnlag.medisinskVurdering,
+                )
+            dto.arbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
+            dto.prognose `should be equal to`
+                sykmeldingGrunnlag.prognose?.let {
+                    sykmeldingDtoKonverterer.konverterPrognose(it)
+                }
+            dto.utdypendeOpplysninger `should be equal to`
+                sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
+            dto.kontaktMedPasient `should be equal to`
+                sykmeldingGrunnlag.tilbakedatering?.let {
+                    sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
+                }
+            dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
+
+            dto.tiltakArbeidsplassen `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
+            dto.tiltakNAV `should be equal to` sykmeldingGrunnlag.tiltak?.tiltakNav
+            dto.andreTiltak `should be equal to` sykmeldingGrunnlag.tiltak?.andreTiltak
+            dto.meldingTilNAV `should be equal to`
+                sykmeldingGrunnlag.bistandNav!!.let {
+                    sykmeldingDtoKonverterer.konverterMeldingTilNAV(it)
+                }
+            dto.meldingTilArbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
+
+            dto.utenlandskSykmelding.`should be null`()
+        }
+
+        @Test
+        fun `burde konvertere utenlandsk sykmelding`() {
+            val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagUtenlandskSykmeldingGrunnlag())
+            val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag.shouldBeInstanceOf<UtenlandskSykmeldingGrunnlag>()
+
+            val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+            dto.pasient `should be equal to`
+                sykmeldingDtoKonverterer.konverterPasient(
+                    sykmelding.sykmeldingGrunnlag.pasient,
+                    dto.sykmeldingsperioder.minBy { it.fom }.fom,
+                )
+            dto.medisinskVurdering `should be equal to`
+                sykmeldingDtoKonverterer.konverterMedisinskVurdering(
+                    sykmelding.sykmeldingGrunnlag.medisinskVurdering,
+                )
+            dto.utenlandskSykmelding!!.land `should be equal to` sykmeldingGrunnlag.utenlandskInfo.land
+
+            dto.arbeidsgiver.`should be null`()
+            dto.prognose.`should be null`()
+            dto.behandler.`should be null`()
+            dto.meldingTilNAV.`should be null`()
+            dto.meldingTilArbeidsgiver.`should be null`()
+            dto.kontaktMedPasient.`should be null`()
+        }
     }
 
-    @Test
-    fun `burde konvertere med riktig id`() {
-        val sykmelding =
-            lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
-            )
+    @Nested
+    inner class PasientTest {
+        @Test
+        fun `burde konvertere pasient`() {
+            val pasient =
+                Pasient(
+                    navn = Navn("fornavn", "mellomnavn", "etternavn"),
+                    navKontor = null,
+                    navnFastlege = null,
+                    fnr = "fnr",
+                    kontaktinfo = emptyList(),
+                )
 
-        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
-        dto.id `should be equal to` "1"
+            val pasientDto =
+                sykmeldingDtoKonverterer.konverterPasient(
+                    pasient = pasient,
+                    fom = LocalDate.parse("2025-01-01"),
+                )
+
+            pasientDto `should be equal to`
+                PasientDTO(fnr = "fnr", fornavn = "fornavn", mellomnavn = "mellomnavn", etternavn = "etternavn", overSyttiAar = false)
+        }
+
+        @Test
+        fun `burde konvertere pasient som er over 70 år`() {
+            pdlClient.setFoedselsdato(LocalDate.parse("1950-01-01"), "fnr")
+            val pasient = Pasient(Navn("fornavn", "mellomnavn", "etternavn"), null, null, "fnr", emptyList())
+
+            val pasientDto = sykmeldingDtoKonverterer.konverterPasient(pasient, LocalDate.parse("2025-01-01"))
+
+            pasientDto.overSyttiAar `should be` true
+        }
     }
 
-    @Test
-    fun `burde konvertere pasient`() {
-        val pasient =
-            Pasient(
-                navn = Navn("fornavn", "mellomnavn", "etternavn"),
-                navKontor = null,
-                navnFastlege = null,
-                fnr = "fnr",
-                kontaktinfo = emptyList(),
-            )
+    @Nested
+    inner class ArbeidsgiverTest {
+        @Test fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
+            EnArbeidsgiver("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBeEqualTo
+                ArbeidsgiverDTO("Navn", 50)
+        }
 
-        val pasientDto =
-            sykmeldingDtoKonverterer.konverterPasient(
-                pasient = pasient,
-                fom = LocalDate.parse("2025-01-01"),
-            )
+        @Test fun `burde konvertere arbeidsgiver, flere arbeidsgiver`() {
+            FlereArbeidsgivere("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBeEqualTo
+                ArbeidsgiverDTO("Navn", 50)
+        }
 
-        pasientDto `should be equal to`
-            PasientDTO(
-                fnr = "fnr",
-                fornavn = "fornavn",
-                mellomnavn = "mellomnavn",
-                etternavn = "etternavn",
-                overSyttiAar = false,
-            )
-    }
-
-    @Test
-    fun `burde konvertere pasient som er over 70 år`() {
-        pdlClient.setFoedselsdato(LocalDate.parse("1950-01-01"), "fnr")
-
-        val pasient =
-            Pasient(
-                navn = Navn("fornavn", "mellomnavn", "etternavn"),
-                navKontor = null,
-                navnFastlege = null,
-                fnr = "fnr",
-                kontaktinfo = emptyList(),
-            )
-
-        val pasientDto =
-            sykmeldingDtoKonverterer.konverterPasient(
-                pasient = pasient,
-                fom = LocalDate.parse("2025-01-01"),
-            )
-
-        pasientDto `should be equal to`
-            PasientDTO(
-                fnr = "fnr",
-                fornavn = "fornavn",
-                mellomnavn = "mellomnavn",
-                etternavn = "etternavn",
-                overSyttiAar = true,
-            )
-    }
-
-    @Test
-    fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
-        val enArbeidsgiver =
-            EnArbeidsgiver(
-                navn = "Navn",
-                yrkesbetegnelse = "_",
-                stillingsprosent = 50,
-                meldingTilArbeidsgiver = "_",
-                tiltakArbeidsplassen = "_",
-            )
-
-        enArbeidsgiver.tilArbeidsgiverDTO() shouldBeEqualTo
-            ArbeidsgiverDTO(
-                navn = "Navn",
-                stillingsprosent = 50,
-            )
-    }
-
-    @Test
-    fun `burde konvertere arbeidsgiver, flere arbeidsgiver`() {
-        val arbeidsgiver =
-            FlereArbeidsgivere(
-                navn = "Navn",
-                yrkesbetegnelse = "_",
-                stillingsprosent = 50,
-                meldingTilArbeidsgiver = "_",
-                tiltakArbeidsplassen = "_",
-            )
-
-        val forventetArbeidsgiver =
-            ArbeidsgiverDTO(
-                navn = "Navn",
-                stillingsprosent = 50,
-            )
-
-        arbeidsgiver.tilArbeidsgiverDTO() `should be equal to` forventetArbeidsgiver
-    }
-
-    @Test
-    fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-        IngenArbeidsgiver().tilArbeidsgiverDTO().`should be null`()
+        @Test fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
+            IngenArbeidsgiver().tilArbeidsgiverDTO().`should be null`()
+        }
     }
 
     @Test
@@ -510,7 +384,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             stillingsprosent = 0,
         ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
 
-        IngenArbeidsgiver().getTiltakArbeidsplassen() `should be equal to` null
+        IngenArbeidsgiver().getTiltakArbeidsplassen().`should be null`()
     }
 
     @Test
@@ -531,7 +405,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             stillingsprosent = 0,
         ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
 
-        IngenArbeidsgiver().getMeldingTilArbeidsgiver() `should be equal to` null
+        IngenArbeidsgiver().getMeldingTilArbeidsgiver().`should be null`()
     }
 
     @Test

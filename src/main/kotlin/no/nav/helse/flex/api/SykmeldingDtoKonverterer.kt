@@ -26,58 +26,14 @@ class SykmeldingDtoKonverterer(
             is UtenlandskSykmeldingGrunnlag -> konverterUtenlandskSykmelding(sykmelding)
         }
 
-    private fun konverterNorskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
-        require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
-        val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
-        val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
-        val arbeidsgiver = sykmelding.sykmeldingGrunnlag.arbeidsgiver
-
-        return SykmeldingDTO(
-            id = sykmelding.sykmeldingId,
-            pasient =
-                konverterPasient(
-                    pasient = sykmelding.sykmeldingGrunnlag.pasient,
-                    fom = sykmeldingsperioder.minBy { it.fom }.fom,
-                ),
-            mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
-            behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
-            arbeidsgiver = arbeidsgiver.tilArbeidsgiverDTO(),
-            sykmeldingsperioder = sykmeldingsperioder,
-            sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
-            medisinskVurdering = medisinskVurdering,
-            skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
-            utdypendeOpplysninger = konverterUtdypendeOpplysninger(sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger),
-            tiltakArbeidsplassen = arbeidsgiver.getTiltakArbeidsplassen(),
-            tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNav,
-            andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
-            meldingTilNAV = sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
-            meldingTilArbeidsgiver = arbeidsgiver.getMeldingTilArbeidsgiver(),
-            kontaktMedPasient = sykmelding.sykmeldingGrunnlag.tilbakedatering?.let { konverterKontaktMedPasient(it) },
-            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-            behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
-            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
-            navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
-            egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
-            papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
-            harRedusertArbeidsgiverperiode =
-                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
-                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
-                    biDiagnoser = medisinskVurdering.biDiagnoser,
-                    sykmeldingsperioder = sykmeldingsperioder,
-                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-                ),
-            merknader = konverterMerknader(sykmelding.validation),
-            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
-            legekontorOrgnummer = null,
-            utenlandskSykmelding = null,
-        )
-    }
-
-    private fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
-        require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
-        val sykmeldingsperioder = sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
-        val medisinskVurdering = konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+    internal fun konverterTilSykmeldingDTO(
+        sykmelding: Sykmelding,
+        applySpesifikkMapping: SykmeldingDTO.() -> SykmeldingDTO = { this },
+    ): SykmeldingDTO {
+        val sykmeldingsperioder =
+            sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+        val medisinskVurdering =
+            konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -89,11 +45,14 @@ class SykmeldingDtoKonverterer(
             mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
             sykmeldingsperioder = sykmeldingsperioder,
-            sykmeldingStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
+            sykmeldingStatus =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(sykmelding.sisteHendelse()),
             medisinskVurdering = medisinskVurdering,
-            skjermesForPasient = sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
+            skjermesForPasient =
+                sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
             behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
-            syketilfelleStartDato = sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
+            syketilfelleStartDato =
+                sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
@@ -103,10 +62,6 @@ class SykmeldingDtoKonverterer(
                     biDiagnoser = medisinskVurdering.biDiagnoser,
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-                ),
-            utenlandskSykmelding =
-                UtenlandskSykmelding(
-                    land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
                 ),
             rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
@@ -121,7 +76,49 @@ class SykmeldingDtoKonverterer(
             meldingTilArbeidsgiver = null,
             prognose = null,
             behandler = null,
-        )
+            utenlandskSykmelding = null,
+        ).applySpesifikkMapping()
+    }
+
+    private fun konverterNorskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+        require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
+
+        val arbeidsgiver = sykmelding.sykmeldingGrunnlag.arbeidsgiver
+
+        return konverterTilSykmeldingDTO(sykmelding) {
+            copy(
+                arbeidsgiver = arbeidsgiver.tilArbeidsgiverDTO(),
+                prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
+                utdypendeOpplysninger =
+                    konverterUtdypendeOpplysninger(
+                        sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger,
+                    ),
+                tiltakArbeidsplassen = arbeidsgiver.getTiltakArbeidsplassen(),
+                tiltakNAV = sykmelding.sykmeldingGrunnlag.tiltak?.tiltakNav,
+                andreTiltak = sykmelding.sykmeldingGrunnlag.tiltak?.andreTiltak,
+                meldingTilNAV =
+                    sykmelding.sykmeldingGrunnlag.bistandNav?.let { konverterMeldingTilNAV(it) },
+                meldingTilArbeidsgiver = arbeidsgiver.getMeldingTilArbeidsgiver(),
+                kontaktMedPasient =
+                    sykmelding.sykmeldingGrunnlag.tilbakedatering?.let {
+                        konverterKontaktMedPasient(it)
+                    },
+                behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
+            )
+        }
+    }
+
+    private fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
+        require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
+
+        return konverterTilSykmeldingDTO(sykmelding) {
+            copy(
+                utenlandskSykmelding =
+                    UtenlandskSykmelding(
+                        land = sykmelding.sykmeldingGrunnlag.utenlandskInfo.land,
+                    ),
+            )
+        }
     }
 
     internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
