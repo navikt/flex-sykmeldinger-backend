@@ -9,7 +9,6 @@ import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
 import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
-import no.nav.helse.flex.tsmsykmeldingstatus.HistoriskeStatuserDao
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
@@ -59,11 +58,4 @@ class FakesTestConfig {
 
     @Bean
     fun syketilfelleClient(): SyketilfelleClientFake = SyketilfelleClientFake()
-
-    @Bean
-    fun historiskeStatuserDao(): HistoriskeStatuserDao = NoopHistoriskeStatuserDao()
-
-    @Bean
-    fun historiskArbeidsforholdCheckpointRepository(): NoopHistoriskArbeidsforholdCheckpointRepository =
-        NoopHistoriskArbeidsforholdCheckpointRepository()
 }
