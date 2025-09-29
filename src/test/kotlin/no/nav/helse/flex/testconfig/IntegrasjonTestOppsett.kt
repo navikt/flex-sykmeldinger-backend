@@ -24,7 +24,8 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 
-private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnami/valkey:8.0.2")
+// TODO: Bytt fra latest til en konkret versjon når det er tilgjengelig i dockerhub
+private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnamisecure/valkey:latest")
 
 private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
