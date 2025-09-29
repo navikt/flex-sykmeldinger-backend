@@ -26,13 +26,16 @@ class SykmeldingDtoKonverterer(
             is UtenlandskSykmeldingGrunnlag -> konverterUtenlandskSykmelding(sykmelding)
         }
 
-    internal fun mapToSykmeldingDTO(
+    internal fun konverterTilSykmeldingDTO(
         sykmelding: Sykmelding,
-        sykmeldingsperioder: List<SykmeldingsperiodeDTO>,
-        medisinskVurdering: MedisinskVurderingDTO,
-        extra: SykmeldingDTO.() -> SykmeldingDTO,
-    ): SykmeldingDTO =
-        SykmeldingDTO(
+        applySpesifikkMapping: SykmeldingDTO.() -> SykmeldingDTO = { this },
+    ): SykmeldingDTO {
+        val sykmeldingsperioder =
+            sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
+        val medisinskVurdering =
+            konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+
+        return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
             pasient =
                 konverterPasient(
@@ -74,17 +77,15 @@ class SykmeldingDtoKonverterer(
             prognose = null,
             behandler = null,
             utenlandskSykmelding = null,
-        ).extra()
+        ).applySpesifikkMapping()
+    }
 
     private fun konverterNorskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is NorskSykmeldingGrunnlag)
-        val sykmeldingsperioder =
-            sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
-        val medisinskVurdering =
-            konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+
         val arbeidsgiver = sykmelding.sykmeldingGrunnlag.arbeidsgiver
 
-        return mapToSykmeldingDTO(sykmelding, sykmeldingsperioder, medisinskVurdering) {
+        return konverterTilSykmeldingDTO(sykmelding) {
             copy(
                 arbeidsgiver = arbeidsgiver.tilArbeidsgiverDTO(),
                 prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
@@ -109,12 +110,8 @@ class SykmeldingDtoKonverterer(
 
     private fun konverterUtenlandskSykmelding(sykmelding: Sykmelding): SykmeldingDTO {
         require(sykmelding.sykmeldingGrunnlag is UtenlandskSykmeldingGrunnlag)
-        val sykmeldingsperioder =
-            sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
-        val medisinskVurdering =
-            konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
 
-        return mapToSykmeldingDTO(sykmelding, sykmeldingsperioder, medisinskVurdering) {
+        return konverterTilSykmeldingDTO(sykmelding) {
             copy(
                 utenlandskSykmelding =
                     UtenlandskSykmelding(

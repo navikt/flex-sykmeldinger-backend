@@ -39,29 +39,28 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         fun `burde mappe felles felter for alle sykmeldinger`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(),
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(),
                     validation = lagValidation(status = RuleType.OK),
                 )
-            val sykmeldingsperioder =
+            val sykmeldingsperioderDto =
                 sykmelding.sykmeldingGrunnlag.aktivitet.map {
                     sykmeldingDtoKonverterer.konverterSykmeldingsperiode(it)
                 }
-            val medisinskVurdering =
+            val medisinskVurderingDto =
                 sykmeldingDtoKonverterer.konverterMedisinskVurdering(
                     sykmelding.sykmeldingGrunnlag.medisinskVurdering,
                 )
 
-            val dto =
-                sykmeldingDtoKonverterer
-                    .run { mapToSykmeldingDTO(sykmelding, sykmeldingsperioder, medisinskVurdering) { this } }
+            val dto = sykmeldingDtoKonverterer.konverterTilSykmeldingDTO(sykmelding)
 
             dto.pasient `should be equal to`
                 sykmeldingDtoKonverterer.konverterPasient(
                     sykmelding.sykmeldingGrunnlag.pasient,
-                    sykmeldingsperioder.minBy { it.fom }.fom,
+                    sykmeldingsperioderDto.minBy { it.fom }.fom,
                 )
-            dto.medisinskVurdering `should be equal to` medisinskVurdering
-            dto.sykmeldingsperioder `should be equal to` sykmeldingsperioder
+            dto.medisinskVurdering `should be equal to` medisinskVurderingDto
+            dto.sykmeldingsperioder `should be equal to` sykmeldingsperioderDto
             dto.behandlingsutfall `should be equal to` sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
             dto.merknader `should be equal to` sykmeldingDtoKonverterer.konverterMerknader(sykmelding.validation)
 
