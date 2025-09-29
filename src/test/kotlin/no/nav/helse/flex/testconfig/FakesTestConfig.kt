@@ -62,8 +62,4 @@ class FakesTestConfig {
 
     @Bean
     fun historiskeStatuserDao(): HistoriskeStatuserDao = NoopHistoriskeStatuserDao()
-
-    @Bean
-    fun historiskArbeidsforholdCheckpointRepository(): NoopHistoriskArbeidsforholdCheckpointRepository =
-        NoopHistoriskArbeidsforholdCheckpointRepository()
 }
