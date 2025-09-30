@@ -1,8 +1,8 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
-import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
-import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystem
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingMetadata

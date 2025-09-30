@@ -10,8 +10,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import no.nav.helse.flex.sykmelding.domain.Tilleggsinfo
-import no.nav.helse.flex.sykmelding.domain.tsm.SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE
-import no.nav.helse.flex.sykmelding.domain.tsm.SYKMELDING_GRUNNLAG_SERIALIZER
+import no.nav.helse.flex.sykmelding.tsm.SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE
+import no.nav.helse.flex.sykmelding.tsm.SYKMELDING_GRUNNLAG_SERIALIZER
 
 val objectMapper: ObjectMapper =
     JsonMapper

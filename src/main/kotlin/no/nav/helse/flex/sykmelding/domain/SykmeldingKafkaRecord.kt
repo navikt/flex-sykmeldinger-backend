@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding.domain
 
-import no.nav.helse.flex.sykmelding.domain.tsm.ISykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
+import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 
 data class SykmeldingKafkaRecord(
     val sykmelding: ISykmeldingGrunnlag,

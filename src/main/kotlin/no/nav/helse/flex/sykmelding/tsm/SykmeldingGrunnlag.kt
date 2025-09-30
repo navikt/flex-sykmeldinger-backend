@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain.tsm
+package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Sykmelder
+import no.nav.helse.flex.sykmelding.tsm.values.Behandler
+import no.nav.helse.flex.sykmelding.tsm.values.Pasient
+import no.nav.helse.flex.sykmelding.tsm.values.Sykmelder
 import java.time.LocalDate
 import java.time.OffsetDateTime
 

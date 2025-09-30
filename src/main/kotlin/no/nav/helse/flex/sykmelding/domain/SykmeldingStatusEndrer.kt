@@ -1,7 +1,8 @@
 package no.nav.helse.flex.sykmelding.domain
 
+import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
-import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
 import org.springframework.stereotype.Service
 
 @Service

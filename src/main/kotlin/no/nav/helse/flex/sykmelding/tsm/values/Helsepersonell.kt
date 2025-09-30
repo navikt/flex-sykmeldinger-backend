@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain.tsm.values
+package no.nav.helse.flex.sykmelding.tsm.values
 
 import java.time.LocalDate
 

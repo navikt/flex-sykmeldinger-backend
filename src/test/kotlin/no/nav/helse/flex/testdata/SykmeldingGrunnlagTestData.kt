@@ -1,7 +1,7 @@
 package no.nav.helse.flex.testdata
 
-import no.nav.helse.flex.sykmelding.domain.tsm.*
-import no.nav.helse.flex.sykmelding.domain.tsm.values.*
+import no.nav.helse.flex.sykmelding.tsm.*
+import no.nav.helse.flex.sykmelding.tsm.values.*
 import java.time.LocalDate
 import java.time.OffsetDateTime
 

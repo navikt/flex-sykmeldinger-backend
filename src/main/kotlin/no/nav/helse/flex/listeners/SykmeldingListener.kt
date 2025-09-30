@@ -3,7 +3,7 @@ package no.nav.helse.flex.listeners
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.sykmelding.application.SykmeldingKafkaLagrer
+import no.nav.helse.flex.sykmelding.SykmeldingKafkaLagrer
 import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger

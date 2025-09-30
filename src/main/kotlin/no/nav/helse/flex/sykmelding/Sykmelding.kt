@@ -1,6 +1,10 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.sykmelding.domain.tsm.*
+import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.collections.plus

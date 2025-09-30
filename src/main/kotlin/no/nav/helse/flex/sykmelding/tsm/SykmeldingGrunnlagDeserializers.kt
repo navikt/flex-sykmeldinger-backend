@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain.tsm
+package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.utils.addPolymorphicDeserializer

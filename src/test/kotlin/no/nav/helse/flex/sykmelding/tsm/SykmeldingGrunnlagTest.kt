@@ -1,6 +1,9 @@
-package no.nav.helse.flex.sykmelding.domain.tsm
+package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper

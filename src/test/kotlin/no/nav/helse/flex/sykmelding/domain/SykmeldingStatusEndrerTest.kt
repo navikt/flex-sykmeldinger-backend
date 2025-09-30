@@ -1,9 +1,9 @@
 package no.nav.helse.flex.sykmelding.domain
 
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
-import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystem
-import no.nav.helse.flex.sykmelding.domain.tsm.AvsenderSystemNavn
-import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystem
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*

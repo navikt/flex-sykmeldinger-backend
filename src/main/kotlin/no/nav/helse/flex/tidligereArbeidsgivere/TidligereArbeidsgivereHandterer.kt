@@ -1,6 +1,7 @@
 package no.nav.helse.flex.tidligereArbeidsgivere
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
+import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.*
 import java.time.DayOfWeek
 import java.time.LocalDate
