@@ -3,6 +3,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.api.dto.JaEllerNei
 import no.nav.helse.flex.sykmelding.application.*
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
 import java.time.LocalDate
 

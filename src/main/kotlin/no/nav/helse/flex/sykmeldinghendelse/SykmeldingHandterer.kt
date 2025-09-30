@@ -6,7 +6,6 @@ import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
 import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service

@@ -1,11 +1,11 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
 import no.nav.helse.flex.sykmelding.application.UriktigeOpplysning
 import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest

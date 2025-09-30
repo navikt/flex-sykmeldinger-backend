@@ -1,6 +1,7 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.sykmelding.application.*
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import java.time.LocalDate
 
 fun lagArbeidstakerBrukerSvar(

@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.sykmelding.UgyldigSykmeldingStatusException
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystem
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.tsm.RuleType

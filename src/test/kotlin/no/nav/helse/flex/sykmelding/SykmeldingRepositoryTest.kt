@@ -2,8 +2,8 @@ package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*

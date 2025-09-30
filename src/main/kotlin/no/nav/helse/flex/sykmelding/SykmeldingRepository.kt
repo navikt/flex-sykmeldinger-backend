@@ -2,10 +2,10 @@ package no.nav.helse.flex.sykmelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject

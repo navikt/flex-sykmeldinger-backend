@@ -4,7 +4,7 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset

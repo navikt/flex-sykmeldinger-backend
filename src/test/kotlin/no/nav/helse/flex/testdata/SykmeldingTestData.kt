@@ -1,9 +1,9 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import java.time.Instant
 
 fun lagSykmelding(

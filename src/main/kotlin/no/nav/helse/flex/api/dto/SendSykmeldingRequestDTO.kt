@@ -2,6 +2,7 @@ package no.nav.helse.flex.api.dto
 
 import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import java.time.LocalDate
 
 fun JaEllerNei.tilBoolean(): Boolean = this == JaEllerNei.JA

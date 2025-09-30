@@ -1,7 +1,7 @@
 package no.nav.helse.flex.tidligereArbeidsgivere
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test

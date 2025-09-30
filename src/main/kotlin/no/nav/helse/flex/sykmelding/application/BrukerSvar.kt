@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.application
 
 import com.fasterxml.jackson.databind.module.SimpleModule
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 import java.time.LocalDate
 

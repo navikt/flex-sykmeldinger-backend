@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.sykmeldinghendelse
 
 enum class Arbeidssituasjon {
     ARBEIDSTAKER,

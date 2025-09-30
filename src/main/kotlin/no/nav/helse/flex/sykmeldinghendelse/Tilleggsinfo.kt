@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmeldinghendelse
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver

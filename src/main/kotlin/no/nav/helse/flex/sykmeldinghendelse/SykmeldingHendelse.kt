@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import java.time.Instant
