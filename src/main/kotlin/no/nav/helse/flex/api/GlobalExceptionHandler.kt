@@ -3,7 +3,7 @@ package no.nav.helse.flex.api
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
-import no.nav.helse.flex.sykmelding.application.KunneIkkeFinneTilleggsinfoException
+import no.nav.helse.flex.sykmeldinghendelse.KunneIkkeFinneTilleggsinfoException
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.exceptions.JwtTokenInvalidClaimException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException

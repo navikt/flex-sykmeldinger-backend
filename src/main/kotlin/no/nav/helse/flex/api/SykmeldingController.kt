@@ -11,7 +11,7 @@ import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.application.SykmeldingHandterer
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHandterer
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims

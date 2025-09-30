@@ -1,8 +1,9 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
+import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
