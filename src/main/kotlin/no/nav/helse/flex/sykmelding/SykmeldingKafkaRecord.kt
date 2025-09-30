@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult

@@ -1,6 +1,6 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.sykmelding.domain.SykmeldingKafkaRecord
+import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
