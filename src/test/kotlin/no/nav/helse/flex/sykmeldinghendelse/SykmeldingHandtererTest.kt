@@ -2,8 +2,8 @@ package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
 import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusProducerFake
 import no.nav.helse.flex.testdata.*

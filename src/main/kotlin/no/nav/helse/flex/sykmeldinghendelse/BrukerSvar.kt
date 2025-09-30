@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.sykmeldinghendelse
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
@@ -21,7 +21,8 @@ sealed interface BrukerSvar {
     val type: BrukerSvarType
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>
     val erOpplysningeneRiktige: SporsmalSvar<Boolean>
-    val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>?
+    val uriktigeOpplysninger:
+        SporsmalSvar<List<UriktigeOpplysning>>?
 
     companion object {
         val deserializerModule =
@@ -88,7 +89,12 @@ data class FiskerBrukerSvar(
 ) : BrukerSvar {
     override val type = BrukerSvarType.FISKER
 
-    private val erArbeidstaker = lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)
+    private val erArbeidstaker =
+        lottOgHyre.svar in
+            setOf(
+                FiskerLottOgHyre.HYRE,
+                FiskerLottOgHyre.BEGGE,
+            )
 
     fun valider() {
         if (erArbeidstaker) {

@@ -2,9 +2,8 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
 import no.nav.helse.flex.sykmeldinghendelse.*
+import no.nav.helse.flex.sykmeldinghendelse.Egenmeldingsperiode
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset

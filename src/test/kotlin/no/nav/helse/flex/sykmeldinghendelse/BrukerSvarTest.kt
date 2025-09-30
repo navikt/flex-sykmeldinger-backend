@@ -1,4 +1,4 @@
-package no.nav.helse.flex.sykmelding.application
+package no.nav.helse.flex.sykmeldinghendelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.utils.objectMapper

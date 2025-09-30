@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
-import no.nav.helse.flex.sykmelding.application.BrukerSvar
 import java.time.Instant
 
 data class SykmeldingHendelse(

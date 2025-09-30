@@ -2,8 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.api.dto.JaEllerNei
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.BrukerSvarKafkaDTO
 import java.time.LocalDate
 
@@ -186,7 +185,8 @@ object BrukerSvarKafkaDtoKonverterer {
                         sporsmaltekst = uriktigeOpplysninger.sporsmaltekst,
                         svar =
                             uriktigeOpplysninger.svar.map {
-                                UriktigeOpplysning.valueOf(it.name)
+                                UriktigeOpplysning
+                                    .valueOf(it.name)
                             },
                     )
                 },
@@ -194,14 +194,18 @@ object BrukerSvarKafkaDtoKonverterer {
                 brukerSvarKafkaDTO.fisker?.lottOgHyre?.let {
                     SporsmalSvar(
                         sporsmaltekst = it.sporsmaltekst,
-                        svar = FiskerLottOgHyre.valueOf(it.svar.name),
+                        svar =
+                            FiskerLottOgHyre
+                                .valueOf(it.svar.name),
                     )
                 },
             blad =
                 brukerSvarKafkaDTO.fisker?.blad?.let {
                     SporsmalSvar(
                         sporsmaltekst = it.sporsmaltekst,
-                        svar = FiskerBlad.valueOf(it.svar.name),
+                        svar =
+                            FiskerBlad
+                                .valueOf(it.svar.name),
                     )
                 },
         )

@@ -6,10 +6,10 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import no.nav.helse.flex.sykmelding.application.SporsmalSvar
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SporsmalSvar
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
@@ -854,7 +854,11 @@ fun lagSendSykmeldingRequestDTO(
     fiskerLottOgHyreSporsmaltekst: String = "Mottar du lott eller er du på hyre?",
 ): SendSykmeldingRequestDTO =
     SendSykmeldingRequestDTO(
-        erOpplysningeneRiktige = SporsmalSvar("Stemmer opplysningene?", erOpplysningeneRiktige),
+        erOpplysningeneRiktige =
+            SporsmalSvar(
+                "Stemmer opplysningene?",
+                erOpplysningeneRiktige,
+            ),
         arbeidssituasjon =
             SporsmalSvar(
                 sporsmaltekst = "Jeg er sykmeldt som",

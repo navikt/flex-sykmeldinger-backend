@@ -1,6 +1,6 @@
 package no.nav.helse.flex.testdata
 
-import no.nav.helse.flex.sykmelding.application.BrukerSvar
+import no.nav.helse.flex.sykmeldinghendelse.BrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.sykmeldinghendelse.Tilleggsinfo

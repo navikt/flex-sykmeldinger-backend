@@ -2,8 +2,8 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate

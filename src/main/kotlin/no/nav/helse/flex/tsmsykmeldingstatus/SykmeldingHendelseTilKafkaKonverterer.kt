@@ -3,11 +3,11 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 import no.nav.helse.flex.api.SykmeldingStatusDtoKonverterer
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
-import no.nav.helse.flex.sykmelding.application.BrukerSvar
-import no.nav.helse.flex.sykmelding.application.FiskerBrukerSvar
-import no.nav.helse.flex.sykmelding.application.FiskerLottOgHyre
-import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.*
+import no.nav.helse.flex.sykmeldinghendelse.BrukerSvar
+import no.nav.helse.flex.sykmeldinghendelse.FiskerBrukerSvar
+import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
+import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
