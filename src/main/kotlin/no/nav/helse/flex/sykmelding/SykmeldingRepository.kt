@@ -1,8 +1,9 @@
-package no.nav.helse.flex.sykmelding.domain
+package no.nav.helse.flex.sykmelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.Sykmelding
+import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
 import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.utils.objectMapper
@@ -88,7 +89,8 @@ class SykmeldingRepository(
     @Transactional(rollbackFor = [Exception::class])
     override fun delete(sykmelding: Sykmelding) {
         val sykmeldingDbRecord = SykmeldingDbRecord.mapFraSykmelding(sykmelding)
-        val hendelserDbRecords = SykmeldingHendelseDbRecord.mapFraHendelser(sykmelding.hendelser, sykmelding.sykmeldingId)
+        val hendelserDbRecords =
+            SykmeldingHendelseDbRecord.mapFraHendelser(sykmelding.hendelser, sykmelding.sykmeldingId)
         sykmeldingHendelseDbRepository.deleteAll(hendelserDbRecords)
         sykmeldingDbRepository.delete(sykmeldingDbRecord)
     }

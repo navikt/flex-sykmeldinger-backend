@@ -1,7 +1,7 @@
 package no.nav.helse.flex
 
-import no.nav.helse.flex.sykmelding.domain.SykmeldingDbRepository
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelseDbRepository
+import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
 import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake

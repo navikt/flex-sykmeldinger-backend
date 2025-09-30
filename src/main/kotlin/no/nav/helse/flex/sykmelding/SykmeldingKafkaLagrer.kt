@@ -2,7 +2,6 @@ package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component

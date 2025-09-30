@@ -1,7 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.config.IdentService
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import org.springframework.stereotype.Component
 
 @Component

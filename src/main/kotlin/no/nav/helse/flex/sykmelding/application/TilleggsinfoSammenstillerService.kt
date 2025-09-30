@@ -3,6 +3,7 @@ package no.nav.helse.flex.sykmelding.application
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.domain.*
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
