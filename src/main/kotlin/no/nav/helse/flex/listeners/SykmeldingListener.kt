@@ -79,6 +79,11 @@ class SykmeldingListener(
             }
         }
 
+        if (environmentToggles.isDevelopment() && sykmeldingRecord != null) {
+            val mottattDato = sykmeldingRecord.sykmelding.metadata.mottattDato
+            log.info("mottattDato på sykmelding '$sykmeldingId': mottattDato: $mottattDato, som instant: ${mottattDato.toInstant()}")
+        }
+
         log.info("Prosesserer sykmelding $sykmeldingId fra topic $SYKMELDING_TOPIC")
         try {
             sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
