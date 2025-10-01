@@ -5,7 +5,6 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
-import no.nav.helse.flex.testdatagenerator.TEST_SYKMELDING_TOPIC
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-class TestSykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class TestSykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @AfterEach
     fun afterEach() {
         slettDatabase()

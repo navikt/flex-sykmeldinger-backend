@@ -1,4 +1,4 @@
-package no.nav.helse.flex.testdatagenerator
+package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord

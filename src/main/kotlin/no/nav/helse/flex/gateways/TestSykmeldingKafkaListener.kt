@@ -1,4 +1,4 @@
-package no.nav.helse.flex.testdatagenerator
+package no.nav.helse.flex.gateways
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
