@@ -2,7 +2,7 @@ package no.nav.helse.flex.testdatagenerator
 
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaLagrer
+import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("testdata")
 class TestSykmeldingListener(
-    private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
+    private val eksternSykmeldingHandterer: EksternSykmeldingHandterer,
 ) {
     val log = logger()
 
@@ -37,7 +37,7 @@ class TestSykmeldingListener(
                 } else {
                     objectMapper.readValue(serialisertHendelse)
                 }
-            sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+            eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
                 sykmeldingKafkaRecord = sykmeldingRecord,
             )

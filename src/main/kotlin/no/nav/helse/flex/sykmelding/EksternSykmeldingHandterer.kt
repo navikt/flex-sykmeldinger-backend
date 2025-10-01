@@ -11,7 +11,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Component
-class SykmeldingKafkaLagrer(
+class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,

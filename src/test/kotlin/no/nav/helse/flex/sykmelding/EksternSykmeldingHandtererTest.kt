@@ -22,12 +22,12 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 
-class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
+class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
     lateinit var nowFactoryFake: NowFactoryFake
 
     @Autowired
-    private lateinit var sykmeldingKafkaLagrer: SykmeldingKafkaLagrer
+    private lateinit var eksternSykmeldingHandterer: EksternSykmeldingHandterer
 
     @Autowired
     private lateinit var eregClient: EregClientFake
@@ -51,7 +51,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
 
     @Test
     fun `burde lagre sykmelding`() {
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
@@ -66,10 +66,10 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             lagSykmeldingKafkaRecord(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr")),
             )
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
 
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             kafkaMelding.copy(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("ny_fnr")),
@@ -95,11 +95,11 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
 
         val førsteMeldingTid = Instant.parse("2024-01-01T00:00:00Z")
         nowFactoryFake.setNow(førsteMeldingTid)
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
 
         val nyMeldingTid = førsteMeldingTid.plus(1, ChronoUnit.DAYS)
         nowFactoryFake.setNow(nyMeldingTid)
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding.copy())
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding.copy())
 
         sykmeldingRepository
             .findBySykmeldingId("1")
@@ -118,10 +118,10 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(status = RuleType.PENDING),
             )
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
 
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             kafkaMelding.copy(
                 validation = lagValidation(status = RuleType.OK),
@@ -150,7 +150,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
                         metadata = lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2023-01-01T00:00:00Z")),
                     ),
             )
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingKafkaRecord)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingKafkaRecord)
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
         sykmelding
@@ -183,7 +183,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
                 validation = lagValidation(),
             )
 
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
@@ -199,7 +199,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
             ),
         )
 
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
@@ -215,7 +215,7 @@ class SykmeldingKafkaLagrerTest : FakesTestOppsett() {
         sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
-        sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(sykmeldingId = "1", sykmeldingKafkaRecord = null)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", sykmeldingKafkaRecord = null)
         sykmeldingRepository.findAll().shouldHaveSize(0)
     }
 }

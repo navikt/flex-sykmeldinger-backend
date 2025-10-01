@@ -3,7 +3,7 @@ package no.nav.helse.flex.listeners
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaLagrer
+import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class SykmeldingListener(
-    private val sykmeldingKafkaLagrer: SykmeldingKafkaLagrer,
+    private val eksternSykmeldingHandterer: EksternSykmeldingHandterer,
     private val environmentToggles: EnvironmentToggles,
 ) {
     val log = logger()
@@ -81,7 +81,7 @@ class SykmeldingListener(
 
         log.info("Prosesserer sykmelding $sykmeldingId fra topic $SYKMELDING_TOPIC")
         try {
-            sykmeldingKafkaLagrer.lagreSykmeldingFraKafka(
+            eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
                 sykmeldingKafkaRecord = sykmeldingRecord,
             )
