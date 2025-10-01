@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-class NarmesteLederListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
 

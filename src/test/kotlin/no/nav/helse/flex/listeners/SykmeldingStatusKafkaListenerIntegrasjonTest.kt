@@ -21,7 +21,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class SykmeldingStatusKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     private lateinit var nowFactoryFake: NowFactoryFake
 
@@ -29,7 +29,7 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     private lateinit var environmentToggles: EnvironmentTogglesFake
 
     @Autowired
-    private lateinit var sykmeldingStatusListener: SykmeldingStatusListener
+    private lateinit var sykmeldingStatusKafkaListener: SykmeldingStatusKafkaListener
 
     @BeforeEach
     fun setup() {
@@ -84,7 +84,7 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
                     ),
             )
 
-        sykmeldingStatusListener.listen(
+        sykmeldingStatusKafkaListener.listen(
             ConsumerRecord(
                 SYKMELDINGSTATUS_TOPIC,
                 0,
@@ -132,11 +132,11 @@ class SykmeldingStatusListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde ignorere hendelse fra kafka som har null eller 'null'`() {
-        sykmeldingStatusListener.listen(
+        sykmeldingStatusKafkaListener.listen(
             cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "1", null),
             acknowledgment = { },
         )
-        sykmeldingStatusListener.listen(
+        sykmeldingStatusKafkaListener.listen(
             cr = ConsumerRecord(SYKMELDINGSTATUS_TOPIC, 0, 0, "2", "null"),
             acknowledgment = { },
         )

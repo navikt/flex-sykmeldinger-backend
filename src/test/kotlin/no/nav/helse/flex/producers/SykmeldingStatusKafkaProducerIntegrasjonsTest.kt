@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
-class SykmeldingStatusProducerKafkaIntegrasjonsTest : IntegrasjonTestOppsett() {
+class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var sykmeldingStatusProducerKafka: SykmeldingStatusProducerKafka
 

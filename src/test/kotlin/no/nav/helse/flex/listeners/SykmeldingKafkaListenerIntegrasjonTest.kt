@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
 
-class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
+class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     private lateinit var environmentToggles: EnvironmentTogglesFake
 

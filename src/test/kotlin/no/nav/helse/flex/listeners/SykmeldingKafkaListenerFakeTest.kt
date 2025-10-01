@@ -15,7 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class SykmeldingListenerFakeTest : FakesTestOppsett() {
+class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
     @Autowired
     lateinit var environmentToggles: EnvironmentTogglesFake
 

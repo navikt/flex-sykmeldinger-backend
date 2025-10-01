@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit
 import java.util.function.Supplier
 
 @Component
-class SykmeldingStatusListener(
+class SykmeldingStatusKafkaListener(
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
     private val environmentToggles: EnvironmentToggles,

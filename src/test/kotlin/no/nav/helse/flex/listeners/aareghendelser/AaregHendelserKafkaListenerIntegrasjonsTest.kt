@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import java.time.Duration
 
-class AaregHendelserConsumerIntegrasjonsTest : IntegrasjonTestOppsett() {
+class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Value("\${AAREG_HENDELSE_TOPIC}")
     lateinit var aaregTopic: String
 
