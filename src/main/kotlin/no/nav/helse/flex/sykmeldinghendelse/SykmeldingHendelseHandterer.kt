@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.function.Supplier
 
 @Service
-class SykmeldingHandterer(
+class SykmeldingHendelseHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,

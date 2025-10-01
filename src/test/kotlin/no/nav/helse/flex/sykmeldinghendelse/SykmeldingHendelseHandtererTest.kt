@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmeldinghendelse
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.tsm.RuleType
-import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusProducerFake
 import no.nav.helse.flex.testdata.*
@@ -14,9 +13,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class SykmeldingHandtererTest : FakesTestOppsett() {
+class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
     @Autowired
-    lateinit var sykmeldingHandterer: SykmeldingHandterer
+    lateinit var sykmeldingHendelseHandterer: SykmeldingHendelseHandterer
 
     @Autowired
     lateinit var sykmeldingStatusProducer: SykmeldingStatusProducerFake
@@ -39,7 +38,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
 
             val vilkarligBrukerSvar = lagAnnetArbeidssituasjonBrukerSvar()
 
-            sykmeldingHandterer.sendSykmelding(
+            sykmeldingHendelseHandterer.sendSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
                 brukerSvar = vilkarligBrukerSvar,
@@ -61,7 +60,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
 
             val vilkarligBrukerSvar = lagAnnetArbeidssituasjonBrukerSvar()
 
-            sykmeldingHandterer.sendSykmelding(
+            sykmeldingHendelseHandterer.sendSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
                 brukerSvar = vilkarligBrukerSvar,
@@ -85,7 +84,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -110,7 +109,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagArbeidsledigBrukerSvar(arbeidsledigFraOrgnummer = null)
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -135,7 +134,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagPermittertBrukerSvar(arbeidsledigFraOrgnummer = null)
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -160,7 +159,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagFiskerLottBrukerSvar()
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -187,7 +186,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagFiskerHyreBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -218,7 +217,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -243,7 +242,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagJordbrukerBrukerSvar()
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -268,7 +267,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagNaringsdrivendeBrukerSvar()
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -293,7 +292,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagFrilanserBrukerSvar()
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -318,7 +317,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
             val brukerSvar = lagAnnetArbeidssituasjonBrukerSvar()
 
             val sykmelding =
-                sykmeldingHandterer.sendSykmelding(
+                sykmeldingHendelseHandterer.sendSykmelding(
                     sykmeldingId = "1",
                     identer = PersonIdenter("fnr"),
                     brukerSvar = brukerSvar,
@@ -343,7 +342,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            sykmeldingHandterer.avbrytSykmelding(
+            sykmeldingHendelseHandterer.avbrytSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
             )
@@ -363,7 +362,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            sykmeldingHandterer.avbrytSykmelding(
+            sykmeldingHendelseHandterer.avbrytSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
             )
@@ -387,7 +386,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            sykmeldingHandterer.bekreftAvvistSykmelding(
+            sykmeldingHendelseHandterer.bekreftAvvistSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
             )
@@ -408,7 +407,7 @@ class SykmeldingHandtererTest : FakesTestOppsett() {
                 ),
             )
 
-            sykmeldingHandterer.bekreftAvvistSykmelding(
+            sykmeldingHendelseHandterer.bekreftAvvistSykmelding(
                 sykmeldingId = "1",
                 identer = PersonIdenter("fnr"),
             )
