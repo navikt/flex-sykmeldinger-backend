@@ -1,8 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.clients.aareg.ArbeidsforholdOversikt
-import no.nav.helse.flex.clients.aareg.ArbeidsforholdoversiktResponse
+import no.nav.helse.flex.gateways.aareg.ArbeidsforholdOversikt
+import no.nav.helse.flex.gateways.aareg.ArbeidsforholdoversiktResponse
 import no.nav.helse.flex.utils.objectMapper
 import java.time.LocalDate
 

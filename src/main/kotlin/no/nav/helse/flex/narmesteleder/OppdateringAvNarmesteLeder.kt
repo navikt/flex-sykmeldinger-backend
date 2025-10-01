@@ -1,10 +1,10 @@
 package no.nav.helse.flex.narmesteleder
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.clients.pdl.FunctionalPdlError
-import no.nav.helse.flex.clients.pdl.PdlClient
-import no.nav.helse.flex.clients.pdl.PdlManglerNavnError
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.gateways.pdl.FunctionalPdlError
+import no.nav.helse.flex.gateways.pdl.PdlClient
+import no.nav.helse.flex.gateways.pdl.PdlManglerNavnError
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.utils.logger

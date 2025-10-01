@@ -6,10 +6,11 @@ import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.clients.aareg.*
-import no.nav.helse.flex.clients.ereg.EregClient
-import no.nav.helse.flex.clients.ereg.Navn
-import no.nav.helse.flex.clients.ereg.Nokkelinfo
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.gateways.aareg.*
+import no.nav.helse.flex.gateways.ereg.EregClient
+import no.nav.helse.flex.gateways.ereg.Navn
+import no.nav.helse.flex.gateways.ereg.Nokkelinfo
 import org.amshove.kluent.*
 import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestClientException

@@ -1,8 +1,8 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.clients.ereg.EregClient
-import no.nav.helse.flex.clients.ereg.Navn
-import no.nav.helse.flex.clients.ereg.Nokkelinfo
+import no.nav.helse.flex.gateways.ereg.EregClient
+import no.nav.helse.flex.gateways.ereg.Navn
+import no.nav.helse.flex.gateways.ereg.Nokkelinfo
 
 class EregClientFake : EregClient {
     private val nokkelinfo: MutableMap<String, Result<Nokkelinfo>> = mutableMapOf()

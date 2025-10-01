@@ -3,12 +3,12 @@ package no.nav.helse.flex.api
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
-import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
-import no.nav.helse.flex.clients.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
+import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser

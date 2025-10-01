@@ -1,9 +1,9 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.clients.aareg.AaregClient
-import no.nav.helse.flex.producers.KafkaMetadataDTO
-import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.SykmeldingStatusProducer
+import no.nav.helse.flex.gateways.KafkaMetadataDTO
+import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.gateways.SykmeldingStatusProducer
+import no.nav.helse.flex.gateways.aareg.AaregClient
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
