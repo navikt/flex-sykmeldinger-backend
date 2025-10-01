@@ -4,7 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusProducerFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import org.amshove.kluent.*
@@ -18,7 +18,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
     lateinit var sykmeldingHendelseHandterer: SykmeldingHendelseHandterer
 
     @Autowired
-    lateinit var sykmeldingStatusProducer: SykmeldingStatusProducerFake
+    lateinit var sykmeldingStatusProducer: SykmeldingStatusKafkaProducerFake
 
     @AfterEach
     fun cleanUp() {

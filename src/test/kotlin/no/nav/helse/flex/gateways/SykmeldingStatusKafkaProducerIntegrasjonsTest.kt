@@ -15,7 +15,7 @@ import java.time.Duration
 
 class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     @Autowired
-    lateinit var sykmeldingStatusProducerKafka: SykmeldingStatusProducerKafka
+    lateinit var sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducerImpl
 
     @Autowired
     lateinit var sykmeldingStatusConsumer: KafkaConsumer<String, String>
@@ -35,7 +35,7 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
     fun `burde produsere sykmeldingstatus`() {
         sykmeldingStatusConsumer.subscribe(listOf(SYKMELDINGSTATUS_TOPIC))
 
-        sykmeldingStatusProducerKafka
+        sykmeldingStatusKafkaProducer
             .produserSykmeldingStatus(
                 sykmeldingStatusKafkaMessageDTO =
                     lagSykmeldingStatusKafkaMessageDTO(

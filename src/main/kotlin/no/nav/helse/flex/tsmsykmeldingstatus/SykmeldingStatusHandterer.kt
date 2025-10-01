@@ -2,7 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.gateways.SykmeldingStatusProducer
+import no.nav.helse.flex.gateways.SykmeldingStatusKafkaProducer
 import no.nav.helse.flex.gateways.aareg.AaregClient
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
@@ -25,7 +25,7 @@ const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 class SykmeldingStatusHandterer(
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
-    private val sykmeldingStatusProducer: SykmeldingStatusProducer,
+    private val sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
     private val aaregClient: AaregClient,
 ) {
@@ -82,7 +82,7 @@ class SykmeldingStatusHandterer(
                         sykmeldingId = sykmelding.sykmeldingId,
                     ),
             )
-        sykmeldingStatusProducer.produserSykmeldingStatus(status)
+        sykmeldingStatusKafkaProducer.produserSykmeldingStatus(status)
     }
 
     private fun lagreStatusForEksisterendeSykmelding(

@@ -51,7 +51,7 @@ class FakesTestConfig {
     fun eregClient(): EregClientFake = EregClientFake()
 
     @Bean
-    fun sykmeldingStatusProducer(): SykmeldingStatusProducerFake = SykmeldingStatusProducerFake()
+    fun sykmeldingStatusKafkaProducer(): SykmeldingStatusKafkaProducerFake = SykmeldingStatusKafkaProducerFake()
 
     @Bean
     fun cacheManager(): CacheManager = NoOpCacheManager()

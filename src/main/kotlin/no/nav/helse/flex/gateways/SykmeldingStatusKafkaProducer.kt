@@ -10,14 +10,14 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
 import java.time.OffsetDateTime
 
-interface SykmeldingStatusProducer {
+interface SykmeldingStatusKafkaProducer {
     fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean
 }
 
 @Component
-class SykmeldingStatusProducerKafka(
+class SykmeldingStatusKafkaProducerImpl(
     private val meldingProducer: Producer<String, String>,
-) : SykmeldingStatusProducer {
+) : SykmeldingStatusKafkaProducer {
     private val log = logger()
 
     @WithSpan
