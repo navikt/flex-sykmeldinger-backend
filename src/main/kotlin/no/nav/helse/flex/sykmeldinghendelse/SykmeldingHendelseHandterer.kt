@@ -1,10 +1,7 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
-import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
+import no.nav.helse.flex.sykmelding.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
@@ -15,10 +12,11 @@ import java.util.function.Supplier
 @Service
 class SykmeldingHendelseHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
+    private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
-    private val nowFactory: Supplier<Instant>,
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
+    private val nowFactory: Supplier<Instant>,
 ) {
     private val logger = logger()
 
@@ -28,7 +26,7 @@ class SykmeldingHendelseHandterer(
         identer: PersonIdenter,
         brukerSvar: BrukerSvar,
     ): Sykmelding {
-        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId, identer)
         val tilleggsinfo =
             tilleggsinfoSammenstillerService.sammenstillTilleggsinfo(
                 identer = identer,
@@ -82,7 +80,7 @@ class SykmeldingHendelseHandterer(
         sykmeldingId: String,
         identer: PersonIdenter,
     ): Sykmelding {
-        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId, identer)
         val oppdatertSykmelding =
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
 
@@ -96,7 +94,7 @@ class SykmeldingHendelseHandterer(
         sykmeldingId: String,
         identer: PersonIdenter,
     ): Sykmelding {
-        val sykmelding = finnValidertSykmelding(sykmeldingId, identer)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId, identer)
 
         val oppdatertSykmelding =
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
@@ -126,21 +124,5 @@ class SykmeldingHendelseHandterer(
                 logger.info("Legger til hendelse ${it.status} på sykmelding ${sykmelding.sykmeldingId}")
             },
         )
-    }
-
-    private fun finnValidertSykmelding(
-        sykmeldingId: String,
-        identer: PersonIdenter,
-    ): Sykmelding {
-        val sykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
-        if (sykmelding == null) {
-            logger.warn("Fant ikke sykmeldingen")
-            throw SykmeldingIkkeFunnetException("Fant ikke sykmelding med id $sykmeldingId")
-        }
-        if (sykmelding.pasientFnr !in identer.alle()) {
-            logger.warn("Person har ikke tilgang til sykmelding")
-            throw SykmeldingErIkkeDinException("Person har ikke tilgang til sykmelding")
-        }
-        return sykmelding
     }
 }
