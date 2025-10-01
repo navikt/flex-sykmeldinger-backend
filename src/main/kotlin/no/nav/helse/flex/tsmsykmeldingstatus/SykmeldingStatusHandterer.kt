@@ -25,7 +25,6 @@ const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 class SykmeldingStatusHandterer(
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
-    private val sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
     private val aaregClient: AaregClient,
 ) {
@@ -70,19 +69,6 @@ class SykmeldingStatusHandterer(
         for (status in buffredeStatuser) {
             handterSykmeldingStatus(status)
         }
-    }
-
-    fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
-        val status =
-            sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = sykmelding.pasientFnr,
-                sykmeldingStatusKafkaDTO =
-                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingHendelse = sykmelding.sisteHendelse(),
-                        sykmeldingId = sykmelding.sykmeldingId,
-                    ),
-            )
-        sykmeldingStatusKafkaProducer.produserSykmeldingStatus(status)
     }
 
     private fun lagreStatusForEksisterendeSykmelding(
