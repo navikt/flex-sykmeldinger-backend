@@ -1,6 +1,6 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
+import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
@@ -38,7 +38,7 @@ class SykmeldingListenerFakeTest : FakesTestOppsett() {
         aaregClientFake.setArbeidsforholdoversikt(RuntimeException())
 
         val kafkaMelding =
-            SykmeldingKafkaRecord(
+            EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
@@ -64,7 +64,7 @@ class SykmeldingListenerFakeTest : FakesTestOppsett() {
         aaregClientFake.setArbeidsforholdoversikt(RuntimeException())
 
         val kafkaMelding =
-            SykmeldingKafkaRecord(
+            EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )

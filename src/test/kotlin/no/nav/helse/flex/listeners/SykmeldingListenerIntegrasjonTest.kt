@@ -1,6 +1,6 @@
 package no.nav.helse.flex.listeners
 
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
+import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testdata.lagSykmelding
@@ -39,7 +39,7 @@ class SykmeldingListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde lagre sykmelding fra kafka`() {
         val topic = SYKMELDING_TOPIC
         val kafkaMelding =
-            SykmeldingKafkaRecord(
+            EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )

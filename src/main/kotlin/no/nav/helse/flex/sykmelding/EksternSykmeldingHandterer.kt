@@ -22,27 +22,27 @@ class EksternSykmeldingHandterer(
     @Transactional(rollbackFor = [Exception::class])
     fun lagreSykmeldingFraKafka(
         sykmeldingId: String,
-        sykmeldingKafkaRecord: SykmeldingKafkaRecord?,
+        eksternSykmeldingMelding: EksternSykmeldingMelding?,
     ) {
-        if (sykmeldingKafkaRecord == null) {
+        if (eksternSykmeldingMelding == null) {
             slettSykmelding(sykmeldingId = sykmeldingId)
         } else {
-            opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord)
+            opprettEllerOppdaterSykmelding(eksternSykmeldingMelding)
         }
     }
 
-    internal fun opprettEllerOppdaterSykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord) {
-        val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingKafkaRecord.sykmelding.id)
+    internal fun opprettEllerOppdaterSykmelding(eksternSykmeldingMelding: EksternSykmeldingMelding) {
+        val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(eksternSykmeldingMelding.sykmelding.id)
         if (eksisterendeSykmelding != null) {
-            val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, sykmeldingKafkaRecord)
+            val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, eksternSykmeldingMelding)
             sykmeldingRepository.save(oppdatertSykmelding)
             log.info("Sykmelding oppdatert: ${eksisterendeSykmelding.sykmeldingId}")
         } else {
-            val sykmelding = opprettNySykmelding(sykmeldingKafkaRecord)
+            val sykmelding = opprettNySykmelding(eksternSykmeldingMelding)
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
-            log.info("Sykmelding lagret: ${sykmeldingKafkaRecord.sykmelding.id}")
+            log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
         }
     }
 
@@ -59,40 +59,40 @@ class EksternSykmeldingHandterer(
 
     private fun oppdaterSykmelding(
         eksisterendeSykmelding: Sykmelding,
-        sykmeldingKafkaRecord: SykmeldingKafkaRecord,
+        eksternSykmeldingMelding: EksternSykmeldingMelding,
     ): Sykmelding {
         var oppdatertSykmelding = eksisterendeSykmelding
 
-        if (eksisterendeSykmelding.sykmeldingGrunnlag != sykmeldingKafkaRecord.sykmelding) {
+        if (eksisterendeSykmelding.sykmeldingGrunnlag != eksternSykmeldingMelding.sykmelding) {
             oppdatertSykmelding =
                 oppdatertSykmelding.copy(
-                    sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
+                    sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
                     sykmeldingGrunnlagOppdatert = nowFactory.get(),
                 )
         }
-        if (eksisterendeSykmelding.validation != sykmeldingKafkaRecord.validation) {
+        if (eksisterendeSykmelding.validation != eksternSykmeldingMelding.validation) {
             oppdatertSykmelding =
                 oppdatertSykmelding.copy(
-                    validation = sykmeldingKafkaRecord.validation,
+                    validation = eksternSykmeldingMelding.validation,
                     validationOppdatert = nowFactory.get(),
                 )
         }
         return oppdatertSykmelding
     }
 
-    private fun opprettNySykmelding(sykmeldingKafkaRecord: SykmeldingKafkaRecord): Sykmelding {
+    private fun opprettNySykmelding(eksternSykmeldingMelding: EksternSykmeldingMelding): Sykmelding {
         val now = nowFactory.get()
         val sykmelding =
             Sykmelding(
-                sykmeldingGrunnlag = sykmeldingKafkaRecord.sykmelding,
-                validation = sykmeldingKafkaRecord.validation,
+                sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
+                validation = eksternSykmeldingMelding.validation,
                 hendelser =
                     listOf(
                         SykmeldingHendelse(
                             status = HendelseStatus.APEN,
                             source = SykmeldingHendelse.LOKAL_SOURCE,
                             hendelseOpprettet =
-                                sykmeldingKafkaRecord.sykmelding.metadata.mottattDato
+                                eksternSykmeldingMelding.sykmelding.metadata.mottattDato
                                     .toInstant(),
                             lokaltOpprettet = now,
                         ),

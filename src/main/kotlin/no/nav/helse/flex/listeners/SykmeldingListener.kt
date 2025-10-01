@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
+import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -53,7 +53,7 @@ class SykmeldingListener(
             return
         }
 
-        val sykmeldingRecord: SykmeldingKafkaRecord? =
+        val sykmeldingRecord: EksternSykmeldingMelding? =
             if (serialisertSykmelding == null) {
                 null
             } else {
@@ -83,7 +83,7 @@ class SykmeldingListener(
         try {
             eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
-                sykmeldingKafkaRecord = sykmeldingRecord,
+                eksternSykmeldingMelding = sykmeldingRecord,
             )
         } catch (e: Exception) {
             log.errorSecure(

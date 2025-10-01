@@ -3,7 +3,7 @@ package no.nav.helse.flex.testdatagenerator
 import com.fasterxml.jackson.core.JacksonException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaRecord
+import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -31,7 +31,7 @@ class TestSykmeldingListener(
         val sykmeldingId = cr.key()
         val serialisertHendelse = cr.value()
         try {
-            val sykmeldingRecord: SykmeldingKafkaRecord? =
+            val sykmeldingRecord: EksternSykmeldingMelding? =
                 if (serialisertHendelse == null) {
                     null
                 } else {
@@ -39,7 +39,7 @@ class TestSykmeldingListener(
                 }
             eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
                 sykmeldingId = sykmeldingId,
-                sykmeldingKafkaRecord = sykmeldingRecord,
+                eksternSykmeldingMelding = sykmeldingRecord,
             )
             log.info(
                 "Motatt sykmelding fra $TEST_SYKMELDING_TOPIC: \n${

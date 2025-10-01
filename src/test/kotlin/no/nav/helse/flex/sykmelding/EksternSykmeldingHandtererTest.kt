@@ -178,7 +178,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
 
         val sykmeldingMedBehandlingsutfall =
-            SykmeldingKafkaRecord(
+            EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
                 validation = lagValidation(),
             )
@@ -215,7 +215,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         sykmeldingRepository.save(
             lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", sykmeldingKafkaRecord = null)
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", eksternSykmeldingMelding = null)
         sykmeldingRepository.findAll().shouldHaveSize(0)
     }
 }
