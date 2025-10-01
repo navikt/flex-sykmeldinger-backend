@@ -1,7 +1,6 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.aareg.AaregClient

@@ -1,7 +1,6 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykmelding.application.*
 import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import org.amshove.kluent.`should be equal to`

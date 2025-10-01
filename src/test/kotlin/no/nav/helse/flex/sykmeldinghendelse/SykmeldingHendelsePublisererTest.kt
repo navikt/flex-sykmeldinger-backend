@@ -1,11 +1,9 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
-import no.nav.helse.flex.gateways.SykmeldingStatusKafkaProducer
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach

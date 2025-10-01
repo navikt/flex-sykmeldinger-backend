@@ -5,7 +5,6 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.mock
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.clients.aareg.*
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.gateways.aareg.*
 import no.nav.helse.flex.gateways.ereg.EregClient
