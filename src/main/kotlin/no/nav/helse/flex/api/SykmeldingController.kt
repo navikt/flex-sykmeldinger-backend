@@ -11,6 +11,7 @@ import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
@@ -26,6 +27,7 @@ class SykmeldingController(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService,
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
+    private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingHendelseHandterer: SykmeldingHendelseHandterer,
     private val syketilfelleClient: SyketilfelleClient,
     private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
@@ -41,7 +43,7 @@ class SykmeldingController(
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmeldinger = sykmeldingHendelseHandterer.hentAlleSykmeldinger(identer)
+        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
@@ -57,7 +59,7 @@ class SykmeldingController(
     ): ResponseEntity<List<TidligereArbeidsgiver>> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmeldinger = sykmeldingHendelseHandterer.hentAlleSykmeldinger(identer)
+        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
 
         return ResponseEntity.ok(tidligereArbeidsgivere)
@@ -79,7 +81,7 @@ class SykmeldingController(
             return ResponseEntity.notFound().build()
         }
 
-        val sykmelding = sykmeldingHendelseHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
 
         val konvertertSykmelding = sykmeldingDtoKonverterer.konverter(sykmelding)
         return ResponseEntity.ok(konvertertSykmelding)
@@ -129,7 +131,7 @@ class SykmeldingController(
     ): ResponseEntity<ErUtenforVentetidResponse> {
         val identer = tokenxValidering.hentIdenter()
 
-        val sykmelding = sykmeldingHendelseHandterer.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
 
         val erUtenforVentetid =
             syketilfelleClient.getErUtenforVentetid(

@@ -22,16 +22,6 @@ class SykmeldingHendelseHandterer(
 ) {
     private val logger = logger()
 
-    fun hentSykmelding(
-        sykmeldingId: String,
-        identer: PersonIdenter,
-    ): Sykmelding = finnValidertSykmelding(sykmeldingId, identer)
-
-    fun hentAlleSykmeldinger(identer: PersonIdenter): List<Sykmelding> {
-        val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
-        return sykmeldinger
-    }
-
     @Transactional(rollbackFor = [Exception::class])
     fun sendSykmelding(
         sykmeldingId: String,
