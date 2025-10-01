@@ -6,9 +6,9 @@ import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.producers.SykmeldingStatusProducer
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseException
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.errorSecure
