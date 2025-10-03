@@ -19,6 +19,7 @@ class SynkroniserSpesifiktArbeidsforhold(
     override fun run(args: ApplicationArguments?) {
         if (environmentToggles.isProduction()) {
             try {
+                logger.info("Synkroniserer spesifikt arbeidsforhold")
                 val sykmelding =
                     sykmeldingRepository.findBySykmeldingId("ae20b44b-d2a6-468e-b36d-3f5bd6f731da")
                         ?: error("Fant ikke sykmelding")
