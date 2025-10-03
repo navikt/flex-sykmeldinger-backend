@@ -1,10 +1,12 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
-import no.nav.helse.flex.clients.aareg.*
-import no.nav.helse.flex.clients.ereg.EregClient
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.gateways.aareg.AaregClient
+import no.nav.helse.flex.gateways.aareg.ArbeidsforholdoversiktResponse
+import no.nav.helse.flex.gateways.aareg.ArbeidsstedType
+import no.nav.helse.flex.gateways.ereg.EregClient
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component

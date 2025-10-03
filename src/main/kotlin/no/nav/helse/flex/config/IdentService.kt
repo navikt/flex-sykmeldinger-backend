@@ -1,7 +1,7 @@
 package no.nav.helse.flex.config
 
-import no.nav.helse.flex.clients.pdl.PdlClient
-import no.nav.helse.flex.clients.pdl.PdlIdent
+import no.nav.helse.flex.gateways.pdl.PdlClient
+import no.nav.helse.flex.gateways.pdl.PdlIdent
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import java.io.Serializable

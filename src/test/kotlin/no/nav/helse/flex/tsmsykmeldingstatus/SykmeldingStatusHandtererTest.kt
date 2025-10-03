@@ -2,9 +2,9 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
-import no.nav.helse.flex.sykmelding.domain.ArbeidstakerTilleggsinfo
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerTilleggsinfo
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseException
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake

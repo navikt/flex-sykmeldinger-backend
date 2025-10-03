@@ -1,8 +1,8 @@
 package no.nav.helse.flex.testconfig.fakes
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.clients.aareg.AaregClient
-import no.nav.helse.flex.clients.aareg.ArbeidsforholdoversiktResponse
+import no.nav.helse.flex.gateways.aareg.AaregClient
+import no.nav.helse.flex.gateways.aareg.ArbeidsforholdoversiktResponse
 
 class AaregClientFake : AaregClient {
     private val arbeidsforholdOversikter: MutableMap<String, Result<ArbeidsforholdoversiktResponse>> = mutableMapOf()

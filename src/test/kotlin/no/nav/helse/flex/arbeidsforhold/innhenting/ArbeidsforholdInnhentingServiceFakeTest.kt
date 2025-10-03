@@ -1,9 +1,9 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.*
-import no.nav.helse.flex.clients.ereg.Navn
-import no.nav.helse.flex.clients.ereg.Nokkelinfo
-import no.nav.helse.flex.clients.pdl.PdlIdent
+import no.nav.helse.flex.gateways.ereg.Navn
+import no.nav.helse.flex.gateways.ereg.Nokkelinfo
+import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake

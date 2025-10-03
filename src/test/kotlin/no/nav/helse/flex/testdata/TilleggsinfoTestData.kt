@@ -1,7 +1,7 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 
 fun lagArbeidstakerTilleggsinfo(arbeidsgiver: Arbeidsgiver = lagArbeidsgiver()): ArbeidstakerTilleggsinfo =
     ArbeidstakerTilleggsinfo(

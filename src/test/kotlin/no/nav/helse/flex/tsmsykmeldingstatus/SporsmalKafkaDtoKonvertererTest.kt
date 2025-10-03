@@ -1,11 +1,11 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.application.Arbeidssituasjon
-import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.application.UriktigeOpplysning
-import no.nav.helse.flex.sykmelding.application.UtdatertFormatBrukerSvar
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
+import no.nav.helse.flex.sykmeldinghendelse.Egenmeldingsperiode
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.UriktigeOpplysning
+import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest
@@ -116,8 +116,16 @@ class SporsmalKafkaDtoKonvertererTest {
                         sporsmaltekst `should be equal to` "Hvilke egenmeldingsperioder har du hatt?"
                         svar shouldBeEqualTo
                             listOf(
-                                Egenmeldingsperiode(LocalDate.parse("2025-01-01") to LocalDate.parse("2025-01-05")),
-                                Egenmeldingsperiode(LocalDate.parse("2025-01-10") to LocalDate.parse("2025-01-15")),
+                                Egenmeldingsperiode(
+                                    LocalDate.parse(
+                                        "2025-01-01",
+                                    ) to LocalDate.parse("2025-01-05"),
+                                ),
+                                Egenmeldingsperiode(
+                                    LocalDate.parse(
+                                        "2025-01-10",
+                                    ) to LocalDate.parse("2025-01-15"),
+                                ),
                             )
                     }
                     harForsikring.shouldNotBeNull().run {

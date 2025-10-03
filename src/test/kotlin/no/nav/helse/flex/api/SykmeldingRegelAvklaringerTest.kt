@@ -2,8 +2,8 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.PeriodetypeDTO
 import no.nav.helse.flex.api.dto.SykmeldingsperiodeDTO
-import no.nav.helse.flex.sykmelding.domain.tsm.AnnenFravarArsakType
-import no.nav.helse.flex.sykmelding.domain.tsm.AnnenFraverArsak
+import no.nav.helse.flex.sykmelding.tsm.AnnenFravarArsakType
+import no.nav.helse.flex.sykmelding.tsm.AnnenFraverArsak
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import org.amshove.kluent.`should be false`

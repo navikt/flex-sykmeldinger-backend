@@ -2,9 +2,8 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.SykmeldingStatusDTO
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmelding.application.Egenmeldingsperiode
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmeldinghendelse.*
+import no.nav.helse.flex.sykmeldinghendelse.Egenmeldingsperiode
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -15,7 +14,6 @@ class SykmeldingStatusDtoKonverterer {
         SykmeldingStatusDTO(
             statusEvent = konverterHendelseStatus(hendelse.status),
             timestamp = hendelse.hendelseOpprettet.atOffset(ZoneOffset.UTC),
-            // TODO
             arbeidsgiver = hendelse.tilleggsinfo?.let(::konverterArbeidsgiver),
             brukerSvar = hendelse.brukerSvar?.let { konverterSykmeldingSporsmalSvarForBruker(it) },
         )

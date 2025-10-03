@@ -2,7 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.AdvisoryLock
-import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString

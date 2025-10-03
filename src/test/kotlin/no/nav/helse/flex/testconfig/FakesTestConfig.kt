@@ -4,8 +4,8 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
-import no.nav.helse.flex.sykmelding.domain.SykmeldingDbRepository
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelseDbRepository
+import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
 import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
@@ -51,7 +51,7 @@ class FakesTestConfig {
     fun eregClient(): EregClientFake = EregClientFake()
 
     @Bean
-    fun sykmeldingStatusProducer(): SykmeldingStatusProducerFake = SykmeldingStatusProducerFake()
+    fun sykmeldingStatusKafkaProducer(): SykmeldingStatusKafkaProducerFake = SykmeldingStatusKafkaProducerFake()
 
     @Bean
     fun cacheManager(): CacheManager = NoOpCacheManager()

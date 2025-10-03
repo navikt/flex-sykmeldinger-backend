@@ -1,0 +1,54 @@
+package no.nav.helse.flex.sykmelding
+
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.ValidationResult
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
+import java.time.Instant
+import java.time.LocalDate
+import kotlin.collections.plus
+
+data class Sykmelding(
+    internal val databaseId: String? = null,
+    val sykmeldingGrunnlag: ISykmeldingGrunnlag,
+    val validation: ValidationResult,
+    val hendelser: List<SykmeldingHendelse>,
+    val opprettet: Instant,
+    val hendelseOppdatert: Instant,
+    val sykmeldingGrunnlagOppdatert: Instant,
+    val validationOppdatert: Instant,
+) {
+    init {
+        require(hendelser.isNotEmpty()) { "Må ha minst én hendelse" }
+        require(sykmeldingGrunnlag.aktivitet.isNotEmpty()) { "SykmeldingGrunnlag må ha minst én aktivitet" }
+    }
+
+    val sykmeldingId: String
+        get() = sykmeldingGrunnlag.id
+
+    val pasientFnr: String
+        get() = sykmeldingGrunnlag.pasient.fnr
+
+    val fom: LocalDate
+        get() = sykmeldingGrunnlag.aktivitet.minOf { it.fom }
+
+    val tom: LocalDate
+        get() = sykmeldingGrunnlag.aktivitet.maxOf { it.tom }
+
+    val erAvvist: Boolean
+        get() = validation.status == RuleType.INVALID
+
+    val avsenderSystemNavn: AvsenderSystemNavn
+        get() = sykmeldingGrunnlag.metadata.avsenderSystem.navn
+
+    fun sisteHendelse(): SykmeldingHendelse = hendelser.lastMaxBy { it.hendelseOpprettet } ?: error("Ingen hendelser. Skal ikke skje.")
+
+    fun leggTilHendelse(sykmeldingHendelse: SykmeldingHendelse): Sykmelding =
+        this.copy(
+            hendelser = this.hendelser + sykmeldingHendelse,
+            hendelseOppdatert = sykmeldingHendelse.lokaltOpprettet,
+        )
+}
+
+private fun <T, R : Comparable<R>> Iterable<T>.lastMaxBy(selector: (T) -> R): T? = this.sortedBy(selector).lastOrNull()

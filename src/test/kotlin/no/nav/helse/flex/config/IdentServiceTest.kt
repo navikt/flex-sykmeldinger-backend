@@ -1,6 +1,6 @@
 package no.nav.helse.flex.config
 
-import no.nav.helse.flex.clients.pdl.PdlIdent
+import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import org.amshove.kluent.`should be equal to`

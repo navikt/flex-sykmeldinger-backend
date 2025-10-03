@@ -2,12 +2,12 @@ package no.nav.helse.flex.testconfig
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.clients.EKSEMPEL_RESPONSE_FRA_EREG
-import no.nav.helse.flex.clients.pdl.GraphQlRequest
-import no.nav.helse.flex.clients.pdl.lagGetPersonResponseData
-import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
-import no.nav.helse.flex.clients.pdl.lagHentIdenterResponseData
-import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.gateways.pdl.GraphQlRequest
+import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
+import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
+import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
+import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString

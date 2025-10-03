@@ -1,0 +1,9 @@
+package no.nav.helse.flex.gateways.ereg
+
+data class Nokkelinfo(
+    val navn: Navn,
+)
+
+data class Navn(
+    val sammensattnavn: String,
+)

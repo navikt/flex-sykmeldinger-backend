@@ -1,7 +1,7 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.clients.pdl.PdlClient
-import no.nav.helse.flex.clients.pdl.PdlIdent
+import no.nav.helse.flex.gateways.pdl.PdlClient
+import no.nav.helse.flex.gateways.pdl.PdlIdent
 import java.time.LocalDate
 
 class PdlClientFake : PdlClient {

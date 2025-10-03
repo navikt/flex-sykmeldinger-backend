@@ -1,8 +1,7 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import org.springframework.stereotype.Component
 import java.time.Instant

@@ -1,7 +1,7 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykmelding.application.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testdata.lagBrukerSvarKafkaDto
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be null`
@@ -16,7 +16,8 @@ class BrukerSvarKafkaDtoKonvertererTest {
         val brukerSvarKafkaDTO = lagBrukerSvarKafkaDto(arbeidssituasjonDTO)
 
         val konvertert = BrukerSvarKafkaDtoKonverterer.tilBrukerSvar(brukerSvarKafkaDTO)
-        konvertert.uriktigeOpplysninger?.svar `should be equal to` listOf(UriktigeOpplysning.PERIODE)
+        konvertert.uriktigeOpplysninger?.svar `should be equal to`
+            listOf(UriktigeOpplysning.PERIODE)
         konvertert.erOpplysningeneRiktige.svar `should be equal to` true
         konvertert.arbeidssituasjon.svar.name `should be equal to` arbeidssituasjonDTO.name
 
@@ -35,8 +36,14 @@ class BrukerSvarKafkaDtoKonvertererTest {
                 frilanserBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 frilanserBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-01"),
+                            LocalDate.parse("2025-01-05"),
+                        ),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-10"),
+                            LocalDate.parse("2025-01-15"),
+                        ),
                     )
                 frilanserBrukerSvar.harForsikring?.svar `should be equal to` true
             }
@@ -46,15 +53,22 @@ class BrukerSvarKafkaDtoKonvertererTest {
                 naeringsdrivendeBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 naeringsdrivendeBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-01"),
+                            LocalDate.parse("2025-01-05"),
+                        ),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-10"),
+                            LocalDate.parse("2025-01-15"),
+                        ),
                     )
                 naeringsdrivendeBrukerSvar.harForsikring?.svar `should be equal to` true
             }
             ArbeidssituasjonDTO.FISKER -> {
                 val fiskerBrukerSvar = konvertert as? FiskerBrukerSvar
                 fiskerBrukerSvar.`should not be null`()
-                fiskerBrukerSvar.lottOgHyre.svar `should be equal to` FiskerLottOgHyre.LOTT
+                fiskerBrukerSvar.lottOgHyre.svar `should be equal to`
+                    FiskerLottOgHyre.LOTT
                 fiskerBrukerSvar.blad.svar `should be equal to` FiskerBlad.A
             }
             ArbeidssituasjonDTO.JORDBRUKER -> {
@@ -63,8 +77,14 @@ class BrukerSvarKafkaDtoKonvertererTest {
                 jordbrukerBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 jordbrukerBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-05")),
-                        Egenmeldingsperiode(LocalDate.parse("2025-01-10"), LocalDate.parse("2025-01-15")),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-01"),
+                            LocalDate.parse("2025-01-05"),
+                        ),
+                        Egenmeldingsperiode(
+                            LocalDate.parse("2025-01-10"),
+                            LocalDate.parse("2025-01-15"),
+                        ),
                     )
                 jordbrukerBrukerSvar.harForsikring?.svar `should be equal to` true
             }

@@ -1,8 +1,8 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.producers.KafkaMetadataDTO
-import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.gateways.KafkaMetadataDTO
+import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import java.time.LocalDate
 import java.time.OffsetDateTime

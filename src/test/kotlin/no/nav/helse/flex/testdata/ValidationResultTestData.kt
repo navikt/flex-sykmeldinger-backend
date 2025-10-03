@@ -1,9 +1,9 @@
 package no.nav.helse.flex.testdata
 
-import no.nav.helse.flex.sykmelding.domain.tsm.PendingRule
-import no.nav.helse.flex.sykmelding.domain.tsm.Reason
-import no.nav.helse.flex.sykmelding.domain.tsm.RuleType
-import no.nav.helse.flex.sykmelding.domain.tsm.ValidationResult
+import no.nav.helse.flex.sykmelding.tsm.PendingRule
+import no.nav.helse.flex.sykmelding.tsm.Reason
+import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 

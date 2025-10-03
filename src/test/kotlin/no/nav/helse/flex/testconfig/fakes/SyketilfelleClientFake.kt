@@ -1,8 +1,8 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.clients.syketilfelle.ErUtenforVentetidResponse
-import no.nav.helse.flex.clients.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import java.time.LocalDate
 
 class SyketilfelleClientFake : SyketilfelleClient {

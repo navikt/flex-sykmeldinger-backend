@@ -1,7 +1,7 @@
 package no.nav.helse.flex.config
 
-import no.nav.helse.flex.clients.pdl.lagGraphQlResponse
-import no.nav.helse.flex.clients.pdl.lagHentIdenterResponseData
+import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
+import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher

@@ -14,13 +14,3 @@ open class SykmeldingErIkkeDinException(
     message: String,
     cause: Throwable? = null,
 ) : SykmeldingException(message, cause)
-
-open class SykmeldingHendelseException(
-    message: String,
-    cause: Throwable? = null,
-) : SykmeldingException(message, cause)
-
-open class UgyldigSykmeldingStatusException(
-    message: String,
-    cause: Throwable? = null,
-) : SykmeldingException(message, cause)

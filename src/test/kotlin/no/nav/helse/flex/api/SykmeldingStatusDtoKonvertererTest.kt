@@ -2,8 +2,7 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykmelding.application.*
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
@@ -586,7 +585,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     egenmeldingsperioder =
                         SporsmalSvar(
                             sporsmaltekst = "Egenmeldingsperioder",
-                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                            svar =
+                                listOf(
+                                    Egenmeldingsperiode(
+                                        dato("01.01.2025") to dato("02.01.2025"),
+                                    ),
+                                ),
                         ),
                     harForsikring =
                         SporsmalSvar(
@@ -688,7 +692,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     egenmeldingsperioder =
                         SporsmalSvar(
                             sporsmaltekst = "Egenmeldingsperioder",
-                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                            svar =
+                                listOf(
+                                    Egenmeldingsperiode(
+                                        dato("01.01.2025") to dato("02.01.2025"),
+                                    ),
+                                ),
                         ),
                     harForsikring =
                         SporsmalSvar(
@@ -790,7 +799,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     egenmeldingsperioder =
                         SporsmalSvar(
                             sporsmaltekst = "Egenmeldingsperioder",
-                            svar = listOf(Egenmeldingsperiode(dato("01.01.2025") to dato("02.01.2025"))),
+                            svar =
+                                listOf(
+                                    Egenmeldingsperiode(
+                                        dato("01.01.2025") to dato("02.01.2025"),
+                                    ),
+                                ),
                         ),
                     harForsikring =
                         SporsmalSvar(

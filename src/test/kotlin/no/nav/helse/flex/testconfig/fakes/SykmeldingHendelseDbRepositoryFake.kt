@@ -1,6 +1,7 @@
 package no.nav.helse.flex.testconfig.fakes
 
-import no.nav.helse.flex.sykmelding.domain.*
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRecord
+import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
 
 class SykmeldingHendelseDbRepositoryFake :

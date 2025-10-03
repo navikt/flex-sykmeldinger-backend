@@ -1,14 +1,13 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.clients.aareg.AaregClient
-import no.nav.helse.flex.producers.KafkaMetadataDTO
-import no.nav.helse.flex.producers.SykmeldingStatusKafkaMessageDTO
-import no.nav.helse.flex.producers.SykmeldingStatusProducer
-import no.nav.helse.flex.sykmelding.SykmeldingHendelseException
-import no.nav.helse.flex.sykmelding.domain.HendelseStatus
-import no.nav.helse.flex.sykmelding.domain.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.domain.Sykmelding
-import no.nav.helse.flex.sykmelding.domain.SykmeldingHendelse
+import no.nav.helse.flex.gateways.KafkaMetadataDTO
+import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.gateways.aareg.AaregClient
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.Sykmelding
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseException
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.errorSecure
@@ -25,7 +24,6 @@ const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 class SykmeldingStatusHandterer(
     private val sykmeldingHendelseFraKafkaKonverterer: SykmeldingHendelseFraKafkaKonverterer,
     private val sykmeldingRepository: ISykmeldingRepository,
-    private val sykmeldingStatusProducer: SykmeldingStatusProducer,
     private val sykmeldingStatusBuffer: SykmeldingStatusBuffer,
     private val aaregClient: AaregClient,
 ) {
@@ -70,19 +68,6 @@ class SykmeldingStatusHandterer(
         for (status in buffredeStatuser) {
             handterSykmeldingStatus(status)
         }
-    }
-
-    fun sendSykmeldingStatusPaKafka(sykmelding: Sykmelding) {
-        val status =
-            sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = sykmelding.pasientFnr,
-                sykmeldingStatusKafkaDTO =
-                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingHendelse = sykmelding.sisteHendelse(),
-                        sykmeldingId = sykmelding.sykmeldingId,
-                    ),
-            )
-        sykmeldingStatusProducer.produserSykmeldingStatus(status)
     }
 
     private fun lagreStatusForEksisterendeSykmelding(

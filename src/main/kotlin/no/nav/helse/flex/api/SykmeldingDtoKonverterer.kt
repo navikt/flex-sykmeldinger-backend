@@ -1,13 +1,13 @@
 package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
-import no.nav.helse.flex.sykmelding.domain.*
-import no.nav.helse.flex.sykmelding.domain.tsm.*
-import no.nav.helse.flex.sykmelding.domain.tsm.SporsmalSvar
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Adresse
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Behandler
-import no.nav.helse.flex.sykmelding.domain.tsm.values.KontaktinfoType
-import no.nav.helse.flex.sykmelding.domain.tsm.values.Pasient
+import no.nav.helse.flex.sykmelding.Sykmelding
+import no.nav.helse.flex.sykmelding.tsm.*
+import no.nav.helse.flex.sykmelding.tsm.SporsmalSvar
+import no.nav.helse.flex.sykmelding.tsm.values.Adresse
+import no.nav.helse.flex.sykmelding.tsm.values.Behandler
+import no.nav.helse.flex.sykmelding.tsm.values.KontaktinfoType
+import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Component
