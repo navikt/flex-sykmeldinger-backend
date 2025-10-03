@@ -54,6 +54,7 @@ dependencies {
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
     implementation("io.opentelemetry:opentelemetry-api:$opentelemetryApiVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryInstrumentationVersion")
+    implementation("org.aspectj:aspectjweaver")
 
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))
