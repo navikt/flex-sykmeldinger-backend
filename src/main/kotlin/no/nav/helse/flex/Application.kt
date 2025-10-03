@@ -17,7 +17,7 @@ class Application
 @Profile("default")
 @Configuration
 @EnableScheduling
-@EnableRetry
+@EnableRetry(proxyTargetClass = true)
 class DeployApplicationConfig
 
 fun main(args: Array<String>) {
