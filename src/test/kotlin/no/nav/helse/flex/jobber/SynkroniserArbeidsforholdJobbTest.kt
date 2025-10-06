@@ -5,7 +5,7 @@ import no.nav.helse.flex.arbeidsforhold.manuellsynk.SynkroniserArbeidsforhold
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.TempSynkroniserArbeidsforholdRepositoryFake
-import org.amshove.kluent.`should be false`
+import org.amshove.kluent.`should be true`
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -44,6 +44,6 @@ class SynkroniserArbeidsforholdJobbTest : FakesTestOppsett() {
             .findAll()
             .single()
             .lest
-            .`should be false`()
+            .`should be true`()
     }
 }

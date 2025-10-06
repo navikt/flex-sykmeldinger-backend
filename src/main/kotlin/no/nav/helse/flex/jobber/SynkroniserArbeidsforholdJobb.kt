@@ -21,12 +21,24 @@ class SynkroniserArbeidsforholdJobb(
     @Transactional(rollbackFor = [Exception::class])
     @Scheduled(initialDelay = 10_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørJobb() {
-        val alleArbeidsforhold = tempSynkroniserArbeidsforholdRepository.findNextBatch(500).distinctBy { it.fnr }
-        val personerFnrBatcher = alleArbeidsforhold.chunked(10)
+        val alleArbeidsforhold = tempSynkroniserArbeidsforholdRepository.findNextBatch(500)
+        val alleUnikeArbeidsforhold = alleArbeidsforhold.distinctBy { it.fnr }
+        val personerFnrBatcher = alleUnikeArbeidsforhold.chunked(10)
+
         personerFnrBatcher.forEach { fnrBatch ->
-            val tasks = fnrBatch.map { arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr = it.fnr) }
+            val tasks =
+                fnrBatch.map {
+                    arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr = it.fnr)
+                }
             CompletableFuture.allOf(*tasks.toTypedArray()).join()
         }
-        log.info("Hentet arbeidsforhold for ${alleArbeidsforhold.size} personer")
+
+        tempSynkroniserArbeidsforholdRepository.saveAll(
+            alleArbeidsforhold.map {
+                it.copy(lest = true)
+            },
+        )
+
+        log.info("Hentet arbeidsforhold for ${alleUnikeArbeidsforhold.size} personer")
     }
 }
