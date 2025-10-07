@@ -45,7 +45,6 @@ class ArbeidsforholdInnhentingService(
                 now = nowFactory.get(),
             )
         lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold)
-        log.info(synkroniserteArbeidsforhold.toLogString())
         return synkroniserteArbeidsforhold
     }
 
@@ -152,17 +151,25 @@ data class SynkroniserteArbeidsforhold(
             skalSlettes = this.skalSlettes + other.skalSlettes,
         )
 
-    fun toLogString(): String {
-        val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
-        val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
-        val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
-        return "SynkroniserteArbeidsforhold(" +
-            "antallOpprettet=${opprettetIds.count()}, " +
-            "antallOppdatert=${oppdatertIds.count()}, " +
-            "antallSlettet=${slettetIds.count()}, " +
-            "opprettet navArbeidsforholdId: $opprettetIds, " +
-            "oppdatert navArbeidsforholdId: $oppdatertIds, " +
-            "slettet navArbeidsforholdId: $slettetIds" +
-            ")"
-    }
+    fun toLogString(): String =
+        if (erTom()) {
+            "ingen endringer"
+        } else {
+            val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
+            val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
+            val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
+            val sizeProps =
+                mapOf(
+                    "opprettet" to opprettetIds.size,
+                    "oppdatert" to oppdatertIds.size,
+                    "slettet" to slettetIds.size,
+                ).filterValues { it > 0 }
+            val navArbeidsforholdIdProps =
+                mapOf(
+                    "opprettetNavArbeidsforholdId" to opprettetIds,
+                    "oppdatertNavArbeidsforholdId" to oppdatertIds,
+                    "slettetNavArbeidsforholdId" to slettetIds,
+                ).filterValues { it.isNotEmpty() }
+            (sizeProps + navArbeidsforholdIdProps).toString()
+        }
 }
