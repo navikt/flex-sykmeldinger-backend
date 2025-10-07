@@ -139,6 +139,19 @@ data class SynkroniserteArbeidsforhold(
     val skalOppdateres: List<Arbeidsforhold> = emptyList(),
     val skalSlettes: List<Arbeidsforhold> = emptyList(),
 ) {
+    companion object {
+        val TOM = SynkroniserteArbeidsforhold()
+    }
+
+    fun erTom(): Boolean = this == TOM
+
+    operator fun plus(other: SynkroniserteArbeidsforhold): SynkroniserteArbeidsforhold =
+        SynkroniserteArbeidsforhold(
+            skalOpprettes = this.skalOpprettes + other.skalOpprettes,
+            skalOppdateres = this.skalOppdateres + other.skalOppdateres,
+            skalSlettes = this.skalSlettes + other.skalSlettes,
+        )
+
     fun toLogString(): String {
         val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
         val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }

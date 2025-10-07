@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
+import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -14,7 +15,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
-import kotlin.system.measureTimeMillis
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.measureTimedValue
 
 enum class AaregHendelseHandtering {
     OPPRETT_OPPDATER,
@@ -87,28 +89,38 @@ class AaregHendelserConsumer(
             }
 
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
-        val timeMs =
-            measureTimeMillis {
-                val personerFnrBatcher = personerFnr.chunked(10)
-                personerFnrBatcher.forEach { fnrBatch ->
-                    val tasks = fnrBatch.map { synkroniserForPerson(it) }
-                    CompletableFuture.allOf(*tasks.toTypedArray()).join()
-                }
+        val personerFnrBatcher = personerFnr.chunked(10)
+        val (synkroniserteArbeidsforhold, varighet) =
+            measureTimedValue {
+                personerFnrBatcher
+                    .flatMap { fnrBatch ->
+                        ventPaAlle(fnrBatch.map { synkroniserForPerson(it) })
+                    }.fold(SynkroniserteArbeidsforhold.TOM, SynkroniserteArbeidsforhold::plus)
             }
 
-        if (timeMs > 2000 * personerFnr.size && timeMs > 100) {
+        if (!synkroniserteArbeidsforhold.erTom()) {
+            log.info(
+                "Synkronisert arbeidsforhold ved aareg notifikasjon. " +
+                    mapOf(
+                        "personer" to personerFnr.size,
+                        "tidMs" to varighet.inWholeMilliseconds,
+                        "detaljer" to synkroniserteArbeidsforhold.toLogString(),
+                    ),
+            )
+        }
+        if (varighet > (2.seconds * personerFnr.size.coerceAtLeast(2))) {
             log.warn(
-                "Tok lang tid for å synkronisere arbeidsforhold for ${personerFnr.size} unike fnr, tid: $timeMs ms",
+                "Tok unormalt lang tid å synkronisere arbeidsforhold. " +
+                    mapOf("personer" to personerFnr.size, "tidMs" to varighet.inWholeMilliseconds),
             )
         }
     }
 
-    internal fun synkroniserForPerson(fnr: String): CompletableFuture<Unit> {
+    internal fun synkroniserForPerson(fnr: String): CompletableFuture<SynkroniserteArbeidsforhold> {
         if (!skalSynkroniseres(fnr)) {
-            return CompletableFuture.completedFuture(Unit)
+            return CompletableFuture.completedFuture(SynkroniserteArbeidsforhold.TOM)
         }
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
-        return CompletableFuture.completedFuture(Unit)
+        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
@@ -142,4 +154,9 @@ class AaregHendelserConsumer(
                     endring == Entitetsendring.Ansettelsesperiode
             }
     }
+}
+
+private fun <T> ventPaAlle(futures: List<CompletableFuture<T>>): List<T> {
+    CompletableFuture.allOf(*futures.toTypedArray()).join()
+    return futures.map { it.get() }
 }
