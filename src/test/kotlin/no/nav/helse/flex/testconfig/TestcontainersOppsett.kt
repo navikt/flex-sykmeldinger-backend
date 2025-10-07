@@ -1,8 +1,6 @@
 package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.utils.logger
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
@@ -50,20 +48,24 @@ object TestcontainersOppsett {
             )
         }
 
-    fun setPropertiesInContext(registry: DynamicPropertyRegistry) {
+    init {
         postgresContainer.run {
-            registry.add("spring.datasource.url") { "$jdbcUrl&reWriteBatchedInserts=true" }
-            registry.add("spring.datasource.username") { username }
-            registry.add("spring.datasource.password") { password }
+            System.setProperty("spring.datasource.url", "$jdbcUrl&reWriteBatchedInserts=true")
+            System.setProperty("spring.datasource.username", username)
+            System.setProperty("spring.datasource.password", password)
         }
         kafkaContainer.run {
-            registry.add("KAFKA_BROKERS") { bootstrapServers }
+            System.setProperty("KAFKA_BROKERS", bootstrapServers)
         }
         valkeyContainer.run {
-            registry.add("VALKEY_HOST_SESSIONS") { host }
-            registry.add("VALKEY_PORT_SESSIONS") { firstMappedPort.toString() }
-            registry.add("VALKEY_USERNAME_SESSIONS") { "default" }
-            registry.add("VALKEY_PASSWORD_SESSIONS") { "" }
+            System.setProperty("VALKEY_HOST_SESSIONS", host)
+            System.setProperty("VALKEY_PORT_SESSIONS", firstMappedPort.toString())
+            System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
+            System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
         }
+    }
+
+    fun initIfNotRunning() {
+        // trigger init
     }
 }

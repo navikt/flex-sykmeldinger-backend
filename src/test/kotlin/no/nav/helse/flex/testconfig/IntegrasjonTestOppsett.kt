@@ -17,8 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
 import org.springframework.kafka.test.utils.ContainerTestUtils
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -55,12 +53,8 @@ abstract class IntegrasjonTestOppsett {
     @Autowired
     lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
 
-    companion object {
-        @JvmStatic
-        @DynamicPropertySource
-        fun dynamicProperties(registry: DynamicPropertyRegistry) {
-            TestcontainersOppsett.setPropertiesInContext(registry)
-        }
+    init {
+        TestcontainersOppsett.initIfNotRunning()
     }
 
     @BeforeAll
