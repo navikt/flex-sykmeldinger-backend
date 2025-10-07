@@ -98,26 +98,29 @@ class MockWebServereConfig {
 
         val pdlMockWebServer =
             MockWebServer().apply {
-                System.setProperty("PDL_BASE_URL", "http://localhost:$port")
                 dispatcher = defaultPdlDispatcher
             }
 
         val aaregMockWebServer =
             MockWebServer().apply {
-                System.setProperty("AAREG_URL", "http://localhost:$port")
                 dispatcher = defaultAaregDispatcher
             }
 
         val eregMockWebServer =
             MockWebServer().apply {
-                System.setProperty("EREG_URL", "http://localhost:$port")
                 dispatcher = defaultEregDispatcher
             }
 
         val syketilfelleMockWebServer =
             MockWebServer().apply {
-                System.setProperty("FLEX_SYKETILFELLE_URL", "http://localhost:$port")
                 dispatcher = defaultSyketilfelleDispatcher
             }
+
+        init {
+            System.setProperty("PDL_BASE_URL", "http://localhost:${pdlMockWebServer.port}")
+            System.setProperty("AAREG_URL", "http://localhost:${aaregMockWebServer.port}")
+            System.setProperty("EREG_URL", "http://localhost:${eregMockWebServer.port}")
+            System.setProperty("FLEX_SYKETILFELLE_URL", "http://localhost:${syketilfelleMockWebServer.port}")
+        }
     }
 }
