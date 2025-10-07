@@ -41,7 +41,9 @@ class EksternSykmeldingHandterer(
             val sykmelding = opprettNySykmelding(eksternSykmeldingMelding)
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
-            arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr)
+            arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
+                log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
+            }
             log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
         }
     }
