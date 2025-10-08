@@ -20,7 +20,6 @@ class AivenKafkaErrorHandler :
         },
     ) {
     // Bruker aliased logger for unngå kollisjon med CommonErrorHandler.logger(): LogAccessor.
-    val log = slf4jLogger()
 
     override fun handleRemaining(
         thrownException: Exception,
@@ -28,29 +27,12 @@ class AivenKafkaErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-        val failingRecord = records.firstOrNull()
-        if (failingRecord == null) {
-            log.errorSecure(
-                "Feil ved kafka listener: " +
-                    mapOf(
-                        "listenerId" to container.listenerId,
-                        "listenerTopics" to consumer.listTopics().keys,
-                    ),
-                secureThrowable = thrownException,
-            )
-        } else {
-            log.errorSecure(
-                "Feil ved prossesseringen av kafka hendelse: " +
-                    mapOf(
-                        "topic" to failingRecord.topic(),
-                        "key" to failingRecord.key(),
-                        "partition" to failingRecord.partition(),
-                        "offset" to failingRecord.offset(),
-                    ),
-                secureThrowable = thrownException,
-            )
-        }
-
+        loggFeilende(
+            thrownException = thrownException,
+            records = records,
+            listenerId = container.listenerId,
+            listenerTopics = consumer.listTopics().keys,
+        )
         super.handleRemaining(thrownException, records, consumer, container)
     }
 
@@ -61,27 +43,87 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        if (data.isEmpty) {
-            log.errorSecure(
-                "Feil ved batch kafka listener: " +
-                    mapOf(
-                        "listenerId" to container.listenerId,
-                        "listenerTopics" to consumer.listTopics().keys,
-                    ),
-                secureThrowable = thrownException,
-            )
-        } else {
-            log.errorSecure(
-                "Feil ved batch prossesseringen av kafka hendelser: " +
-                    mapOf(
-                        "topics" to data.map { it.topic() }.distinct(),
-                        "antallRecords" to data.count(),
-                        "forsteOffset" to data.first().offset(),
-                        "forsteKey" to data.first().key(),
-                    ),
-                secureThrowable = thrownException,
-            )
-        }
+        loggFeilendeBatch(
+            thrownException = thrownException,
+            records = data,
+            listenerId = container.listenerId,
+            listenerTopics = consumer.listTopics().keys,
+        )
         super.handleBatch(thrownException, data, consumer, container, invokeListener)
+    }
+
+    companion object {
+        private val log = slf4jLogger()
+
+        internal fun loggFeilende(
+            thrownException: Exception,
+            records: MutableList<ConsumerRecord<*, *>>,
+            listenerId: String? = null,
+            listenerTopics: Collection<String> = emptySet(),
+        ) {
+            if (!skalExceptionLogges(thrownException)) {
+                return
+            }
+            val failingRecord = records.firstOrNull()
+            if (failingRecord == null) {
+                log.errorSecure(
+                    "Feil ved kafka listener: " +
+                        mapOf(
+                            "listenerId" to listenerId,
+                            "listenerTopics" to listenerTopics,
+                        ),
+                    secureThrowable = thrownException,
+                )
+            } else {
+                log.errorSecure(
+                    "Feil ved prossesseringen av kafka hendelse: " +
+                        mapOf(
+                            "topic" to failingRecord.topic(),
+                            "key" to failingRecord.key(),
+                            "partition" to failingRecord.partition(),
+                            "offset" to failingRecord.offset(),
+                        ),
+                    secureThrowable = thrownException,
+                )
+            }
+        }
+
+        internal fun loggFeilendeBatch(
+            thrownException: Exception,
+            records: ConsumerRecords<*, *>,
+            listenerId: String? = null,
+            listenerTopics: Collection<String> = emptySet(),
+        ) {
+            if (!skalExceptionLogges(thrownException)) {
+                return
+            }
+            if (records.isEmpty) {
+                log.errorSecure(
+                    "Feil ved batch kafka listener: " +
+                        mapOf(
+                            "listenerId" to listenerId,
+                            "listenerTopics" to listenerTopics,
+                        ),
+                    secureThrowable = thrownException,
+                )
+            } else {
+                log.errorSecure(
+                    "Feil ved batch prossesseringen av kafka hendelser: " +
+                        mapOf(
+                            "topics" to records.map { it.topic() }.distinct(),
+                            "antallRecords" to records.count(),
+                            "forsteOffset" to records.first().offset(),
+                            "forsteKey" to records.first().key(),
+                        ),
+                    secureThrowable = thrownException,
+                )
+            }
+        }
+
+        private fun skalExceptionLogges(ex: Exception): Boolean =
+            when (ex) {
+                is KafkaErrorHandlerException -> ex.skalLogges
+                else -> true
+            }
     }
 }
