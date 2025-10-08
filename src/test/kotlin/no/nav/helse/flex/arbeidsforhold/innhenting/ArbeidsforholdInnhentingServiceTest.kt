@@ -19,7 +19,7 @@ class ArbeidsforholdInnhentingServiceTest {
                     ),
                 fnr = "fnr",
             )
-        resultat.skalOpprettes shouldHaveSize 1
+        resultat.opprett shouldHaveSize 1
     }
 
     @Test
@@ -36,7 +36,7 @@ class ArbeidsforholdInnhentingServiceTest {
                     ),
                 fnr = "fnr",
             )
-        resultat.skalOppdateres shouldHaveSize 1
+        resultat.oppdater shouldHaveSize 1
     }
 
     @Test
@@ -50,7 +50,7 @@ class ArbeidsforholdInnhentingServiceTest {
                 eksterneArbeidsforhold = emptyList(),
                 fnr = "fnr",
             )
-        resultat.skalSlettes shouldHaveSize 1
+        resultat.slett shouldHaveSize 1
     }
 
     @Test
@@ -67,6 +67,6 @@ class ArbeidsforholdInnhentingServiceTest {
                 fnr = "fnr",
                 now = Instant.parse("2020-05-01T00:00:00Z"),
             )
-        resultat.skalOpprettes shouldHaveSize 0
+        resultat.opprett shouldHaveSize 0
     }
 }
