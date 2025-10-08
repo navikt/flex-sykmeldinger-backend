@@ -6,8 +6,8 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
-import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
 import no.nav.helse.flex.utils.objectMapper
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be`
@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
         mock {
-            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn CompletableFuture.completedFuture(SynkroniserteArbeidsforhold())
+            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn CompletableFuture.completedFuture(ArbeidsforholdSynkronisering())
         }
 
     @Test

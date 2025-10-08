@@ -3,7 +3,6 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.IdentService
-import no.nav.helse.flex.utils.logger
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,15 +19,13 @@ class ArbeidsforholdInnhentingService(
     private val identService: IdentService,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
-    private val log = logger()
-
     @Async("virtualThreadExecutor")
     @Transactional(rollbackFor = [Exception::class])
-    fun synkroniserArbeidsforholdForPersonAsync(fnr: String): CompletableFuture<SynkroniserteArbeidsforhold> =
+    fun synkroniserArbeidsforholdForPersonAsync(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> =
         CompletableFuture.completedFuture(synkroniserArbeidsforholdForPerson(fnr))
 
     @Transactional(rollbackFor = [Exception::class])
-    fun synkroniserArbeidsforholdForPerson(fnr: String): SynkroniserteArbeidsforhold {
+    fun synkroniserArbeidsforholdForPerson(fnr: String): ArbeidsforholdSynkronisering {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)
         val alleIdenter =
             run {
@@ -52,15 +49,15 @@ class ArbeidsforholdInnhentingService(
         arbeidsforholdRepository.deleteByNavArbeidsforholdId(navArbeidsforholdId)
     }
 
-    internal fun lagreSynkroniserteArbeidsforhold(synkroniserteArbeidsforhold: SynkroniserteArbeidsforhold) {
-        if (synkroniserteArbeidsforhold.skalOpprettes.isNotEmpty()) {
-            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOpprettes)
+    internal fun lagreSynkroniserteArbeidsforhold(arbeidsforholdSynkronisering: ArbeidsforholdSynkronisering) {
+        if (arbeidsforholdSynkronisering.opprett.isNotEmpty()) {
+            arbeidsforholdRepository.saveAll(arbeidsforholdSynkronisering.opprett)
         }
-        if (synkroniserteArbeidsforhold.skalOppdateres.isNotEmpty()) {
-            arbeidsforholdRepository.saveAll(synkroniserteArbeidsforhold.skalOppdateres)
+        if (arbeidsforholdSynkronisering.oppdater.isNotEmpty()) {
+            arbeidsforholdRepository.saveAll(arbeidsforholdSynkronisering.oppdater)
         }
-        if (synkroniserteArbeidsforhold.skalSlettes.isNotEmpty()) {
-            arbeidsforholdRepository.deleteAll(synkroniserteArbeidsforhold.skalSlettes)
+        if (arbeidsforholdSynkronisering.slett.isNotEmpty()) {
+            arbeidsforholdRepository.deleteAll(arbeidsforholdSynkronisering.slett)
         }
     }
 
@@ -70,7 +67,7 @@ class ArbeidsforholdInnhentingService(
             eksterneArbeidsforhold: List<EksterntArbeidsforhold>,
             fnr: String,
             now: Instant = Instant.now(),
-        ): SynkroniserteArbeidsforhold {
+        ): ArbeidsforholdSynkronisering {
             val eksterneArbeidsforholdVedId = eksterneArbeidsforhold.associateBy { it.navArbeidsforholdId }
             val interneArbeidsforholdVedId = interneArbeidsforhold.associateBy { it.navArbeidsforholdId }
 
@@ -116,10 +113,10 @@ class ArbeidsforholdInnhentingService(
 
             val opprettNyligeArbeidsforhold = opprettArbeidsforhold.filter { harVaertAnsattSiste4Mnd(it.tom, now = now) }
 
-            return SynkroniserteArbeidsforhold(
-                skalOpprettes = opprettNyligeArbeidsforhold,
-                skalOppdateres = oppdaterteArbeidsforhold,
-                skalSlettes = slettedeArbeidsforhold,
+            return ArbeidsforholdSynkronisering(
+                opprett = opprettNyligeArbeidsforhold,
+                oppdater = oppdaterteArbeidsforhold,
+                slett = slettedeArbeidsforhold,
             )
         }
 
@@ -133,42 +130,42 @@ class ArbeidsforholdInnhentingService(
     }
 }
 
-data class SynkroniserteArbeidsforhold(
-    val skalOpprettes: List<Arbeidsforhold> = emptyList(),
-    val skalOppdateres: List<Arbeidsforhold> = emptyList(),
-    val skalSlettes: List<Arbeidsforhold> = emptyList(),
+data class ArbeidsforholdSynkronisering(
+    val opprett: List<Arbeidsforhold> = emptyList(),
+    val oppdater: List<Arbeidsforhold> = emptyList(),
+    val slett: List<Arbeidsforhold> = emptyList(),
 ) {
     companion object {
-        val TOM = SynkroniserteArbeidsforhold()
+        val INGEN = ArbeidsforholdSynkronisering()
     }
 
-    fun erTom(): Boolean = this == TOM
+    fun erIngen(): Boolean = this == INGEN
 
-    operator fun plus(other: SynkroniserteArbeidsforhold): SynkroniserteArbeidsforhold =
-        SynkroniserteArbeidsforhold(
-            skalOpprettes = this.skalOpprettes + other.skalOpprettes,
-            skalOppdateres = this.skalOppdateres + other.skalOppdateres,
-            skalSlettes = this.skalSlettes + other.skalSlettes,
+    operator fun plus(other: ArbeidsforholdSynkronisering): ArbeidsforholdSynkronisering =
+        ArbeidsforholdSynkronisering(
+            opprett = this.opprett + other.opprett,
+            oppdater = this.oppdater + other.oppdater,
+            slett = this.slett + other.slett,
         )
 
     fun toLogString(): String =
-        if (erTom()) {
+        if (erIngen()) {
             "ingen endringer"
         } else {
-            val opprettetIds = skalOpprettes.map { it.navArbeidsforholdId }
-            val oppdatertIds = skalOppdateres.map { it.navArbeidsforholdId }
-            val slettetIds = skalSlettes.map { it.navArbeidsforholdId }
+            val opprettIds = opprett.map { it.navArbeidsforholdId }
+            val oppdaterIds = oppdater.map { it.navArbeidsforholdId }
+            val slettIds = slett.map { it.navArbeidsforholdId }
             val sizeProps =
                 mapOf(
-                    "opprettet" to opprettetIds.size,
-                    "oppdatert" to oppdatertIds.size,
-                    "slettet" to slettetIds.size,
+                    "opprett" to opprettIds.size,
+                    "oppdater" to oppdaterIds.size,
+                    "slett" to slettIds.size,
                 ).filterValues { it > 0 }
             val navArbeidsforholdIdProps =
                 mapOf(
-                    "opprettetNavArbeidsforholdId" to opprettetIds,
-                    "oppdatertNavArbeidsforholdId" to oppdatertIds,
-                    "slettetNavArbeidsforholdId" to slettetIds,
+                    "opprettNavArbeidsforholdId" to opprettIds,
+                    "oppdaterNavArbeidsforholdId" to oppdaterIds,
+                    "slettNavArbeidsforholdId" to slettIds,
                 ).filterValues { it.isNotEmpty() }
             (sizeProps + navArbeidsforholdIdProps).toString()
         }

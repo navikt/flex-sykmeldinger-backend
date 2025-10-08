@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
-import no.nav.helse.flex.arbeidsforhold.innhenting.SynkroniserteArbeidsforhold
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -95,10 +95,10 @@ class AaregHendelserConsumer(
                 personerFnrBatcher
                     .flatMap { fnrBatch ->
                         ventPaAlle(fnrBatch.map { synkroniserForPerson(it) })
-                    }.fold(SynkroniserteArbeidsforhold.TOM, SynkroniserteArbeidsforhold::plus)
+                    }.fold(ArbeidsforholdSynkronisering.INGEN, ArbeidsforholdSynkronisering::plus)
             }
 
-        if (!synkroniserteArbeidsforhold.erTom()) {
+        if (!synkroniserteArbeidsforhold.erIngen()) {
             log.info(
                 "Synkronisert arbeidsforhold ved aareg notifikasjon. " +
                     mapOf(
@@ -116,9 +116,9 @@ class AaregHendelserConsumer(
         }
     }
 
-    internal fun synkroniserForPerson(fnr: String): CompletableFuture<SynkroniserteArbeidsforhold> {
+    internal fun synkroniserForPerson(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
         if (!skalSynkroniseres(fnr)) {
-            return CompletableFuture.completedFuture(SynkroniserteArbeidsforhold.TOM)
+            return CompletableFuture.completedFuture(ArbeidsforholdSynkronisering.INGEN)
         }
         return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
     }
