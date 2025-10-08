@@ -1,5 +1,6 @@
 package no.nav.helse.flex.config.kafka
 
+import no.nav.helse.flex.utils.errorSecure
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
@@ -28,13 +29,26 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
     ) {
         val failingRecord = records.firstOrNull()
-        if (failingRecord != null) {
-            log.error(
-                "Feil i prossesseringen av record med offset: ${failingRecord.offset()}, key: ${failingRecord.key()} på topic ${failingRecord.topic()}",
-                thrownException,
+        if (failingRecord == null) {
+            log.errorSecure(
+                "Feil ved kafka listener: " +
+                    mapOf(
+                        "listenerId" to container.listenerId,
+                        "listenerTopics" to consumer.listTopics().keys,
+                    ),
+                secureThrowable = thrownException,
             )
         } else {
-            log.error("Feil i listener uten noen records", thrownException)
+            log.errorSecure(
+                "Feil ved prossesseringen av kafka hendelse: " +
+                    mapOf(
+                        "topic" to failingRecord.topic(),
+                        "key" to failingRecord.key(),
+                        "partition" to failingRecord.partition(),
+                        "offset" to failingRecord.offset(),
+                    ),
+                secureThrowable = thrownException,
+            )
         }
 
         super.handleRemaining(thrownException, records, consumer, container)
@@ -48,22 +62,24 @@ class AivenKafkaErrorHandler :
         invokeListener: Runnable,
     ) {
         if (data.isEmpty) {
-            log.error("Feil i batch listener uten noen records", thrownException)
+            log.errorSecure(
+                "Feil ved batch kafka listener: " +
+                    mapOf(
+                        "listenerId" to container.listenerId,
+                        "listenerTopics" to consumer.listTopics().keys,
+                    ),
+                secureThrowable = thrownException,
+            )
         } else {
-            val alleTopics = data.map { it.topic() }.distinct()
-            val antallRecords = data.count()
-            val forsteOffset = data.first().offset()
-            val forsteKey = data.first().key()
-            val topicStr =
-                if (alleTopics.size == 1) {
-                    "topic: ${alleTopics.first()}"
-                } else {
-                    "topics: [${alleTopics.joinToString(", ")}]"
-                }
-            log.error(
-                "Feil i batch prossesseringen av record på $topicStr, " +
-                    "første offset: $forsteOffset, antall records: $antallRecords, førsteKey: $forsteKey",
-                thrownException,
+            log.errorSecure(
+                "Feil ved batch prossesseringen av kafka hendelser: " +
+                    mapOf(
+                        "topics" to data.map { it.topic() }.distinct(),
+                        "antallRecords" to data.count(),
+                        "forsteOffset" to data.first().offset(),
+                        "forsteKey" to data.first().key(),
+                    ),
+                secureThrowable = thrownException,
             )
         }
         super.handleBatch(thrownException, data, consumer, container, invokeListener)
