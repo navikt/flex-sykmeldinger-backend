@@ -43,9 +43,9 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        loggFeilendeBatch(
+        loggFeilende(
             thrownException = thrownException,
-            records = data,
+            records = data.toList(),
             listenerId = container.listenerId,
             listenerTopics = consumer.listTopics().keys,
         )
@@ -57,68 +57,60 @@ class AivenKafkaErrorHandler :
 
         internal fun loggFeilende(
             thrownException: Exception,
-            records: MutableList<ConsumerRecord<*, *>>,
+            records: Collection<ConsumerRecord<*, *>>,
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
             if (!skalExceptionLogges(thrownException)) {
                 return
             }
-            val failingRecord = records.firstOrNull()
-            if (failingRecord == null) {
+            val relevantThrownException =
+                when (thrownException) {
+                    is KafkaErrorHandlerException -> thrownException.cause
+                    else -> thrownException
+                }
+            if (records.isEmpty()) {
                 log.errorSecure(
                     "Feil ved kafka listener: " +
                         mapOf(
                             "listenerId" to listenerId,
                             "listenerTopics" to listenerTopics,
+                            "exceptionType" to relevantThrownException?.let { it::class.simpleName },
                         ),
-                    secureThrowable = thrownException,
+                    secureMessage = "Årsak: ${relevantThrownException?.message}",
+                    secureThrowable = relevantThrownException,
                 )
             } else {
                 log.errorSecure(
-                    "Feil ved prossesseringen av kafka hendelse: " +
+                    "Feil ved prossesseringen av kafka hendelse(r): " +
                         mapOf(
-                            "topic" to failingRecord.topic(),
-                            "key" to failingRecord.key(),
-                            "partition" to failingRecord.partition(),
-                            "offset" to failingRecord.offset(),
+                            "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
+                            "exceptionType" to relevantThrownException?.let { it::class.simpleName },
+                            "antall" to records.count(),
+                            "key" to records.map { it.key() }.limitWithEllipsis(4).nullOrSingleOrList(),
+                            "offset" to records.firstOrNull()?.offset(),
+                            "partition" to records.map { it.partition() }.distinct().nullOrSingleOrList(),
+                            "listenerId" to listenerId,
                         ),
-                    secureThrowable = thrownException,
+                    secureMessage = "Årsak: ${relevantThrownException?.message}",
+                    secureThrowable = relevantThrownException,
                 )
             }
         }
 
-        internal fun loggFeilendeBatch(
-            thrownException: Exception,
-            records: ConsumerRecords<*, *>,
-            listenerId: String? = null,
-            listenerTopics: Collection<String> = emptySet(),
-        ) {
-            if (!skalExceptionLogges(thrownException)) {
-                return
+        private fun List<*>.nullOrSingleOrList(): Any? =
+            when (this.size) {
+                0 -> null
+                1 -> this.first()
+                else -> this.toList()
             }
-            if (records.isEmpty) {
-                log.errorSecure(
-                    "Feil ved batch kafka listener: " +
-                        mapOf(
-                            "listenerId" to listenerId,
-                            "listenerTopics" to listenerTopics,
-                        ),
-                    secureThrowable = thrownException,
-                )
+
+        private fun List<*>.limitWithEllipsis(n: Int): List<*> =
+            if (size > n) {
+                this.take(n).toList() + "..."
             } else {
-                log.errorSecure(
-                    "Feil ved batch prossesseringen av kafka hendelser: " +
-                        mapOf(
-                            "topics" to records.map { it.topic() }.distinct(),
-                            "antallRecords" to records.count(),
-                            "forsteOffset" to records.first().offset(),
-                            "forsteKey" to records.first().key(),
-                        ),
-                    secureThrowable = thrownException,
-                )
+                this.toList()
             }
-        }
 
         private fun skalExceptionLogges(ex: Exception): Boolean =
             when (ex) {
