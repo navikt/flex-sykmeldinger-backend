@@ -6,10 +6,7 @@ import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Marker
 import ch.qos.logback.classic.Logger as LogbackLogger
