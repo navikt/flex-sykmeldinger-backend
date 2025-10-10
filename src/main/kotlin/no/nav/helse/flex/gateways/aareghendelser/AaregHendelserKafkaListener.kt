@@ -8,7 +8,6 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingServi
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
-import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
