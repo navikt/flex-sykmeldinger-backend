@@ -7,6 +7,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
+import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -51,13 +52,10 @@ class AaregHendelserConsumer(
         try {
             handterHendelser(rawRecords)
         } catch (e: Exception) {
-            val message = "Klarte ikke prosessere aareg hendelser. Dette vil bli retryet. Keys: ${rawRecords.map { it.key }}"
-            log.errorSecure(
-                message,
-                secureMessage = e.message ?: "",
-                secureThrowable = e,
+            throw KafkaErrorHandlerException(
+                cause = e,
+                insecureMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
             )
-            throw RuntimeException(message)
         }
     }
 
