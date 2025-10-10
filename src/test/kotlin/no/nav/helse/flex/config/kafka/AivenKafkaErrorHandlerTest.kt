@@ -60,6 +60,17 @@ class AivenKafkaErrorHandlerTest {
     }
 
     @Test
+    fun `logger 'insecureMessage' i KafkaErrorHandlerException`() {
+        AivenKafkaErrorHandler.loggFeilende(
+            thrownException = KafkaErrorHandlerException(insecureMessage = "sikker beskjed", cause = RuntimeException()),
+            records = mutableListOf(Testdata.lagConsumerRecord()),
+        )
+        logListAppender.eventerUtenMarkers().first().run {
+            message shouldStartWith "sikker beskjed"
+        }
+    }
+
+    @Test
     fun `logger 'message' kun til secure logs`() {
         AivenKafkaErrorHandler.loggFeilende(
             thrownException = RuntimeException("Feil melding"),

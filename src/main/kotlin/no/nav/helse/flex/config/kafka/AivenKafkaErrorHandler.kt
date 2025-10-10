@@ -64,14 +64,12 @@ class AivenKafkaErrorHandler :
             if (!skalExceptionLogges(thrownException)) {
                 return
             }
-            val relevantThrownException =
-                when (thrownException) {
-                    is KafkaErrorHandlerException -> thrownException.cause
-                    else -> thrownException
-                }
+            val relevantThrownException = (thrownException as? KafkaErrorHandlerException)?.cause ?: thrownException
+            val insecureMessage: String? = (thrownException as? KafkaErrorHandlerException)?.message
             if (records.isEmpty()) {
+                val message = insecureMessage ?: "Feil ved kafka listener"
                 log.errorSecure(
-                    "Feil ved kafka listener: " +
+                    "$message: " +
                         mapOf(
                             "listenerId" to listenerId,
                             "listenerTopics" to listenerTopics,
@@ -81,8 +79,9 @@ class AivenKafkaErrorHandler :
                     secureThrowable = relevantThrownException,
                 )
             } else {
+                val message = insecureMessage ?: "Feil ved prossesseringen av kafka hendelse(r)"
                 log.errorSecure(
-                    "Feil ved prossesseringen av kafka hendelse(r): " +
+                    "$message: " +
                         mapOf(
                             "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
                             "exceptionType" to relevantThrownException?.let { it::class.simpleName },
