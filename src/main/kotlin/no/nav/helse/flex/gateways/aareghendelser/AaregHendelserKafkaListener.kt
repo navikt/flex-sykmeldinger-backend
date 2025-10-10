@@ -73,7 +73,10 @@ class AaregHendelserConsumer(
                         )
                         null
                     } else {
-                        throw RuntimeException("Feil aareg hendelse format, rå hendelse: ${hendelse.value}", e)
+                        throw KafkaErrorHandlerException(
+                            cause = e,
+                            insecureMessage = "Feil ved deserialisering",
+                        )
                     }
                 }
             }

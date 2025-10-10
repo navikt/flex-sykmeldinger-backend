@@ -28,7 +28,7 @@ class NarmestelederListener(
         } catch (e: Exception) {
             throw KafkaErrorHandlerException(
                 cause = e,
-                insecureMessage = "Feil ved håndtering av nærmeste leder hendelse. Dette vil bli retryet",
+                insecureMessage = "Feil ved håndtering av nærmeste leder hendelse",
             )
         }
         acknowledgment.acknowledge()

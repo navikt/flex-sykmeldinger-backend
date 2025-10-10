@@ -64,22 +64,20 @@ class SykmeldingListener(
                 try {
                     objectMapper.readValue(serialisertSykmelding)
                 } catch (e: Exception) {
-                    log.errorSecure(
-                        "Feil sykmelding format. Melding key: ${cr.key()}",
-                        secureMessage = "Rå sykmelding: ${cr.value()}",
-                        secureThrowable = e,
+                    throw KafkaErrorHandlerException(
+                        cause = e,
+                        insecureMessage = "Feil ved deserialisering",
                     )
-                    throw e
                 }
             }
 
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
-                val message =
-                    "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
-                        "value: ${sykmeldingRecord.sykmelding.id}"
-                log.error(message)
-                throw IllegalArgumentException(message)
+                throw KafkaErrorHandlerException(
+                    insecureMessage =
+                        "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
+                            "value: ${sykmeldingRecord.sykmelding.id}",
+                )
             }
         }
 
