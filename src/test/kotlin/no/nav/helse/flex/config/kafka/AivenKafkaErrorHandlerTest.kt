@@ -7,6 +7,7 @@ import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Marker
 import ch.qos.logback.classic.Logger as LogbackLogger
@@ -36,30 +37,6 @@ class AivenKafkaErrorHandlerTest {
     }
 
     @Test
-    fun `logger ikke KafkaErrorHandlerException dersom spesifisert`() {
-        AivenKafkaErrorHandler.loggFeilende(
-            thrownException = KafkaErrorHandlerException(skalLogges = false, cause = RuntimeException()),
-            records = mutableListOf(Testdata.lagConsumerRecord()),
-        )
-        logListAppender.eventerUtenMarkers().shouldBeEmpty()
-    }
-
-    @Test
-    fun `logger kun årsak av KafkaErrorHandlerException`() {
-        AivenKafkaErrorHandler.loggFeilende(
-            thrownException = KafkaErrorHandlerException(cause = RuntimeException("Årsak melding")),
-            records = mutableListOf(Testdata.lagConsumerRecord()),
-        )
-        logListAppender.eventerUtenMarkers().first().run {
-            message shouldNotContain "KafkaErrorHandlerException"
-            message shouldContain "RuntimeException"
-        }
-        logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).first().run {
-            throwableProxy.message shouldBeEqualTo "Årsak melding"
-        }
-    }
-
-    @Test
     fun `logger 'message' kun til secure logs`() {
         AivenKafkaErrorHandler.loggFeilende(
             thrownException = RuntimeException("Feil melding"),
@@ -80,6 +57,106 @@ class AivenKafkaErrorHandlerTest {
             records = mutableListOf(Testdata.lagConsumerRecord()),
         )
         logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).shouldHaveSingleItem()
+    }
+
+    @Nested
+    inner class HandterKafkaErrorHandlerException {
+        @Test
+        fun `logger ingenting dersom spesifisert`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = KafkaErrorHandlerException(skalLogges = false, cause = RuntimeException()),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.list.shouldBeEmpty()
+        }
+
+        @Test
+        fun `logger insecureMessage`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = KafkaErrorHandlerException(insecureMessage = "Usikker melding"),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldStartWith "Usikker melding"
+            }
+        }
+
+        @Test
+        fun `logger kjede av insecureMessage`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException =
+                    KafkaErrorHandlerException(
+                        insecureMessage = "Første melding",
+                        cause =
+                            KafkaErrorHandlerException(
+                                insecureMessage = "Annen melding",
+                            ),
+                    ),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldContain "Første melding"
+                message shouldContain "Annen melding"
+            }
+        }
+
+        @Test
+        fun `stopper kjede av insecureMessage dersom ikke skalLogges`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException =
+                    KafkaErrorHandlerException(
+                        insecureMessage = "Første melding",
+                        cause =
+                            KafkaErrorHandlerException(
+                                insecureMessage = "Annen melding",
+                                skalLogges = false,
+                            ),
+                    ),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldNotContain "Annen melding"
+            }
+        }
+
+        @Test
+        fun `logger årsak type`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = KafkaErrorHandlerException(cause = RuntimeException()),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldNotContain "KafkaErrorHandlerException"
+                message shouldContain "RuntimeException"
+            }
+        }
+
+        @Test
+        fun `logger årsak type neders i kjede`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException =
+                    KafkaErrorHandlerException(
+                        cause =
+                            KafkaErrorHandlerException(cause = RuntimeException()),
+                    ),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldNotContain "KafkaErrorHandlerException"
+                message shouldContain "RuntimeException"
+            }
+        }
+
+        @Test
+        fun `logger årsak melding til secure logs`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = KafkaErrorHandlerException(cause = RuntimeException("Årsak melding")),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).first().run {
+                throwableProxy.message shouldBeEqualTo "Årsak melding"
+            }
+        }
     }
 
     private fun ListAppender<ILoggingEvent>.eventerUtenMarkers(): List<ILoggingEvent> = this.list.filter { it.markerList.isNullOrEmpty() }
