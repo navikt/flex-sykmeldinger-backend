@@ -2,8 +2,7 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
-import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerTilleggsinfo
-import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
@@ -18,7 +17,7 @@ import java.time.LocalDate
 
 class SykmeldingHendelseTilKafkaKonvertererTest {
     @Test
-    fun `Mapper status BEKREFT_AVVIST riktig`() {
+    fun `Mapper hendelse med status BEKREFT_AVVIST riktig`() {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.BEKREFTET_AVVIST,
@@ -39,7 +38,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     }
 
     @Test
-    fun `Mapper status AVBRUTT riktig`() {
+    fun `Mapper hendelse med status AVBRUTT riktig`() {
         val sykmeldingStatusKafkaDTO =
             SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                 sykmeldingId = "1",
@@ -59,7 +58,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     }
 
     @Test
-    fun `Mapper status APEN riktig`() {
+    fun `Mapper hendelse med status APEN riktig`() {
         val sykmeldingStatusKafkaDTO =
             SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                 sykmeldingId = "1",
@@ -79,7 +78,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     }
 
     @Nested
-    inner class StatusSendtTilArbeidsgiver {
+    inner class `Hendelse med status SENDT_TIL_ARBEIDSGIVER` {
         @Test
         fun `Mapper arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
