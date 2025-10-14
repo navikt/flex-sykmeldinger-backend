@@ -1,6 +1,7 @@
 package no.nav.helse.flex.gateways
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
@@ -22,7 +23,14 @@ class NarmestelederListener(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
     ) {
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(cr.value())
+        try {
+            oppdateringAvNarmesteLeder.behandleMeldingFraKafka(cr.value())
+        } catch (e: Exception) {
+            throw KafkaErrorHandlerException(
+                cause = e,
+                insecureMessage = "Feil ved håndtering av nærmeste leder hendelse",
+            )
+        }
         acknowledgment.acknowledge()
     }
 }

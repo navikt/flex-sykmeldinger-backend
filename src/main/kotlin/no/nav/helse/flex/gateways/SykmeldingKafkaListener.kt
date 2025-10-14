@@ -3,9 +3,9 @@ package no.nav.helse.flex.gateways
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
-import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -41,7 +41,10 @@ class SykmeldingListener(
                 acknowledgment.acknowledge()
                 return
             }
-            throw RuntimeException("Feil ved behandling av sykmelding på kafka. Melding key: ${cr.key()}")
+            throw KafkaErrorHandlerException(
+                e,
+                insecureMessage = "Feil ved prosessering av sykmelding på kafka",
+            )
         }
     }
 
@@ -60,38 +63,29 @@ class SykmeldingListener(
                 try {
                     objectMapper.readValue(serialisertSykmelding)
                 } catch (e: Exception) {
-                    log.errorSecure(
-                        "Feil sykmelding format. Melding key: ${cr.key()}",
-                        secureMessage = "Rå sykmelding: ${cr.value()}",
-                        secureThrowable = e,
+                    throw KafkaErrorHandlerException(
+                        cause = e,
+                        insecureMessage = "Feil ved deserialisering",
                     )
-                    throw e
                 }
             }
 
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
-                val message =
-                    "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
-                        "value: ${sykmeldingRecord.sykmelding.id}"
-                log.error(message)
-                throw IllegalArgumentException(message)
+                throw KafkaErrorHandlerException(
+                    insecureMessage =
+                        "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
+                            "value: ${sykmeldingRecord.sykmelding.id}",
+                )
             }
         }
 
         log.info("Prosesserer sykmelding $sykmeldingId fra topic $SYKMELDING_TOPIC")
-        try {
-            eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
-                sykmeldingId = sykmeldingId,
-                eksternSykmeldingMelding = sykmeldingRecord,
-            )
-        } catch (e: Exception) {
-            log.errorSecure(
-                "Feil ved håndtering av sykmelding $sykmeldingId",
-                secureThrowable = e,
-            )
-            throw e
-        }
+
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = sykmeldingId,
+            eksternSykmeldingMelding = sykmeldingRecord,
+        )
     }
 
     private fun burdeIgnorereSykmelding(

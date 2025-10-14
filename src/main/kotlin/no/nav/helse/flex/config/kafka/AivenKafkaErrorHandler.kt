@@ -64,38 +64,61 @@ class AivenKafkaErrorHandler :
             if (!skalExceptionLogges(thrownException)) {
                 return
             }
-            val relevantThrownException =
-                when (thrownException) {
-                    is KafkaErrorHandlerException -> thrownException.cause
-                    else -> thrownException
-                }
+
+            val relevantCauseException = findRelevantCauseException(thrownException)
+            val insecureMessage: String? = composeSecureMessage(thrownException)
+
             if (records.isEmpty()) {
+                val message = insecureMessage ?: "Feil ved kafka listener"
                 log.errorSecure(
-                    "Feil ved kafka listener: " +
+                    "$message: " +
                         mapOf(
                             "listenerId" to listenerId,
                             "listenerTopics" to listenerTopics,
-                            "exceptionType" to relevantThrownException?.let { it::class.simpleName },
+                            "exceptionType" to relevantCauseException::class.simpleName,
                         ),
-                    secureMessage = "Årsak: ${relevantThrownException?.message}",
-                    secureThrowable = relevantThrownException,
+                    secureMessage = relevantCauseException.message ?: "",
+                    secureThrowable = relevantCauseException,
                 )
             } else {
+                val message = insecureMessage ?: "Feil ved prossesseringen av kafka hendelse(r)"
                 log.errorSecure(
-                    "Feil ved prossesseringen av kafka hendelse(r): " +
+                    "$message: " +
                         mapOf(
                             "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
-                            "exceptionType" to relevantThrownException?.let { it::class.simpleName },
+                            "exceptionType" to relevantCauseException::class.simpleName,
                             "antall" to records.count(),
                             "key" to records.map { it.key() }.limitWithEllipsis(4).nullOrSingleOrList(),
                             "offset" to records.firstOrNull()?.offset(),
                             "partition" to records.map { it.partition() }.distinct().nullOrSingleOrList(),
                             "listenerId" to listenerId,
                         ),
-                    secureMessage = "Årsak: ${relevantThrownException?.message}",
-                    secureThrowable = relevantThrownException,
+                    secureMessage = relevantCauseException.message ?: "",
+                    secureThrowable = relevantCauseException,
                 )
             }
+        }
+
+        private fun findRelevantCauseException(exception: Throwable): Throwable {
+            if (exception !is KafkaErrorHandlerException) {
+                return exception
+            }
+            return exception.cause?.let { findRelevantCauseException(it) } ?: exception
+        }
+
+        private fun composeSecureMessage(exception: Throwable): String? {
+            if (exception !is KafkaErrorHandlerException) {
+                return exception::class.simpleName
+            }
+            if (!exception.skalLogges) {
+                return null
+            }
+            val insecureMessage: String? = exception.message
+            val causeMessage: String? = exception.cause?.let { composeSecureMessage(it) }
+
+            return listOfNotNull(insecureMessage, causeMessage)
+                .joinToString(" -- ")
+                .ifEmpty { null }
         }
 
         private fun List<*>.nullOrSingleOrList(): Any? =

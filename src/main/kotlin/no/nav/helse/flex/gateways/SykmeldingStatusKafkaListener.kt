@@ -3,9 +3,9 @@ package no.nav.helse.flex.gateways
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.EnvironmentToggles
+import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
-import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -39,8 +39,11 @@ class SykmeldingStatusKafkaListener(
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
-        } catch (_: Exception) {
-            throw RuntimeException("Feil ved behandling av sykmelding status på kafka, meldingKey: ${cr.key()}")
+        } catch (e: Exception) {
+            throw KafkaErrorHandlerException(
+                cause = e,
+                insecureMessage = "Feil ved prosessering av sykmelding status på kafka",
+            )
         }
     }
 
@@ -56,12 +59,10 @@ class SykmeldingStatusKafkaListener(
             try {
                 objectMapper.readValue(verdi)
             } catch (e: Exception) {
-                log.errorSecure(
-                    "Feil sykmelding status format, meldingKey: ${cr.key()}",
-                    secureMessage = "Rå sykmelding status: $verdi",
-                    secureThrowable = e,
+                throw KafkaErrorHandlerException(
+                    cause = e,
+                    insecureMessage = "Feil ved deserialisering",
                 )
-                throw e
             }
 
         if (environmentToggles.isDevelopment() && status.erEldreEnn(dager = 60)) {
@@ -72,12 +73,12 @@ class SykmeldingStatusKafkaListener(
         try {
             sykmeldingStatusHandterer.handterSykmeldingStatus(status)
         } catch (e: Exception) {
-            log.errorSecure(
-                "Feil ved håndtering av sykmelding status, sykmeldingId: ${status.kafkaMetadata.sykmeldingId}, status: ${status.event.statusEvent}, meldingKey: ${cr.key()}",
-                "Rå sykmelding status: ${cr.value()}",
-                secureThrowable = e,
+            throw KafkaErrorHandlerException(
+                cause = e,
+                insecureMessage =
+                    "Feil ved håndtering, " +
+                        mapOf("sykmeldingId" to status.kafkaMetadata.sykmeldingId, "status" to status.event.statusEvent),
             )
-            throw e
         }
     }
 
