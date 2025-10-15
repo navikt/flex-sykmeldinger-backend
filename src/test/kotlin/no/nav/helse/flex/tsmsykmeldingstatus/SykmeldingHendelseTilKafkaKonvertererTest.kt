@@ -7,7 +7,6 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SvartypeKafkaDTO
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
@@ -17,8 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 class SykmeldingHendelseTilKafkaKonvertererTest {
     @TestFactory
