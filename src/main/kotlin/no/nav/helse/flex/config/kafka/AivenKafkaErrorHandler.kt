@@ -62,10 +62,6 @@ class AivenKafkaErrorHandler :
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
-            if (!skalExceptionLogges(thrownException)) {
-                return
-            }
-
             val relevantCauseException = findRelevantCauseException(thrownException)
 
             if (records.isEmpty()) {
@@ -139,9 +135,6 @@ class AivenKafkaErrorHandler :
 
             while (nextThrowable != null) {
                 if (nextThrowable is KafkaErrorHandlerException) {
-                    if (!nextThrowable.skalLogges) {
-                        break
-                    }
                     messageParts.add(nextThrowable.message)
                 } else {
                     messageParts.add(nextThrowable::class.simpleName)
@@ -163,12 +156,6 @@ class AivenKafkaErrorHandler :
                 this.take(n).toList() + "..."
             } else {
                 this.toList()
-            }
-
-        private fun skalExceptionLogges(ex: Exception): Boolean =
-            when (ex) {
-                is KafkaErrorHandlerException -> ex.skalLogges
-                else -> true
             }
     }
 }

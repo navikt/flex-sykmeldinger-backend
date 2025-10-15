@@ -63,15 +63,6 @@ class AivenKafkaErrorHandlerTest {
     @Nested
     inner class HandterKafkaErrorHandlerException {
         @Test
-        fun `logger ingenting dersom spesifisert`() {
-            AivenKafkaErrorHandler.loggFeilende(
-                thrownException = KafkaErrorHandlerException(skalLogges = false, cause = RuntimeException()),
-                records = mutableListOf(Testdata.lagConsumerRecord()),
-            )
-            logListAppender.list.shouldBeEmpty()
-        }
-
-        @Test
         fun `logger insecureMessage`() {
             AivenKafkaErrorHandler.loggFeilende(
                 thrownException = KafkaErrorHandlerException(insecureMessage = "Usikker melding"),
@@ -98,25 +89,6 @@ class AivenKafkaErrorHandlerTest {
             logListAppender.eventerUtenMarkers().first().run {
                 message shouldContain "Første melding"
                 message shouldContain "Annen melding"
-            }
-        }
-
-        @Test
-        fun `stopper kjede av insecureMessage dersom ikke skalLogges`() {
-            AivenKafkaErrorHandler.loggFeilende(
-                thrownException =
-                    KafkaErrorHandlerException(
-                        insecureMessage = "Første melding",
-                        cause =
-                            KafkaErrorHandlerException(
-                                insecureMessage = "Annen melding",
-                                skalLogges = false,
-                            ),
-                    ),
-                records = mutableListOf(Testdata.lagConsumerRecord()),
-            )
-            logListAppender.eventerUtenMarkers().first().run {
-                message shouldNotContain "Annen melding"
             }
         }
 
