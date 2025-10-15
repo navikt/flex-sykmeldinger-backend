@@ -89,27 +89,23 @@ data class FiskerBrukerSvar(
 ) : BrukerSvar {
     override val type = BrukerSvarType.FISKER
 
-    private val erArbeidstaker =
-        lottOgHyre.svar in
-            setOf(
-                FiskerLottOgHyre.HYRE,
-                FiskerLottOgHyre.BEGGE,
-            )
+    val erSomArbeidstaker: Boolean
 
-    fun valider() {
-        if (erArbeidstaker) {
-            runCatching { somArbeidstaker() }.onFailure {
-                throw IllegalArgumentException("Fisker som arbeidstaker må ha satt felter tilknyttet arbeidsgiver")
-            }
-        } else {
-            runCatching { somNaringsdrivende() }.onFailure {
-                throw IllegalArgumentException("Fisker som naringsdrivende må ha satt felter tilknyttet næringsdrivende")
-            }
+    init {
+        val somArbeidstakerResultat = runCatching { somArbeidstaker() }
+        val somNaringsdrivendeResultat = runCatching { somNaringsdrivende() }
+
+        require(somArbeidstakerResultat.isSuccess || somNaringsdrivendeResultat.isSuccess) {
+            "Fisker må ha besvart spørsmål tilsvarende enten arbeidstaker eller næringsdrivende"
         }
+
+        this.erSomArbeidstaker = somArbeidstakerResultat.isSuccess
     }
 
     fun somArbeidstaker(): ArbeidstakerBrukerSvar {
-        require(erArbeidstaker) { "Fisker er ikke arbeidstaker" }
+        require(lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)) {
+            "Fisker som arbeidstaker må ha HYRE (eller BEGGE)"
+        }
         return ArbeidstakerBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
             arbeidssituasjon = arbeidssituasjon,
@@ -122,7 +118,9 @@ data class FiskerBrukerSvar(
     }
 
     fun somNaringsdrivende(): NaringsdrivendeBrukerSvar {
-        require(!erArbeidstaker) { "Fisker er ikke naringsdrivende" }
+        require(lottOgHyre.svar in setOf(FiskerLottOgHyre.LOTT, FiskerLottOgHyre.BEGGE)) {
+            "Fisker som naringsdrivende må ha LOTT (eller BEGGE)"
+        }
         return NaringsdrivendeBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
             arbeidssituasjon = arbeidssituasjon,
