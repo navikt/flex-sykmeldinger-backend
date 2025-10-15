@@ -83,10 +83,7 @@ object SykmeldingHendelseTilKafkaKonverterer {
         return SykmeldingStatusKafkaDTO(
             sykmeldingId = sykmeldingId,
             timestamp = hendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
-            statusEvent =
-                hendelse.status
-                    .tilBakoverkompatibelSendtStatus(hendelse.brukerSvar)
-                    .tilStatusEventDTO(),
+            statusEvent = hendelse.status.tilStatusEventDTO(),
             sporsmals =
                 konverterTilSporsmalsKafkaDto(
                     sporsmalSvarDto = sporsmalSvarDto,
@@ -136,21 +133,6 @@ object SykmeldingHendelseTilKafkaKonverterer {
             sporsmalSvarDto.forsikringSporsmalBuilder(),
             sporsmalSvarDto.egenmeldingsdagerBuilder(),
         )
-
-    private fun HendelseStatus.tilBakoverkompatibelSendtStatus(brukerSvar: BrukerSvar?): HendelseStatus {
-        val bakoverkompatibelStatus =
-            when (brukerSvar) {
-                is FiskerBrukerSvar -> {
-                    if (brukerSvar.lottOgHyre.svar == FiskerLottOgHyre.HYRE) {
-                        HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    } else {
-                        HendelseStatus.SENDT_TIL_NAV
-                    }
-                }
-                else -> this
-            }
-        return bakoverkompatibelStatus
-    }
 
     private fun Arbeidsgiver.tilArbeidsgiverKafkaDto(): ArbeidsgiverStatusKafkaDTO =
         ArbeidsgiverStatusKafkaDTO(
