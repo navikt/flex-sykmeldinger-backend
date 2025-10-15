@@ -42,7 +42,7 @@ class SykmeldingStatusKafkaListener(
         } catch (e: Exception) {
             throw KafkaErrorHandlerException(
                 cause = e,
-                insecureMessage = "Feil ved prosessering av sykmelding status på kafka",
+                insensitiveMessage = "Feil ved prosessering av sykmelding status på kafka",
             )
         }
     }
@@ -61,7 +61,7 @@ class SykmeldingStatusKafkaListener(
             } catch (e: Exception) {
                 throw KafkaErrorHandlerException(
                     cause = e,
-                    insecureMessage = "Feil ved deserialisering",
+                    insensitiveMessage = "Feil ved deserialisering",
                 )
             }
 
@@ -75,7 +75,7 @@ class SykmeldingStatusKafkaListener(
         } catch (e: Exception) {
             throw KafkaErrorHandlerException(
                 cause = e,
-                insecureMessage =
+                insensitiveMessage =
                     "Feil ved håndtering, " +
                         mapOf("sykmeldingId" to status.kafkaMetadata.sykmeldingId, "status" to status.event.statusEvent),
             )

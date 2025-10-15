@@ -53,7 +53,7 @@ class AaregHendelserConsumer(
         } catch (e: Exception) {
             throw KafkaErrorHandlerException(
                 cause = e,
-                insecureMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
+                insensitiveMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
             )
         }
     }
@@ -74,7 +74,7 @@ class AaregHendelserConsumer(
                     } else {
                         throw KafkaErrorHandlerException(
                             cause = e,
-                            insecureMessage = "Feil ved deserialisering",
+                            insensitiveMessage = "Feil ved deserialisering",
                         )
                     }
                 }

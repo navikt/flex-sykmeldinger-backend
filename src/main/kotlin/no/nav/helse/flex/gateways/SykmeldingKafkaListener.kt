@@ -43,7 +43,7 @@ class SykmeldingListener(
             }
             throw KafkaErrorHandlerException(
                 e,
-                insecureMessage = "Feil ved prosessering av sykmelding på kafka",
+                insensitiveMessage = "Feil ved prosessering av sykmelding på kafka",
             )
         }
     }
@@ -65,7 +65,7 @@ class SykmeldingListener(
                 } catch (e: Exception) {
                     throw KafkaErrorHandlerException(
                         cause = e,
-                        insecureMessage = "Feil ved deserialisering",
+                        insensitiveMessage = "Feil ved deserialisering",
                     )
                 }
             }
@@ -73,7 +73,7 @@ class SykmeldingListener(
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
                 throw KafkaErrorHandlerException(
-                    insecureMessage =
+                    insensitiveMessage =
                         "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
                             "value: ${sykmeldingRecord.sykmelding.id}",
                 )
