@@ -9,7 +9,6 @@ import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.utils.logger
-import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -174,32 +173,16 @@ class SykmeldingDtoKonverterer(
                 val ruleHits =
                     validationResult.rules.mapNotNull { rule ->
                         if (rule is InvalidRule) {
+                            if (rule.name !in RuleNameDTO.NAVN_SET) {
+                                log.warn(
+                                    "Ukjent regelnavn for 'InvalidRule': " + mapOf("regelNavn" to rule.name),
+                                )
+                            }
+
                             RegelinfoDTO(
-                                messageForSender = rule.reason?.sykmelder ?: "",
-                                messageForUser = rule.reason?.sykmeldt ?: "",
-                                ruleName =
-                                    when (rule.name) {
-                                        "BEHANDLER_IKKE_GYLDIG_I_HPR" ->
-                                            RuleNameDTO.BEHANDLER_IKKE_GYLDIG_I_HPR.name
-                                        "BEHANDLER_MANGLER_AUTORISASJON_I_HPR" ->
-                                            RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name
-                                        "BEHANDLER_IKKE_LE_KI_MT_TL_FT_I_HPR" ->
-                                            RuleNameDTO.BEHANDLER_IKKE_LE_KI_MT_TL_FT_I_HPR.name
-                                        "BEHANDLER_MT_FT_KI_OVER_12_UKER" ->
-                                            RuleNameDTO.BEHANDLER_MT_FT_KI_OVER_12_UKER.name
-                                        "BEHANDLER_SUSPENDERT" ->
-                                            RuleNameDTO.BEHANDLER_SUSPENDERT.name
-                                        "PASIENT_ELDRE_ENN_70" ->
-                                            RuleNameDTO.PASIENT_ELDRE_ENN_70.name
-                                        "ICPC_2_Z_DIAGNOSE" ->
-                                            RuleNameDTO.ICPC_2_Z_DIAGNOSE.name
-                                        "GRADERT_UNDER_20_PROSENT" ->
-                                            RuleNameDTO.GRADERT_UNDER_20_PROSENT.name
-                                        else -> {
-                                            log.warn("Ukjent regelnavn ${rule.name} for behandlingsutfall: ${rule.serialisertTilString()}")
-                                            rule.name
-                                        }
-                                    },
+                                messageForSender = rule.reason.sykmelder,
+                                messageForUser = rule.reason.sykmeldt,
+                                ruleName = rule.name,
                                 ruleStatus = RegelStatusDTO.INVALID,
                             )
                         } else {
