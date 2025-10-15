@@ -41,11 +41,12 @@ class SykmeldingHendelseHandterer(
                 is FiskerBrukerSvar -> {
                     when (brukerSvar.lottOgHyre.svar) {
                         FiskerLottOgHyre.HYRE,
-                        FiskerLottOgHyre.BEGGE,
                         -> {
                             HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                         }
-                        FiskerLottOgHyre.LOTT -> {
+                        FiskerLottOgHyre.LOTT,
+                        FiskerLottOgHyre.BEGGE,
+                        -> {
                             HendelseStatus.SENDT_TIL_NAV
                         }
                     }
