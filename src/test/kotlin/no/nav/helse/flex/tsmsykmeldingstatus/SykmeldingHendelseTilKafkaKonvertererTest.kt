@@ -2,93 +2,102 @@ package no.nav.helse.flex.tsmsykmeldingstatus
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
-import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerTilleggsinfo
-import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SvartypeKafkaDTO
 import org.amshove.kluent.*
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
 
 class SykmeldingHendelseTilKafkaKonvertererTest {
+    @TestFactory
+    fun `konverterer sykmeldingId riktig`() =
+        mapOf(
+            "1" to "1",
+            "2" to "2",
+        ).map { (sykmeldingId, kafkaSykmeldingId) ->
+            DynamicTest.dynamicTest("konverterer $sykmeldingId til $kafkaSykmeldingId") {
+                SykmeldingHendelseTilKafkaKonverterer
+                    .konverterSykmeldingHendelseTilKafkaDTO(
+                        sykmeldingId = sykmeldingId,
+                        sykmeldingHendelse = lagSykmeldingHendelse(),
+                    ).run {
+                        this.sykmeldingId shouldBe kafkaSykmeldingId
+                    }
+            }
+        }
+
+    @TestFactory
+    fun `konverterer timestamp riktig`() =
+        mapOf(
+            Instant.parse("2021-01-01T00:00:00.00Z") to Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime(),
+            Instant.parse("2022-02-02T00:00:00.00Z") to Instant.parse("2022-02-02T00:00:00.00Z").tilNorgeOffsetDateTime(),
+        ).map { (hendelseOpprettet, kafkaTimestamp) ->
+            DynamicTest.dynamicTest("konverterer $hendelseOpprettet til $kafkaTimestamp") {
+                SykmeldingHendelseTilKafkaKonverterer
+                    .konverterSykmeldingHendelseTilKafkaDTO(
+                        sykmeldingId = "_",
+                        sykmeldingHendelse = lagSykmeldingHendelse(hendelseOpprettet = hendelseOpprettet),
+                    ).run {
+                        this.timestamp shouldBeEqualTo kafkaTimestamp
+                    }
+            }
+        }
+
     @Test
-    fun `Mapper status BEKREFT_AVVIST riktig`() {
+    fun `konverterer hendelse med status BEKREFT_AVVIST riktig`() {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.BEKREFTET_AVVIST,
-                hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
             )
         val sykmeldingStatusKafkaDTO =
             SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                sykmeldingId = "1",
+                sykmeldingId = "_",
                 sykmeldingHendelse = hendelse,
             )
-
-        sykmeldingStatusKafkaDTO.sykmeldingId shouldBeEqualTo "1"
-        sykmeldingStatusKafkaDTO.timestamp shouldBeEqualTo Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime()
         sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
         sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull().shouldHaveSize(0)
         sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
-        sykmeldingStatusKafkaDTO.arbeidsgiver shouldBeEqualTo null
     }
 
-    @Test
-    fun `Mapper status AVBRUTT riktig`() {
-        val sykmeldingStatusKafkaDTO =
-            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                sykmeldingId = "1",
-                sykmeldingHendelse =
-                    lagSykmeldingHendelse(
-                        status = HendelseStatus.AVBRUTT,
-                        hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                    ),
-            )
+    @TestFactory
+    fun `konverterer hendelse med status APEN og AVBRUTT riktig`() =
+        mapOf(
+            HendelseStatus.APEN to "APEN",
+            HendelseStatus.AVBRUTT to "AVBRUTT",
+        ).map { (status, kafkaStatus) ->
+            DynamicTest.dynamicTest("konverterer hendelse med status $status") {
+                val sykmeldingStatusKafkaDTO =
+                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                        sykmeldingId = "_",
+                        sykmeldingHendelse =
+                            lagSykmeldingHendelse(status = status),
+                    )
 
-        sykmeldingStatusKafkaDTO.sykmeldingId shouldBeEqualTo "1"
-        sykmeldingStatusKafkaDTO.timestamp shouldBeEqualTo Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime()
-        sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "AVBRUTT"
-        sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
-        sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
-        sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
-    }
-
-    @Test
-    fun `Mapper status APEN riktig`() {
-        val sykmeldingStatusKafkaDTO =
-            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                sykmeldingId = "1",
-                sykmeldingHendelse =
-                    lagSykmeldingHendelse(
-                        status = HendelseStatus.APEN,
-                        hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
-                    ),
-            )
-
-        sykmeldingStatusKafkaDTO.sykmeldingId shouldBeEqualTo "1"
-        sykmeldingStatusKafkaDTO.timestamp shouldBeEqualTo Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime()
-        sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "APEN"
-        sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
-        sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
-        sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
-    }
+                sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo kafkaStatus
+                sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
+                sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
+            }
+        }
 
     @Nested
-    inner class StatusSendtTilArbeidsgiver {
+    inner class `Konverterer hendelse med status SENDT_TIL_ARBEIDSGIVER og SENDT_TIL_NAV` {
         @Test
-        fun `Mapper arbeidstaker riktig`() {
+        fun `konverterer arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                    sykmeldingId = "1",
+                    sykmeldingId = "_",
                     sykmeldingHendelse =
                         lagSykmeldingHendelse(
                             status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
-                            hendelseOpprettet = Instant.parse("2021-01-01T00:00:00.00Z"),
                             brukerSvar = lagArbeidstakerBrukerSvar(),
                             tilleggsinfo =
                                 ArbeidstakerTilleggsinfo(
@@ -102,8 +111,6 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.sykmeldingId shouldBeEqualTo "1"
-            sykmeldingStatusKafkaDTO.timestamp shouldBeEqualTo Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime()
             sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "SENDT"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
@@ -113,6 +120,192 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 orgNavn shouldBeEqualTo "orgnavn"
             }
         }
+
+        @Test
+        fun `konverterer fisker med hyre riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "_",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                            brukerSvar = lagFiskerHyreBrukerSvar(),
+                            tilleggsinfo =
+                                FiskerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnummer = "orgnr",
+                                            juridiskOrgnummer = "juridiskOrgnr",
+                                            orgnavn = "orgnavn",
+                                        ),
+                                ),
+                        ),
+                )
+
+            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "SENDT"
+            sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
+                orgnummer shouldBeEqualTo "orgnr"
+                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
+                orgNavn shouldBeEqualTo "orgnavn"
+            }
+        }
+
+        @Test
+        fun `konverterer fisker med lott riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "_",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_NAV,
+                            brukerSvar = lagFiskerLottBrukerSvar(),
+                            tilleggsinfo = lagFiskerTilleggsinfo(arbeidsgiver = null),
+                        ),
+                )
+
+            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
+        }
+
+        @Test
+        fun `konverterer fisker med både lott og hyre riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "_",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_NAV,
+                            brukerSvar =
+                                lagFiskerHyreBrukerSvar(lottOgHyre = lagSporsmalSvar(FiskerLottOgHyre.BEGGE)),
+                            tilleggsinfo =
+                                FiskerTilleggsinfo(
+                                    arbeidsgiver =
+                                        lagArbeidsgiver(
+                                            orgnummer = "orgnr",
+                                            juridiskOrgnummer = "juridiskOrgnr",
+                                            orgnavn = "orgnavn",
+                                        ),
+                                ),
+                        ),
+                )
+
+            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
+                orgnummer shouldBeEqualTo "orgnr"
+                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
+                orgNavn shouldBeEqualTo "orgnavn"
+            }
+        }
+
+        @Test
+        fun `konverterer arbeidsledig riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "_",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_NAV,
+                            brukerSvar =
+                                lagArbeidsledigBrukerSvar(),
+                            tilleggsinfo =
+                                lagArbeidsledigTilleggsinfo(
+                                    tidligereArbeidsgiver =
+                                        TidligereArbeidsgiver(
+                                            orgNavn = "orgnavn",
+                                            orgnummer = "orgnr",
+                                        ),
+                                ),
+                        ),
+                )
+
+            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
+            sykmeldingStatusKafkaDTO.tidligereArbeidsgiver.shouldNotBeNull().run {
+                orgnummer shouldBeEqualTo "orgnr"
+                orgNavn shouldBeEqualTo "orgnavn"
+            }
+        }
+
+        @Test
+        fun `konverterer permittert riktig`() {
+            val sykmeldingStatusKafkaDTO =
+                SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                    sykmeldingId = "_",
+                    sykmeldingHendelse =
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_NAV,
+                            brukerSvar = lagPermittertBrukerSvar(),
+                            tilleggsinfo =
+                                lagPermittertTilleggsinfo(
+                                    tidligereArbeidsgiver =
+                                        TidligereArbeidsgiver(
+                                            orgNavn = "orgnavn",
+                                            orgnummer = "orgnr",
+                                        ),
+                                ),
+                        ),
+                )
+
+            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+            sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
+            sykmeldingStatusKafkaDTO.tidligereArbeidsgiver.shouldNotBeNull().run {
+                orgnummer shouldBeEqualTo "orgnr"
+                orgNavn shouldBeEqualTo "orgnavn"
+            }
+        }
+
+        @TestFactory
+        fun `konverterer enkle arbeidsforhold riktig`() =
+            mapOf(
+                "naringsdrivende" to
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                        tilleggsinfo = lagNaringsdrivendeTilleggsinfo(),
+                    ),
+                "frilanser" to
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        brukerSvar = lagFrilanserBrukerSvar(),
+                        tilleggsinfo = lagFrilanserTilleggsinfo(),
+                    ),
+                "jordbruker" to
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        brukerSvar = lagJordbrukerBrukerSvar(),
+                        tilleggsinfo = lagJordbrukerTilleggsinfo(),
+                    ),
+                "annet-arbeidssituasjon" to
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        brukerSvar = lagAnnetArbeidssituasjonBrukerSvar(),
+                        tilleggsinfo = lagAnnetArbeidssituasjonTilleggsinfo(),
+                    ),
+            ).map { (testNavn, hendelse) ->
+                DynamicTest.dynamicTest(testNavn) {
+                    val sykmeldingStatusKafkaDTO =
+                        SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                            sykmeldingId = "_",
+                            sykmeldingHendelse = hendelse,
+                        )
+
+                    sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+                    sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
+                    sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
+                    sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
+                    sykmeldingStatusKafkaDTO.tidligereArbeidsgiver.shouldBeNull()
+                }
+            }
 
         @Test
         fun `Burde ikke godta hendelser med UtdatertFormatTilleggsinfo`() {

@@ -4,9 +4,6 @@ import no.nav.helse.flex.api.SykmeldingStatusDtoKonverterer
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.sykmeldinghendelse.*
-import no.nav.helse.flex.sykmeldinghendelse.BrukerSvar
-import no.nav.helse.flex.sykmeldinghendelse.FiskerBrukerSvar
-import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
 import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
@@ -83,10 +80,7 @@ object SykmeldingHendelseTilKafkaKonverterer {
         return SykmeldingStatusKafkaDTO(
             sykmeldingId = sykmeldingId,
             timestamp = hendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
-            statusEvent =
-                hendelse.status
-                    .tilBakoverkompatibelSendtStatus(hendelse.brukerSvar)
-                    .tilStatusEventDTO(),
+            statusEvent = hendelse.status.tilStatusEventDTO(),
             sporsmals =
                 konverterTilSporsmalsKafkaDto(
                     sporsmalSvarDto = sporsmalSvarDto,
@@ -136,21 +130,6 @@ object SykmeldingHendelseTilKafkaKonverterer {
             sporsmalSvarDto.forsikringSporsmalBuilder(),
             sporsmalSvarDto.egenmeldingsdagerBuilder(),
         )
-
-    private fun HendelseStatus.tilBakoverkompatibelSendtStatus(brukerSvar: BrukerSvar?): HendelseStatus {
-        val bakoverkompatibelStatus =
-            when (brukerSvar) {
-                is FiskerBrukerSvar -> {
-                    if (brukerSvar.lottOgHyre.svar == FiskerLottOgHyre.HYRE) {
-                        HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    } else {
-                        HendelseStatus.SENDT_TIL_NAV
-                    }
-                }
-                else -> this
-            }
-        return bakoverkompatibelStatus
-    }
 
     private fun Arbeidsgiver.tilArbeidsgiverKafkaDto(): ArbeidsgiverStatusKafkaDTO =
         ArbeidsgiverStatusKafkaDTO(
