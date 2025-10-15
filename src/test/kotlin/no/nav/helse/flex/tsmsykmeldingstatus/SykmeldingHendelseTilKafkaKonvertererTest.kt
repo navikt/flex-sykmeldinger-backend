@@ -22,7 +22,7 @@ import java.time.ZonedDateTime
 
 class SykmeldingHendelseTilKafkaKonvertererTest {
     @TestFactory
-    fun `konverter sykmeldingId riktig`() =
+    fun `konverterer sykmeldingId riktig`() =
         mapOf(
             "1" to "1",
             "2" to "2",
@@ -39,7 +39,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
     @TestFactory
-    fun `konverter timestamp riktig`() =
+    fun `konverterer timestamp riktig`() =
         mapOf(
             Instant.parse("2021-01-01T00:00:00.00Z") to Instant.parse("2021-01-01T00:00:00.00Z").tilNorgeOffsetDateTime(),
             Instant.parse("2022-02-02T00:00:00.00Z") to Instant.parse("2022-02-02T00:00:00.00Z").tilNorgeOffsetDateTime(),
@@ -56,7 +56,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
     @Test
-    fun `Mapper hendelse med status BEKREFT_AVVIST riktig`() {
+    fun `konverterer hendelse med status BEKREFT_AVVIST riktig`() {
         val hendelse =
             lagSykmeldingHendelse(
                 status = HendelseStatus.BEKREFTET_AVVIST,
@@ -72,12 +72,12 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
     }
 
     @TestFactory
-    fun `Mapper hendelse med status APEN og AVBRUTT riktig`() =
+    fun `konverterer hendelse med status APEN og AVBRUTT riktig`() =
         mapOf(
             HendelseStatus.APEN to "APEN",
             HendelseStatus.AVBRUTT to "AVBRUTT",
         ).map { (status, kafkaStatus) ->
-            DynamicTest.dynamicTest("Mapper hendelse med status $status") {
+            DynamicTest.dynamicTest("konverterer hendelse med status $status") {
                 val sykmeldingStatusKafkaDTO =
                     SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                         sykmeldingId = "_",
@@ -92,9 +92,9 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
     @Nested
-    inner class `Hendelse med status SENDT_TIL_ARBEIDSGIVER og SENDT_TIL_NAV` {
+    inner class `Konverterer hendelse med status SENDT_TIL_ARBEIDSGIVER og SENDT_TIL_NAV` {
         @Test
-        fun `Mapper arbeidstaker riktig`() {
+        fun `konverterer arbeidstaker riktig`() {
             val sykmeldingStatusKafkaDTO =
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "_",
@@ -125,7 +125,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
         @Test
-        fun `Mapper fisker med hyre riktig`() {
+        fun `konverterer fisker med hyre riktig`() {
             val sykmeldingStatusKafkaDTO =
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "_",
@@ -156,7 +156,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
         @Test
-        fun `Mapper fisker med lott riktig`() {
+        fun `konverterer fisker med lott riktig`() {
             val sykmeldingStatusKafkaDTO =
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "_",
@@ -175,7 +175,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
         @Test
-        fun `Mapper fisker med både lott og hyre riktig`() {
+        fun `konverterer fisker med både lott og hyre riktig`() {
             val sykmeldingStatusKafkaDTO =
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "_",
