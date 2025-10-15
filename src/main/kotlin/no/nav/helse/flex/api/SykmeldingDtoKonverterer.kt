@@ -180,8 +180,8 @@ class SykmeldingDtoKonverterer(
                             }
 
                             RegelinfoDTO(
-                                messageForSender = rule.reason?.sykmelder ?: "",
-                                messageForUser = rule.reason?.sykmeldt ?: "",
+                                messageForSender = rule.reason.sykmelder,
+                                messageForUser = rule.reason.sykmeldt,
                                 ruleName = rule.name,
                                 ruleStatus = RegelStatusDTO.INVALID,
                             )
