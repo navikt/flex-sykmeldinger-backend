@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Marker
+import org.springframework.kafka.listener.ListenerExecutionFailedException
 import ch.qos.logback.classic.Logger as LogbackLogger
 
 class AivenKafkaErrorHandlerTest {
@@ -155,6 +156,18 @@ class AivenKafkaErrorHandlerTest {
             )
             logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).first().run {
                 throwableProxy.message shouldBeEqualTo "Årsak melding"
+            }
+        }
+
+        @Test
+        fun `logger kun årsak av ListenerExecutionFailedException`() {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = ListenerExecutionFailedException("", RuntimeException("Årsak melding")),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+            logListAppender.eventerUtenMarkers().first().run {
+                message shouldNotContain "ListenerExecutionFailedException"
+                message shouldContain "RuntimeException"
             }
         }
     }

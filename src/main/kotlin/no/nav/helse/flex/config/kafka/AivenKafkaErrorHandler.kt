@@ -5,6 +5,7 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.listener.DefaultErrorHandler
+import org.springframework.kafka.listener.ListenerExecutionFailedException
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
@@ -66,10 +67,14 @@ class AivenKafkaErrorHandler :
             }
 
             val relevantCauseException = findRelevantCauseException(thrownException)
-            val insecureMessage: String? = composeSecureMessage(thrownException)
 
             if (records.isEmpty()) {
-                val message = insecureMessage ?: "Feil ved kafka listener"
+                val message =
+                    composeInsensitiveMessage(
+                        throwable = thrownException,
+                        defaultMessage = "Feil ved kafka listener",
+                        messageSeparator = " -- ",
+                    )
                 log.errorSecure(
                     "$message: " +
                         mapOf(
@@ -81,7 +86,12 @@ class AivenKafkaErrorHandler :
                     secureThrowable = relevantCauseException,
                 )
             } else {
-                val message = insecureMessage ?: "Feil ved prossesseringen av kafka hendelse(r)"
+                val message =
+                    composeInsensitiveMessage(
+                        throwable = thrownException,
+                        defaultMessage = "Feil ved kafka hendelse",
+                        messageSeparator = " -- ",
+                    )
                 log.errorSecure(
                     "$message: " +
                         mapOf(
@@ -99,26 +109,46 @@ class AivenKafkaErrorHandler :
             }
         }
 
-        private fun findRelevantCauseException(exception: Throwable): Throwable {
-            if (exception !is KafkaErrorHandlerException) {
-                return exception
+        private fun findRelevantCauseException(exception: Throwable): Throwable =
+            when (exception) {
+                is ListenerExecutionFailedException,
+                is KafkaErrorHandlerException,
+                -> exception.cause?.let { findRelevantCauseException(it) } ?: exception
+                else -> exception
             }
-            return exception.cause?.let { findRelevantCauseException(it) } ?: exception
-        }
 
-        private fun composeSecureMessage(exception: Throwable): String? {
-            if (exception !is KafkaErrorHandlerException) {
-                return exception::class.simpleName
-            }
-            if (!exception.skalLogges) {
-                return null
-            }
-            val insecureMessage: String? = exception.message
-            val causeMessage: String? = exception.cause?.let { composeSecureMessage(it) }
+        private fun composeInsensitiveMessage(
+            throwable: Throwable,
+            defaultMessage: String,
+            messageSeparator: String = " -- ",
+        ): String {
+            val rootThrowable: Throwable? =
+                if (throwable is ListenerExecutionFailedException) {
+                    throwable.cause
+                } else {
+                    throwable
+                }
 
-            return listOfNotNull(insecureMessage, causeMessage)
-                .joinToString(" -- ")
-                .ifEmpty { null }
+            val messageParts = mutableListOf<String?>()
+            var nextThrowable: Throwable? = rootThrowable
+
+            val skipDefaultMessage = rootThrowable is KafkaErrorHandlerException && rootThrowable.message != null
+            if (!skipDefaultMessage) {
+                messageParts.add(defaultMessage)
+            }
+
+            while (nextThrowable != null) {
+                if (nextThrowable is KafkaErrorHandlerException) {
+                    if (!nextThrowable.skalLogges) {
+                        break
+                    }
+                    messageParts.add(nextThrowable.message)
+                } else {
+                    messageParts.add(nextThrowable::class.simpleName)
+                }
+                nextThrowable = nextThrowable.cause
+            }
+            return messageParts.filterNotNull().joinToString(messageSeparator)
         }
 
         private fun List<*>.nullOrSingleOrList(): Any? =
