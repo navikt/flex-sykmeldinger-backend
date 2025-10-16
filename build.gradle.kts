@@ -28,7 +28,7 @@ val kluentVersion = "1.73"
 val sykepengesoknadKafkaVersion = "2025.10.15-10.48-2259a278"
 val commonsTextVersion = "1.14.0"
 val mockitoKotlinVersion = "2.2.0"
-val opentelemetryApiVersion = "1.54.0"
+val opentelemetryApiVersion = "1.55.0"
 val opentelemetryInstrumentationVersion = "2.20.1"
 
 dependencies {
