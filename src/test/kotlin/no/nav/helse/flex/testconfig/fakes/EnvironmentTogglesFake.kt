@@ -4,7 +4,7 @@ import no.nav.helse.flex.config.EnvironmentToggles
 
 class EnvironmentTogglesFake : EnvironmentToggles {
     companion object {
-        private const val DEFAULT_ENVIRONMENT = "dev"
+        private const val DEFAULT_ENVIRONMENT = "prod"
     }
 
     private var environment = DEFAULT_ENVIRONMENT
