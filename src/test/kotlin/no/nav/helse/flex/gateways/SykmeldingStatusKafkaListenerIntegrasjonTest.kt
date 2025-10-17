@@ -12,7 +12,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Duration
@@ -30,11 +29,6 @@ class SykmeldingStatusKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired
     private lateinit var sykmeldingStatusKafkaListener: SykmeldingStatusKafkaListener
-
-    @BeforeEach
-    fun setup() {
-        environmentToggles.setEnvironment("prod")
-    }
 
     @AfterEach
     fun tearDown() {
