@@ -10,6 +10,7 @@ import no.nav.helse.flex.gateways.ereg.EregClient
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
+import org.springframework.web.client.ResourceAccessException
 import java.time.LocalDate
 
 data class EksterntArbeidsforhold(
@@ -39,13 +40,16 @@ class EksternArbeidsforholdHenter(
         val result =
             try {
                 aaregClient.getArbeidsforholdoversikt(fnr)
+            } catch (e: ResourceAccessException) {
+                log.error("Klarte ikke hente Aareg arbeidsforhold: ${e.message}", e)
+                throw e
             } catch (e: Exception) {
-                if (environmentToggles.isProduction()) {
-                    log.errorSecure("Feil ved getArbeidsforholdoversikt i AaregClient", secureThrowable = e)
-                    throw e
-                } else {
+                if (environmentToggles.isDevelopment()) {
                     log.warn("AAREG er midlertidig nede i dev. Returnerer tom liste.", e)
                     ArbeidsforholdoversiktResponse(emptyList())
+                } else {
+                    log.errorSecure("Feil ved getArbeidsforholdoversikt i AaregClient", secureThrowable = e)
+                    throw e
                 }
             }
 

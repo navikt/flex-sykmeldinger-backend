@@ -8,10 +8,13 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testutils.LoggLytter
+import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestClientException
 import java.time.LocalDate
 
@@ -91,6 +94,20 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr")
         resultat.eksterneArbeidsforhold.`should be empty`()
+    }
+
+    @Test
+    fun `burde logge melding ved aareg timeout`() {
+        aaregClient.setArbeidsforholdoversikt(failure = ResourceAccessException("feilmelding"))
+        val loggLytter = LoggLytter(eksternArbeidsforholdHenter.logger())
+
+        invoking {
+            eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
+        }.shouldThrow(ResourceAccessException::class)
+
+        loggLytter.logEventer().shouldHaveSingleItem().run {
+            message shouldEndWith "feilmelding"
+        }
     }
 
     @Test
