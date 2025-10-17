@@ -9,7 +9,6 @@ import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
@@ -38,15 +37,11 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
     private lateinit var sykmeldignHendelseBuffer: SykmeldingStatusBuffer
 
-    @Autowired
-    private lateinit var environmentToggles: EnvironmentTogglesFake
-
     @AfterEach
     fun tearDown() {
         slettDatabase()
         aaregClient.reset()
         nowFactoryFake.reset()
-        environmentToggles.reset()
     }
 
     @Test
