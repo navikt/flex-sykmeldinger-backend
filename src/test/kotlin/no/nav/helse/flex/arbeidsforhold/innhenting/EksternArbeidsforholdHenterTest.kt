@@ -8,7 +8,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
-import no.nav.helse.flex.testutils.LoggLytter
+import no.nav.helse.flex.testutils.fangLogger
 import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
@@ -99,13 +99,12 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
     @Test
     fun `burde logge melding ved aareg timeout`() {
         aaregClient.setArbeidsforholdoversikt(failure = ResourceAccessException("feilmelding"))
-        val loggLytter = LoggLytter(eksternArbeidsforholdHenter.logger())
 
-        invoking {
-            eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        }.shouldThrow(ResourceAccessException::class)
-
-        loggLytter.logEventer().shouldHaveSingleItem().run {
+        fangLogger(eksternArbeidsforholdHenter.logger()) {
+            invoking {
+                eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
+            }.shouldThrow(ResourceAccessException::class)
+        }.logEventer().shouldHaveSingleItem().run {
             message shouldEndWith "feilmelding"
         }
     }
