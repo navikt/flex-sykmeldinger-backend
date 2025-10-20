@@ -1,6 +1,10 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.gateways.SykmeldingBrukernotifikasjonProducer
+import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
+import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
+import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
@@ -15,6 +19,7 @@ class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
+    private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
     private val nowFactory: Supplier<Instant>,
 ) {
     val log = logger()
@@ -43,6 +48,9 @@ class EksternSykmeldingHandterer(
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
+            }
+            sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {
+                log.info("Brukernotifikasjon produsert for sykmelding med id ${sykmelding.sykmeldingId}")
             }
             log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
         }
@@ -110,5 +118,20 @@ class EksternSykmeldingHandterer(
             }
             return oppdatertSykmelding
         }
+
+        fun lagSykemldingNotifikasjon(sykmelding: Sykmelding): SykmeldingNotifikasjon =
+            SykmeldingNotifikasjon(
+                sykmeldingId = sykmelding.sykmeldingId,
+                status =
+                    when (sykmelding.validation.status) {
+                        RuleType.INVALID -> SykmeldingNotifikasjonStatus.INVALID
+                        RuleType.PENDING -> SykmeldingNotifikasjonStatus.MANUAL_PROCESSING
+                        RuleType.OK -> SykmeldingNotifikasjonStatus.OK
+                    },
+                mottattDato =
+                    sykmelding.sykmeldingGrunnlag.metadata.mottattDato
+                        .toLocalDateTime(),
+                fnr = sykmelding.pasientFnr,
+            )
     }
 }

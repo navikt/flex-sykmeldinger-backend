@@ -2,6 +2,8 @@ package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
+import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
+import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
 import no.nav.helse.flex.gateways.ereg.Navn
 import no.nav.helse.flex.gateways.ereg.Nokkelinfo
 import no.nav.helse.flex.sykmelding.tsm.RuleType
@@ -11,12 +13,20 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
+import no.nav.helse.flex.testconfig.fakes.SykmeldingBrukernotifikasjonProducerFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
@@ -34,11 +44,16 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
     private lateinit var sykmeldignHendelseBuffer: SykmeldingStatusBuffer
 
+    @Autowired
+    private lateinit var sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducerFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
         aaregClient.reset()
         nowFactoryFake.reset()
+        eregClient.reset()
+        sykmeldingBrukernotifikasjonProducer.reset()
     }
 
     @Test
@@ -184,6 +199,15 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     }
 
     @Test
+    fun `burde publisere brukernotifikasjon ved lagring av sykmelding`() {
+        val sykmeldingMedBehandlingsutfall = lagEksternSykmeldingMelding()
+
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
+
+        sykmeldingBrukernotifikasjonProducer.hentSykmeldingBrukernotifikasjoner().shouldHaveSingleItem()
+    }
+
+    @Test
     fun `burde lagre alle buffrede hendelser på sykmelding`() {
         sykmeldignHendelseBuffer.leggTil(
             lagSykmeldingStatusKafkaMessageDTO(
@@ -275,5 +299,51 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                 hendelseOppdatert `should be equal to` eksisterendeSykmelding.hendelseOppdatert
             }
         }
+
+        @TestFactory
+        fun `lagSykemldingNotifikasjon burde lage rikitg notifikasjon`() =
+            listOf(
+                Pair(
+                    lagSykmelding(
+                        validation = lagValidation(status = RuleType.OK),
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "1",
+                                metadata =
+                                    lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2020-01-01T00:00:00Z")),
+                                pasient = lagPasient(fnr = "fnr"),
+                            ),
+                    ),
+                    SykmeldingNotifikasjon(
+                        sykmeldingId = "1",
+                        fnr = "fnr",
+                        status = SykmeldingNotifikasjonStatus.OK,
+                        mottattDato = LocalDateTime.parse("2020-01-01T00:00:00.000"),
+                    ),
+                ),
+                Pair(
+                    lagSykmelding(
+                        validation = lagValidation(status = RuleType.INVALID),
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "2",
+                                metadata =
+                                    lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2022-01-01T00:00:00Z")),
+                                pasient = lagPasient(fnr = "fnr-2"),
+                            ),
+                    ),
+                    SykmeldingNotifikasjon(
+                        sykmeldingId = "2",
+                        fnr = "fnr-2",
+                        status = SykmeldingNotifikasjonStatus.INVALID,
+                        mottattDato = LocalDateTime.parse("2022-01-01T00:00:00.000"),
+                    ),
+                ),
+            ).mapIndexed { index, (sykmelding, forventetNotifikasjon) ->
+                DynamicTest.dynamicTest("Punkt $index") {
+                    val notifikasjon = EksternSykmeldingHandterer.lagSykemldingNotifikasjon(sykmelding)
+                    notifikasjon shouldBeEqualTo forventetNotifikasjon
+                }
+            }
     }
 }
