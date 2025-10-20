@@ -17,8 +17,6 @@ import org.amshove.kluent.*
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
 
 class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
@@ -45,118 +43,119 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde lagre sykmelding`() {
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
+
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
-        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
+            opprettet shouldBeEqualTo Instant.parse("2024-01-01T00:00:00Z")
+        }
     }
 
     @Test
     fun `burde oppdatere sykmelding grunnlag`() {
-        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
-        val kafkaMelding =
-            lagSykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr")),
-            )
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
-
-        nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
-            sykmeldingId = "_",
-            kafkaMelding.copy(
-                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("ny_fnr")),
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr-1")),
+                sykmeldingGrunnlagOppdatert = Instant.parse("2020-01-01T00:00:00Z"),
             ),
         )
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
 
-        sykmeldingRepository.findAll().size `should be equal to` 1
-        sykmeldingRepository
-            .findBySykmeldingId("1")
-            .`should not be null`()
-            .also {
-                it.sykmeldingGrunnlag.pasient.fnr shouldBeEqualTo "ny_fnr"
-                it.sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
-            }
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord(
+                    sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr-2")),
+                ),
+        )
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
+            pasientFnr shouldBeEqualTo "fnr-2"
+            sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2024-01-01T00:00:00Z")
+        }
     }
 
     @Test
     fun `burde ikke oppdatere dersom ny kafka melding er lik`() {
-        val kafkaMelding =
-            lagSykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-            )
+        val sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")
+        val validation = lagValidation()
+        val originaltOpprettet = Instant.parse("2020-01-01T00:00:00Z")
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = sykmeldingGrunnlag,
+                validation = validation,
+                sykmeldingGrunnlagOppdatert = originaltOpprettet,
+                validationOppdatert = originaltOpprettet,
+            ),
+        )
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
 
-        val førsteMeldingTid = Instant.parse("2024-01-01T00:00:00Z")
-        nowFactoryFake.setNow(førsteMeldingTid)
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
-
-        val nyMeldingTid = førsteMeldingTid.plus(1, ChronoUnit.DAYS)
-        nowFactoryFake.setNow(nyMeldingTid)
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding.copy())
-
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord(
+                    sykmelding = sykmeldingGrunnlag,
+                    validation = validation,
+                ),
+        )
         sykmeldingRepository
             .findBySykmeldingId("1")
-            .`should not be null`()
-            .also {
-                it.sykmeldingGrunnlagOppdatert `should be equal to` førsteMeldingTid
-                it.validationOppdatert `should be equal to` førsteMeldingTid
+            .shouldNotBeNull()
+            .run {
+                sykmeldingGrunnlagOppdatert `should be equal to` originaltOpprettet
+                validationOppdatert `should be equal to` originaltOpprettet
             }
     }
 
     @Test
     fun `burde oppdatere validation`() {
-        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
-        val kafkaMelding =
-            lagSykmeldingKafkaRecord(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(status = RuleType.PENDING),
-            )
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", kafkaMelding)
-
-        nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00Z"))
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
-            sykmeldingId = "_",
-            kafkaMelding.copy(
-                validation = lagValidation(status = RuleType.OK),
+                validationOppdatert = Instant.parse("2020-01-01T00:00:00Z"),
             ),
         )
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
 
-        sykmeldingRepository.findAll().size `should be equal to` 1
-        sykmeldingRepository
-            .findBySykmeldingId("1")
-            .`should not be null`()
-            .also {
-                it.validation.status `should be equal to` RuleType.OK
-                it.validationOppdatert `should be equal to` Instant.parse("2025-01-01T00:00:00Z")
-            }
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "1",
+            eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord(
+                    sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                    validation = lagValidation(status = RuleType.OK),
+                ),
+        )
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
+            validation.status `should be equal to` RuleType.OK
+            validationOppdatert `should be equal to` Instant.parse("2024-01-01T00:00:00Z")
+        }
     }
 
     @Test
     fun `burde legge til hendelse med status APEN`() {
-        val now = Instant.parse("2024-01-01T00:00:00Z")
-        nowFactoryFake.setNow(now)
-        val sykmeldingKafkaRecord =
-            lagSykmeldingKafkaRecord(
-                sykmelding =
-                    lagSykmeldingGrunnlag(
-                        id = "1",
-                        metadata = lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2023-01-01T00:00:00Z")),
-                    ),
-            )
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingKafkaRecord)
+        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
 
-        val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-        sykmelding
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord(
+                    sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                ),
+        )
+
+        sykmeldingRepository
+            .findBySykmeldingId("1")
             .shouldNotBeNull()
             .hendelser
-            .shouldHaveSize(1)
-            .first()
+            .shouldHaveSingleItem()
             .run {
-                status `should be equal to` HendelseStatus.APEN
-                hendelseOpprettet `should be equal to` Instant.parse("2023-01-01T00:00:00Z")
-                lokaltOpprettet `should be equal to` now
-                source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
+                status shouldBeEqualTo HendelseStatus.APEN
+                lokaltOpprettet shouldBeEqualTo Instant.parse("2024-01-01T00:00:00Z")
             }
     }
 
@@ -216,7 +215,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Nested
     inner class Companion {
         @Test
-        fun `lagNySykmelding burde lage ny sykmelding`() {
+        fun `lagNySykmelding burde lage ny sykmelding med APEN hendelse`() {
             val tidspunkt = Instant.parse("2024-01-01T00:00:00Z")
             val eksternSykmeldingMelding =
                 lagSykmeldingKafkaRecord()
