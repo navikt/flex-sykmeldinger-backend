@@ -47,7 +47,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
-            lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
@@ -68,7 +68,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord(
+                lagEksternSykmeldingMelding(
                     sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr-2")),
                 ),
         )
@@ -97,7 +97,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord(
+                lagEksternSykmeldingMelding(
                     sykmelding = sykmeldingGrunnlag,
                     validation = validation,
                 ),
@@ -125,7 +125,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "1",
             eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord(
+                lagEksternSykmeldingMelding(
                     sykmelding = lagSykmeldingGrunnlag(id = "1"),
                     validation = lagValidation(status = RuleType.OK),
                 ),
@@ -143,7 +143,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
             eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord(
+                lagEksternSykmeldingMelding(
                     sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 ),
         )
@@ -194,7 +194,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
-            lagSykmeldingKafkaRecord(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
@@ -218,7 +218,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         fun `lagNySykmelding burde lage ny sykmelding med APEN hendelse`() {
             val tidspunkt = Instant.parse("2024-01-01T00:00:00Z")
             val eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord()
+                lagEksternSykmeldingMelding()
 
             val nySykmelding =
                 EksternSykmeldingHandterer.lagNySykmelding(
@@ -252,7 +252,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                     validation = lagValidation(status = RuleType.OK),
                 )
             val eksternSykmeldingMelding =
-                lagSykmeldingKafkaRecord(
+                lagEksternSykmeldingMelding(
                     sykmelding = lagSykmeldingGrunnlag(id = "2"),
                     validation = lagValidation(status = RuleType.INVALID),
                 )
