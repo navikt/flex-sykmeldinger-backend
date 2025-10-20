@@ -34,11 +34,11 @@ class EksternSykmeldingHandterer(
     internal fun opprettEllerOppdaterSykmelding(eksternSykmeldingMelding: EksternSykmeldingMelding) {
         val eksisterendeSykmelding = sykmeldingRepository.findBySykmeldingId(eksternSykmeldingMelding.sykmelding.id)
         if (eksisterendeSykmelding != null) {
-            val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, eksternSykmeldingMelding)
+            val oppdatertSykmelding = oppdaterSykmelding(eksisterendeSykmelding, eksternSykmeldingMelding, tidspunkt = nowFactory.get())
             sykmeldingRepository.save(oppdatertSykmelding)
             log.info("Sykmelding oppdatert: ${eksisterendeSykmelding.sykmeldingId}")
         } else {
-            val sykmelding = opprettNySykmelding(eksternSykmeldingMelding)
+            val sykmelding = lagNySykmelding(eksternSykmeldingMelding, tidspunkt = nowFactory.get())
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
@@ -59,51 +59,56 @@ class EksternSykmeldingHandterer(
         }
     }
 
-    private fun oppdaterSykmelding(
-        eksisterendeSykmelding: Sykmelding,
-        eksternSykmeldingMelding: EksternSykmeldingMelding,
-    ): Sykmelding {
-        var oppdatertSykmelding = eksisterendeSykmelding
-
-        if (eksisterendeSykmelding.sykmeldingGrunnlag != eksternSykmeldingMelding.sykmelding) {
-            oppdatertSykmelding =
-                oppdatertSykmelding.copy(
+    companion object {
+        fun lagNySykmelding(
+            eksternSykmeldingMelding: EksternSykmeldingMelding,
+            tidspunkt: Instant,
+        ): Sykmelding {
+            val sykmelding =
+                Sykmelding(
                     sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
-                    sykmeldingGrunnlagOppdatert = nowFactory.get(),
-                )
-        }
-        if (eksisterendeSykmelding.validation != eksternSykmeldingMelding.validation) {
-            oppdatertSykmelding =
-                oppdatertSykmelding.copy(
                     validation = eksternSykmeldingMelding.validation,
-                    validationOppdatert = nowFactory.get(),
-                )
-        }
-        return oppdatertSykmelding
-    }
-
-    private fun opprettNySykmelding(eksternSykmeldingMelding: EksternSykmeldingMelding): Sykmelding {
-        val now = nowFactory.get()
-        val sykmelding =
-            Sykmelding(
-                sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
-                validation = eksternSykmeldingMelding.validation,
-                hendelser =
-                    listOf(
-                        SykmeldingHendelse(
-                            status = HendelseStatus.APEN,
-                            source = SykmeldingHendelse.LOKAL_SOURCE,
-                            hendelseOpprettet =
-                                eksternSykmeldingMelding.sykmelding.metadata.mottattDato
-                                    .toInstant(),
-                            lokaltOpprettet = now,
+                    hendelser =
+                        listOf(
+                            SykmeldingHendelse(
+                                status = HendelseStatus.APEN,
+                                source = SykmeldingHendelse.LOKAL_SOURCE,
+                                hendelseOpprettet =
+                                    eksternSykmeldingMelding.sykmelding.metadata.mottattDato
+                                        .toInstant(),
+                                lokaltOpprettet = tidspunkt,
+                            ),
                         ),
-                    ),
-                opprettet = now,
-                sykmeldingGrunnlagOppdatert = now,
-                validationOppdatert = now,
-                hendelseOppdatert = now,
-            )
-        return sykmelding
+                    opprettet = tidspunkt,
+                    sykmeldingGrunnlagOppdatert = tidspunkt,
+                    validationOppdatert = tidspunkt,
+                    hendelseOppdatert = tidspunkt,
+                )
+            return sykmelding
+        }
+
+        fun oppdaterSykmelding(
+            eksisterendeSykmelding: Sykmelding,
+            eksternSykmeldingMelding: EksternSykmeldingMelding,
+            tidspunkt: Instant,
+        ): Sykmelding {
+            var oppdatertSykmelding = eksisterendeSykmelding
+
+            if (eksisterendeSykmelding.sykmeldingGrunnlag != eksternSykmeldingMelding.sykmelding) {
+                oppdatertSykmelding =
+                    oppdatertSykmelding.copy(
+                        sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
+                        sykmeldingGrunnlagOppdatert = tidspunkt,
+                    )
+            }
+            if (eksisterendeSykmelding.validation != eksternSykmeldingMelding.validation) {
+                oppdatertSykmelding =
+                    oppdatertSykmelding.copy(
+                        validation = eksternSykmeldingMelding.validation,
+                        validationOppdatert = tidspunkt,
+                    )
+            }
+            return oppdatertSykmelding
+        }
     }
 }
