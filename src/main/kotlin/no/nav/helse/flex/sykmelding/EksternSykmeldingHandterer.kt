@@ -38,7 +38,7 @@ class EksternSykmeldingHandterer(
             sykmeldingRepository.save(oppdatertSykmelding)
             log.info("Sykmelding oppdatert: ${eksisterendeSykmelding.sykmeldingId}")
         } else {
-            val sykmelding = opprettNySykmelding(eksternSykmeldingMelding)
+            val sykmelding = lagNySykmelding(eksternSykmeldingMelding, tidspunkt = nowFactory.get())
             sykmeldingRepository.save(sykmelding)
             sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
@@ -82,28 +82,32 @@ class EksternSykmeldingHandterer(
         return oppdatertSykmelding
     }
 
-    private fun opprettNySykmelding(eksternSykmeldingMelding: EksternSykmeldingMelding): Sykmelding {
-        val now = nowFactory.get()
-        val sykmelding =
-            Sykmelding(
-                sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
-                validation = eksternSykmeldingMelding.validation,
-                hendelser =
-                    listOf(
-                        SykmeldingHendelse(
-                            status = HendelseStatus.APEN,
-                            source = SykmeldingHendelse.LOKAL_SOURCE,
-                            hendelseOpprettet =
-                                eksternSykmeldingMelding.sykmelding.metadata.mottattDato
-                                    .toInstant(),
-                            lokaltOpprettet = now,
+    companion object {
+        fun lagNySykmelding(
+            eksternSykmeldingMelding: EksternSykmeldingMelding,
+            tidspunkt: Instant,
+        ): Sykmelding {
+            val sykmelding =
+                Sykmelding(
+                    sykmeldingGrunnlag = eksternSykmeldingMelding.sykmelding,
+                    validation = eksternSykmeldingMelding.validation,
+                    hendelser =
+                        listOf(
+                            SykmeldingHendelse(
+                                status = HendelseStatus.APEN,
+                                source = SykmeldingHendelse.LOKAL_SOURCE,
+                                hendelseOpprettet =
+                                    eksternSykmeldingMelding.sykmelding.metadata.mottattDato
+                                        .toInstant(),
+                                lokaltOpprettet = tidspunkt,
+                            ),
                         ),
-                    ),
-                opprettet = now,
-                sykmeldingGrunnlagOppdatert = now,
-                validationOppdatert = now,
-                hendelseOppdatert = now,
-            )
-        return sykmelding
+                    opprettet = tidspunkt,
+                    sykmeldingGrunnlagOppdatert = tidspunkt,
+                    validationOppdatert = tidspunkt,
+                    hendelseOppdatert = tidspunkt,
+                )
+            return sykmelding
+        }
     }
 }

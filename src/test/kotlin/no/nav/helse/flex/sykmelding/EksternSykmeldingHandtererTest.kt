@@ -14,8 +14,7 @@ import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -212,5 +211,38 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         )
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", eksternSykmeldingMelding = null)
         sykmeldingRepository.findAll().shouldHaveSize(0)
+    }
+
+    @Nested
+    inner class Companion {
+        @Test
+        fun `lagNySykmelding burde lage ny sykmelding`() {
+            val tidspunkt = Instant.parse("2024-01-01T00:00:00Z")
+            val eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord()
+
+            val nySykmelding =
+                EksternSykmeldingHandterer.lagNySykmelding(
+                    eksternSykmeldingMelding = eksternSykmeldingMelding,
+                    tidspunkt = tidspunkt,
+                )
+
+            nySykmelding.run {
+                sykmeldingGrunnlag `should be equal to` eksternSykmeldingMelding.sykmelding
+                validation `should be equal to` eksternSykmeldingMelding.validation
+                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
+                hendelseOppdatert `should be equal to` tidspunkt
+                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
+                validationOppdatert `should be equal to` tidspunkt
+            }
+            nySykmelding.hendelser.shouldHaveSingleItem().run {
+                status `should be equal to` HendelseStatus.APEN
+                hendelseOpprettet `should be equal to`
+                    eksternSykmeldingMelding.sykmelding.metadata.mottattDato
+                        .toInstant()
+                lokaltOpprettet `should be equal to` tidspunkt
+                source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
+            }
+        }
     }
 }
