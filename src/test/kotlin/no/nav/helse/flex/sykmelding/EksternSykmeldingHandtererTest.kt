@@ -244,5 +244,37 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                 source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
             }
         }
+
+        @Test
+        fun `oppdaterSykmelding burde oppdatere riktig`() {
+            val eksisterendeSykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                    validation = lagValidation(status = RuleType.OK),
+                )
+            val eksternSykmeldingMelding =
+                lagSykmeldingKafkaRecord(
+                    sykmelding = lagSykmeldingGrunnlag(id = "2"),
+                    validation = lagValidation(status = RuleType.INVALID),
+                )
+            val tidspunkt = Instant.parse("2024-01-01T00:00:00Z")
+            val oppdatertSykmelding =
+                EksternSykmeldingHandterer.oppdaterSykmelding(
+                    eksisterendeSykmelding = eksisterendeSykmelding,
+                    eksternSykmeldingMelding = eksternSykmeldingMelding,
+                    tidspunkt = tidspunkt,
+                )
+            oppdatertSykmelding.run {
+                sykmeldingId `should be equal to` eksternSykmeldingMelding.sykmelding.id
+                sykmeldingGrunnlag `should be equal to` eksternSykmeldingMelding.sykmelding
+                validation `should be equal to` eksternSykmeldingMelding.validation
+                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
+                validationOppdatert `should be equal to` tidspunkt
+
+                databaseId `should be equal to` eksisterendeSykmelding.databaseId
+                hendelser shouldBeEqualTo eksisterendeSykmelding.hendelser
+                hendelseOppdatert `should be equal to` eksisterendeSykmelding.hendelseOppdatert
+            }
+        }
     }
 }
