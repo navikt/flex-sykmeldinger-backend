@@ -17,7 +17,6 @@ import no.nav.helse.flex.testconfig.fakes.SykmeldingBrukernotifikasjonProducerFa
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
@@ -310,7 +309,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                             lagSykmeldingGrunnlag(
                                 id = "1",
                                 metadata =
-                                    lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2020-01-01T00:00:00Z")),
+                                    lagUtfyllendeSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2020-01-01T00:00:00Z")),
                                 pasient = lagPasient(fnr = "fnr"),
                             ),
                     ),
@@ -328,7 +327,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                             lagSykmeldingGrunnlag(
                                 id = "2",
                                 metadata =
-                                    lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2022-01-01T00:00:00Z")),
+                                    lagUtfyllendeSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2022-01-01T00:00:00Z")),
                                 pasient = lagPasient(fnr = "fnr-2"),
                             ),
                     ),

@@ -11,6 +11,7 @@ import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.OffsetDateTime
 
 @Component
 class SykmeldingDtoKonverterer(
@@ -33,6 +34,7 @@ class SykmeldingDtoKonverterer(
             sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering =
             konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        val metadata = sykmelding.sykmeldingGrunnlag.metadata
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -41,7 +43,7 @@ class SykmeldingDtoKonverterer(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
-            mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
+            mottattTidspunkt = metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus =
@@ -49,7 +51,7 @@ class SykmeldingDtoKonverterer(
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
+            behandletTidspunkt = metadata.getBehandlingsTidspunkt(),
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
@@ -62,7 +64,7 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            rulesetVersion = metadata.getRulesetVersion(),
             merknader = konverterMerknader(sykmelding.validation),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
@@ -437,4 +439,16 @@ fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
                 stillingsprosent = this.stillingsprosent,
             )
         else -> null
+    }
+
+fun SykmeldingMetadata.getBehandlingsTidspunkt(): OffsetDateTime? =
+    when (this) {
+        is UtfyllendeSykmeldingMetadata -> this.behandletTidspunkt
+        else -> null
+    }
+
+fun SykmeldingMetadata.getRulesetVersion(): String? =
+    when (this) {
+        is UtfyllendeSykmeldingMetadata -> this.regelsettVersjon
+        is DigitalSykmeldingMetadata -> null
     }

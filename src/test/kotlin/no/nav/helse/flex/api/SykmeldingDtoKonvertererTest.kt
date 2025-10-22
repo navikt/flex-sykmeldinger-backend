@@ -6,6 +6,7 @@ import no.nav.helse.flex.sykmelding.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
+import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagMedisinskVurdering
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
@@ -104,7 +105,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             dto.utdypendeOpplysninger `should be equal to`
                 sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
             dto.kontaktMedPasient `should be equal to`
-                sykmeldingGrunnlag.tilbakedatering?.let {
+                sykmeldingGrunnlag.tilbakedatering!!.let {
                     sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
                 }
             dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
@@ -118,6 +119,48 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 }
             dto.meldingTilArbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
 
+            dto.utenlandskSykmelding.`should be null`()
+        }
+
+        @Test
+        fun `burde konvertere norsk DIGITAL sykmelding`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagDigitalSykmeldingGrunnlag(),
+                )
+
+            val sykmeldingGrunnlag = sykmelding.sykmeldingGrunnlag.shouldBeInstanceOf<DigitalSykmeldingGrunnlag>()
+
+            val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+            // Spesifikk for DIGITAL
+            dto.prognose.`should be null`()
+            dto.tiltakNAV.`should be null`()
+            dto.andreTiltak.`should be null`()
+
+            dto.pasient `should be equal to`
+                sykmeldingDtoKonverterer.konverterPasient(
+                    sykmeldingGrunnlag.pasient,
+                    dto.sykmeldingsperioder.minBy { it.fom }.fom,
+                )
+            dto.medisinskVurdering `should be equal to`
+                sykmeldingDtoKonverterer.konverterMedisinskVurdering(
+                    sykmeldingGrunnlag.medisinskVurdering,
+                )
+            dto.arbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
+            dto.utdypendeOpplysninger `should be equal to`
+                sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
+            dto.kontaktMedPasient `should be equal to`
+                sykmeldingGrunnlag.tilbakedatering!!.let {
+                    sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
+                }
+            dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
+            dto.tiltakArbeidsplassen `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
+            dto.meldingTilNAV `should be equal to`
+                sykmeldingGrunnlag.bistandNav!!.let {
+                    sykmeldingDtoKonverterer.konverterMeldingTilNAV(it)
+                }
+            dto.meldingTilArbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
             dto.utenlandskSykmelding.`should be null`()
         }
 

@@ -154,7 +154,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                         lagSykmeldingGrunnlag(
                             id = "1",
                             metadata =
-                                lagSykmeldingMetadata(
+                                lagUtfyllendeSykmeldingMetadata(
                                     avsenderSystem =
                                         AvsenderSystem(
                                             navn = AvsenderSystemNavn.EGENMELDT,

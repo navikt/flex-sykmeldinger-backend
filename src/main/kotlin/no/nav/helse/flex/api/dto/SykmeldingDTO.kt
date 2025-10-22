@@ -22,7 +22,7 @@ data class SykmeldingDTO(
     val meldingTilNAV: MeldingTilNavDTO?,
     val meldingTilArbeidsgiver: String?,
     val kontaktMedPasient: KontaktMedPasientDTO?,
-    val behandletTidspunkt: OffsetDateTime,
+    val behandletTidspunkt: OffsetDateTime?,
     val behandler: BehandlerDTO?,
     val syketilfelleStartDato: LocalDate?,
     val navnFastlege: String?,
