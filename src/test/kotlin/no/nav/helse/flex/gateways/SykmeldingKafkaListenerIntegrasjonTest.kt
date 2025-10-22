@@ -3,6 +3,8 @@ package no.nav.helse.flex.gateways
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
+import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
@@ -18,15 +20,11 @@ import java.time.Duration
 
 class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
-    private lateinit var environmentToggles: EnvironmentTogglesFake
-
-    @Autowired
     private lateinit var sykmeldingListener: SykmeldingListener
 
     @AfterEach
     fun afterEach() {
         slettDatabase()
-        environmentToggles.reset()
     }
 
     @Test
@@ -76,17 +74,12 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `sykmelding type DIGITAL burde ignorere i dev miljø`() {
-        val sykmeldingJson =
-            """
-            {
-              "sykmelding": {
-                "id": "1",
-                "type": "DIGITAL"
-              }
-            }
-            """.trimIndent()
-        environmentToggles.setEnvironment("dev")
+    fun `sykmelding type DIGITAL burde ikke ignoreres i dev miljø`() {
+        val eksternSykmeldingMelding =
+            lagEksternSykmeldingMelding(
+                sykmelding = lagDigitalSykmeldingGrunnlag(),
+                validation = lagValidation(),
+            )
 
         sykmeldingListener.listen(
             cr =
@@ -95,39 +88,11 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
                     0,
                     0,
                     "1",
-                    sykmeldingJson,
+                    eksternSykmeldingMelding.serialisertTilString(),
                 ),
             acknowledgment = { },
         )
 
-        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
-    }
-
-    @Test
-    fun `sykmelding type DIGITAL burde feile i prod miljø`() {
-        val sykmeldingJson =
-            """
-            {
-              "sykmelding": {
-                "id": "1",
-                "type": "DIGITAL"
-              }
-            }
-            """.trimIndent()
-        environmentToggles.setEnvironment("prod")
-
-        invoking {
-            sykmeldingListener.listen(
-                cr =
-                    ConsumerRecord(
-                        SYKMELDING_TOPIC,
-                        0,
-                        0,
-                        "1",
-                        sykmeldingJson,
-                    ),
-                acknowledgment = { },
-            )
-        }.shouldThrow(Exception::class)
+        sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
     }
 }

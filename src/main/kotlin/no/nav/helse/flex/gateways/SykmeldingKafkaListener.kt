@@ -52,10 +52,6 @@ class SykmeldingListener(
         val sykmeldingId = cr.key()
         val serialisertSykmelding: String? = cr.value()
 
-        if (burdeIgnorereSykmelding(serialisertSykmelding, sykmeldingId = sykmeldingId)) {
-            return
-        }
-
         val sykmeldingRecord: EksternSykmeldingMelding? =
             if (serialisertSykmelding == null) {
                 null
@@ -87,47 +83,6 @@ class SykmeldingListener(
             eksternSykmeldingMelding = sykmeldingRecord,
         )
     }
-
-    private fun burdeIgnorereSykmelding(
-        sykmeldingRecordJson: String?,
-        sykmeldingId: String? = null,
-    ): Boolean {
-        if (environmentToggles.isProduction()) {
-            return false
-        }
-        if (sykmeldingRecordJson == null) {
-            return false
-        }
-
-        val minimalSykmeldingKafkaRecord: MinimalSykmeldingKafkaRecord =
-            try {
-                objectMapper.readValue(sykmeldingRecordJson)
-            } catch (e: Exception) {
-                log.error(
-                    "Feil minimal sykmelding format. sykmeldingId: $sykmeldingId. Rå sykmelding: $sykmeldingRecordJson",
-                    e,
-                )
-                throw e
-            }
-        if (minimalSykmeldingKafkaRecord.sykmelding.type == "DIGITAL") {
-            log.info(
-                "Ignorerer sykmelding av type DIGITAL, sykmeldingId: ${minimalSykmeldingKafkaRecord.sykmelding.id}",
-            )
-            return true
-        } else {
-            return false
-        }
-    }
-
-    private data class MinimalSykmeldingKafkaRecord(
-        val sykmelding: MinimalSykmelding,
-    )
-
-    private data class MinimalSykmelding(
-        val id: String,
-        val type: String,
-        val metadata: Map<String, Any?>? = null,
-    )
 }
 
 const val SYKMELDING_TOPIC = "tsm.sykmeldinger"
