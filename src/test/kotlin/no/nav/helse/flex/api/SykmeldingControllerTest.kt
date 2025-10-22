@@ -573,6 +573,37 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
+        fun `burde få 409 dersom ugyldig sykmeldingstatus`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                    hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/send")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            lagSendSykmeldingRequestDTO().serialisertTilString(),
+                        ),
+                ).andExpect(MockMvcResultMatchers.status().isConflict)
+        }
+
+        @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
                 content = lagSendSykmeldingRequestDTO().serialisertTilString(),
@@ -634,6 +665,37 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
             sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
+        }
+
+        @Test
+        fun `burde få 409 dersom vi endrer til ugyldig status`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                    hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER)),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/change-status")
+                        .header(
+                            "Authorization",
+                            "Bearer ${
+                                oauth2Server.tokenxToken(
+                                    fnr = "fnr",
+                                )
+                            }",
+                        ).contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            SykmeldingChangeStatus.AVBRYT.serialisertTilString(),
+                        ),
+                ).andExpect(MockMvcResultMatchers.status().isConflict)
         }
 
         @Test
