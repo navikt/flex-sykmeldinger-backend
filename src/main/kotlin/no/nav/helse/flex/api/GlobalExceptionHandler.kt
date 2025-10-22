@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
 import no.nav.helse.flex.sykmeldinghendelse.KunneIkkeFinneTilleggsinfoException
+import no.nav.helse.flex.sykmeldinghendelse.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.exceptions.JwtTokenInvalidClaimException
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -35,6 +36,7 @@ class GlobalExceptionHandler {
             }
             is SykmeldingIkkeFunnetException -> skapResponseEntity(HttpStatus.NOT_FOUND)
             is SykmeldingErIkkeDinException -> skapResponseEntity(HttpStatus.FORBIDDEN)
+            is UgyldigSykmeldingStatusException -> skapResponseEntity(HttpStatus.CONFLICT)
             is JwtTokenInvalidClaimException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is JwtTokenUnauthorizedException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is HttpMediaTypeNotAcceptableException -> skapResponseEntity(HttpStatus.NOT_ACCEPTABLE)
