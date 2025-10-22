@@ -35,7 +35,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde lagre hendelse`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -57,7 +57,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding med hendelse til producer`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -78,7 +78,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for arbeidstaker`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -105,7 +105,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for arbeidsledig`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -130,7 +130,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for permittert`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -155,7 +155,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for fisker med lott`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -180,7 +180,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for fisker med hyre`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -207,7 +207,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for fisker med både lott og hyre`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -238,7 +238,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for jordbruker`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -263,7 +263,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for naringsdrivende`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -288,7 +288,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for frilanser`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -313,7 +313,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding for annen arbeidssituasjon`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -341,7 +341,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde lagre hendelse`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -361,7 +361,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding med hendelse til producer`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 ),
             )
 
@@ -384,7 +384,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde lagre hendelse`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     validation = lagValidation(status = RuleType.INVALID),
                 ),
             )
@@ -405,7 +405,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
         fun `burde sende sykmelding med hendelse til producer`() {
             sykmeldingRepository.save(
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     validation = lagValidation(status = RuleType.INVALID),
                 ),
             )

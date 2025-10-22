@@ -5,7 +5,7 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +27,7 @@ class RegistrertePersonerForArbeidsforholdTest : FakesTestOppsett() {
 
     @Test
     fun `burde returnere true når en person har sykmelding`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
 
         val result = registrertePersonerForArbeidsforhold.erPersonRegistrert("fnr")
         result.`should be true`()
@@ -41,7 +41,7 @@ class RegistrertePersonerForArbeidsforholdTest : FakesTestOppsett() {
 
     @Test
     fun `burde returnere true dersom personen har en sykmelding med gammel fnr`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = "gammel-fnr"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(pasient = lagPasient(fnr = "gammel-fnr"))))
         pdlClientFake.setIdentMedHistorikk(listOf(PdlIdent(gruppe = "FOLKEREGISTERIDENT", ident = "gammel-fnr")))
 
         val result = registrertePersonerForArbeidsforhold.erPersonRegistrert("ny-ident")

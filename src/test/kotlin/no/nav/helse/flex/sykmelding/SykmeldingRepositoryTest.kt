@@ -25,7 +25,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lagre en sykmelding`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
         sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
@@ -35,7 +35,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `burde lese og returnere lagret sykmelding med riktig data`() {
         val sykmelding =
             Sykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         SykmeldingHendelse(
@@ -61,7 +61,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde oppdatere en sykmelding`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")))
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")))
 
         sykmeldingRepository.save(sykmelding)
 
@@ -69,7 +69,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding.copy(
                 sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(id = "1").copy(
+                    lagXMLSykmeldingGrunnlag(id = "1").copy(
                         pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
                     ),
             )
@@ -84,7 +84,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde oppdatere en sykmelding uten å lagre dobbelt`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
 
@@ -98,7 +98,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde legge til en hendelse i en sykmelding`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
 
@@ -150,7 +150,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     )
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = sykmeldingId),
                         hendelser = listOf(hendelse),
                     )
 
@@ -189,7 +189,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     )
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = sykmeldingId),
                         hendelser = listOf(hendelse),
                     )
 
@@ -202,9 +202,9 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde hente alle ved person identer`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "1"))))
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "2"))))
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "3", pasient = lagPasient(fnr = "3"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "1"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "2"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "3", pasient = lagPasient(fnr = "3"))))
 
         sykmeldingRepository.findAllByPersonIdenter(PersonIdenter("1", listOf("2"))) shouldHaveSize 2
     }
@@ -213,14 +213,14 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `deleteBySykmeldingId burde slette bestemt sykmelding`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         lagSykmeldingHendelse(),
                     ),
             ),
         )
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2")))
 
         sykmeldingRepository.deleteBySykmeldingId("1")
 
@@ -232,7 +232,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `deleteBySykmeldingId burde slette sykmelding hendelser`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         lagSykmeldingHendelse(),
@@ -248,14 +248,14 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `delete burde slette bestemt sykmelding`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         lagSykmeldingHendelse(),
                     ),
             ),
         )
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2")))
 
         val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
         sykmeldingRepository.delete(sykmelding1)
@@ -268,7 +268,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     fun `delete burde slette sykmelding hendelser`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         lagSykmeldingHendelse(),

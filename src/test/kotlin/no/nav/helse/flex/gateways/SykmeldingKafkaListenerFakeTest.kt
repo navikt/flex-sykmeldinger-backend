@@ -4,8 +4,8 @@ import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should not throw`
@@ -39,7 +39,7 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
 
         val kafkaMelding =
             EksternSykmeldingMelding(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                sykmelding = lagXMLSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
 
@@ -65,7 +65,7 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
 
         val kafkaMelding =
             EksternSykmeldingMelding(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
+                sykmelding = lagXMLSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
 

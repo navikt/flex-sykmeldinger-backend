@@ -7,7 +7,7 @@ import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import java.time.Instant
 
 fun lagSykmelding(
-    sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+    sykmeldingGrunnlag: ISykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
     validation: ValidationResult = lagValidation(),
     hendelser: List<SykmeldingHendelse> =
         listOf(

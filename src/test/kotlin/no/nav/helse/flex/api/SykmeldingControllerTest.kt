@@ -200,7 +200,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -226,13 +226,13 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId" }
     }
 
@@ -243,7 +243,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -290,7 +290,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -319,7 +319,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                             aktiviteter =
@@ -360,7 +360,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                             aktiviteter =
@@ -403,7 +403,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                             aktiviteter =
@@ -464,13 +464,13 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/brukerinformasjon" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/brukerinformasjon" }
     }
 
@@ -522,7 +522,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -564,7 +564,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -602,7 +602,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -641,7 +641,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -683,7 +683,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -702,7 +702,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -722,7 +722,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -791,7 +791,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             pasient = lagPasient(fnr = "fnr"),
                         ),
@@ -823,13 +823,13 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
             sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
+                content = lagXMLSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
     }
 
@@ -856,7 +856,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         sykmeldingRepository.save(
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(
+                    lagXMLSykmeldingGrunnlag(
                         id = "1",
                         pasient = lagPasient(fnr = "fnr"),
                     ),

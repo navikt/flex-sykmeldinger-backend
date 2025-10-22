@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmeldinghendelse
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
@@ -47,7 +46,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar =
@@ -90,7 +89,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
             val brukerSvar =
                 lagArbeidstakerBrukerSvar(
@@ -114,7 +113,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burder feile dersom arbeidsforhold ikke finnes`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
@@ -140,7 +139,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             lagPasient(fnr = "fnr"),
                             aktiviteter =
@@ -164,7 +163,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 sykmeldingRepository.save(
                     lagSykmelding(
                         sykmeldingGrunnlag =
-                            lagSykmeldingGrunnlag(
+                            lagXMLSykmeldingGrunnlag(
                                 id = "2",
                                 lagPasient(fnr = "fnr"),
                                 aktiviteter =
@@ -205,7 +204,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     ),
                 )
 
@@ -235,7 +234,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                     ),
                 )
 
@@ -261,7 +260,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             sykmeldingRepository.save(
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagXMLSykmeldingGrunnlag(
                             id = "1",
                             lagPasient(fnr = "fnr"),
                             aktiviteter =
@@ -285,7 +284,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 sykmeldingRepository.save(
                     lagSykmelding(
                         sykmeldingGrunnlag =
-                            lagSykmeldingGrunnlag(
+                            lagXMLSykmeldingGrunnlag(
                                 id = "2",
                                 lagPasient(fnr = "fnr"),
                                 aktiviteter =
@@ -326,7 +325,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     ),
                 )
 
@@ -356,7 +355,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             val sykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                     ),
                 )
 
@@ -401,7 +400,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
 
                 val brukerSvar =
@@ -450,7 +449,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
                 val brukerSvar =
                     lagFiskerHyreBrukerSvar(
@@ -478,7 +477,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             fun `burde feile dersom arbeidsforhold ikke finnes`(fiskerLottOgHyre: FiskerLottOgHyre) {
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
 
                 val brukerSvar =
@@ -507,7 +506,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
             fun `burde returnere riktig tilleggsinfo`() {
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                     )
 
                 val brukerSvar = lagFiskerLottBrukerSvar()
@@ -536,7 +535,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde returnere riktig tilleggsinfo`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar =
@@ -564,7 +563,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde returnere riktig tilleggsinfo`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar =
@@ -592,7 +591,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde returnere riktig tilleggsinfo`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar =
@@ -620,7 +619,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
         fun `burde returnere riktig tilleggsinfo`() {
             val sykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
+                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", lagPasient(fnr = "fnr")),
                 )
 
             val brukerSvar =

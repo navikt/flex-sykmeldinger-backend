@@ -1,88 +1,91 @@
 package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingType
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
+import no.nav.helse.flex.testdata.lagPapirSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
+import org.junit.jupiter.api.TestFactory
 import java.time.Duration
 
 class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
-    @Autowired
-    private lateinit var sykmeldingListener: SykmeldingListener
-
     @AfterEach
     fun afterEach() {
         slettDatabase()
     }
 
-    @Test
-    fun `burde lagre NORSK sykmelding fra kafka`() {
-        val eksternSykmeldingMelding =
-            EksternSykmeldingMelding(
-                sykmelding = lagSykmeldingGrunnlag(id = "1"),
-                validation = lagValidation(),
-            )
+    data class SykmeldingTestCase(
+        val typeNavn: SykmeldingType,
+        val lagEksternSykmelding: (sykmeldingId: String) -> String,
+    )
 
-        kafkaProducer
-            .send(
-                ProducerRecord(
-                    SYKMELDING_TOPIC,
-                    null,
-                    "1",
-                    eksternSykmeldingMelding.serialisertTilString(),
-                ),
-            ).get()
+    @TestFactory
+    fun `lagrer sykmelding fra kafka for ulike typer`() =
+        listOf(
+            SykmeldingTestCase(SykmeldingType.XML) { id ->
+                EksternSykmeldingMelding(
+                    sykmelding = lagXMLSykmeldingGrunnlag(id = id),
+                    validation = lagValidation(),
+                ).serialisertTilString()
+            },
+            SykmeldingTestCase(SykmeldingType.UTENLANDSK) { id ->
+                lagEksternSykmeldingMelding(
+                    sykmelding = lagUtenlandskSykmeldingGrunnlag(id = id),
+                    validation = lagValidation(),
+                ).serialisertTilString()
+            },
+            SykmeldingTestCase(SykmeldingType.PAPIR) { id ->
+                lagEksternSykmeldingMelding(
+                    sykmelding = lagPapirSykmeldingGrunnlag(id = id),
+                    validation = lagValidation(),
+                ).serialisertTilString()
+            },
+            SykmeldingTestCase(SykmeldingType.DIGITAL) { id ->
+                lagEksternSykmeldingMelding(
+                    sykmelding = lagDigitalSykmeldingGrunnlag(id = id),
+                    validation = lagValidation(),
+                ).serialisertTilString()
+            },
+        ).map { testCase ->
+            DynamicTest.dynamicTest("burde lagre ${testCase.typeNavn} sykmelding fra kafka") {
+                slettDatabase()
+                val sykmeldingId = "1"
+                val melding = testCase.lagEksternSykmelding(sykmeldingId)
 
-        await().atMost(Duration.ofSeconds(2)).until {
-            sykmeldingRepository.findBySykmeldingId("1") != null
+                kafkaProducer
+                    .send(
+                        ProducerRecord(
+                            SYKMELDING_TOPIC,
+                            null,
+                            sykmeldingId,
+                            melding,
+                        ),
+                    ).get()
+
+                await().atMost(Duration.ofSeconds(2)).until {
+                    sykmeldingRepository.findBySykmeldingId(sykmeldingId) != null
+                }
+                sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
+            }
         }
-
-        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
-    }
-
-    @Test
-    fun `burde lagre DIGITAL sykmelding fra kafka`() {
-        val eksternSykmeldingMelding =
-            lagEksternSykmeldingMelding(
-                sykmelding = lagSykmeldingGrunnlag(),
-                validation = lagValidation(),
-            )
-
-        sykmeldingListener.listen(
-            cr =
-                ConsumerRecord(
-                    SYKMELDING_TOPIC,
-                    0,
-                    0,
-                    "1",
-                    eksternSykmeldingMelding.serialisertTilString(),
-                ),
-            acknowledgment = { },
-        )
-
-        await().atMost(Duration.ofSeconds(2)).until {
-            sykmeldingRepository.findBySykmeldingId("1") != null
-        }
-
-        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
-    }
 
     @Test
     fun `burde tombstone sykmelding fra kafka`() {
         val topic = SYKMELDING_TOPIC
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
+            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")),
         )
 
         val key = "1"

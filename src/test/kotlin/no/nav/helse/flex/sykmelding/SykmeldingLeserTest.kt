@@ -4,7 +4,7 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldHaveSize
 import org.amshove.kluent.shouldNotThrow
@@ -28,7 +28,7 @@ class SykmeldingLeserTest : FakesTestOppsett() {
         @Test
         fun `burde hente en sykmelding`() {
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
             )
             invoking {
                 sykmeldingLeser.hentSykmelding("1", identer = PersonIdenter("fnr"))
@@ -45,7 +45,7 @@ class SykmeldingLeserTest : FakesTestOppsett() {
         @Test
         fun `burde feile dersom feil identer`() {
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
             )
             invoking {
                 sykmeldingLeser.hentSykmelding("1", identer = PersonIdenter("annet_fnr"))
@@ -58,10 +58,10 @@ class SykmeldingLeserTest : FakesTestOppsett() {
         @Test
         fun `burde hente alle sykmeldinger`() {
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
             )
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "fnr"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "fnr"))),
             )
 
             val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer = PersonIdenter("fnr"))
@@ -72,10 +72,10 @@ class SykmeldingLeserTest : FakesTestOppsett() {
         @Test
         fun `burde ikke hente sykmeldinger for andre identer`() {
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
             )
             sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "fnr_2"))),
+                lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = "fnr_2"))),
             )
 
             val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer = PersonIdenter("fnr"))
