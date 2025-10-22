@@ -5,7 +5,7 @@ import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingMetadata
+import no.nav.helse.flex.testdata.lagUtfyllendeSykmeldingMetadata
 import no.nav.helse.flex.testdata.lagValidation
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should not be equal to`
@@ -36,7 +36,7 @@ class SykmeldingTest {
             lagSykmelding(
                 lagSykmeldingGrunnlag(
                     metadata =
-                        lagSykmeldingMetadata(
+                        lagUtfyllendeSykmeldingMetadata(
                             avsenderSystem =
                                 AvsenderSystem(
                                     navn = AvsenderSystemNavn.EGENMELDT,

@@ -10,6 +10,7 @@ val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE: SimpleModule =
                 SykmeldingType.XML -> SykmeldingGrunnlag::class
                 SykmeldingType.PAPIR -> PapirSykmeldingGrunnlag::class
                 SykmeldingType.UTENLANDSK -> UtenlandskSykmeldingGrunnlag::class
+                SykmeldingType.DIGITAL -> DigitalSykmeldingGrunnlag::class
             }
         }.addPolymorphicDeserializer(Aktivitet::type) {
             when (it) {

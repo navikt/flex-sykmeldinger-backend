@@ -17,6 +17,7 @@ enum class SykmeldingType {
     XML,
     PAPIR,
     UTENLANDSK,
+    DIGITAL,
 }
 
 sealed interface ISykmeldingGrunnlag {
@@ -30,7 +31,7 @@ sealed interface ISykmeldingGrunnlag {
 
 data class UtenlandskSykmeldingGrunnlag(
     override val id: String,
-    override val metadata: SykmeldingMetadata,
+    override val metadata: UtfyllendeSykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -57,7 +58,7 @@ sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
 
 data class SykmeldingGrunnlag(
     override val id: String,
-    override val metadata: SykmeldingMetadata,
+    override val metadata: UtfyllendeSykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -73,9 +74,27 @@ data class SykmeldingGrunnlag(
     override val type = SykmeldingType.XML
 }
 
+data class DigitalSykmeldingGrunnlag(
+    override val id: String,
+    override val metadata: DigitalSykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val sykmelder: Sykmelder,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
+    override val prognose: Prognose? = null
+    override val tiltak: Tiltak? = null
+    override val type = SykmeldingType.DIGITAL
+}
+
 data class PapirSykmeldingGrunnlag(
     override val id: String,
-    override val metadata: SykmeldingMetadata,
+    override val metadata: UtfyllendeSykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -167,14 +186,26 @@ enum class AvsenderSystemNavn(
     }
 }
 
-data class SykmeldingMetadata(
-    val mottattDato: OffsetDateTime,
-    val genDate: OffsetDateTime,
+sealed interface SykmeldingMetadata {
+    val mottattDato: OffsetDateTime
+    val genDate: OffsetDateTime
+    val avsenderSystem: AvsenderSystem
+}
+
+data class UtfyllendeSykmeldingMetadata(
+    override val mottattDato: OffsetDateTime,
+    override val genDate: OffsetDateTime,
+    override val avsenderSystem: AvsenderSystem,
     val behandletTidspunkt: OffsetDateTime,
     val regelsettVersjon: String?,
-    val avsenderSystem: AvsenderSystem,
     val strekkode: String?,
-)
+) : SykmeldingMetadata
+
+data class DigitalSykmeldingMetadata(
+    override val mottattDato: OffsetDateTime,
+    override val genDate: OffsetDateTime,
+    override val avsenderSystem: AvsenderSystem,
+) : SykmeldingMetadata
 
 data class BistandNav(
     val bistandUmiddelbart: Boolean,
