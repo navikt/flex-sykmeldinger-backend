@@ -2,14 +2,10 @@ package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.*
+import org.amshove.kluent.shouldBeNull
+import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -28,9 +24,8 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde lagre sykmelding fra kafka`() {
-        val topic = SYKMELDING_TOPIC
-        val kafkaMelding =
+    fun `burde lagre NORSK sykmelding fra kafka`() {
+        val eksternSykmeldingMelding =
             EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
@@ -39,12 +34,39 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         kafkaProducer
             .send(
                 ProducerRecord(
-                    topic,
+                    SYKMELDING_TOPIC,
                     null,
                     "1",
-                    kafkaMelding.serialisertTilString(),
+                    eksternSykmeldingMelding.serialisertTilString(),
                 ),
             ).get()
+
+        await().atMost(Duration.ofSeconds(2)).until {
+            sykmeldingRepository.findBySykmeldingId("1") != null
+        }
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+    }
+
+    @Test
+    fun `burde lagre DIGITAL sykmelding fra kafka`() {
+        val eksternSykmeldingMelding =
+            lagEksternSykmeldingMelding(
+                sykmelding = lagDigitalSykmeldingGrunnlag(),
+                validation = lagValidation(),
+            )
+
+        sykmeldingListener.listen(
+            cr =
+                ConsumerRecord(
+                    SYKMELDING_TOPIC,
+                    0,
+                    0,
+                    "1",
+                    eksternSykmeldingMelding.serialisertTilString(),
+                ),
+            acknowledgment = { },
+        )
 
         await().atMost(Duration.ofSeconds(2)).until {
             sykmeldingRepository.findBySykmeldingId("1") != null
@@ -71,28 +93,5 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         }
 
         sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
-    }
-
-    @Test
-    fun `sykmelding type DIGITAL burde ikke ignoreres i dev miljø`() {
-        val eksternSykmeldingMelding =
-            lagEksternSykmeldingMelding(
-                sykmelding = lagDigitalSykmeldingGrunnlag(),
-                validation = lagValidation(),
-            )
-
-        sykmeldingListener.listen(
-            cr =
-                ConsumerRecord(
-                    SYKMELDING_TOPIC,
-                    0,
-                    0,
-                    "1",
-                    eksternSykmeldingMelding.serialisertTilString(),
-                ),
-            acknowledgment = { },
-        )
-
-        sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
     }
 }
