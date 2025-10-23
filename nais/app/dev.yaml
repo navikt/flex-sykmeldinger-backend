@@ -18,6 +18,7 @@ env:
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
   PDL_API_AAD_CLIENT_ID: dev-fss.pdl.pdl-api
   DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
+  SYKEPENGESOKNAD_CLIENT_ID: dev-gcp:flex:sykepengesoknad
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
   AAREG_HENDELSE_TOPIC: arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1
   EREG_URL: https://ereg-services-q1.dev-fss-pub.nais.io
