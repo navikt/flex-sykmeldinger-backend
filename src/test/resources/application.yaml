@@ -28,7 +28,8 @@ spring:
     redis:
       time-to-live: 1h
 
-DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: frontend-client-id
+DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: ditt-sykefravaer-frontend-client-id
+SYKEPENGESOKNAD_CLIENT_ID: sykepengesoknad-client-id
 
 management:
   endpoint.prometheus.enabled: true

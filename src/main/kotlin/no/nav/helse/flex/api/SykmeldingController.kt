@@ -16,6 +16,7 @@ import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -31,6 +32,10 @@ class SykmeldingController(
     private val sykmeldingHendelseHandterer: SykmeldingHendelseHandterer,
     private val syketilfelleClient: SyketilfelleClient,
     private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
+    @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
+    private val dittSykefravaerFrontendClientId: String,
+    @Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
+    private val sykepengesoknadClientId: String,
 ) {
     private val logger = logger()
 
@@ -41,7 +46,7 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId, sykepengesoknadClientId)
 
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
@@ -57,7 +62,7 @@ class SykmeldingController(
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<List<TidligereArbeidsgiver>> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
@@ -74,7 +79,7 @@ class SykmeldingController(
     fun getSykmelding(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<SykmeldingDTO> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId, sykepengesoknadClientId)
 
         if (sykmeldingId == "null") {
             logger.warn("Mottok kall for å hente sykmelding med id null, sender 404 Not Found")
@@ -96,7 +101,7 @@ class SykmeldingController(
     fun getBrukerinformasjon(
         @PathVariable("sykmeldingId") sykmeldingId: String,
     ): ResponseEntity<BrukerinformasjonDTO> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmelding =
             sykmeldingRepository.findBySykmeldingId(sykmeldingId)
@@ -129,7 +134,7 @@ class SykmeldingController(
     fun getErUtenforVentetid(
         @PathVariable sykmeldingId: String,
     ): ResponseEntity<ErUtenforVentetidResponse> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
 
@@ -152,7 +157,7 @@ class SykmeldingController(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         @RequestBody sendSykmeldingRequestDTO: SendSykmeldingRequestDTO,
     ): ResponseEntity<SykmeldingDTO> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val brukerSvar = sendSykmeldingRequestDTO.tilBrukerSvar()
 
@@ -178,7 +183,7 @@ class SykmeldingController(
         @PathVariable("sykmeldingUuid") sykmeldingUuid: String,
         @RequestBody changeStatus: SykmeldingChangeStatus,
     ): ResponseEntity<SykmeldingDTO> {
-        val identer = tokenxValidering.hentIdenter()
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmelding =
             when (changeStatus) {
@@ -194,8 +199,8 @@ class SykmeldingController(
         return ResponseEntity.ok(konvertertSykmelding)
     }
 
-    private fun TokenxValidering.hentIdenter(): PersonIdenter =
-        identService.hentFolkeregisterIdenterMedHistorikkForFnr(this.validerFraDittSykefravaerOgHentFnr())
+    private fun TokenxValidering.hentIdenter(vararg tillatteClient: String): PersonIdenter =
+        identService.hentFolkeregisterIdenterMedHistorikkForFnr(this.validerOgHentFnr(*tillatteClient))
 }
 
 internal fun ArbeidsgiverDetaljer.konverterTilDto(): ArbeidsgiverDetaljerDTO =

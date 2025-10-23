@@ -4,18 +4,17 @@ import no.nav.helse.flex.api.AbstractApiError
 import no.nav.helse.flex.api.LogLevel
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
 class TokenxValidering(
     private val tokenValidationContextHolder: TokenValidationContextHolder,
-    @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
-    private val dittSykefravaerFrontendClientId: String,
 ) {
-    fun validerFraDittSykefravaerOgHentFnr(): String =
-        tokenValidationContextHolder.validerTokenXClaims(dittSykefravaerFrontendClientId).fnr()
+    fun validerOgHentFnr(vararg tillatteClient: String): String =
+        tokenValidationContextHolder
+            .validerTokenXClaims(*tillatteClient)
+            .fnr()
 }
 
 fun TokenValidationContextHolder.validerTokenXClaims(vararg tillattClient: String): JwtTokenClaims {
