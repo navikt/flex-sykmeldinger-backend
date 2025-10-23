@@ -3,7 +3,6 @@ package no.nav.helse.flex.api
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.tsm.*
-import no.nav.helse.flex.sykmelding.tsm.SporsmalSvar
 import no.nav.helse.flex.sykmelding.tsm.values.Adresse
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.KontaktinfoType
@@ -438,13 +437,13 @@ fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
                 navn = this.navn,
                 stillingsprosent = this.stillingsprosent,
             )
-        else -> null
+        is IngenArbeidsgiver -> null
     }
 
-fun SykmeldingMetadata.getBehandlingsTidspunkt(): OffsetDateTime? =
+fun SykmeldingMetadata.getBehandlingsTidspunkt(): OffsetDateTime =
     when (this) {
         is UtfyllendeSykmeldingMetadata -> this.behandletTidspunkt
-        else -> null
+        is DigitalSykmeldingMetadata -> this.genDate
     }
 
 fun SykmeldingMetadata.getRulesetVersion(): String? =
