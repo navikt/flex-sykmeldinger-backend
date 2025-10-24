@@ -3,7 +3,6 @@ package no.nav.helse.flex.sykmeldinghendelse
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import no.nav.helse.flex.sykmeldinghendelse.FiskerLottOgHyre
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*

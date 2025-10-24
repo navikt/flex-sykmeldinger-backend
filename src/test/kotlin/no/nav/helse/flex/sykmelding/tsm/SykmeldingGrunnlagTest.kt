@@ -1,9 +1,6 @@
 package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
-import no.nav.helse.flex.sykmelding.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
@@ -19,7 +16,7 @@ class SykmeldingGrunnlagTest {
         val sykmeldingSerialisert = opprinneligSykmelding.serialisertTilString()
 
         val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
-        sykmelding `should be instance of` SykmeldingGrunnlag::class
+        sykmelding `should be instance of` XMLSykmeldingGrunnlag::class
         sykmelding `should be equal to` opprinneligSykmelding
     }
 

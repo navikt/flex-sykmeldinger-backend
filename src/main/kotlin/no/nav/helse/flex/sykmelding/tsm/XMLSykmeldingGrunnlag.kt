@@ -52,7 +52,7 @@ sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
     val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
 }
 
-data class SykmeldingGrunnlag(
+data class XMLSykmeldingGrunnlag(
     override val id: String,
     override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,

@@ -18,8 +18,8 @@ fun lagSykmeldingGrunnlag(
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
-): SykmeldingGrunnlag =
-    SykmeldingGrunnlag(
+): XMLSykmeldingGrunnlag =
+    XMLSykmeldingGrunnlag(
         id = id,
         metadata = metadata,
         pasient = pasient,
@@ -79,9 +79,9 @@ fun lagTilbakedatering(kontaktDato: LocalDate? = LocalDate.parse("2025-01-01")):
         begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
     )
 
-fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
+fun lagUtenlandskSykmeldingGrunnlag(id: String = "1"): UtenlandskSykmeldingGrunnlag =
     UtenlandskSykmeldingGrunnlag(
-        id = "1",
+        id = id,
         metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
         medisinskVurdering = lagMedisinskVurdering(),
