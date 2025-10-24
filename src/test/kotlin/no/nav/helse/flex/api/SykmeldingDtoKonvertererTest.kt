@@ -193,6 +193,25 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
+    fun `burde bruke genDato dersom behandletTidspunkt ikke er satt`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        metadata =
+                            lagSykmeldingMetadata(
+                                genDato = OffsetDateTime.parse("2025-01-01T00:00:00Z"),
+                                behandletTidspunkt = null,
+                            ),
+                    ),
+            )
+
+        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+        dto.behandletTidspunkt `should be equal to` OffsetDateTime.parse("2025-01-01T00:00:00Z")
+    }
+
+    @Test
     fun `burde konvertere aktivitet til en periode`() {
         val aktivitet =
             AktivitetIkkeMulig(

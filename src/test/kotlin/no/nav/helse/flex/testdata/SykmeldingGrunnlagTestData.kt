@@ -101,11 +101,13 @@ fun lagSykmeldingMetadata(
             versjon = "2.1.0",
         ),
     mottattDato: OffsetDateTime = OffsetDateTime.now(),
+    genDato: OffsetDateTime = OffsetDateTime.now().minusDays(1),
+    behandletTidspunkt: OffsetDateTime? = OffsetDateTime.now().minusHours(2),
 ): SykmeldingMetadata =
     SykmeldingMetadata(
         mottattDato = mottattDato,
-        genDate = OffsetDateTime.now().minusDays(1),
-        behandletTidspunkt = OffsetDateTime.now().minusHours(2),
+        genDate = genDato,
+        behandletTidspunkt = behandletTidspunkt,
         regelsettVersjon = "1.0",
         avsenderSystem = avsenderSystem,
         strekkode = "ABC12345",
