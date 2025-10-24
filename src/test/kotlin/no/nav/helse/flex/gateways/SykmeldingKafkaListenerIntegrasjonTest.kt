@@ -2,12 +2,13 @@ package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
+import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.*
+import org.amshove.kluent.shouldBeNull
+import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -18,21 +19,16 @@ import java.time.Duration
 
 class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
-    private lateinit var environmentToggles: EnvironmentTogglesFake
-
-    @Autowired
     private lateinit var sykmeldingListener: SykmeldingListener
 
     @AfterEach
     fun afterEach() {
         slettDatabase()
-        environmentToggles.reset()
     }
 
     @Test
-    fun `burde lagre sykmelding fra kafka`() {
-        val topic = SYKMELDING_TOPIC
-        val kafkaMelding =
+    fun `burde lagre NORSK sykmelding fra kafka`() {
+        val eksternSykmeldingMelding =
             EksternSykmeldingMelding(
                 sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
@@ -41,12 +37,39 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         kafkaProducer
             .send(
                 ProducerRecord(
-                    topic,
+                    SYKMELDING_TOPIC,
                     null,
                     "1",
-                    kafkaMelding.serialisertTilString(),
+                    eksternSykmeldingMelding.serialisertTilString(),
                 ),
             ).get()
+
+        await().atMost(Duration.ofSeconds(2)).until {
+            sykmeldingRepository.findBySykmeldingId("1") != null
+        }
+
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+    }
+
+    @Test
+    fun `burde lagre DIGITAL sykmelding fra kafka`() {
+        val eksternSykmeldingMelding =
+            lagEksternSykmeldingMelding(
+                sykmelding = lagSykmeldingGrunnlag(),
+                validation = lagValidation(),
+            )
+
+        sykmeldingListener.listen(
+            cr =
+                ConsumerRecord(
+                    SYKMELDING_TOPIC,
+                    0,
+                    0,
+                    "1",
+                    eksternSykmeldingMelding.serialisertTilString(),
+                ),
+            acknowledgment = { },
+        )
 
         await().atMost(Duration.ofSeconds(2)).until {
             sykmeldingRepository.findBySykmeldingId("1") != null
@@ -73,61 +96,5 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         }
 
         sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
-    }
-
-    @Test
-    fun `sykmelding type DIGITAL burde ignorere i dev miljø`() {
-        val sykmeldingJson =
-            """
-            {
-              "sykmelding": {
-                "id": "1",
-                "type": "DIGITAL"
-              }
-            }
-            """.trimIndent()
-        environmentToggles.setEnvironment("dev")
-
-        sykmeldingListener.listen(
-            cr =
-                ConsumerRecord(
-                    SYKMELDING_TOPIC,
-                    0,
-                    0,
-                    "1",
-                    sykmeldingJson,
-                ),
-            acknowledgment = { },
-        )
-
-        sykmeldingRepository.findBySykmeldingId("1").shouldBeNull()
-    }
-
-    @Test
-    fun `sykmelding type DIGITAL burde feile i prod miljø`() {
-        val sykmeldingJson =
-            """
-            {
-              "sykmelding": {
-                "id": "1",
-                "type": "DIGITAL"
-              }
-            }
-            """.trimIndent()
-        environmentToggles.setEnvironment("prod")
-
-        invoking {
-            sykmeldingListener.listen(
-                cr =
-                    ConsumerRecord(
-                        SYKMELDING_TOPIC,
-                        0,
-                        0,
-                        "1",
-                        sykmeldingJson,
-                    ),
-                acknowledgment = { },
-            )
-        }.shouldThrow(Exception::class)
     }
 }

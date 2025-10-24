@@ -2,17 +2,10 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.tsm.*
-import no.nav.helse.flex.sykmelding.tsm.UtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import no.nav.helse.flex.testdata.lagMedisinskVurdering
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagTilbakedatering
-import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -104,7 +97,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             dto.utdypendeOpplysninger `should be equal to`
                 sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
             dto.kontaktMedPasient `should be equal to`
-                sykmeldingGrunnlag.tilbakedatering?.let {
+                sykmeldingGrunnlag.tilbakedatering.`should not be null`().let {
                     sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
                 }
             dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
@@ -197,6 +190,25 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         @Test fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
             IngenArbeidsgiver().tilArbeidsgiverDTO().`should be null`()
         }
+    }
+
+    @Test
+    fun `burde bruke genDato dersom behandletTidspunkt ikke er satt`() {
+        val sykmelding =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        metadata =
+                            lagSykmeldingMetadata(
+                                genDato = OffsetDateTime.parse("2025-01-01T00:00:00Z"),
+                                behandletTidspunkt = null,
+                            ),
+                    ),
+            )
+
+        val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
+
+        dto.behandletTidspunkt `should be equal to` OffsetDateTime.parse("2025-01-01T00:00:00Z")
     }
 
     @Test

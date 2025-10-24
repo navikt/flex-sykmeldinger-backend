@@ -2,11 +2,7 @@ package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.*
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.sykmelding.tsm.values.Sykmelder
@@ -17,6 +13,7 @@ enum class SykmeldingType {
     XML,
     PAPIR,
     UTENLANDSK,
+    DIGITAL,
 }
 
 sealed interface ISykmeldingGrunnlag {
@@ -71,6 +68,24 @@ data class SykmeldingGrunnlag(
     override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
 ) : NorskSykmeldingGrunnlag {
     override val type = SykmeldingType.XML
+}
+
+data class DigitalSykmeldingGrunnlag(
+    override val id: String,
+    override val metadata: SykmeldingMetadata,
+    override val pasient: Pasient,
+    override val medisinskVurdering: MedisinskVurdering,
+    override val aktivitet: List<Aktivitet>,
+    override val behandler: Behandler,
+    override val arbeidsgiver: ArbeidsgiverInfo,
+    override val sykmelder: Sykmelder,
+    override val bistandNav: BistandNav?,
+    override val tilbakedatering: Tilbakedatering?,
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+) : NorskSykmeldingGrunnlag {
+    override val prognose: Prognose? = null
+    override val tiltak: Tiltak? = null
+    override val type = SykmeldingType.DIGITAL
 }
 
 data class PapirSykmeldingGrunnlag(
@@ -170,9 +185,9 @@ enum class AvsenderSystemNavn(
 data class SykmeldingMetadata(
     val mottattDato: OffsetDateTime,
     val genDate: OffsetDateTime,
-    val behandletTidspunkt: OffsetDateTime,
-    val regelsettVersjon: String?,
     val avsenderSystem: AvsenderSystem,
+    val behandletTidspunkt: OffsetDateTime?,
+    val regelsettVersjon: String?,
     val strekkode: String?,
 )
 

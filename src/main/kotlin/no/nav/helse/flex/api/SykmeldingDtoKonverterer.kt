@@ -3,7 +3,6 @@ package no.nav.helse.flex.api
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.tsm.*
-import no.nav.helse.flex.sykmelding.tsm.SporsmalSvar
 import no.nav.helse.flex.sykmelding.tsm.values.Adresse
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.KontaktinfoType
@@ -33,6 +32,7 @@ class SykmeldingDtoKonverterer(
             sykmelding.sykmeldingGrunnlag.aktivitet.map { konverterSykmeldingsperiode(it) }
         val medisinskVurdering =
             konverterMedisinskVurdering(sykmelding.sykmeldingGrunnlag.medisinskVurdering)
+        val metadata = sykmelding.sykmeldingGrunnlag.metadata
 
         return SykmeldingDTO(
             id = sykmelding.sykmeldingId,
@@ -41,7 +41,7 @@ class SykmeldingDtoKonverterer(
                     pasient = sykmelding.sykmeldingGrunnlag.pasient,
                     fom = sykmeldingsperioder.minBy { it.fom }.fom,
                 ),
-            mottattTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.mottattDato,
+            mottattTidspunkt = metadata.mottattDato,
             behandlingsutfall = konverterBehandlingsutfall(sykmelding.validation),
             sykmeldingsperioder = sykmeldingsperioder,
             sykmeldingStatus =
@@ -49,7 +49,7 @@ class SykmeldingDtoKonverterer(
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            behandletTidspunkt = sykmelding.sykmeldingGrunnlag.metadata.behandletTidspunkt,
+            behandletTidspunkt = metadata.behandletTidspunkt ?: metadata.genDate,
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
@@ -62,7 +62,7 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            rulesetVersion = sykmelding.sykmeldingGrunnlag.metadata.regelsettVersjon,
+            rulesetVersion = metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
@@ -436,5 +436,5 @@ fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
                 navn = this.navn,
                 stillingsprosent = this.stillingsprosent,
             )
-        else -> null
+        is IngenArbeidsgiver -> null
     }
