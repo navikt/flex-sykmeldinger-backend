@@ -1,0 +1,3 @@
+DROP TABLE temp_resterende_sykmeldingstatuser_fra_tsm;
+DROP TABLE temp_sykmeldinghendelser_apen_fra_tsm;
+DROP TABLE temp_synkroniser_arbeidsforhold;
