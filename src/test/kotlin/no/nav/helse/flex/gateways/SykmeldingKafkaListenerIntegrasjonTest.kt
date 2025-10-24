@@ -1,6 +1,5 @@
 package no.nav.helse.flex.gateways
 
-import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.sykmelding.tsm.SykmeldingType
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
@@ -10,9 +9,9 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.Duration
 
 class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
@@ -21,60 +20,53 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         slettDatabase()
     }
 
-    data class SykmeldingTestCase(
-        val typeNavn: SykmeldingType,
-        val lagEksternSykmelding: (sykmeldingId: String) -> String,
-    )
+    @ParameterizedTest
+    @EnumSource(SykmeldingType::class)
+    fun `lagrer sykmelding fra kafka for ulike typer`(sykmeldingType: SykmeldingType) {
+        slettDatabase()
+        val sykmeldingId = "1"
+        val melding =
+            when (sykmeldingType) {
+                SykmeldingType.XML ->
+                    lagEksternSykmeldingMelding(
+                        sykmelding = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        validation = lagValidation(),
+                    ).serialisertTilString()
 
-    @TestFactory
-    fun `lagrer sykmelding fra kafka for ulike typer`() =
-        listOf(
-            SykmeldingTestCase(SykmeldingType.XML) { id ->
-                EksternSykmeldingMelding(
-                    sykmelding = lagSykmeldingGrunnlag(id = id),
-                    validation = lagValidation(),
-                ).serialisertTilString()
-            },
-            SykmeldingTestCase(SykmeldingType.UTENLANDSK) { id ->
-                lagEksternSykmeldingMelding(
-                    sykmelding = lagUtenlandskSykmeldingGrunnlag(id = id),
-                    validation = lagValidation(),
-                ).serialisertTilString()
-            },
-            SykmeldingTestCase(SykmeldingType.PAPIR) { id ->
-                lagEksternSykmeldingMelding(
-                    sykmelding = lagSykmeldingGrunnlag(id = id),
-                    validation = lagValidation(),
-                ).serialisertTilString()
-            },
-            SykmeldingTestCase(SykmeldingType.DIGITAL) { id ->
-                lagEksternSykmeldingMelding(
-                    sykmelding = lagSykmeldingGrunnlag(id = id),
-                    validation = lagValidation(),
-                ).serialisertTilString()
-            },
-        ).map { testCase ->
-            DynamicTest.dynamicTest("burde lagre ${testCase.typeNavn} sykmelding fra kafka") {
-                slettDatabase()
-                val sykmeldingId = "1"
-                val melding = testCase.lagEksternSykmelding(sykmeldingId)
+                SykmeldingType.PAPIR ->
+                    lagEksternSykmeldingMelding(
+                        sykmelding = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        validation = lagValidation(),
+                    ).serialisertTilString()
 
-                kafkaProducer
-                    .send(
-                        ProducerRecord(
-                            SYKMELDING_TOPIC,
-                            null,
-                            sykmeldingId,
-                            melding,
-                        ),
-                    ).get()
+                SykmeldingType.DIGITAL ->
+                    lagEksternSykmeldingMelding(
+                        sykmelding = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        validation = lagValidation(),
+                    ).serialisertTilString()
 
-                await().atMost(Duration.ofSeconds(2)).until {
-                    sykmeldingRepository.findBySykmeldingId(sykmeldingId) != null
-                }
-                sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
+                SykmeldingType.UTENLANDSK ->
+                    lagEksternSykmeldingMelding(
+                        sykmelding = lagUtenlandskSykmeldingGrunnlag(id = sykmeldingId),
+                        validation = lagValidation(),
+                    ).serialisertTilString()
             }
+
+        kafkaProducer
+            .send(
+                ProducerRecord(
+                    SYKMELDING_TOPIC,
+                    null,
+                    sykmeldingId,
+                    melding,
+                ),
+            ).get()
+
+        await().atMost(Duration.ofSeconds(2)).until {
+            sykmeldingRepository.findBySykmeldingId(sykmeldingId) != null
         }
+        sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
+    }
 
     @Test
     fun `burde tombstone sykmelding fra kafka`() {
