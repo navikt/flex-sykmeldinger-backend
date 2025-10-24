@@ -6,7 +6,7 @@ import no.nav.helse.flex.gateways.SykmeldingStatusKafkaProducer
 class SykmeldingStatusKafkaProducerFake : SykmeldingStatusKafkaProducer {
     private var sendteStatuser: MutableList<SykmeldingStatusKafkaMessageDTO> = mutableListOf()
 
-    fun sendteSykmeldinger(): List<SykmeldingStatusKafkaMessageDTO> = sendteStatuser
+    fun sendteSykmeldingStatuser(): List<SykmeldingStatusKafkaMessageDTO> = sendteStatuser
 
     fun reset() {
         sendteStatuser.clear()

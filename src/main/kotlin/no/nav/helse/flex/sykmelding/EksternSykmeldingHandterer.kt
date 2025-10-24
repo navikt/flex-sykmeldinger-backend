@@ -7,6 +7,7 @@ import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
@@ -21,6 +22,7 @@ class EksternSykmeldingHandterer(
     private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
     private val nowFactory: Supplier<Instant>,
+    private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
 ) {
     val log = logger()
 
@@ -49,6 +51,7 @@ class EksternSykmeldingHandterer(
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
+            sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
             sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {
                 log.info("Brukernotifikasjon produsert for sykmelding med id ${sykmelding.sykmeldingId}")
             }
