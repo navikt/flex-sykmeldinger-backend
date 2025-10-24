@@ -234,7 +234,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde produsere status APEN ved opprettelse av sykmelding`() {
-        nowFactoryFake.setNow(Instant.parse("2024-01-01T00:00:00Z"))
+        nowFactoryFake.setNow(Instant.parse("2025-10-24T10:30:01+02:00"))
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
@@ -244,6 +244,18 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSingleItem().run {
             event.statusEvent shouldBeEqualTo "APEN"
         }
+    }
+
+    @Test
+    fun `burde ikke produsere status APEN ved opprettelse av sykmelding før 2025-10-24 klokka 1030`() {
+        nowFactoryFake.setNow(Instant.parse("2025-10-24T10:30:00+02:00"))
+
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+        )
+
+        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().`should be empty`()
     }
 
     @Nested

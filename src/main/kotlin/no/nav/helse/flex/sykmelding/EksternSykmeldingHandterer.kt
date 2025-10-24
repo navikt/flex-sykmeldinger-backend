@@ -51,7 +51,9 @@ class EksternSykmeldingHandterer(
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
-            sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
+            if (sykmelding.opprettet > Instant.parse("2025-10-24T10:30:00+02:00")) {
+                sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
+            }
             sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {
                 log.info("Brukernotifikasjon produsert for sykmelding med id ${sykmelding.sykmeldingId}")
             }
