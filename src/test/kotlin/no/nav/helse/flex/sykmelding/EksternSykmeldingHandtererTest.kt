@@ -10,23 +10,13 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testconfig.fakes.AaregClientFake
-import no.nav.helse.flex.testconfig.fakes.EregClientFake
-import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
-import no.nav.helse.flex.testconfig.fakes.SykmeldingBrukernotifikasjonProducerFake
+import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
+import java.time.*
 
 class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
@@ -47,6 +37,9 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
     private lateinit var sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducerFake
 
+    @Autowired
+    private lateinit var sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducerFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
@@ -54,6 +47,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         nowFactoryFake.reset()
         eregClient.reset()
         sykmeldingBrukernotifikasjonProducer.reset()
+        sykmeldingStatusKafkaProducer.reset()
     }
 
     @Test
@@ -234,6 +228,36 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         )
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", eksternSykmeldingMelding = null)
         sykmeldingRepository.findAll().shouldHaveSize(0)
+    }
+
+    @Test
+    fun `burde produsere status APEN ved opprettelse av sykmelding`() {
+        nowFactoryFake.setNow(
+            ZonedDateTime.of(LocalDateTime.parse("2025-10-24T10:35:01"), ZoneId.of("Europe/Oslo")).toInstant(),
+        )
+
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+        )
+
+        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSingleItem().run {
+            event.statusEvent shouldBeEqualTo "APEN"
+        }
+    }
+
+    @Test
+    fun `burde ikke produsere status APEN ved opprettelse av sykmelding før 2025-10-24 klokka 1030`() {
+        nowFactoryFake.setNow(
+            ZonedDateTime.of(LocalDateTime.parse("2025-10-24T10:35:00"), ZoneId.of("Europe/Oslo")).toInstant(),
+        )
+
+        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
+            sykmeldingId = "_",
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
+        )
+
+        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().`should be empty`()
     }
 
     @Nested

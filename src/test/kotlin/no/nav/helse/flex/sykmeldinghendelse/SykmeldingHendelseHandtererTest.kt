@@ -7,7 +7,10 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
-import org.amshove.kluent.*
+import org.amshove.kluent.`should be equal to`
+import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldHaveSize
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -67,7 +70,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             )
 
             sykmeldingStatusProducer
-                .sendteSykmeldinger()
+                .sendteSykmeldingStatuser()
                 .shouldHaveSize(1)
         }
 
@@ -368,7 +371,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             )
 
             sykmeldingStatusProducer
-                .sendteSykmeldinger()
+                .sendteSykmeldingStatuser()
                 .shouldHaveSize(1)
                 .first()
                 .event.statusEvent `should be equal to` StatusEventKafkaDTO.AVBRUTT
@@ -413,7 +416,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             )
 
             sykmeldingStatusProducer
-                .sendteSykmeldinger()
+                .sendteSykmeldingStatuser()
                 .shouldHaveSize(1)
                 .first()
                 .event.statusEvent `should be equal to` StatusEventKafkaDTO.BEKREFTET

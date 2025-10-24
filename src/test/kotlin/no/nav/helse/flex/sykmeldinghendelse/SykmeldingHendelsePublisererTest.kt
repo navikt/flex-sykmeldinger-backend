@@ -28,7 +28,7 @@ class SykmeldingHendelsePublisererTest : FakesTestOppsett() {
 
         sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
 
-        sykmeldingStatusKafkaProducer.sendteSykmeldinger().shouldHaveSize(1).first().run {
+        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSize(1).first().run {
             event.sykmeldingId shouldBeEqualTo "1"
         }
     }
