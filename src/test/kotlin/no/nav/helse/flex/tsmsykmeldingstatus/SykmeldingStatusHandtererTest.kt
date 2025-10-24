@@ -42,7 +42,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde lagre hendelse på sykmelding`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -67,7 +67,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ignorere APEN status`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
             hendelser.shouldHaveSize(1)
         }
@@ -87,7 +87,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde returnere true ved APEN status`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -101,7 +101,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ignorere SLETTET status`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
             hendelser.shouldHaveSize(1)
         }
@@ -121,7 +121,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde returnere true ved SLETTET status`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -159,7 +159,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ikke buffre status dersom sykmelding finnes`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val status =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -172,7 +172,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     fun `handterSykmeldingStatus og prosesserSykmeldingStatuserFraBuffer burde synkronisere ved buffer lås`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         sykmeldingStatusHandterer.handterSykmeldingStatus(
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
@@ -186,7 +186,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde deduplisere statuser`() {
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")).leggTilHendelse(
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.SENDT_TIL_NAV,
                     hendelseOpprettet = Instant.parse("2025-07-01T12:00:00Z"),
@@ -212,7 +212,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde deduplisere statuser med litt ulik timestamp`() {
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")).leggTilHendelse(
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.SENDT_TIL_NAV,
                     hendelseOpprettet = Instant.parse("2025-07-01T12:00:00Z"),
@@ -239,7 +239,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde feile når ny status er eldre enn siste hendelse, og de er fra forskjellige systemer`() {
         val sykmelding =
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
             ).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.AVBRUTT,
@@ -269,7 +269,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde akseptere at ny status er eldre enn siste hendelse, dersom begge er fra samme system`() {
         val sykmelding =
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
             ).leggTilHendelse(
                 lagSykmeldingHendelse(
                     status = HendelseStatus.AVBRUTT,
@@ -300,7 +300,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde ignorere når sykmeldingens siste hendelse er APEN, selv om den er laget etter kafka-status`() {
         val sykmelding =
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 hendelser =
                     listOf(
                         lagSykmeldingHendelse(
@@ -327,7 +327,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde korrigere manglende juridiskOrgnummer`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
             ),
         )
 
@@ -374,7 +374,7 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
     fun `burde ikke korrigere juridiskOrgnummer dersom satt`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
             ),
         )
 

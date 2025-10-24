@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 class SykmeldingGrunnlagTest {
     @Test
     fun `burde deserialisere sykmelding`() {
-        val opprinneligSykmelding = lagXMLSykmeldingGrunnlag()
+        val opprinneligSykmelding = lagSykmeldingGrunnlag()
         val sykmeldingSerialisert = opprinneligSykmelding.serialisertTilString()
 
         val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)

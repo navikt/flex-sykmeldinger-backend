@@ -5,7 +5,7 @@ import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 
 fun lagEksternSykmeldingMelding(
-    sykmelding: ISykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+    sykmelding: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
     validation: ValidationResult = lagValidation(),
 ) = EksternSykmeldingMelding(
     sykmelding = sykmelding,

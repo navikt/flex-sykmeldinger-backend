@@ -56,7 +56,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
-            lagEksternSykmeldingMelding(sykmelding = lagXMLSykmeldingGrunnlag(id = "1")),
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
@@ -68,7 +68,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     fun `burde oppdatere sykmelding grunnlag`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr-1")),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr-1")),
                 sykmeldingGrunnlagOppdatert = Instant.parse("2020-01-01T00:00:00Z"),
             ),
         )
@@ -78,7 +78,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingId = "_",
             eksternSykmeldingMelding =
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr-2")),
+                    sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient("fnr-2")),
                 ),
         )
 
@@ -90,7 +90,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ikke oppdatere dersom ny kafka melding er lik`() {
-        val sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")
+        val sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")
         val validation = lagValidation()
         val originaltOpprettet = Instant.parse("2020-01-01T00:00:00Z")
         sykmeldingRepository.save(
@@ -124,7 +124,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     fun `burde oppdatere validation`() {
         sykmeldingRepository.save(
             lagSykmelding(
-                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(status = RuleType.PENDING),
                 validationOppdatert = Instant.parse("2020-01-01T00:00:00Z"),
             ),
@@ -135,7 +135,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingId = "1",
             eksternSykmeldingMelding =
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagXMLSykmeldingGrunnlag(id = "1"),
+                    sykmelding = lagSykmeldingGrunnlag(id = "1"),
                     validation = lagValidation(status = RuleType.OK),
                 ),
         )
@@ -153,7 +153,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             sykmeldingId = "_",
             eksternSykmeldingMelding =
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagXMLSykmeldingGrunnlag(id = "1"),
+                    sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 ),
         )
 
@@ -181,7 +181,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         val sykmeldingMedBehandlingsutfall =
             EksternSykmeldingMelding(
-                sykmelding = lagXMLSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                sykmelding = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
                 validation = lagValidation(),
             )
 
@@ -212,7 +212,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
-            lagEksternSykmeldingMelding(sykmelding = lagXMLSykmeldingGrunnlag(id = "1")),
+            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
         val sykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
@@ -224,7 +224,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Test
     fun `burde slette sykmelding dersom hendelse er null`() {
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")),
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "1", eksternSykmeldingMelding = null)
         sykmeldingRepository.findAll().shouldHaveSize(0)
@@ -282,12 +282,12 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         fun `oppdaterSykmelding burde oppdatere riktig`() {
             val eksisterendeSykmelding =
                 lagSykmelding(
-                    sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"),
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
                     validation = lagValidation(status = RuleType.OK),
                 )
             val eksternSykmeldingMelding =
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagXMLSykmeldingGrunnlag(id = "2"),
+                    sykmelding = lagSykmeldingGrunnlag(id = "2"),
                     validation = lagValidation(status = RuleType.INVALID),
                 )
             val tidspunkt = Instant.parse("2024-01-01T00:00:00Z")
@@ -317,7 +317,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                     lagSykmelding(
                         validation = lagValidation(status = RuleType.OK),
                         sykmeldingGrunnlag =
-                            lagXMLSykmeldingGrunnlag(
+                            lagSykmeldingGrunnlag(
                                 id = "1",
                                 metadata =
                                     lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2020-01-01T00:00:00Z")),
@@ -335,7 +335,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                     lagSykmelding(
                         validation = lagValidation(status = RuleType.INVALID),
                         sykmeldingGrunnlag =
-                            lagXMLSykmeldingGrunnlag(
+                            lagSykmeldingGrunnlag(
                                 id = "2",
                                 metadata =
                                     lagSykmeldingMetadata(mottattDato = OffsetDateTime.parse("2022-01-01T00:00:00Z")),

@@ -18,7 +18,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -46,7 +46,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -74,7 +74,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelPermitertSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -101,7 +101,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -129,7 +129,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelPermitertSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -157,7 +157,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -185,7 +185,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -214,7 +214,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -242,7 +242,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -271,7 +271,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -299,7 +299,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -328,7 +328,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -356,7 +356,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -385,7 +385,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmeldingMedSammeArbeidsgiver =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -414,7 +414,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -442,7 +442,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -471,7 +471,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver2 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -500,7 +500,7 @@ class TidligereArbeidsgivereHandtererTest {
         val tidligereArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -528,7 +528,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "4",
                         aktiviteter =
                             listOf(
@@ -566,7 +566,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -595,7 +595,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver2 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -624,7 +624,7 @@ class TidligereArbeidsgivereHandtererTest {
         val tidligereArbeidsledigSykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -652,7 +652,7 @@ class TidligereArbeidsgivereHandtererTest {
         val tidligereArbeidsledigSykmeldingForArbeidsgiver2 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "4",
                         aktiviteter =
                             listOf(
@@ -680,7 +680,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "5",
                         aktiviteter =
                             listOf(
@@ -715,7 +715,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -744,7 +744,7 @@ class TidligereArbeidsgivereHandtererTest {
         val sykmeldingForArbeidsgiver2 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -773,7 +773,7 @@ class TidligereArbeidsgivereHandtererTest {
         val tidligereArbeidsledigSykmeldingForArbeidsgiver1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -801,7 +801,7 @@ class TidligereArbeidsgivereHandtererTest {
         val tidligereArbeidsledigSykmeldingForArbeidsgiver2 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "4",
                         aktiviteter =
                             listOf(
@@ -829,7 +829,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nyArbeidsledigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "5",
                         aktiviteter =
                             listOf(
@@ -864,7 +864,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding1 =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -893,7 +893,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -920,7 +920,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -949,7 +949,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gjeldendeSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -964,7 +964,7 @@ class TidligereArbeidsgivereHandtererTest {
         val fremtidigSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -992,7 +992,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -1021,7 +1021,7 @@ class TidligereArbeidsgivereHandtererTest {
         val annenGammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -1050,7 +1050,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(
@@ -1078,7 +1078,7 @@ class TidligereArbeidsgivereHandtererTest {
         val gammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "1",
                         aktiviteter =
                             listOf(
@@ -1107,7 +1107,7 @@ class TidligereArbeidsgivereHandtererTest {
         val annenGammelSykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "2",
                         aktiviteter =
                             listOf(
@@ -1136,7 +1136,7 @@ class TidligereArbeidsgivereHandtererTest {
         val nySykmelding =
             lagSykmelding(
                 sykmeldingGrunnlag =
-                    lagXMLSykmeldingGrunnlag(
+                    lagSykmeldingGrunnlag(
                         id = "3",
                         aktiviteter =
                             listOf(

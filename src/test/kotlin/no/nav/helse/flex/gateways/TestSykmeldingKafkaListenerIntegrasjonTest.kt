@@ -3,8 +3,8 @@ package no.nav.helse.flex.gateways
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
-import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
@@ -25,7 +25,7 @@ class TestSykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         val topic = TEST_SYKMELDING_TOPIC
         val kafkaMelding =
             EksternSykmeldingMelding(
-                sykmelding = lagXMLSykmeldingGrunnlag(id = "1"),
+                sykmelding = lagSykmeldingGrunnlag(id = "1"),
                 validation = lagValidation(),
             )
 
@@ -50,7 +50,7 @@ class TestSykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde tombstone sykmelding fra kafka`() {
         val topic = TEST_SYKMELDING_TOPIC
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")),
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
 
         val key = "1"

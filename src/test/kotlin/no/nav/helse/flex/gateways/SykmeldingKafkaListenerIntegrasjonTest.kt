@@ -3,15 +3,10 @@ package no.nav.helse.flex.gateways
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.sykmelding.tsm.SykmeldingType
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
-import no.nav.helse.flex.testdata.lagPapirSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagValidation
-import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.*
+import org.amshove.kluent.shouldBeNull
+import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
@@ -36,7 +31,7 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         listOf(
             SykmeldingTestCase(SykmeldingType.XML) { id ->
                 EksternSykmeldingMelding(
-                    sykmelding = lagXMLSykmeldingGrunnlag(id = id),
+                    sykmelding = lagSykmeldingGrunnlag(id = id),
                     validation = lagValidation(),
                 ).serialisertTilString()
             },
@@ -48,13 +43,13 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
             },
             SykmeldingTestCase(SykmeldingType.PAPIR) { id ->
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagPapirSykmeldingGrunnlag(id = id),
+                    sykmelding = lagSykmeldingGrunnlag(id = id),
                     validation = lagValidation(),
                 ).serialisertTilString()
             },
             SykmeldingTestCase(SykmeldingType.DIGITAL) { id ->
                 lagEksternSykmeldingMelding(
-                    sykmelding = lagDigitalSykmeldingGrunnlag(id = id),
+                    sykmelding = lagSykmeldingGrunnlag(id = id),
                     validation = lagValidation(),
                 ).serialisertTilString()
             },
@@ -85,7 +80,7 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde tombstone sykmelding fra kafka`() {
         val topic = SYKMELDING_TOPIC
         sykmeldingRepository.save(
-            lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")),
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")),
         )
 
         val key = "1"

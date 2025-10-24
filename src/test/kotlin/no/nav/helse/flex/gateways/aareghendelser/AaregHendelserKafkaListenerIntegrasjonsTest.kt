@@ -11,7 +11,7 @@ import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -73,7 +73,7 @@ class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lese arbeidsforhold hendelse, og lagre endret arbeidsforhold fra aareg + ereg`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
         pdlMockWebServer.dispatcher =
             simpleDispatcher { _ ->
                 lagGraphQlResponse(lagGetPersonResponseData())

@@ -3,7 +3,7 @@ package no.nav.helse.flex.sykmeldinghendelse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
@@ -24,7 +24,7 @@ class SykmeldingHendelsePublisererTest : FakesTestOppsett() {
 
     @Test
     fun `burde publisere hendelse`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1"))
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
 
         sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
 

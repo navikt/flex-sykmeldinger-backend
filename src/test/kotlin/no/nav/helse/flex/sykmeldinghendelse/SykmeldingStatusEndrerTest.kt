@@ -68,7 +68,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                     DynamicTest.dynamicTest("$sisteStatus -> $tilStatus") {
                         val sykmelding =
                             lagSykmelding(
-                                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                                 hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                             )
                         sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding, nyStatus = tilStatus)
@@ -85,7 +85,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                     DynamicTest.dynamicTest("$sisteStatus -> $tilStatus") {
                         val sykmelding =
                             lagSykmelding(
-                                sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                                sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                                 hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                             )
                         invoking {
@@ -112,7 +112,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             DynamicTest.dynamicTest(nyStatus.name) {
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                         validation = lagValidation(status = RuleType.INVALID),
                         hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.APEN)),
                     )
@@ -137,7 +137,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             DynamicTest.dynamicTest(nyStatus.name) {
                 val sykmelding =
                     lagSykmelding(
-                        sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                         validation = lagValidation(status = RuleType.INVALID),
                     )
                 sykmeldingStatusEndrer.sjekkStatusEndring(
@@ -153,7 +153,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagXMLSykmeldingGrunnlag(
+                        lagSykmeldingGrunnlag(
                             id = "1",
                             metadata =
                                 lagSykmeldingMetadata(

@@ -39,7 +39,7 @@ class SykmeldingStatusKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde lagre hendelse fra kafka`() {
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
@@ -67,7 +67,7 @@ class SykmeldingStatusKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00.00Z"))
         val toManederSiden = nowFactoryFake.get().minus(61, ChronoUnit.DAYS)
 
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
@@ -98,7 +98,7 @@ class SykmeldingStatusKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         nowFactoryFake.setNow(Instant.parse("2025-01-01T00:00:00.00Z"))
         val toManederSiden = nowFactoryFake.get().minus(60, ChronoUnit.DAYS)
 
-        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagXMLSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
         val kafkamelding =
             lagSykmeldingStatusKafkaMessageDTO(
                 kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1", fnr = "fnr"),
