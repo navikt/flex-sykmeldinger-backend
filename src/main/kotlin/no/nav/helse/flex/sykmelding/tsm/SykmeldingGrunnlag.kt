@@ -2,11 +2,7 @@ package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.*
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.sykmelding.tsm.values.Sykmelder
@@ -31,7 +27,7 @@ sealed interface ISykmeldingGrunnlag {
 
 data class UtenlandskSykmeldingGrunnlag(
     override val id: String,
-    override val metadata: UtfyllendeSykmeldingMetadata,
+    override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -58,7 +54,7 @@ sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
 
 data class SykmeldingGrunnlag(
     override val id: String,
-    override val metadata: UtfyllendeSykmeldingMetadata,
+    override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -76,7 +72,7 @@ data class SykmeldingGrunnlag(
 
 data class DigitalSykmeldingGrunnlag(
     override val id: String,
-    override val metadata: DigitalSykmeldingMetadata,
+    override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -94,7 +90,7 @@ data class DigitalSykmeldingGrunnlag(
 
 data class PapirSykmeldingGrunnlag(
     override val id: String,
-    override val metadata: UtfyllendeSykmeldingMetadata,
+    override val metadata: SykmeldingMetadata,
     override val pasient: Pasient,
     override val medisinskVurdering: MedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
@@ -186,26 +182,14 @@ enum class AvsenderSystemNavn(
     }
 }
 
-sealed interface SykmeldingMetadata {
-    val mottattDato: OffsetDateTime
-    val genDate: OffsetDateTime
-    val avsenderSystem: AvsenderSystem
-}
-
-data class UtfyllendeSykmeldingMetadata(
-    override val mottattDato: OffsetDateTime,
-    override val genDate: OffsetDateTime,
-    override val avsenderSystem: AvsenderSystem,
-    val behandletTidspunkt: OffsetDateTime,
+data class SykmeldingMetadata(
+    val mottattDato: OffsetDateTime,
+    val genDate: OffsetDateTime,
+    val avsenderSystem: AvsenderSystem,
+    val behandletTidspunkt: OffsetDateTime?,
     val regelsettVersjon: String?,
     val strekkode: String?,
-) : SykmeldingMetadata
-
-data class DigitalSykmeldingMetadata(
-    override val mottattDato: OffsetDateTime,
-    override val genDate: OffsetDateTime,
-    override val avsenderSystem: AvsenderSystem,
-) : SykmeldingMetadata
+)
 
 data class BistandNav(
     val bistandUmiddelbart: Boolean,

@@ -10,7 +10,6 @@ import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 @Component
 class SykmeldingDtoKonverterer(
@@ -50,7 +49,7 @@ class SykmeldingDtoKonverterer(
             medisinskVurdering = medisinskVurdering,
             skjermesForPasient =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.skjermetForPasient,
-            behandletTidspunkt = metadata.getBehandlingsTidspunkt(),
+            behandletTidspunkt = metadata.behandletTidspunkt ?: metadata.genDate,
             syketilfelleStartDato =
                 sykmelding.sykmeldingGrunnlag.medisinskVurdering.syketilfelletStartDato,
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
@@ -63,7 +62,7 @@ class SykmeldingDtoKonverterer(
                     sykmeldingsperioder = sykmeldingsperioder,
                     annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
                 ),
-            rulesetVersion = metadata.getRulesetVersion(),
+            rulesetVersion = metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
             legekontorOrgnummer = null,
             arbeidsgiver = null,
@@ -438,16 +437,4 @@ fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
                 stillingsprosent = this.stillingsprosent,
             )
         is IngenArbeidsgiver -> null
-    }
-
-fun SykmeldingMetadata.getBehandlingsTidspunkt(): OffsetDateTime =
-    when (this) {
-        is UtfyllendeSykmeldingMetadata -> this.behandletTidspunkt
-        is DigitalSykmeldingMetadata -> this.genDate
-    }
-
-fun SykmeldingMetadata.getRulesetVersion(): String? =
-    when (this) {
-        is UtfyllendeSykmeldingMetadata -> this.regelsettVersjon
-        is DigitalSykmeldingMetadata -> null
     }

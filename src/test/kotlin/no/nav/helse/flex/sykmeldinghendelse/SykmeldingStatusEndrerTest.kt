@@ -5,7 +5,9 @@ import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.*
+import org.amshove.kluent.invoking
+import org.amshove.kluent.shouldContainIgnoringCase
+import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -154,7 +156,7 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                         lagSykmeldingGrunnlag(
                             id = "1",
                             metadata =
-                                lagUtfyllendeSykmeldingMetadata(
+                                lagSykmeldingMetadata(
                                     avsenderSystem =
                                         AvsenderSystem(
                                             navn = AvsenderSystemNavn.EGENMELDT,

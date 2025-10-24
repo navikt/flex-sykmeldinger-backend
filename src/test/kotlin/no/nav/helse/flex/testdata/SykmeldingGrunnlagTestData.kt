@@ -15,7 +15,7 @@ fun lagSykmeldingGrunnlag(
                 LocalDate.parse("2021-01-10"),
             ),
         ),
-    metadata: UtfyllendeSykmeldingMetadata = lagUtfyllendeSykmeldingMetadata(),
+    metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
 ): SykmeldingGrunnlag =
@@ -82,7 +82,7 @@ fun lagTilbakedatering(kontaktDato: LocalDate? = LocalDate.parse("2025-01-01")):
 fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
     UtenlandskSykmeldingGrunnlag(
         id = "1",
-        metadata = lagUtfyllendeSykmeldingMetadata(),
+        metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
         medisinskVurdering = lagMedisinskVurdering(),
         aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
@@ -94,92 +94,21 @@ fun lagUtenlandskSykmeldingGrunnlag(): UtenlandskSykmeldingGrunnlag =
             ),
     )
 
-fun lagDigitalSykmeldingGrunnlag(
-    id: String = "1",
-    pasient: Pasient = lagPasient(),
-    aktiviteter: List<Aktivitet> =
-        listOf(
-            lagAktivitetIkkeMulig(
-                LocalDate.parse("2021-01-01"),
-                LocalDate.parse("2021-01-10"),
-            ),
-        ),
-    metadata: DigitalSykmeldingMetadata = lagDigitalSykmeldingMetadata(),
-    medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
-    tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
-): DigitalSykmeldingGrunnlag =
-    DigitalSykmeldingGrunnlag(
-        id = id,
-        metadata = metadata,
-        pasient = pasient,
-        medisinskVurdering = medisinskVurdering,
-        aktivitet = aktiviteter,
-        behandler = lagBehandler(),
-        arbeidsgiver =
-            FlereArbeidsgivere(
-                meldingTilArbeidsgiver = "Melding til arbeidsgiver",
-                tiltakArbeidsplassen = "Dette er et tiltak",
-                navn = "Arbeidsgivernavn",
-                yrkesbetegnelse = "Arbeider",
-                stillingsprosent = 99,
-            ),
-        sykmelder =
-            Sykmelder(
-                ids =
-                    listOf(
-                        PersonId(id = "00000000000", type = PersonIdType.DKF),
-                    ),
-                helsepersonellKategori = HelsepersonellKategori.LEGE,
-            ),
-        bistandNav =
-            BistandNav(
-                bistandUmiddelbart = false,
-                beskrivBistand = "Ingen behov for bistand per nå",
-            ),
-        tilbakedatering = tilbakedatering,
-        utdypendeOpplysninger =
-            mapOf(
-                "arbeidsforhold" to
-                    mapOf(
-                        "tilrettelegging" to
-                            SporsmalSvar(
-                                sporsmal = "Har du behov for tilrettelegging?",
-                                svar = "Ja",
-                                restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
-                            ),
-                    ),
-            ),
-    )
-
-fun lagUtfyllendeSykmeldingMetadata(
+fun lagSykmeldingMetadata(
     avsenderSystem: AvsenderSystem =
         AvsenderSystem(
             navn = AvsenderSystemNavn.PRIDOK_EPJ,
             versjon = "2.1.0",
         ),
     mottattDato: OffsetDateTime = OffsetDateTime.now(),
-): UtfyllendeSykmeldingMetadata =
-    UtfyllendeSykmeldingMetadata(
+): SykmeldingMetadata =
+    SykmeldingMetadata(
         mottattDato = mottattDato,
         genDate = OffsetDateTime.now().minusDays(1),
         behandletTidspunkt = OffsetDateTime.now().minusHours(2),
         regelsettVersjon = "1.0",
         avsenderSystem = avsenderSystem,
         strekkode = "ABC12345",
-    )
-
-fun lagDigitalSykmeldingMetadata(
-    avsenderSystem: AvsenderSystem =
-        AvsenderSystem(
-            navn = AvsenderSystemNavn.PRIDOK_EPJ,
-            versjon = "2.1.0",
-        ),
-    mottattDato: OffsetDateTime = OffsetDateTime.now(),
-): DigitalSykmeldingMetadata =
-    DigitalSykmeldingMetadata(
-        avsenderSystem = avsenderSystem,
-        mottattDato = mottattDato,
-        genDate = OffsetDateTime.now().minusDays(1),
     )
 
 fun lagPasient(

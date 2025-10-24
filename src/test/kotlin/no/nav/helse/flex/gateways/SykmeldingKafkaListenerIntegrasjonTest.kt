@@ -2,7 +2,10 @@ package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import no.nav.helse.flex.testdata.*
+import no.nav.helse.flex.testdata.lagEksternSykmeldingMelding
+import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull
@@ -52,7 +55,7 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `burde lagre DIGITAL sykmelding fra kafka`() {
         val eksternSykmeldingMelding =
             lagEksternSykmeldingMelding(
-                sykmelding = lagDigitalSykmeldingGrunnlag(),
+                sykmelding = lagSykmeldingGrunnlag(),
                 validation = lagValidation(),
             )
 
