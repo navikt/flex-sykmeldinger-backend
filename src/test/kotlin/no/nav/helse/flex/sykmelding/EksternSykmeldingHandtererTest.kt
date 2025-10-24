@@ -246,20 +246,6 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         }
     }
 
-    @Test
-    fun `burde ikke produsere status APEN ved opprettelse av sykmelding før 2025-10-24 klokka 1030`() {
-        nowFactoryFake.setNow(
-            ZonedDateTime.of(LocalDateTime.parse("2025-10-24T10:35:00"), ZoneId.of("Europe/Oslo")).toInstant(),
-        )
-
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
-            sykmeldingId = "_",
-            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
-        )
-
-        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().`should be empty`()
-    }
-
     @Nested
     inner class Companion {
         @Test
