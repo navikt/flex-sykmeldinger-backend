@@ -13,6 +13,9 @@ import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.function.Supplier
 
 @Component
@@ -51,7 +54,13 @@ class EksternSykmeldingHandterer(
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
-            if (sykmelding.opprettet > Instant.parse("2025-10-24T10:30:00+02:00")) {
+            if (sykmelding.opprettet >
+                ZonedDateTime
+                    .of(
+                        LocalDateTime.parse("2025-10-24T10:35:00"),
+                        ZoneId.of("Europe/Oslo"),
+                    ).toInstant()
+            ) {
                 sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
             }
             sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {

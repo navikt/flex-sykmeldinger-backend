@@ -16,9 +16,7 @@ import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.OffsetDateTime
+import java.time.*
 
 class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     @Autowired
@@ -234,7 +232,9 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde produsere status APEN ved opprettelse av sykmelding`() {
-        nowFactoryFake.setNow(Instant.parse("2025-10-24T10:30:01+02:00"))
+        nowFactoryFake.setNow(
+            ZonedDateTime.of(LocalDateTime.parse("2025-10-24T10:35:01"), ZoneId.of("Europe/Oslo")).toInstant(),
+        )
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
@@ -248,7 +248,9 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Test
     fun `burde ikke produsere status APEN ved opprettelse av sykmelding før 2025-10-24 klokka 1030`() {
-        nowFactoryFake.setNow(Instant.parse("2025-10-24T10:30:00+02:00"))
+        nowFactoryFake.setNow(
+            ZonedDateTime.of(LocalDateTime.parse("2025-10-24T10:35:00"), ZoneId.of("Europe/Oslo")).toInstant(),
+        )
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
             sykmeldingId = "_",
