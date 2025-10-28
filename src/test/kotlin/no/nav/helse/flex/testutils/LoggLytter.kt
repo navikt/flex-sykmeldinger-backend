@@ -7,7 +7,7 @@ import org.slf4j.Marker
 import ch.qos.logback.classic.Logger as LogbackLogger
 
 class LoggLytter(
-    logger: Logger,
+    private val logger: Logger,
 ) {
     private val logListAppender = ListAppender<ILoggingEvent>()
 
@@ -16,7 +16,7 @@ class LoggLytter(
         logListAppender.start()
     }
 
-    fun logEventer(): List<ILoggingEvent> = logListAppender.list.filter { it.markerList.isNullOrEmpty() }
+    fun logEventer(): List<ILoggingEvent> = logListAppender.list.toList()
 
     fun logEventerUtenMarkers(): List<ILoggingEvent> = logEventer().filter { it.markerList.isNullOrEmpty() }
 
@@ -24,4 +24,23 @@ class LoggLytter(
         logEventer().filter {
             it.markerList != null && marker in it.markerList
         }
+
+    fun clear() {
+        logListAppender.list.clear()
+    }
+
+    fun stop() {
+        logListAppender.stop()
+        (logger as? LogbackLogger)?.detachAppender(logListAppender)
+    }
+}
+
+fun fangLogger(
+    logger: Logger,
+    block: () -> Unit,
+): LoggLytter {
+    val loggLytter = LoggLytter(logger)
+    block()
+    loggLytter.stop()
+    return loggLytter
 }
