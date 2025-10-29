@@ -1,9 +1,11 @@
 package no.nav.helse.flex.config.kafka
 
+import io.opentelemetry.api.trace.Span
 import no.nav.helse.flex.utils.errorSecure
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.slf4j.MDC
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.ListenerExecutionFailedException
 import org.springframework.kafka.listener.MessageListenerContainer
@@ -62,6 +64,17 @@ class AivenKafkaErrorHandler :
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
+            medTraceContext {
+                loggFeilendeInternal(thrownException, records, listenerId, listenerTopics)
+            }
+        }
+
+        private fun loggFeilendeInternal(
+            thrownException: Exception,
+            records: Collection<ConsumerRecord<*, *>>,
+            listenerId: String?,
+            listenerTopics: Collection<String>,
+        ) {
             val relevantCauseException = findRelevantCauseException(thrownException)
 
             if (records.isEmpty()) {
@@ -102,6 +115,25 @@ class AivenKafkaErrorHandler :
                     secureMessage = relevantCauseException.message ?: "",
                     secureThrowable = relevantCauseException,
                 )
+            }
+        }
+
+        private inline fun <T> medTraceContext(block: () -> T): T {
+            val currentSpan = Span.current()
+            val spanContext = currentSpan.spanContext
+
+            if (spanContext.isValid) {
+                MDC.put("trace_id", spanContext.traceId)
+                MDC.put("span_id", spanContext.spanId)
+            }
+
+            try {
+                return block()
+            } finally {
+                if (spanContext.isValid) {
+                    MDC.remove("trace_id")
+                    MDC.remove("span_id")
+                }
             }
         }
 

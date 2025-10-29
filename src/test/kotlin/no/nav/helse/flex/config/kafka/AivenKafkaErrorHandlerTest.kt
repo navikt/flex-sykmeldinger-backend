@@ -2,6 +2,11 @@ package no.nav.helse.flex.config.kafka
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.SpanContext
+import io.opentelemetry.api.trace.TraceFlags
+import io.opentelemetry.api.trace.TraceState
+import io.opentelemetry.context.Context
 import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
@@ -58,6 +63,48 @@ class AivenKafkaErrorHandlerTest {
             records = mutableListOf(Testdata.lagConsumerRecord()),
         )
         logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).shouldHaveSingleItem()
+    }
+
+    @Test
+    fun `logger trace_id og span_id fra OpenTelemetry context til MDC`() {
+        val testTraceId = "0af7651916cd43dd8448eb211c80319c"
+        val testSpanId = "b7ad6b7169203331"
+
+        val spanContext =
+            SpanContext.create(
+                testTraceId,
+                testSpanId,
+                TraceFlags.getSampled(),
+                TraceState.getDefault(),
+            )
+
+        val span = Span.wrap(spanContext)
+        val context = Context.current().with(span)
+
+        context.makeCurrent().use {
+            AivenKafkaErrorHandler.loggFeilende(
+                thrownException = RuntimeException("Test exception"),
+                records = mutableListOf(Testdata.lagConsumerRecord()),
+            )
+
+            logListAppender.eventerUtenMarkers().first().run {
+                mdcPropertyMap["trace_id"] shouldBeEqualTo testTraceId
+                mdcPropertyMap["span_id"] shouldBeEqualTo testSpanId
+            }
+        }
+    }
+
+    @Test
+    fun `logger uten trace_id og span_id når det ikke finnes gyldig OpenTelemetry span`() {
+        AivenKafkaErrorHandler.loggFeilende(
+            thrownException = RuntimeException("Test exception"),
+            records = mutableListOf(Testdata.lagConsumerRecord()),
+        )
+
+        logListAppender.eventerUtenMarkers().first().run {
+            mdcPropertyMap.containsKey("trace_id").shouldBeFalse()
+            mdcPropertyMap.containsKey("span_id").shouldBeFalse()
+        }
     }
 
     @Nested
