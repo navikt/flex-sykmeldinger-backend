@@ -1,0 +1,1 @@
+DROP TABLE temp_tsm_historisk_sykmeldingstatus;
