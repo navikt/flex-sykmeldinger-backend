@@ -36,7 +36,9 @@ class AivenKafkaErrorHandler :
             listenerId = container.listenerId,
             listenerTopics = consumer.listTopics().keys,
         )
-        super.handleRemaining(thrownException, records, consumer, container)
+        medTraceContext {
+            super.handleRemaining(thrownException, records, consumer, container)
+        }
     }
 
     override fun handleBatch(
@@ -52,28 +54,19 @@ class AivenKafkaErrorHandler :
             listenerId = container.listenerId,
             listenerTopics = consumer.listTopics().keys,
         )
-        super.handleBatch(thrownException, data, consumer, container, invokeListener)
+        medTraceContext {
+            super.handleBatch(thrownException, data, consumer, container, invokeListener)
+        }
     }
 
     companion object {
         private val log = slf4jLogger()
 
-        internal fun loggFeilende(
+        fun loggFeilende(
             thrownException: Exception,
             records: Collection<ConsumerRecord<*, *>>,
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
-        ) {
-            medTraceContext {
-                loggFeilendeInternal(thrownException, records, listenerId, listenerTopics)
-            }
-        }
-
-        private fun loggFeilendeInternal(
-            thrownException: Exception,
-            records: Collection<ConsumerRecord<*, *>>,
-            listenerId: String?,
-            listenerTopics: Collection<String>,
         ) {
             val relevantCauseException = findRelevantCauseException(thrownException)
 
@@ -118,7 +111,7 @@ class AivenKafkaErrorHandler :
             }
         }
 
-        private inline fun <T> medTraceContext(block: () -> T): T {
+        inline fun <T> medTraceContext(block: () -> T): T {
             val currentSpan = Span.current()
             val spanContext = currentSpan.spanContext
 

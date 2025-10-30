@@ -14,6 +14,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.slf4j.MDC
 import org.slf4j.Marker
 import org.springframework.kafka.listener.ListenerExecutionFailedException
 import ch.qos.logback.classic.Logger as LogbackLogger
@@ -82,16 +83,14 @@ class AivenKafkaErrorHandlerTest {
         val context = Context.current().with(span)
 
         context.makeCurrent().use {
-            AivenKafkaErrorHandler.loggFeilende(
-                thrownException = RuntimeException("Test exception"),
-                records = mutableListOf(Testdata.lagConsumerRecord()),
-            )
-
-            logListAppender.eventerUtenMarkers().first().run {
-                mdcPropertyMap["trace_id"] shouldBeEqualTo testTraceId
-                mdcPropertyMap["span_id"] shouldBeEqualTo testSpanId
+            AivenKafkaErrorHandler.medTraceContext {
+                MDC.get("trace_id") shouldBeEqualTo testTraceId
+                MDC.get("span_id") shouldBeEqualTo testSpanId
             }
         }
+
+        MDC.get("trace_id").shouldBeNull()
+        MDC.get("span_id").shouldBeNull()
     }
 
     @Test
