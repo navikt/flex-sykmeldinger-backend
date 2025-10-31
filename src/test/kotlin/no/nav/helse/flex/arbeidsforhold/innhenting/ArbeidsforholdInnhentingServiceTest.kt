@@ -69,4 +69,63 @@ class ArbeidsforholdInnhentingServiceTest {
             )
         resultat.opprett shouldHaveSize 0
     }
+
+    @Test
+    fun `burde opprette arbeidsforhold som er fremtidig`() {
+        val resultat =
+            ArbeidsforholdInnhentingService.synkroniserArbeidsforhold(
+                interneArbeidsforhold = emptyList(),
+                eksterneArbeidsforhold =
+                    listOf(
+                        lagEksterntArbeidsforhold(
+                            fom = LocalDate.parse("2024-12-01"),
+                        ),
+                    ),
+                fnr = "fnr",
+                now = Instant.parse("2024-05-01T00:00:00Z"),
+            )
+        resultat.opprett shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde oppdatere arbeidsforhold som er fremtidig`() {
+        val resultat =
+            ArbeidsforholdInnhentingService.synkroniserArbeidsforhold(
+                interneArbeidsforhold =
+                    listOf(
+                        lagArbeidsforhold(
+                            navArbeidsforholdId = "1",
+                            fom = LocalDate.parse("2024-12-01"),
+                        ),
+                    ),
+                eksterneArbeidsforhold =
+                    listOf(
+                        lagEksterntArbeidsforhold(
+                            navArbeidsforholdId = "1",
+                            fom = LocalDate.parse("2024-11-01"),
+                        ),
+                    ),
+                fnr = "fnr",
+                now = Instant.parse("2024-05-01T00:00:00Z"),
+            )
+        resultat.oppdater shouldHaveSize 1
+    }
+
+    @Test
+    fun `burde slette fremtidig arbeidsforhold som ikke lenger finnes i aareg`() {
+        val resultat =
+            ArbeidsforholdInnhentingService.synkroniserArbeidsforhold(
+                interneArbeidsforhold =
+                    listOf(
+                        lagArbeidsforhold(
+                            navArbeidsforholdId = "1",
+                            fom = LocalDate.parse("2024-12-01"),
+                        ),
+                    ),
+                eksterneArbeidsforhold = emptyList(),
+                fnr = "fnr",
+                now = Instant.parse("2024-05-01T00:00:00Z"),
+            )
+        resultat.slett shouldHaveSize 1
+    }
 }

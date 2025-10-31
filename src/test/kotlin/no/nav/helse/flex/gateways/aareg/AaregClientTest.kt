@@ -84,6 +84,25 @@ class AaregClientTest {
             headers["Content-Type"] `should be equal to` "application/json"
         }
     }
+
+    @Test
+    fun `burde inkludere FREMTIDIG i arbeidsforholdstatuser i request`() {
+        var requestBody: String? = null
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher { req ->
+                requestBody = req.body.readUtf8()
+                MockResponse()
+                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        aaregEksternClient.getArbeidsforholdoversikt("_")
+
+        requestBody.shouldNotBeNull()
+        requestBody `should contain` "AKTIV"
+        requestBody `should contain` "FREMTIDIG"
+        requestBody `should contain` "AVSLUTTET"
+    }
 }
 
 private val EKSEMPEL_ERROR_RESPONSE_FRA_AAREG =

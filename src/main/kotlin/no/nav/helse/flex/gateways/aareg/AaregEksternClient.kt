@@ -2,7 +2,7 @@ package no.nav.helse.flex.gateways.aareg
 
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
-import org.springframework.http.*
+import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -26,7 +26,7 @@ class AaregEksternClient(
                     ArbeidsforholdRequest(
                         arbeidstakerId = fnr,
                         arbeidsforholdtyper = listOf("ordinaertArbeidsforhold", "maritimtArbeidsforhold", "forenkletOppgjoersordning"),
-                        arbeidsforholdstatuser = listOf("AKTIV", "AVSLUTTET"),
+                        arbeidsforholdstatuser = listOf("AKTIV", "FREMTIDIG", "AVSLUTTET"),
                     ).serialisertTilString(),
                 ).retrieve()
                 .toEntity<ArbeidsforholdoversiktResponse>()
