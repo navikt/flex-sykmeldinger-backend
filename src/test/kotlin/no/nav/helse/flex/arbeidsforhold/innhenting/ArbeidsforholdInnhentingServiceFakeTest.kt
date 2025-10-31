@@ -1,6 +1,7 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import no.nav.helse.flex.arbeidsforhold.*
+import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
+import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.gateways.ereg.Navn
 import no.nav.helse.flex.gateways.ereg.Nokkelinfo
 import no.nav.helse.flex.gateways.pdl.PdlIdent
@@ -266,5 +267,33 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("kjent_ident")
         arbeidsforholdRepository.findAll().shouldHaveSize(1)
+    }
+
+    @Test
+    fun `burde synkronisere fremtidig arbeidsforhold fra aareg`() {
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "fremtidig",
+                        arbeidstakerIdenter = listOf("fnr"),
+                        startdato = LocalDate.parse("2024-12-01"),
+                        sluttdato = null,
+                    ),
+                ),
+            ),
+            fnr = "fnr",
+        )
+
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+
+        arbeidsforholdRepository
+            .findByNavArbeidsforholdId("fremtidig")
+            .shouldNotBeNull()
+            .run {
+                fnr shouldBeEqualTo "fnr"
+                fom shouldBeEqualTo LocalDate.parse("2024-12-01")
+                tom shouldBeEqualTo null
+            }
     }
 }
