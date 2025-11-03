@@ -31,7 +31,7 @@ object SykmeldingHendelseTilKafkaKonverterer {
                     timestamp = sykmeldingHendelse.hendelseOpprettet.tilNorgeOffsetDateTime(),
                     statusEvent = sykmeldingHendelse.status.tilStatusEventDTO(),
                     arbeidsgiver = null,
-                    sporsmals = emptyList(),
+                    sporsmals = null,
                 )
             }
             HendelseStatus.APEN,
