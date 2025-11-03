@@ -64,7 +64,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 sykmeldingHendelse = hendelse,
             )
         sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
-        sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull().shouldHaveSize(0)
+        sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
         sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
     }
 
