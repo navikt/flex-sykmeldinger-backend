@@ -86,22 +86,24 @@ class AaregClientTest {
     }
 
     @Test
-    fun `burde inkludere FREMTIDIG i arbeidsforholdstatuser i request`() {
+    fun `burde ha korrekt request body`() {
         var requestBody: String? = null
         aaregMockWebServer.dispatcher =
             simpleDispatcher { req ->
                 requestBody = req.body.readUtf8()
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
-                    .addHeader("Content-Type", "application/json")
+                defaultAaregDispatcher.dispatch(req)
             }
 
-        aaregEksternClient.getArbeidsforholdoversikt("_")
+        aaregEksternClient.getArbeidsforholdoversikt("fnr")
 
         requestBody.shouldNotBeNull()
-        requestBody `should contain` "AKTIV"
-        requestBody `should contain` "FREMTIDIG"
-        requestBody `should contain` "AVSLUTTET"
+        val parsedRequest = objectMapper.readValue(requestBody, ArbeidsforholdRequest::class.java)
+        parsedRequest `should be equal to`
+            ArbeidsforholdRequest(
+                arbeidstakerId = "fnr",
+                arbeidsforholdtyper = listOf("ordinaertArbeidsforhold", "maritimtArbeidsforhold", "forenkletOppgjoersordning"),
+                arbeidsforholdstatuser = listOf("AKTIV", "FREMTIDIG", "AVSLUTTET"),
+            )
     }
 }
 

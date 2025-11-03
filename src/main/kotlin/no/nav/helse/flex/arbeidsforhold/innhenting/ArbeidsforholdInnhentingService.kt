@@ -120,7 +120,7 @@ class ArbeidsforholdInnhentingService(
             )
         }
 
-        private fun harVaertAnsattSiste4Mnd(
+        internal fun harVaertAnsattSiste4Mnd(
             sluttDato: LocalDate?,
             now: Instant,
         ): Boolean {

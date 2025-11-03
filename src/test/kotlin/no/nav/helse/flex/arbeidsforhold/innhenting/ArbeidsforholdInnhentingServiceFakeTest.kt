@@ -9,13 +9,12 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 import java.time.LocalDate
 
 class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
@@ -269,31 +268,36 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         arbeidsforholdRepository.findAll().shouldHaveSize(1)
     }
 
-    @Test
-    fun `burde synkronisere fremtidig arbeidsforhold fra aareg`() {
-        aaregClientFake.setArbeidsforholdoversikt(
-            lagArbeidsforholdOversiktResponse(
-                listOf(
-                    lagArbeidsforholdOversikt(
-                        navArbeidsforholdId = "fremtidig",
-                        arbeidstakerIdenter = listOf("fnr"),
-                        startdato = LocalDate.parse("2024-12-01"),
-                        sluttdato = null,
-                    ),
-                ),
-            ),
-            fnr = "fnr",
-        )
+    @Nested
+    inner class AnsattSiste4Mnd {
+        @Test
+        fun `burde returnere true ved sluttdato mindre enn 4 måneder siden`() {
+            val resultat =
+                ArbeidsforholdInnhentingService.harVaertAnsattSiste4Mnd(
+                    now = Instant.parse("2025-04-01T00:00:00Z"),
+                    sluttDato = LocalDate.parse("2025-01-01"),
+                )
+            resultat.`should be true`()
+        }
 
-        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        @Test
+        fun `burde returnere true ved sluttdato i fremtiden`() {
+            val resultat =
+                ArbeidsforholdInnhentingService.harVaertAnsattSiste4Mnd(
+                    now = Instant.parse("2025-05-01T00:00:00Z"),
+                    sluttDato = LocalDate.parse("2025-05-02"),
+                )
+            resultat.`should be true`()
+        }
 
-        arbeidsforholdRepository
-            .findByNavArbeidsforholdId("fremtidig")
-            .shouldNotBeNull()
-            .run {
-                fnr shouldBeEqualTo "fnr"
-                fom shouldBeEqualTo LocalDate.parse("2024-12-01")
-                tom shouldBeEqualTo null
-            }
+        @Test
+        fun `burde returnere false ved sluttdato mer enn 4 måneder siden`() {
+            val resultat =
+                ArbeidsforholdInnhentingService.harVaertAnsattSiste4Mnd(
+                    now = Instant.parse("2025-05-01T00:00:00Z"),
+                    sluttDato = LocalDate.parse("2025-01-01"),
+                )
+            resultat.`should be false`()
+        }
     }
 }
