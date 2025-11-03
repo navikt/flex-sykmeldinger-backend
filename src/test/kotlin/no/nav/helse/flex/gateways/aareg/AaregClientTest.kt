@@ -84,6 +84,27 @@ class AaregClientTest {
             headers["Content-Type"] `should be equal to` "application/json"
         }
     }
+
+    @Test
+    fun `burde ha korrekt request body`() {
+        var requestBody: String? = null
+        aaregMockWebServer.dispatcher =
+            simpleDispatcher { req ->
+                requestBody = req.body.readUtf8()
+                defaultAaregDispatcher.dispatch(req)
+            }
+
+        aaregEksternClient.getArbeidsforholdoversikt("fnr")
+
+        requestBody.shouldNotBeNull()
+        val parsedRequest = objectMapper.readValue(requestBody, ArbeidsforholdRequest::class.java)
+        parsedRequest `should be equal to`
+            ArbeidsforholdRequest(
+                arbeidstakerId = "fnr",
+                arbeidsforholdtyper = listOf("ordinaertArbeidsforhold", "maritimtArbeidsforhold", "forenkletOppgjoersordning"),
+                arbeidsforholdstatuser = listOf("AKTIV", "FREMTIDIG", "AVSLUTTET"),
+            )
+    }
 }
 
 private val EKSEMPEL_ERROR_RESPONSE_FRA_AAREG =
