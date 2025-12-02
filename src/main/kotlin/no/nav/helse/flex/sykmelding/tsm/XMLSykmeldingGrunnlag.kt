@@ -81,11 +81,13 @@ data class DigitalSykmeldingGrunnlag(
     override val sykmelder: Sykmelder,
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
-    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+    val utdypendeSporsmal: List<UtdypendeSporsmal>?,
 ) : NorskSykmeldingGrunnlag {
     override val prognose: Prognose? = null
     override val tiltak: Tiltak? = null
     override val type = SykmeldingType.DIGITAL
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
+        get() = toUtdypendeOpplysninger(utdypendeSporsmal)
 }
 
 data class PapirSykmeldingGrunnlag(
@@ -228,4 +230,59 @@ enum class SvarRestriksjon {
     SKJERMET_FOR_ARBEIDSGIVER,
     SKJERMET_FOR_PASIENT,
     SKJERMET_FOR_NAV,
+}
+
+enum class Sporsmalstype {
+    UTFORDRINGER_MED_GRADERT_ARBEID,
+    MEDISINSK_OPPSUMMERING,
+    HENSYN_PA_ARBEIDSPLASSEN,
+}
+
+data class UtdypendeSporsmal(
+    val svar: String,
+    val type: Sporsmalstype,
+    val skjermetForArbeidsgiver: Boolean = true,
+)
+
+val uke7Prefix = "6.3"
+
+val spmUke7Mapping =
+    mapOf<Sporsmalstype, Pair<String, String>>(
+        Sporsmalstype.MEDISINSK_OPPSUMMERING to
+            (
+                "$uke7Prefix.1"
+                    to "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)"
+            ),
+        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID to
+            (
+                "$uke7Prefix.2"
+                    to "Hvilke utfordringer har pasienten med å utføre gradert arbeid?"
+            ),
+        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN to
+            (
+                "$uke7Prefix.3"
+                    to "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)"
+            ),
+    )
+
+fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>>? {
+    if (sporsmal == null) {
+        return null
+    }
+
+    val uke7 =
+        sporsmal
+            .asSequence()
+            .mapNotNull { spm ->
+                spmUke7Mapping[spm.type]?.let { (key, currentSpm) ->
+                    key to
+                        SporsmalSvar(
+                            sporsmal = currentSpm,
+                            restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                            svar = spm.svar,
+                        )
+                }
+            }.toMap()
+
+    return mapOf(uke7Prefix to uke7)
 }

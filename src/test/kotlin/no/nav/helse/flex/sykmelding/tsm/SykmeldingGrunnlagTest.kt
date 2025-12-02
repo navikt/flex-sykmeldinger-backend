@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
@@ -28,5 +29,65 @@ class SykmeldingGrunnlagTest {
         val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
         sykmelding `should be instance of` UtenlandskSykmeldingGrunnlag::class
         sykmelding `should be equal to` opprinneligUtenlandskSykmelding
+    }
+
+    @Test
+    fun `burde serialisere og deserialisere digital sykmelding`() {
+        val opprinneligDigitalSykmelding = lagDigitalSykmeldingGrunnlag()
+        val digitalSykmeldingSerialisert = opprinneligDigitalSykmelding.serialisertTilString()
+
+        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(digitalSykmeldingSerialisert)
+        sykmelding `should be instance of` DigitalSykmeldingGrunnlag::class
+        sykmelding `should be equal to` opprinneligDigitalSykmelding
+    }
+
+    @Test
+    fun `mapper utdypendeSporsmal til utdypendeOpplysninger`() {
+        val utdypendeSporsmal =
+            listOf(
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    svar = "svar 1",
+                ),
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
+                    svar = "svar 2",
+                ),
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
+                    svar = "svar 3",
+                ),
+            )
+
+        val expectedUtdypendeOpplysninger =
+            mapOf(
+                "6.3" to
+                    mapOf(
+                        "6.3.1" to
+                            SporsmalSvar(
+                                sporsmal =
+                                    "Gi en kort medisinsk oppsummering av tilstanden " +
+                                        "(sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
+                                svar = "svar 1",
+                                restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                            ),
+                        "6.3.2" to
+                            SporsmalSvar(
+                                sporsmal = "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
+                                svar = "svar 2",
+                                restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                            ),
+                        "6.3.3" to
+                            SporsmalSvar(
+                                sporsmal =
+                                    "Hvilke hensyn må være på plass for at pasienten kan prøves i det " +
+                                        "nåværende arbeidet? (ikke obligatorisk)",
+                                svar = "svar 3",
+                                restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                            ),
+                    ),
+            )
+
+        toUtdypendeOpplysninger(utdypendeSporsmal) `should be equal to` expectedUtdypendeOpplysninger
     }
 }
