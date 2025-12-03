@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding.tsm
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
@@ -81,11 +82,15 @@ data class DigitalSykmeldingGrunnlag(
     override val sykmelder: Sykmelder,
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
-    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?,
+    val utdypendeSporsmal: List<UtdypendeSporsmal>? = null,
 ) : NorskSykmeldingGrunnlag {
     override val prognose: Prognose? = null
     override val tiltak: Tiltak? = null
     override val type = SykmeldingType.DIGITAL
+
+    @get:JsonIgnore
+    override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
+        get() = toUtdypendeOpplysninger(utdypendeSporsmal)
 }
 
 data class PapirSykmeldingGrunnlag(
@@ -228,4 +233,63 @@ enum class SvarRestriksjon {
     SKJERMET_FOR_ARBEIDSGIVER,
     SKJERMET_FOR_PASIENT,
     SKJERMET_FOR_NAV,
+}
+
+enum class Sporsmalstype {
+    UTFORDRINGER_MED_GRADERT_ARBEID,
+    MEDISINSK_OPPSUMMERING,
+    HENSYN_PA_ARBEIDSPLASSEN,
+}
+
+data class UtdypendeSporsmal(
+    val svar: String,
+    val type: Sporsmalstype,
+    val skjermetForArbeidsgiver: Boolean = true,
+)
+
+const val UKE_7_PREFIX = "6.3"
+
+fun sporsmalUke7Mapping(sporsmalType: Sporsmalstype): Pair<String, String> =
+    when (sporsmalType) {
+        Sporsmalstype.MEDISINSK_OPPSUMMERING -> {
+            Pair(
+                "$UKE_7_PREFIX.1",
+                "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
+            )
+        }
+
+        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID -> {
+            Pair(
+                "$UKE_7_PREFIX.2",
+                "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
+            )
+        }
+
+        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN -> {
+            Pair(
+                "$UKE_7_PREFIX.3",
+                "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
+            )
+        }
+    }
+
+fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>>? {
+    if (sporsmal == null) {
+        return null
+    }
+
+    val uke7 =
+        sporsmal
+            .asSequence()
+            .map { sporsmal ->
+                val (key, sporsmalTekst) = sporsmalUke7Mapping(sporsmal.type)
+                key to
+                    SporsmalSvar(
+                        sporsmal = sporsmalTekst,
+                        restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                        svar = sporsmal.svar,
+                    )
+            }.toMap()
+
+    return mapOf(UKE_7_PREFIX to uke7)
 }
