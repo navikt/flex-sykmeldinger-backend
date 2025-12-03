@@ -82,11 +82,13 @@ data class DigitalSykmeldingGrunnlag(
     override val sykmelder: Sykmelder,
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
-    val utdypendeSporsmal: List<UtdypendeSporsmal>?,
+    val utdypendeSporsmal: List<UtdypendeSporsmal>? = null,
 ) : NorskSykmeldingGrunnlag {
     override val prognose: Prognose? = null
     override val tiltak: Tiltak? = null
     override val type = SykmeldingType.DIGITAL
+
+    @get:JsonIgnore
     override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>?
         get() = toUtdypendeOpplysninger(utdypendeSporsmal)
 }
