@@ -41,7 +41,7 @@ class SykmeldingKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
                 SykmeldingType.DIGITAL ->
                     lagEksternSykmeldingMelding(
-                        sykmelding = lagSykmeldingGrunnlag(id = sykmeldingId),
+                        sykmelding = lagDigitalSykmeldingGrunnlag(id = sykmeldingId),
                         validation = lagValidation(),
                     ).serialisertTilString()
 

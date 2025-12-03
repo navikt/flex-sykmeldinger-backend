@@ -94,6 +94,42 @@ fun lagUtenlandskSykmeldingGrunnlag(id: String = "1"): UtenlandskSykmeldingGrunn
             ),
     )
 
+fun lagDigitalSykmeldingGrunnlag(id: String = "1"): DigitalSykmeldingGrunnlag =
+    DigitalSykmeldingGrunnlag(
+        id = id,
+        metadata = lagSykmeldingMetadata(),
+        pasient = lagPasient(),
+        medisinskVurdering = lagMedisinskVurdering(),
+        aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
+        behandler = lagBehandler(),
+        arbeidsgiver = IngenArbeidsgiver(),
+        sykmelder =
+            Sykmelder(
+                ids =
+                    listOf(
+                        PersonId(id = "00000000000", type = PersonIdType.FNR),
+                    ),
+                helsepersonellKategori = HelsepersonellKategori.LEGE,
+            ),
+        bistandNav = null,
+        tilbakedatering = null,
+        utdypendeSporsmal =
+            listOf(
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.MEDISINSK_OPPSUMMERING,
+                    svar = "svar",
+                ),
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
+                    svar = "svar",
+                ),
+                UtdypendeSporsmal(
+                    type = Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
+                    svar = "svar",
+                ),
+            ),
+    )
+
 fun lagSykmeldingMetadata(
     avsenderSystem: AvsenderSystem =
         AvsenderSystem(
