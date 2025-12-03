@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding.tsm
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
@@ -244,26 +245,31 @@ data class UtdypendeSporsmal(
     val skjermetForArbeidsgiver: Boolean = true,
 )
 
-val uke7Prefix = "6.3"
+const val UKE_7_PREFIX = "6.3"
 
-val spmUke7Mapping =
-    mapOf<Sporsmalstype, Pair<String, String>>(
-        Sporsmalstype.MEDISINSK_OPPSUMMERING to
-            (
-                "$uke7Prefix.1"
-                    to "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)"
-            ),
-        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID to
-            (
-                "$uke7Prefix.2"
-                    to "Hvilke utfordringer har pasienten med å utføre gradert arbeid?"
-            ),
-        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN to
-            (
-                "$uke7Prefix.3"
-                    to "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)"
-            ),
-    )
+fun sporsmalUke7Mapping(sporsmalType: Sporsmalstype): Pair<String, String> =
+    when (sporsmalType) {
+        Sporsmalstype.MEDISINSK_OPPSUMMERING -> {
+            Pair(
+                "$UKE_7_PREFIX.1",
+                "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
+            )
+        }
+
+        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID -> {
+            Pair(
+                "$UKE_7_PREFIX.2",
+                "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
+            )
+        }
+
+        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN -> {
+            Pair(
+                "$UKE_7_PREFIX.3",
+                "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
+            )
+        }
+    }
 
 fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>>? {
     if (sporsmal == null) {
@@ -273,16 +279,15 @@ fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map
     val uke7 =
         sporsmal
             .asSequence()
-            .mapNotNull { spm ->
-                spmUke7Mapping[spm.type]?.let { (key, currentSpm) ->
-                    key to
-                        SporsmalSvar(
-                            sporsmal = currentSpm,
-                            restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
-                            svar = spm.svar,
-                        )
-                }
+            .map { sporsmal ->
+                val (key, sporsmalTekst) = sporsmalUke7Mapping(sporsmal.type)
+                key to
+                    SporsmalSvar(
+                        sporsmal = sporsmalTekst,
+                        restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                        svar = sporsmal.svar,
+                    )
             }.toMap()
 
-    return mapOf(uke7Prefix to uke7)
+    return mapOf(UKE_7_PREFIX to uke7)
 }
