@@ -4,7 +4,7 @@ environment: prod
 replicas_min: 2
 replicas_max: 3
 cpu: 500m
-memory: 1000Mi
+memory: 1500Mi
 db_tier: db-custom-4-15360
 db_highAvailability: true
 external-host:
