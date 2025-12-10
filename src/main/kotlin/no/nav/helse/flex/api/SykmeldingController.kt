@@ -32,9 +32,9 @@ class SykmeldingController(
     private val sykmeldingHendelseHandterer: SykmeldingHendelseHandterer,
     private val syketilfelleClient: SyketilfelleClient,
     private val sykmeldingRegelAvklaringer: SykmeldingRegelAvklaringer,
-    @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
+    @param:Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
     private val dittSykefravaerFrontendClientId: String,
-    @Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
+    @param:Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
     private val sykepengesoknadClientId: String,
 ) {
     private val logger = logger()
