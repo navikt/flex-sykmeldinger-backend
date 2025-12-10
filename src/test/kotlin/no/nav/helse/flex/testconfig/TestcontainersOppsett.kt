@@ -2,14 +2,14 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.utils.logger
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
 // TODO: Bytt fra latest til en konkret versjon når det er tilgjengelig i dockerhub
 private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnamisecure/valkey:latest")
 
-private class PostgreSQLContainer16 : PostgreSQLContainer<PostgreSQLContainer16>("postgres:16-alpine")
+private class PostgreSQLContainer16 : PostgreSQLContainer("postgres:16-alpine")
 
 object TestcontainersOppsett {
     private val logger = logger()
