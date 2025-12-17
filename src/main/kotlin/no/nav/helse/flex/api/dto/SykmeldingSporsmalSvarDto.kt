@@ -9,6 +9,7 @@ data class SykmeldingSporsmalSvarDto(
     val arbeidsgiverOrgnummer: FormSporsmalSvar<String>? = null,
     val arbeidsledig: ArbeidsledigFraOrgnummer? = null,
     val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>? = null,
+    val sykFoerSykmeldingen: FormSporsmalSvar<JaEllerNei>? = null,
     val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>? = null,
     val egenmeldingsperioder: FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>? = null,
     val harForsikring: FormSporsmalSvar<JaEllerNei>? = null,

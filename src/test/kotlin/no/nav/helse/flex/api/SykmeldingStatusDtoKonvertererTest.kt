@@ -197,6 +197,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsledig.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -228,6 +229,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 egenmeldingsdager.shouldBeNull()
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsledig.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -283,6 +285,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -308,6 +311,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -363,6 +367,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -388,6 +393,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -438,6 +444,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         SporsmalSvar(
                             sporsmaltekst = "Egenmeldingsdager",
                             svar = listOf(dato("01.01.2025")),
+                        ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
                         ),
                     harBruktEgenmelding =
                         SporsmalSvar(
@@ -497,6 +508,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
                     svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
                 }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
                     svar `should be equal to` JaEllerNei.JA
@@ -534,6 +549,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     riktigNarmesteLeder = lagSporsmalSvar(false),
                     harEgenmeldingsdager = lagSporsmalSvar(false),
                     egenmeldingsdager = null,
+                    sykFoerSykmeldingen = lagSporsmalSvar(true),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -551,6 +567,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 harBruktEgenmeldingsdager.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
                 harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
@@ -576,6 +593,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.FRILANSER,
+                        ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
                         ),
                     harBruktEgenmelding =
                         SporsmalSvar(
@@ -615,6 +637,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
                 }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
                     svar `should be equal to` JaEllerNei.JA
@@ -646,6 +672,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
                     arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
+                    sykFoerSykmeldingen = lagSporsmalSvar(true),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -657,6 +684,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             konvertertStatus.run {
                 erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
                 arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
                 harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
@@ -683,6 +711,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.JORDBRUKER,
+                        ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
                         ),
                     harBruktEgenmelding =
                         SporsmalSvar(
@@ -722,6 +755,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
                 }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
                     svar `should be equal to` JaEllerNei.JA
@@ -753,6 +790,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 JordbrukerBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
                     arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
+                    sykFoerSykmeldingen = lagSporsmalSvar(true),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -764,6 +802,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             konvertertStatus.run {
                 erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
                 arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
                 harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
@@ -790,6 +829,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                         SporsmalSvar(
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.NAERINGSDRIVENDE,
+                        ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
                         ),
                     harBruktEgenmelding =
                         SporsmalSvar(
@@ -829,6 +873,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
                 }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
+                }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
                     svar `should be equal to` JaEllerNei.JA
@@ -860,6 +908,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
                     arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
+                    sykFoerSykmeldingen = lagSporsmalSvar(true),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -871,7 +920,40 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             konvertertStatus.run {
                 erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
                 arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
                 harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                egenmeldingsperioder.shouldBeNull()
+                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                uriktigeOpplysninger.shouldBeNull()
+                arbeidsgiverOrgnummer.shouldBeNull()
+                riktigNarmesteLeder.shouldBeNull()
+                harBruktEgenmeldingsdager.shouldBeNull()
+                egenmeldingsdager.shouldBeNull()
+                arbeidsledig.shouldBeNull()
+                fisker.shouldBeNull()
+            }
+        }
+
+        @Test
+        fun `Naringsdrivende med nei svar syk før sykmeldingen`() {
+            val brukerSvar =
+                NaringsdrivendeBrukerSvar(
+                    erOpplysningeneRiktige = lagSporsmalSvar(false),
+                    arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
+                    sykFoerSykmeldingen = lagSporsmalSvar(false),
+                    harBruktEgenmelding = null,
+                    egenmeldingsperioder = null,
+                    harForsikring = lagSporsmalSvar(false),
+                    uriktigeOpplysninger = null,
+                )
+
+            val konvertertStatus: SykmeldingSporsmalSvarDto =
+                sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
+            konvertertStatus.run {
+                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
+                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
@@ -924,6 +1006,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
@@ -951,6 +1034,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
                 egenmeldingsdager.shouldBeNull()
+                sykFoerSykmeldingen.shouldBeNull()
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldBeNull()
