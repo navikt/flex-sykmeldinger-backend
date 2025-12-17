@@ -439,6 +439,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Egenmeldingsdager",
                             svar = listOf(dato("01.01.2025")),
                         ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
+                        ),
                     harBruktEgenmelding =
                         SporsmalSvar(
                             sporsmaltekst = "Har du brukt egenmelding?",
@@ -496,6 +501,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 uriktigeOpplysninger.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
                     svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
@@ -577,6 +586,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.FRILANSER,
                         ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
+                        ),
                     harBruktEgenmelding =
                         SporsmalSvar(
                             sporsmaltekst = "Har du brukt egenmelding?",
@@ -614,6 +628,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 arbeidssituasjon.run {
                     svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
@@ -684,6 +702,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.JORDBRUKER,
                         ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
+                        ),
                     harBruktEgenmelding =
                         SporsmalSvar(
                             sporsmaltekst = "Har du brukt egenmelding?",
@@ -721,6 +744,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 arbeidssituasjon.run {
                     svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
@@ -791,6 +818,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                             sporsmaltekst = "Hvilken arbeidssituasjon?",
                             svar = Arbeidssituasjon.NAERINGSDRIVENDE,
                         ),
+                    sykFoerSykmeldingen =
+                        SporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = true,
+                        ),
                     harBruktEgenmelding =
                         SporsmalSvar(
                             sporsmaltekst = "Har du brukt egenmelding?",
@@ -828,6 +860,10 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 arbeidssituasjon.run {
                     svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
                     sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                }
+                sykFoerSykmeldingen.shouldNotBeNull().run {
+                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                    svar `should be equal to` JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
                     sporsmaltekst `should be equal to` "Har du brukt egenmelding?"

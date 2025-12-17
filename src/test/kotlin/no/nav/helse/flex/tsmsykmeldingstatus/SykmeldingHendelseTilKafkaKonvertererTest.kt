@@ -370,6 +370,11 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             sporsmaltekst = "Er dette riktig nærmeste leder?",
                             svar = JaEllerNei.JA,
                         ),
+                    sykFoerSykmeldingen =
+                        FormSporsmalSvar(
+                            sporsmaltekst = "Var du syk før sykmeldingen?",
+                            svar = JaEllerNei.JA,
+                        ),
                     harBruktEgenmelding =
                         FormSporsmalSvar(
                             sporsmaltekst = "Har du brukt egenmelding?",
@@ -443,6 +448,10 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             brukerSvar.riktigNarmesteLeder.shouldNotBeNull().run {
                 sporsmaltekst shouldBeEqualTo "Er dette riktig nærmeste leder?"
                 svar shouldBeEqualTo JaEllerNei.JA
+            }
+            brukerSvar.sykFoerSykmeldingen.shouldNotBeNull().run {
+                sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
+                svar `should be equal to` JaEllerNei.JA
             }
             brukerSvar.harBruktEgenmelding.shouldNotBeNull().run {
                 sporsmaltekst shouldBeEqualTo "Har du brukt egenmelding?"
