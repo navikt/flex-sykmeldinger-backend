@@ -33,6 +33,7 @@ class BrukerSvarKafkaDtoKonvertererTest {
             ArbeidssituasjonDTO.FRILANSER -> {
                 val frilanserBrukerSvar = konvertert as? FrilanserBrukerSvar
                 frilanserBrukerSvar.`should not be null`()
+                frilanserBrukerSvar.sykFoerSykmeldingen?.svar `should be equal to` true
                 frilanserBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 frilanserBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
@@ -50,6 +51,7 @@ class BrukerSvarKafkaDtoKonvertererTest {
             ArbeidssituasjonDTO.NAERINGSDRIVENDE -> {
                 val naeringsdrivendeBrukerSvar = konvertert as? NaringsdrivendeBrukerSvar
                 naeringsdrivendeBrukerSvar.`should not be null`()
+                naeringsdrivendeBrukerSvar.sykFoerSykmeldingen?.svar `should be equal to` true
                 naeringsdrivendeBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 naeringsdrivendeBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(
@@ -70,10 +72,12 @@ class BrukerSvarKafkaDtoKonvertererTest {
                 fiskerBrukerSvar.lottOgHyre.svar `should be equal to`
                     FiskerLottOgHyre.LOTT
                 fiskerBrukerSvar.blad.svar `should be equal to` FiskerBlad.A
+                fiskerBrukerSvar.sykFoerSykmeldingen?.svar `should be equal to` true
             }
             ArbeidssituasjonDTO.JORDBRUKER -> {
                 val jordbrukerBrukerSvar = konvertert as? JordbrukerBrukerSvar
                 jordbrukerBrukerSvar.`should not be null`()
+                jordbrukerBrukerSvar.sykFoerSykmeldingen?.svar `should be equal to` true
                 jordbrukerBrukerSvar.harBruktEgenmelding?.svar `should be equal to` true
                 jordbrukerBrukerSvar.egenmeldingsperioder?.svar `should be equal to`
                     listOf(

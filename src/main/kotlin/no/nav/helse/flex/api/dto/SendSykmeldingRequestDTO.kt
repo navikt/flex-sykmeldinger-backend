@@ -225,6 +225,13 @@ data class SendSykmeldingRequestDTO(
                                 it.svar.tilUriktigeOpplysningerListe(),
                             )
                         },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
+                            )
+                        },
                     harBruktEgenmelding =
                         harBruktEgenmelding?.let {
                             SporsmalSvar(
@@ -263,6 +270,13 @@ data class SendSykmeldingRequestDTO(
                                 it.svar.tilUriktigeOpplysningerListe(),
                             )
                         },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
+                            )
+                        },
                     harBruktEgenmelding =
                         harBruktEgenmelding?.let {
                             SporsmalSvar(
@@ -299,6 +313,13 @@ data class SendSykmeldingRequestDTO(
                             SporsmalSvar(
                                 it.sporsmaltekst,
                                 it.svar.tilUriktigeOpplysningerListe(),
+                            )
+                        },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
                             )
                         },
                     harBruktEgenmelding =

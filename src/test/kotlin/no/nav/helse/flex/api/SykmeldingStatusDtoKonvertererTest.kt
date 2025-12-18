@@ -664,6 +664,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = lagSporsmalSvar(false),
                     arbeidssituasjon = lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
+                    sykFoerSykmeldingen = lagSporsmalSvar(true),
                     harBruktEgenmelding = lagSporsmalSvar(false),
                     egenmeldingsperioder = null,
                     harForsikring = lagSporsmalSvar(false),
@@ -675,6 +676,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             konvertertStatus.run {
                 erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
                 arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
+                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
                 harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
                 harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
