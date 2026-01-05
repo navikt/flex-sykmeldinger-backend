@@ -86,6 +86,7 @@ fun lagFiskerLottBrukerSvar(
         lagSporsmalSvar(FiskerLottOgHyre.LOTT),
     blad: SporsmalSvar<FiskerBlad> =
         lagSporsmalSvar(FiskerBlad.A),
+    sykFoerSykmeldingen: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     harForsikring: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
@@ -96,6 +97,7 @@ fun lagFiskerLottBrukerSvar(
         erOpplysningeneRiktige = erOpplysningeneRiktige,
         lottOgHyre = lottOgHyre,
         blad = blad,
+        sykFoerSykmeldingen = sykFoerSykmeldingen,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
         harForsikring = harForsikring,
@@ -106,6 +108,7 @@ fun lagFrilanserBrukerSvar(
     arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> =
         lagSporsmalSvar(Arbeidssituasjon.FRILANSER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
+    sykFoerSykmeldingen: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     harForsikring: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
@@ -114,6 +117,7 @@ fun lagFrilanserBrukerSvar(
     FrilanserBrukerSvar(
         arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
+        sykFoerSykmeldingen = sykFoerSykmeldingen,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
         harForsikring = harForsikring,
@@ -124,6 +128,7 @@ fun lagJordbrukerBrukerSvar(
     arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> =
         lagSporsmalSvar(Arbeidssituasjon.JORDBRUKER),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
+    sykFoerSykmeldingen: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     harForsikring: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
@@ -132,6 +137,7 @@ fun lagJordbrukerBrukerSvar(
     JordbrukerBrukerSvar(
         arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
+        sykFoerSykmeldingen = sykFoerSykmeldingen,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
         harForsikring = harForsikring,
@@ -142,6 +148,7 @@ fun lagNaringsdrivendeBrukerSvar(
     arbeidssituasjon: SporsmalSvar<Arbeidssituasjon> =
         lagSporsmalSvar(Arbeidssituasjon.NAERINGSDRIVENDE),
     erOpplysningeneRiktige: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
+    sykFoerSykmeldingen: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harBruktEgenmelding: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
     egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     harForsikring: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
@@ -150,6 +157,7 @@ fun lagNaringsdrivendeBrukerSvar(
     NaringsdrivendeBrukerSvar(
         arbeidssituasjon = arbeidssituasjon,
         erOpplysningeneRiktige = erOpplysningeneRiktige,
+        sykFoerSykmeldingen = sykFoerSykmeldingen,
         harBruktEgenmelding = harBruktEgenmelding,
         egenmeldingsperioder = egenmeldingsperioder,
         harForsikring = harForsikring,

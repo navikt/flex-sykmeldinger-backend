@@ -144,6 +144,10 @@ class SykmeldingController(
                 identer = identer,
             )
 
+        if (erUtenforVentetid.ventetid == null) {
+            logger.warn("Sykmelding ${sykmelding.sykmeldingId} mangler beregnet ventetid $erUtenforVentetid")
+        }
+
         return ResponseEntity.ok(erUtenforVentetid)
     }
 
