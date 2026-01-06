@@ -12,6 +12,7 @@ import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
 import no.nav.helse.flex.utils.logger
@@ -45,10 +46,21 @@ class SykmeldingController(
         combineWithOr = true,
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
-    fun getSykmeldinger(): ResponseEntity<List<SykmeldingDTO>> {
+    fun getSykmeldinger(
+        @RequestParam("kunApen", required = false) kunApen: Boolean?,
+    ): ResponseEntity<List<SykmeldingDTO>> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId, sykepengesoknadClientId)
 
-        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
+        val sykmeldinger =
+            sykmeldingLeser
+                .hentAlleSykmeldinger(identer)
+                .filter {
+                    if (kunApen == true) {
+                        it.sisteHendelse().status == HendelseStatus.APEN
+                    } else {
+                        true
+                    }
+                }
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
@@ -190,6 +202,7 @@ class SykmeldingController(
                 SykmeldingChangeStatus.AVBRYT -> {
                     sykmeldingHendelseHandterer.avbrytSykmelding(sykmeldingUuid, identer)
                 }
+
                 SykmeldingChangeStatus.BEKREFT_AVVIST -> {
                     sykmeldingHendelseHandterer.bekreftAvvistSykmelding(sykmeldingUuid, identer)
                 }

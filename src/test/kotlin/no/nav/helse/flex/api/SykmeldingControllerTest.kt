@@ -269,6 +269,46 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         @Test
+        fun `burde kun hente sykmeldinger med status APEN`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "2",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ).leggTilHendelse(lagSykmeldingHendelse(status = HendelseStatus.SENDT_TIL_NAV)),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger?kunApen=true")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
+            sykmeldinger.size `should be equal to` 1
+            val sykmelding = sykmeldinger[0]
+            sykmelding.id `should be equal to` "1"
+            sykmelding.pasient.fnr `should be equal to` "fnr"
+        }
+
+        @Test
         fun `burde returnere tom liste om ingen sykmeldinger finnes`() {
             val result =
                 mockMvc
