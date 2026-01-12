@@ -35,6 +35,7 @@ object BrukerSvarKafkaDtoKonverterer {
                     riktigNarmesteLeder = alleBrukerSvar.riktigNarmesteLeder,
                     harEgenmeldingsdager = alleBrukerSvar.harEgenmeldingsdager,
                     egenmeldingsdager = alleBrukerSvar.egenmeldingsdager,
+                    sykFoerSykmeldingen = alleBrukerSvar.sykFoerSykmeldingen,
                     harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
                     egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
                     harForsikring = alleBrukerSvar.harForsikring,
@@ -46,6 +47,7 @@ object BrukerSvarKafkaDtoKonverterer {
                 FrilanserBrukerSvar(
                     erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
                     arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
+                    sykFoerSykmeldingen = alleBrukerSvar.sykFoerSykmeldingen,
                     harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
                     egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
                     harForsikring = alleBrukerSvar.harForsikring,
@@ -56,6 +58,7 @@ object BrukerSvarKafkaDtoKonverterer {
                 NaringsdrivendeBrukerSvar(
                     erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
                     arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
+                    sykFoerSykmeldingen = alleBrukerSvar.sykFoerSykmeldingen,
                     harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
                     egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
                     harForsikring = alleBrukerSvar.harForsikring,
@@ -67,6 +70,7 @@ object BrukerSvarKafkaDtoKonverterer {
                     erOpplysningeneRiktige = alleBrukerSvar.erOpplysningeneRiktige,
                     arbeidssituasjon = alleBrukerSvar.arbeidssituasjon,
                     uriktigeOpplysninger = alleBrukerSvar.uriktigeOpplysninger,
+                    sykFoerSykmeldingen = alleBrukerSvar.sykFoerSykmeldingen,
                     harBruktEgenmelding = alleBrukerSvar.harBruktEgenmelding,
                     egenmeldingsperioder = alleBrukerSvar.egenmeldingsperioder,
                     harForsikring = alleBrukerSvar.harForsikring,
@@ -152,6 +156,13 @@ object BrukerSvarKafkaDtoKonverterer {
                         svar = it.svar,
                     )
                 },
+            sykFoerSykmeldingen =
+                brukerSvarKafkaDTO.sykFoerSykmeldingen?.let {
+                    SporsmalSvar(
+                        sporsmaltekst = it.sporsmaltekst,
+                        svar = it.svar.tilBoolean(),
+                    )
+                },
             harBruktEgenmelding =
                 brukerSvarKafkaDTO.harBruktEgenmelding?.let {
                     SporsmalSvar(
@@ -216,6 +227,7 @@ internal data class AlleBrukerSvar(
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsgiverOrgnummer: SporsmalSvar<String>? = null,
     val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
+    val sykFoerSykmeldingen: SporsmalSvar<Boolean>? = null,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
