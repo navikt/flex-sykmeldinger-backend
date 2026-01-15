@@ -10,6 +10,7 @@ data class MedisinskVurdering(
     val skjermetForPasient: Boolean,
     val syketilfelletStartDato: LocalDate?,
     val annenFraversArsak: AnnenFraverArsak?,
+    val annenFravarsgrunn: AnnenFravarArsakType?, // For digital sykmelding
 )
 
 data class DiagnoseInfo(
