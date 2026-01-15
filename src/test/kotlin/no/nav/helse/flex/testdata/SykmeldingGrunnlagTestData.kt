@@ -193,6 +193,7 @@ fun lagMedisinskVurdering(
         annenFraversArsak = annenFraverArsak,
         yrkesskade = null,
         skjermetForPasient = false,
+        annenFravarsgrunn = null,
         syketilfelletStartDato = syketilfelleStartDato,
     )
 

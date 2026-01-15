@@ -288,7 +288,9 @@ class SykmeldingDtoKonverterer(
             biDiagnoser = medisinskVurdering.biDiagnoser?.map { konverterDiagnose(it) } ?: emptyList(),
             yrkesskade = medisinskVurdering.yrkesskade != null,
             yrkesskadeDato = medisinskVurdering.yrkesskade?.yrkesskadeDato,
-            annenFraversArsak = medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) },
+            annenFraversArsak =
+                medisinskVurdering.annenFravarsgrunn?.let { AnnenFraversArsakDTO(null, listOf(it.toAnnenFravarGrunnDTO())) }
+                    ?: medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) },
             svangerskap = medisinskVurdering.svangerskap,
         )
 
@@ -296,23 +298,24 @@ class SykmeldingDtoKonverterer(
         AnnenFraversArsakDTO(
             beskrivelse = annenFraverArsak.beskrivelse,
             grunn =
-                annenFraverArsak.arsak?.map {
-                    when (it) {
-                        AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON -> AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON
-                        AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> AnnenFraverGrunnDTO.BEHANDLING_FORHINDRER_ARBEID
-                        AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> AnnenFraverGrunnDTO.ARBEIDSRETTET_TILTAK
-                        AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
-                            AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
-
-                        AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE -> AnnenFraverGrunnDTO.NODVENDIG_KONTROLLUNDENRSOKELSE
-                        AnnenFravarArsakType.SMITTEFARE -> AnnenFraverGrunnDTO.SMITTEFARE
-                        AnnenFravarArsakType.ABORT -> AnnenFraverGrunnDTO.ABORT
-                        AnnenFravarArsakType.UFOR_GRUNNET_BARNLOSHET -> AnnenFraverGrunnDTO.UFOR_GRUNNET_BARNLOSHET
-                        AnnenFravarArsakType.DONOR -> AnnenFraverGrunnDTO.DONOR
-                        AnnenFravarArsakType.BEHANDLING_STERILISERING -> AnnenFraverGrunnDTO.BEHANDLING_STERILISERING
-                    }
-                } ?: emptyList(),
+                annenFraverArsak.arsak?.map { it.toAnnenFravarGrunnDTO() } ?: emptyList(),
         )
+
+    private fun AnnenFravarArsakType.toAnnenFravarGrunnDTO(): AnnenFraverGrunnDTO =
+        when (this) {
+            AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON -> AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON
+            AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> AnnenFraverGrunnDTO.BEHANDLING_FORHINDRER_ARBEID
+            AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> AnnenFraverGrunnDTO.ARBEIDSRETTET_TILTAK
+            AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
+                AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+
+            AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE -> AnnenFraverGrunnDTO.NODVENDIG_KONTROLLUNDENRSOKELSE
+            AnnenFravarArsakType.SMITTEFARE -> AnnenFraverGrunnDTO.SMITTEFARE
+            AnnenFravarArsakType.ABORT -> AnnenFraverGrunnDTO.ABORT
+            AnnenFravarArsakType.UFOR_GRUNNET_BARNLOSHET -> AnnenFraverGrunnDTO.UFOR_GRUNNET_BARNLOSHET
+            AnnenFravarArsakType.DONOR -> AnnenFraverGrunnDTO.DONOR
+            AnnenFravarArsakType.BEHANDLING_STERILISERING -> AnnenFraverGrunnDTO.BEHANDLING_STERILISERING
+        }
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
         DiagnoseDTO(

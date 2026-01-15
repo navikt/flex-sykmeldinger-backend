@@ -276,6 +276,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                         beskrivelse = "beskrivelse",
                         arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
                     ),
+                null,
             )
 
         sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
