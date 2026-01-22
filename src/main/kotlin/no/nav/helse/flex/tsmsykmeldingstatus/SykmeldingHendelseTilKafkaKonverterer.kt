@@ -100,6 +100,7 @@ object SykmeldingHendelseTilKafkaKonverterer {
             arbeidssituasjon = sykmeldingSporsmalSvarDto.arbeidssituasjon,
             arbeidsgiverOrgnummer = sykmeldingSporsmalSvarDto.arbeidsgiverOrgnummer,
             riktigNarmesteLeder = sykmeldingSporsmalSvarDto.riktigNarmesteLeder,
+            sykFoerSykmeldingen = sykmeldingSporsmalSvarDto.sykFoerSykmeldingen,
             harBruktEgenmelding = sykmeldingSporsmalSvarDto.harBruktEgenmelding,
             egenmeldingsperioder = sykmeldingSporsmalSvarDto.egenmeldingsperioder,
             harForsikring = sykmeldingSporsmalSvarDto.harForsikring,

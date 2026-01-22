@@ -8,6 +8,7 @@ import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -47,6 +48,7 @@ val defaultSyketilfelleDispatcher =
                 ErUtenforVentetidResponse(
                     erUtenforVentetid = false,
                     oppfolgingsdato = LocalDate.parse("2025-01-01"),
+                    ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
                 ).serialisertTilString(),
             )
     }

@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import com.fasterxml.jackson.databind.module.SimpleModule
-import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 import java.time.LocalDate
 
@@ -82,6 +81,7 @@ data class FiskerBrukerSvar(
     val riktigNarmesteLeder: SporsmalSvar<Boolean>? = null,
     val harEgenmeldingsdager: SporsmalSvar<Boolean>? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
+    val sykFoerSykmeldingen: SporsmalSvar<Boolean>? = null,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
@@ -124,6 +124,7 @@ data class FiskerBrukerSvar(
         return NaringsdrivendeBrukerSvar(
             erOpplysningeneRiktige = erOpplysningeneRiktige,
             arbeidssituasjon = arbeidssituasjon,
+            sykFoerSykmeldingen = sykFoerSykmeldingen,
             harBruktEgenmelding = harBruktEgenmelding,
             egenmeldingsperioder = egenmeldingsperioder,
             harForsikring = harForsikring,
@@ -135,6 +136,7 @@ data class FiskerBrukerSvar(
 data class FrilanserBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    val sykFoerSykmeldingen: SporsmalSvar<Boolean>? = null,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
@@ -146,6 +148,7 @@ data class FrilanserBrukerSvar(
 data class JordbrukerBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    val sykFoerSykmeldingen: SporsmalSvar<Boolean>? = null,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,
@@ -157,6 +160,7 @@ data class JordbrukerBrukerSvar(
 data class NaringsdrivendeBrukerSvar(
     override val erOpplysningeneRiktige: SporsmalSvar<Boolean>,
     override val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
+    val sykFoerSykmeldingen: SporsmalSvar<Boolean>? = null,
     val harBruktEgenmelding: SporsmalSvar<Boolean>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<Egenmeldingsperiode>>? = null,
     val harForsikring: SporsmalSvar<Boolean>? = null,

@@ -92,6 +92,11 @@ fun lagBrukerSvarKafkaDto(
             sporsmaltekst = "Er dette riktig nærmeste leder?",
             svar = JaEllerNei.JA,
         ),
+    sykFoerSykmeldingen =
+        FormSporsmalSvar(
+            sporsmaltekst = "Var du syk før sykmeldingen?",
+            svar = JaEllerNei.JA,
+        ),
     harBruktEgenmelding =
         FormSporsmalSvar(
             sporsmaltekst = "Har du brukt egenmelding?",

@@ -15,6 +15,7 @@ data class SendSykmeldingRequestDTO(
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
     val egenmeldingsperioder: SporsmalSvar<List<EgenmeldingsperiodeDTO>>? = null,
     val fisker: FiskerDTO? = null,
+    val sykFoerSykmeldingen: SporsmalSvar<JaEllerNei>? = null,
     val harBruktEgenmelding: SporsmalSvar<JaEllerNei>? = null,
     val harForsikring: SporsmalSvar<JaEllerNei>? = null,
     val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysningDTO>>? = null,
@@ -178,6 +179,13 @@ data class SendSykmeldingRequestDTO(
                                 it.svar,
                             )
                         },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
+                            )
+                        },
                     harBruktEgenmelding =
                         harBruktEgenmelding?.let {
                             SporsmalSvar(
@@ -215,6 +223,13 @@ data class SendSykmeldingRequestDTO(
                             SporsmalSvar(
                                 it.sporsmaltekst,
                                 it.svar.tilUriktigeOpplysningerListe(),
+                            )
+                        },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
                             )
                         },
                     harBruktEgenmelding =
@@ -255,6 +270,13 @@ data class SendSykmeldingRequestDTO(
                                 it.svar.tilUriktigeOpplysningerListe(),
                             )
                         },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
+                            )
+                        },
                     harBruktEgenmelding =
                         harBruktEgenmelding?.let {
                             SporsmalSvar(
@@ -291,6 +313,13 @@ data class SendSykmeldingRequestDTO(
                             SporsmalSvar(
                                 it.sporsmaltekst,
                                 it.svar.tilUriktigeOpplysningerListe(),
+                            )
+                        },
+                    sykFoerSykmeldingen =
+                        sykFoerSykmeldingen?.let {
+                            SporsmalSvar(
+                                it.sporsmaltekst,
+                                it.svar.tilBoolean(),
                             )
                         },
                     harBruktEgenmelding =
