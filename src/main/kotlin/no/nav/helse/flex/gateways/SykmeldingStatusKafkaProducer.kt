@@ -1,7 +1,6 @@
 package no.nav.helse.flex.gateways
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.helse.flex.tsmsykmeldingstatus.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
@@ -13,6 +12,8 @@ import java.time.OffsetDateTime
 interface SykmeldingStatusKafkaProducer {
     fun produserSykmeldingStatus(sykmeldingStatusKafkaMessageDTO: SykmeldingStatusKafkaMessageDTO): Boolean
 }
+
+const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
 
 @Component
 class SykmeldingStatusKafkaProducerImpl(

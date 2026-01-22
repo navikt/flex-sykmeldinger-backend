@@ -9,7 +9,6 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testdata.*
-import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -131,18 +130,6 @@ class SykmeldingStatusHandtererTest : FakesTestOppsett() {
                     ),
             )
         sykmeldingStatusHandterer.handterSykmeldingStatus(status).`should be true`()
-    }
-
-    @Test
-    fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
-        val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
-        val sammenstillSykmeldingStatusKafkaMessageDTO =
-            SykmeldingStatusHandterer.sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = "fnr",
-                sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
-            )
-        sammenstillSykmeldingStatusKafkaMessageDTO.kafkaMetadata.`should not be null`()
-        sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.`should not be null`()
     }
 
     @Test

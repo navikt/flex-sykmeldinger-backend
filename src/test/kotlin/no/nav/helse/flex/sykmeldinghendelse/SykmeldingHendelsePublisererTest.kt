@@ -4,9 +4,13 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
+import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -30,6 +34,21 @@ class SykmeldingHendelsePublisererTest : FakesTestOppsett() {
 
         sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSize(1).first().run {
             event.sykmeldingId shouldBeEqualTo "1"
+        }
+    }
+
+    @Nested
+    inner class Funksjoner {
+        @Test
+        fun `burde sammenstille data til SykmeldingStatusKafkaMessageDTO`() {
+            val sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO = lagSykmeldingStatusKafkaMessageDTO().event
+            val sammenstillSykmeldingStatusKafkaMessageDTO =
+                SykmeldingHendelsePubliserer.sammenstillSykmeldingStatusKafkaMessageDTO(
+                    fnr = "fnr",
+                    sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
+                )
+            sammenstillSykmeldingStatusKafkaMessageDTO.kafkaMetadata.`should not be null`()
+            sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.`should not be null`()
         }
     }
 }

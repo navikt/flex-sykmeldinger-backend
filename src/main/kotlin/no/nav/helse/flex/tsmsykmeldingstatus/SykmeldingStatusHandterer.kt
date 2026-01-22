@@ -1,11 +1,11 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
-import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.gateways.SykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.gateways.aareg.AaregClient
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseException
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
@@ -14,11 +14,6 @@ import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-
-const val SYKMELDINGSTATUS_TOPIC: String = "teamsykmelding.sykmeldingstatus-leesah"
-const val SYKMELDINGSTATUS_LEESAH_SOURCE = "flex-sykmeldinger-backend"
 
 @Service
 class SykmeldingStatusHandterer(
@@ -171,25 +166,6 @@ class SykmeldingStatusHandterer(
 
     companion object {
         private fun SykmeldingStatusKafkaMessageDTO.erFraEgetSystem(): Boolean = this.kafkaMetadata.source == SYKMELDINGSTATUS_LEESAH_SOURCE
-
-        internal fun sammenstillSykmeldingStatusKafkaMessageDTO(
-            fnr: String,
-            sykmeldingStatusKafkaDTO: SykmeldingStatusKafkaDTO,
-        ): SykmeldingStatusKafkaMessageDTO {
-            val sykmeldingId = sykmeldingStatusKafkaDTO.sykmeldingId
-            val metadataDTO =
-                KafkaMetadataDTO(
-                    sykmeldingId = sykmeldingId,
-                    timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                    fnr = fnr,
-                    source = SYKMELDINGSTATUS_LEESAH_SOURCE,
-                )
-
-            return SykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = metadataDTO,
-                event = sykmeldingStatusKafkaDTO,
-            )
-        }
 
         fun finnesDuplikatHendelsePaaSykmelding(
             sykmelding: Sykmelding,
