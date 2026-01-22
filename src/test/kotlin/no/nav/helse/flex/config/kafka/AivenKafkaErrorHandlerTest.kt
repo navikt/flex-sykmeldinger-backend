@@ -44,7 +44,7 @@ class AivenKafkaErrorHandlerTest {
     }
 
     @Test
-    fun `logger 'message' kun til secure logs`() {
+    fun `logger 'message' kun til team logs`() {
         AivenKafkaErrorHandler.loggFeilende(
             thrownException = RuntimeException("Feil melding"),
             records = mutableListOf(Testdata.lagConsumerRecord()),
@@ -52,18 +52,18 @@ class AivenKafkaErrorHandlerTest {
         logListAppender.eventerUtenMarkers().first().run {
             message shouldNotContain "Feil melding"
         }
-        logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).first().run {
+        logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).first().run {
             message shouldContain "Feil melding"
         }
     }
 
     @Test
-    fun `logger også til secure logs`() {
+    fun `logger også til team logs`() {
         AivenKafkaErrorHandler.loggFeilende(
             thrownException = RuntimeException(),
             records = mutableListOf(Testdata.lagConsumerRecord()),
         )
-        logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).shouldHaveSingleItem()
+        logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).shouldHaveSingleItem()
     }
 
     @Test
@@ -167,12 +167,12 @@ class AivenKafkaErrorHandlerTest {
         }
 
         @Test
-        fun `logger årsak melding til secure logs`() {
+        fun `logger årsak melding til team logs`() {
             AivenKafkaErrorHandler.loggFeilende(
                 thrownException = KafkaErrorHandlerException(cause = RuntimeException("Årsak melding")),
                 records = mutableListOf(Testdata.lagConsumerRecord()),
             )
-            logListAppender.eventerMedMarker(LogMarker.SECURE_LOGS).first().run {
+            logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).first().run {
                 throwableProxy.message shouldBeEqualTo "Årsak melding"
             }
         }

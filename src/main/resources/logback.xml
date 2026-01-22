@@ -10,7 +10,7 @@
         </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOG</marker>
+                <marker>TEAM_LOG</marker>
             </evaluator>
             <OnMismatch>ACCEPT</OnMismatch>
             <OnMatch>DENY</OnMatch>
@@ -25,7 +25,7 @@
         </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOG</marker>
+                <marker>TEAM_LOG</marker>
             </evaluator>
             <OnMismatch>DENY</OnMismatch>
             <OnMatch>ACCEPT</OnMatch>
