@@ -12,7 +12,6 @@ import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testdata.*
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBuffer
 import org.amshove.kluent.*
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,9 +29,6 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
     @Autowired
     private lateinit var aaregClient: AaregClientFake
-
-    @Autowired
-    private lateinit var sykmeldignHendelseBuffer: SykmeldingStatusBuffer
 
     @Autowired
     private lateinit var sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducerFake
@@ -199,26 +195,6 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
 
         sykmeldingBrukernotifikasjonProducer.hentSykmeldingBrukernotifikasjoner().shouldHaveSingleItem()
-    }
-
-    @Test
-    fun `burde lagre alle buffrede hendelser på sykmelding`() {
-        sykmeldignHendelseBuffer.leggTil(
-            lagSykmeldingStatusKafkaMessageDTO(
-                kafkaMetadata = lagKafkaMetadataDTO(sykmeldingId = "1"),
-                event = lagSykmeldingStatusKafkaDTO(statusEvent = "SENDT"),
-            ),
-        )
-
-        eksternSykmeldingHandterer.lagreSykmeldingFraKafka(
-            sykmeldingId = "_",
-            lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
-        )
-
-        val sykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
-        sykmelding.hendelser.size `should be equal to` 2
-        sykmelding.hendelser[0].status `should be equal to` HendelseStatus.APEN
-        sykmelding.hendelser[1].status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
     }
 
     @Test
