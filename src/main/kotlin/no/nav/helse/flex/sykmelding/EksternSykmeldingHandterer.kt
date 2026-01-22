@@ -8,7 +8,6 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusHandterer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +18,6 @@ import java.util.function.Supplier
 class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
-    private val sykmeldingStatusHandterer: SykmeldingStatusHandterer,
     private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
     private val nowFactory: Supplier<Instant>,
     private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
@@ -47,7 +45,6 @@ class EksternSykmeldingHandterer(
         } else {
             val sykmelding = lagNySykmelding(eksternSykmeldingMelding, tidspunkt = nowFactory.get())
             sykmeldingRepository.save(sykmelding)
-            sykmeldingStatusHandterer.prosesserSykmeldingStatuserFraBuffer(sykmelding.sykmeldingId)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
