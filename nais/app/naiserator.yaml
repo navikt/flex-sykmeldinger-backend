@@ -49,6 +49,8 @@ spec:
     outbound:
       rules:
         - application: flex-syketilfelle
+        - application: logging
+          namespace: nais-system
       external:
     {{#each external-host}}
         - host: {{this}}
@@ -57,8 +59,6 @@ spec:
       rules:
         - application: ditt-sykefravaer
         - application: sykepengesoknad
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -67,7 +67,6 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-        - id: secure_logs
   gcp:
     sqlInstances:
       - type: POSTGRES_16

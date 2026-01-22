@@ -10,39 +10,33 @@
         </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOG</marker>
+                <marker>TEAM_LOG</marker>
             </evaluator>
-            <OnMismatch>NEUTRAL</OnMismatch>
+            <OnMismatch>ACCEPT</OnMismatch>
             <OnMatch>DENY</OnMatch>
         </filter>
     </appender>
 
-    <appender name="secure_log_json" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/secure-logs/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>128MB</maxFileSize>
-        </triggeringPolicy>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    <appender name="team_log_json" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>team-logs.nais-system:5170</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
+            <includeContext>false</includeContext>
+        </encoder>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOG</marker>
+                <marker>TEAM_LOG</marker>
             </evaluator>
             <OnMismatch>DENY</OnMismatch>
-            <OnMatch>NEUTRAL</OnMatch>
+            <OnMatch>ACCEPT</OnMatch>
         </filter>
     </appender>
 
     <root level="WARN">
         <appender-ref ref="stdout_json"/>
-        <appender-ref ref="secure_log_json"/>
+        <appender-ref ref="team_log_json"/>
     </root>
 
     <logger name="no.nav.helse.flex" level="INFO"/>
-
     <logger name="org.springframework" level="INFO"/>
 </configuration>

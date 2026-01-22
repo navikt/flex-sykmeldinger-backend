@@ -9,7 +9,7 @@ import java.util.UUID
 inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
 object LogMarker {
-    val SECURE_LOGS: Marker = MarkerFactory.getMarker("SECURE_LOG")
+    val TEAM_LOG: Marker = MarkerFactory.getMarker("TEAM_LOG")
 }
 
 fun Logger.errorSecure(
@@ -17,7 +17,7 @@ fun Logger.errorSecure(
     secureMessage: String = "",
     secureThrowable: Throwable? = null,
 ) {
-    val secureLogId = UUID.randomUUID().toString().take(8)
-    this.error("$message (SecureLogId: $secureLogId)")
-    this.error(LogMarker.SECURE_LOGS, "$message (SecureLogId: $secureLogId) $secureMessage", secureThrowable)
+    val teamLogId = UUID.randomUUID().toString().take(8)
+    this.error("$message (TeamLogId: $teamLogId)")
+    this.error(LogMarker.TEAM_LOG, "$message (TeamLogId: $teamLogId) $secureMessage", secureThrowable)
 }
