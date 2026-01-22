@@ -5,7 +5,6 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -50,9 +49,6 @@ abstract class FakesTestOppsett {
     lateinit var sykmeldingRepository: ISykmeldingRepository
 
     @Autowired
-    lateinit var sykmeldingStatusBufferRepository: SykmeldingStatusBufferRepository
-
-    @Autowired
     lateinit var advisoryLock: AdvisoryLockFake
 
     @AfterAll
@@ -64,7 +60,6 @@ abstract class FakesTestOppsett {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
-        sykmeldingStatusBufferRepository.deleteAll()
         advisoryLock.reset()
     }
 }

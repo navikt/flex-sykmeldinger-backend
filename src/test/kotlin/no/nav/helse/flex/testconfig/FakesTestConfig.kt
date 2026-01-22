@@ -9,7 +9,6 @@ import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
 import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingStatusBufferRepository
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.support.NoOpCacheManager
@@ -34,9 +33,6 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
-
-    @Bean
-    fun sykmeldingHendelseBufferRepository(): SykmeldingStatusBufferRepository = SykmeldingStatusBufferRepositoryFake()
 
     @Bean
     fun advisoryLock(): AdvisoryLockFake = AdvisoryLockFake()
