@@ -138,7 +138,7 @@ class SykmeldingDtoKonverterer(
                         when (it) {
                             is InvalidRule -> it.reason.sykmeldt
                             is PendingRule -> it.reason.sykmeldt
-                            else -> null
+                            is OKRule -> null
                         },
                 )
             }
@@ -165,7 +165,7 @@ class SykmeldingDtoKonverterer(
             }
             RuleType.PENDING -> {
                 BehandlingsutfallDTO(
-                    status = RegelStatusDTO.OK,
+                    status = RegelStatusDTO.MANUAL_PROCESSING,
                     ruleHits = emptyList(),
                 )
             }
