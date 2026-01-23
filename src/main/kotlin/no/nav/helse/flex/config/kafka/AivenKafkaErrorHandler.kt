@@ -30,13 +30,13 @@ class AivenKafkaErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-        loggFeilende(
-            thrownException = thrownException,
-            records = records,
-            listenerId = container.listenerId,
-            listenerTopics = consumer.listTopics().keys,
-        )
         medTraceContext {
+            loggFeilende(
+                thrownException = thrownException,
+                records = records,
+                listenerId = container.listenerId,
+                listenerTopics = consumer.listTopics().keys,
+            )
             super.handleRemaining(thrownException, records, consumer, container)
         }
     }
@@ -48,13 +48,13 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        loggFeilende(
-            thrownException = thrownException,
-            records = data.toList(),
-            listenerId = container.listenerId,
-            listenerTopics = consumer.listTopics().keys,
-        )
         medTraceContext {
+            loggFeilende(
+                thrownException = thrownException,
+                records = data.toList(),
+                listenerId = container.listenerId,
+                listenerTopics = consumer.listTopics().keys,
+            )
             super.handleBatch(thrownException, data, consumer, container, invokeListener)
         }
     }
