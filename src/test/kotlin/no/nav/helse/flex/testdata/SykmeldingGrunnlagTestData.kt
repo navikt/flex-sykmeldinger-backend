@@ -16,7 +16,7 @@ fun lagSykmeldingGrunnlag(
             ),
         ),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
-    medisinskVurdering: MedisinskVurdering = lagMedisinskVurdering(),
+    medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
 ): XMLSykmeldingGrunnlag =
     XMLSykmeldingGrunnlag(
@@ -84,7 +84,7 @@ fun lagUtenlandskSykmeldingGrunnlag(id: String = "1"): UtenlandskSykmeldingGrunn
         id = id,
         metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
-        medisinskVurdering = lagMedisinskVurdering(),
+        medisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
         aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
         utenlandskInfo =
             UtenlandskInfo(
@@ -99,7 +99,7 @@ fun lagDigitalSykmeldingGrunnlag(id: String = "1"): DigitalSykmeldingGrunnlag =
         id = id,
         metadata = lagSykmeldingMetadata(),
         pasient = lagPasient(),
-        medisinskVurdering = lagMedisinskVurdering(),
+        medisinskVurdering = lagDigitalMedisinskVurdering(),
         aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
         behandler = lagBehandler(),
         arbeidsgiver = IngenArbeidsgiver(),
@@ -169,12 +169,12 @@ fun lagPasient(
         navnFastlege = navnFastlege,
     )
 
-fun lagMedisinskVurdering(
+fun lagIkkeDigitalMedisinskVurdering(
     hovedDiagnoseKode: String = "R51",
     annenFraverArsak: AnnenFraverArsak? = null,
     syketilfelleStartDato: LocalDate? = null,
-): MedisinskVurdering =
-    MedisinskVurdering(
+): IkkeDigitalMedisinskVurdering =
+    IkkeDigitalMedisinskVurdering(
         hovedDiagnose =
             DiagnoseInfo(
                 system = DiagnoseSystem.ICPC2,
@@ -193,7 +193,33 @@ fun lagMedisinskVurdering(
         annenFraversArsak = annenFraverArsak,
         yrkesskade = null,
         skjermetForPasient = false,
-        annenFravarsgrunn = null,
+        syketilfelletStartDato = syketilfelleStartDato,
+    )
+
+fun lagDigitalMedisinskVurdering(
+    hovedDiagnoseKode: String = "R51",
+    annenfravarsgrunn: AnnenFravarArsakType? = null,
+    syketilfelleStartDato: LocalDate? = null,
+): DigitalMedisinskVurdering =
+    DigitalMedisinskVurdering(
+        hovedDiagnose =
+            DiagnoseInfo(
+                system = DiagnoseSystem.ICPC2,
+                kode = hovedDiagnoseKode,
+                tekst = "tekst",
+            ),
+        biDiagnoser =
+            listOf(
+                DiagnoseInfo(
+                    system = DiagnoseSystem.ICD10,
+                    kode = "J06.9",
+                    tekst = "tekst",
+                ),
+            ),
+        svangerskap = false,
+        yrkesskade = null,
+        skjermetForPasient = false,
+        annenFravarsgrunn = annenfravarsgrunn,
         syketilfelletStartDato = syketilfelleStartDato,
     )
 

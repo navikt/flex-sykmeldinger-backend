@@ -5,7 +5,7 @@ import no.nav.helse.flex.api.dto.SykmeldingsperiodeDTO
 import no.nav.helse.flex.sykmelding.tsm.AnnenFravarArsakType
 import no.nav.helse.flex.sykmelding.tsm.AnnenFraverArsak
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagMedisinskVurdering
+import no.nav.helse.flex.testdata.lagIkkeDigitalMedisinskVurdering
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class SykmeldingRegelAvklaringerTest : FakesTestOppsett() {
         val medisinskVurdering =
             sykmeldingDtoKonverterer
                 .konverterMedisinskVurdering(
-                    lagMedisinskVurdering(
+                    lagIkkeDigitalMedisinskVurdering(
                         hovedDiagnoseKode = "R991",
                         annenFraverArsak =
                             AnnenFraverArsak(
@@ -60,7 +60,7 @@ class SykmeldingRegelAvklaringerTest : FakesTestOppsett() {
         val medisinskVurdering =
             sykmeldingDtoKonverterer
                 .konverterMedisinskVurdering(
-                    lagMedisinskVurdering(
+                    lagIkkeDigitalMedisinskVurdering(
                         hovedDiagnoseKode = "R991",
                         annenFraverArsak =
                             AnnenFraverArsak(

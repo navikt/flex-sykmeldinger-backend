@@ -69,7 +69,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 lagSykmelding(
                     sykmeldingGrunnlag =
                         lagSykmeldingGrunnlag(
-                            medisinskVurdering = lagMedisinskVurdering(syketilfelleStartDato = LocalDate.parse("2025-01-01")),
+                            medisinskVurdering = lagIkkeDigitalMedisinskVurdering(syketilfelleStartDato = LocalDate.parse("2025-01-01")),
                             pasient = lagPasient(navnFastlege = "Fastlege Navn"),
                             tilbakedatering = lagTilbakedatering(LocalDate.parse("2025-04-25")),
                         ),
@@ -247,9 +247,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde konvertere medisinsk vurdering`() {
+    fun `burde konvertere ikke-digital medisinsk vurdering`() {
         val medisinskVurdering =
-            MedisinskVurdering(
+            IkkeDigitalMedisinskVurdering(
                 hovedDiagnose =
                     DiagnoseInfo(
                         system = DiagnoseSystem.ICD10,
@@ -276,7 +276,6 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                         beskrivelse = "beskrivelse",
                         arsak = listOf(AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON),
                     ),
-                null,
             )
 
         sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
@@ -298,6 +297,61 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 annenFraversArsak =
                     AnnenFraversArsakDTO(
                         beskrivelse = "beskrivelse",
+                        grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
+                    ),
+                svangerskap = true,
+                yrkesskade = true,
+                yrkesskadeDato = LocalDate.parse("2021-01-01"),
+            )
+    }
+
+    @Test
+    fun `burde konvertere digital medisinsk vurdering`() {
+        val medisinskVurdering =
+            DigitalMedisinskVurdering(
+                hovedDiagnose =
+                    DiagnoseInfo(
+                        system = DiagnoseSystem.ICD10,
+                        kode = "kode",
+                        tekst = "tekst",
+                    ),
+                biDiagnoser =
+                    listOf(
+                        DiagnoseInfo(
+                            system = DiagnoseSystem.ICPC2,
+                            kode = "bi diagnose",
+                            tekst = null,
+                        ),
+                    ),
+                svangerskap = true,
+                yrkesskade =
+                    Yrkesskade(
+                        yrkesskadeDato = LocalDate.parse("2021-01-01"),
+                    ),
+                skjermetForPasient = false,
+                syketilfelletStartDato = LocalDate.parse("2021-01-01"),
+                annenFravarsgrunn = AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON,
+            )
+
+        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+            MedisinskVurderingDTO(
+                hovedDiagnose =
+                    DiagnoseDTO(
+                        kode = "kode",
+                        system = "ICD10",
+                        tekst = "tekst",
+                    ),
+                biDiagnoser =
+                    listOf(
+                        DiagnoseDTO(
+                            kode = "bi diagnose",
+                            system = "ICPC2",
+                            tekst = null,
+                        ),
+                    ),
+                annenFraversArsak =
+                    AnnenFraversArsakDTO(
+                        beskrivelse = null,
                         grunn = listOf(AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON),
                     ),
                 svangerskap = true,

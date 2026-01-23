@@ -126,13 +126,29 @@ class SykmeldingDtoKonverterer(
                 MerknadDTO(
                     type =
                         when (it.name) {
-                            "TILBAKEDATERING_DELVIS_GODKJENT" -> MerknadtypeDTO.DELVIS_GODKJENT
-                            "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" ->
+                            "TILBAKEDATERING_DELVIS_GODKJENT" -> {
+                                MerknadtypeDTO.DELVIS_GODKJENT
+                            }
+
+                            "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER" -> {
                                 MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
-                            "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING" -> MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
-                            "TILBAKEDATERING_UNDER_BEHANDLING" -> MerknadtypeDTO.UNDER_BEHANDLING
-                            "TILBAKEDATERING_TILBAKEDATERT_PAPIRSYKMELDING" -> MerknadtypeDTO.TILBAKEDATERT_PAPIRSYKMELDING
-                            else -> MerknadtypeDTO.UKJENT_MERKNAD
+                            }
+
+                            "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING" -> {
+                                MerknadtypeDTO.UGYLDIG_TILBAKEDATERING
+                            }
+
+                            "TILBAKEDATERING_UNDER_BEHANDLING" -> {
+                                MerknadtypeDTO.UNDER_BEHANDLING
+                            }
+
+                            "TILBAKEDATERING_TILBAKEDATERT_PAPIRSYKMELDING" -> {
+                                MerknadtypeDTO.TILBAKEDATERT_PAPIRSYKMELDING
+                            }
+
+                            else -> {
+                                MerknadtypeDTO.UKJENT_MERKNAD
+                            }
                         },
                     beskrivelse =
                         when (it) {
@@ -163,12 +179,14 @@ class SykmeldingDtoKonverterer(
                     ruleHits = emptyList(),
                 )
             }
+
             RuleType.PENDING -> {
                 BehandlingsutfallDTO(
                     status = RegelStatusDTO.OK,
                     ruleHits = emptyList(),
                 )
             }
+
             RuleType.INVALID -> {
                 val ruleHits =
                     validationResult.rules.mapNotNull { rule ->
@@ -207,16 +225,21 @@ class SykmeldingDtoKonverterer(
                             arsak =
                                 aktivitet.medisinskArsak.arsak.map {
                                     when (it) {
-                                        MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET ->
+                                        MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET -> {
                                             MedisinskArsakTypeDTO.TILSTAND_HINDRER_AKTIVITET
+                                        }
 
-                                        MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND ->
+                                        MedisinskArsakType.AKTIVITET_FORVERRER_TILSTAND -> {
                                             MedisinskArsakTypeDTO.AKTIVITET_FORVERRER_TILSTAND
+                                        }
 
-                                        MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING ->
+                                        MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING -> {
                                             MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING
+                                        }
 
-                                        MedisinskArsakType.ANNET -> MedisinskArsakTypeDTO.ANNET
+                                        MedisinskArsakType.ANNET -> {
+                                            MedisinskArsakTypeDTO.ANNET
+                                        }
                                     }
                                 },
                         )
@@ -230,10 +253,13 @@ class SykmeldingDtoKonverterer(
                             arsak =
                                 aktivitet.arbeidsrelatertArsak.arsak.map {
                                     when (it) {
-                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING ->
+                                        ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING -> {
                                             ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING
+                                        }
 
-                                        ArbeidsrelatertArsakType.ANNET -> ArbeidsrelatertArsakTypeDTO.ANNET
+                                        ArbeidsrelatertArsakType.ANNET -> {
+                                            ArbeidsrelatertArsakTypeDTO.ANNET
+                                        }
                                     }
                                 },
                         )
@@ -261,12 +287,16 @@ class SykmeldingDtoKonverterer(
             aktivitetIkkeMulig = aktivitetIkkeMuligDto,
             gradert =
                 when (aktivitet) {
-                    is Gradert ->
+                    is Gradert -> {
                         GradertDTO(
                             grad = aktivitet.grad,
                             reisetilskudd = aktivitet.reisetilskudd,
                         )
-                    else -> null
+                    }
+
+                    else -> {
+                        null
+                    }
                 },
             behandlingsdager =
                 when (aktivitet) {
@@ -289,8 +319,24 @@ class SykmeldingDtoKonverterer(
             yrkesskade = medisinskVurdering.yrkesskade != null,
             yrkesskadeDato = medisinskVurdering.yrkesskade?.yrkesskadeDato,
             annenFraversArsak =
-                medisinskVurdering.annenFravarsgrunn?.let { AnnenFraversArsakDTO(null, listOf(it.toAnnenFravarGrunnDTO())) }
-                    ?: medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) },
+                when (medisinskVurdering) {
+                    is DigitalMedisinskVurdering -> {
+                        medisinskVurdering.annenFravarsgrunn?.let {
+                            AnnenFraversArsakDTO(
+                                null,
+                                listOf(it.toAnnenFravarGrunnDTO()),
+                            )
+                        }
+                    }
+
+                    is IkkeDigitalMedisinskVurdering -> {
+                        medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) }
+                    }
+
+                    else -> {
+                        null
+                    }
+                },
             svangerskap = medisinskVurdering.svangerskap,
         )
 
@@ -303,18 +349,45 @@ class SykmeldingDtoKonverterer(
 
     private fun AnnenFravarArsakType.toAnnenFravarGrunnDTO(): AnnenFraverGrunnDTO =
         when (this) {
-            AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON -> AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON
-            AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> AnnenFraverGrunnDTO.BEHANDLING_FORHINDRER_ARBEID
-            AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> AnnenFraverGrunnDTO.ARBEIDSRETTET_TILTAK
-            AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND ->
-                AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+            AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON -> {
+                AnnenFraverGrunnDTO.GODKJENT_HELSEINSTITUSJON
+            }
 
-            AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE -> AnnenFraverGrunnDTO.NODVENDIG_KONTROLLUNDENRSOKELSE
-            AnnenFravarArsakType.SMITTEFARE -> AnnenFraverGrunnDTO.SMITTEFARE
-            AnnenFravarArsakType.ABORT -> AnnenFraverGrunnDTO.ABORT
-            AnnenFravarArsakType.UFOR_GRUNNET_BARNLOSHET -> AnnenFraverGrunnDTO.UFOR_GRUNNET_BARNLOSHET
-            AnnenFravarArsakType.DONOR -> AnnenFraverGrunnDTO.DONOR
-            AnnenFravarArsakType.BEHANDLING_STERILISERING -> AnnenFraverGrunnDTO.BEHANDLING_STERILISERING
+            AnnenFravarArsakType.BEHANDLING_FORHINDRER_ARBEID -> {
+                AnnenFraverGrunnDTO.BEHANDLING_FORHINDRER_ARBEID
+            }
+
+            AnnenFravarArsakType.ARBEIDSRETTET_TILTAK -> {
+                AnnenFraverGrunnDTO.ARBEIDSRETTET_TILTAK
+            }
+
+            AnnenFravarArsakType.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND -> {
+                AnnenFraverGrunnDTO.MOTTAR_TILSKUDD_GRUNNET_HELSETILSTAND
+            }
+
+            AnnenFravarArsakType.NODVENDIG_KONTROLLUNDENRSOKELSE -> {
+                AnnenFraverGrunnDTO.NODVENDIG_KONTROLLUNDENRSOKELSE
+            }
+
+            AnnenFravarArsakType.SMITTEFARE -> {
+                AnnenFraverGrunnDTO.SMITTEFARE
+            }
+
+            AnnenFravarArsakType.ABORT -> {
+                AnnenFraverGrunnDTO.ABORT
+            }
+
+            AnnenFravarArsakType.UFOR_GRUNNET_BARNLOSHET -> {
+                AnnenFraverGrunnDTO.UFOR_GRUNNET_BARNLOSHET
+            }
+
+            AnnenFravarArsakType.DONOR -> {
+                AnnenFraverGrunnDTO.DONOR
+            }
+
+            AnnenFravarArsakType.BEHANDLING_STERILISERING -> {
+                AnnenFraverGrunnDTO.BEHANDLING_STERILISERING
+            }
         }
 
     internal fun konverterDiagnose(diagnose: DiagnoseInfo): DiagnoseDTO =
@@ -404,12 +477,17 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterSvarRestriksjon(restriksjon: SvarRestriksjon): SvarRestriksjonDTO =
         when (restriksjon) {
-            SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER ->
+            SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER -> {
                 SvarRestriksjonDTO.SKJERMET_FOR_ARBEIDSGIVER
-            SvarRestriksjon.SKJERMET_FOR_PASIENT ->
+            }
+
+            SvarRestriksjon.SKJERMET_FOR_PASIENT -> {
                 SvarRestriksjonDTO.SKJERMET_FOR_PASIENT
-            SvarRestriksjon.SKJERMET_FOR_NAV ->
+            }
+
+            SvarRestriksjon.SKJERMET_FOR_NAV -> {
                 SvarRestriksjonDTO.SKJERMET_FOR_NAV
+            }
         }
 }
 
@@ -429,15 +507,21 @@ fun ArbeidsgiverInfo.getTiltakArbeidsplassen(): String? =
 
 fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
     when (this) {
-        is EnArbeidsgiver ->
+        is EnArbeidsgiver -> {
             ArbeidsgiverDTO(
                 navn = this.navn,
                 stillingsprosent = this.stillingsprosent,
             )
-        is FlereArbeidsgivere ->
+        }
+
+        is FlereArbeidsgivere -> {
             ArbeidsgiverDTO(
                 navn = this.navn,
                 stillingsprosent = this.stillingsprosent,
             )
-        is IngenArbeidsgiver -> null
+        }
+
+        is IngenArbeidsgiver -> {
+            null
+        }
     }
