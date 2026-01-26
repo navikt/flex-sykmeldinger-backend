@@ -30,6 +30,6 @@ class SchedulerConfig {
     @Bean
     fun fixedThreadPool(): ConcurrentTaskExecutor =
         ConcurrentTaskExecutor(
-            Executors.newFixedThreadPool(15),
+            Executors.newFixedThreadPool(10),
         )
 }
