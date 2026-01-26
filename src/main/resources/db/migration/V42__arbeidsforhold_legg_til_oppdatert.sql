@@ -1,0 +1,2 @@
+ALTER TABLE arbeidsforhold
+    ADD COLUMN oppdatert TIMESTAMP WITH TIME ZONE;
