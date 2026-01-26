@@ -2,6 +2,7 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
+import no.nav.helse.flex.arbeidsforhold.manuellsynk.TempSynkroniserArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
@@ -57,4 +58,7 @@ class FakesTestConfig {
 
     @Bean
     fun sykmeldingBrukernotifikasjonProducer(): SykmeldingBrukernotifikasjonProducerFake = SykmeldingBrukernotifikasjonProducerFake()
+
+    @Bean
+    fun tempSynkroniserArbeidsforholdRepository(): TempSynkroniserArbeidsforholdRepository = TempSynkroniserArbeidsforholdRepositoryFake()
 }
