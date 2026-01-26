@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
-import kotlin.collections.chunked
-import kotlin.collections.map
 
 @Component
 class SynkroniserArbeidsforholdJobb(
@@ -23,15 +21,12 @@ class SynkroniserArbeidsforholdJobb(
     fun kjørJobb() {
         log.info("Starter SynkroniserArbeidsforholdJobb")
         val alleArbeidsforhold = tempSynkroniserArbeidsforholdRepository.findNextBatch(500)
-        val personerFnrBatcher = alleArbeidsforhold.chunked(10)
 
-        personerFnrBatcher.forEach { fnrBatch ->
-            val tasks =
-                fnrBatch.map {
-                    arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr = it.fnr)
-                }
-            CompletableFuture.allOf(*tasks.toTypedArray()).join()
-        }
+        val tasks =
+            alleArbeidsforhold.map {
+                arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsyncThreadPool(fnr = it.fnr)
+            }
+        CompletableFuture.allOf(*tasks.toTypedArray()).join()
 
         tempSynkroniserArbeidsforholdRepository.saveAll(
             alleArbeidsforhold.map {
