@@ -24,11 +24,6 @@ class ArbeidsforholdInnhentingService(
     fun synkroniserArbeidsforholdForPersonAsync(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> =
         CompletableFuture.completedFuture(synkroniserArbeidsforholdForPerson(fnr))
 
-    @Async("fixedThreadPool")
-    @Transactional(rollbackFor = [Exception::class])
-    fun synkroniserArbeidsforholdForPersonAsyncThreadPool(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> =
-        CompletableFuture.completedFuture(synkroniserArbeidsforholdForPerson(fnr))
-
     @Transactional(rollbackFor = [Exception::class])
     fun synkroniserArbeidsforholdForPerson(fnr: String): ArbeidsforholdSynkronisering {
         val identerOgEksterneArbeidsforhold = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson(fnr)

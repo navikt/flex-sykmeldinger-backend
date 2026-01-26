@@ -26,10 +26,4 @@ class SchedulerConfig {
         ConcurrentTaskExecutor(
             Executors.newVirtualThreadPerTaskExecutor(),
         )
-
-    @Bean
-    fun fixedThreadPool(): ConcurrentTaskExecutor =
-        ConcurrentTaskExecutor(
-            Executors.newFixedThreadPool(10),
-        )
 }
