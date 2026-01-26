@@ -2,7 +2,7 @@ package no.nav.helse.flex.sykmelding.tsm
 
 import java.time.LocalDate
 
-interface MedisinskVurdering {
+sealed interface MedisinskVurdering {
     val hovedDiagnose: DiagnoseInfo?
     val biDiagnoser: List<DiagnoseInfo>?
     val svangerskap: Boolean

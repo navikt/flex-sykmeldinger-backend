@@ -332,10 +332,6 @@ class SykmeldingDtoKonverterer(
                     is IkkeDigitalMedisinskVurdering -> {
                         medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) }
                     }
-
-                    else -> {
-                        null
-                    }
                 },
             svangerskap = medisinskVurdering.svangerskap,
         )
