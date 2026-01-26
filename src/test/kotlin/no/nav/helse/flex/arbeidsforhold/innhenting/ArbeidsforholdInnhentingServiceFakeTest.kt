@@ -8,6 +8,7 @@ import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
+import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
@@ -30,12 +31,16 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
     @Autowired
     lateinit var pdlClient: PdlClientFake
 
+    @Autowired
+    lateinit var nowFactory: NowFactoryFake
+
     @AfterEach
     fun tearDown() {
         slettDatabase()
         aaregClientFake.reset()
         eregClientFake.reset()
         pdlClient.reset()
+        nowFactory.reset()
     }
 
     @Test
@@ -266,6 +271,34 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
 
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("kjent_ident")
         arbeidsforholdRepository.findAll().shouldHaveSize(1)
+    }
+
+    @Test
+    fun `burde sett oppdatert timestamp ved oppdatering`() {
+        val opprettet = Instant.parse("2000-01-01T00:00:00Z")
+        arbeidsforholdRepository.save(
+            lagArbeidsforhold(
+                navArbeidsforholdId = "1",
+                fnr = "fnr",
+                oppdatert = opprettet,
+            ),
+        )
+        aaregClientFake.setArbeidsforholdoversikt(
+            lagArbeidsforholdOversiktResponse(
+                listOf(
+                    lagArbeidsforholdOversikt(
+                        navArbeidsforholdId = "1",
+                    ),
+                ),
+            ),
+        )
+        val oppdatert = Instant.parse("2020-01-01T00:00:00Z")
+        nowFactory.setNow(oppdatert)
+        arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
+        arbeidsforholdRepository
+            .findByNavArbeidsforholdId("1")
+            .shouldNotBeNull()
+            .oppdatert shouldBeEqualTo oppdatert
     }
 
     @Nested
