@@ -15,7 +15,7 @@ import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
-import no.nav.helse.flex.utils.errorSecure
+import no.nav.helse.flex.utils.infoSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
@@ -63,7 +63,7 @@ class SykmeldingController(
                     }
                 }
         val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
-        logger.errorSecure(message = "Test team logs", secureMessage = "hemmeligmelding")
+        logger.infoSecure(message = "Test team logs", secureMessage = "hemmeligmelding")
         return ResponseEntity.ok(konverterteSykmeldinger)
     }
 
