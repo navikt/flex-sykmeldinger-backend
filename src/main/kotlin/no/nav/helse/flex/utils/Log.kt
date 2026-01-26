@@ -21,3 +21,12 @@ fun Logger.errorSecure(
     this.error("$message (TeamLogId: $teamLogId)")
     this.error(LogMarker.TEAM_LOG, "$message (TeamLogId: $teamLogId) $secureMessage", secureThrowable)
 }
+
+fun Logger.infoSecure(
+    message: String,
+    secureMessage: String = "",
+) {
+    val teamLogId = UUID.randomUUID().toString().take(8)
+    this.info("$message (TeamLogId: $teamLogId)")
+    this.info(LogMarker.TEAM_LOG, "$message (TeamLogId: $teamLogId) $secureMessage")
+}
