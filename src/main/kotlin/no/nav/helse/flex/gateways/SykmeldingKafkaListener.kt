@@ -41,6 +41,7 @@ class SykmeldingListener(
                 acknowledgment.acknowledge()
                 return
             }
+            log.error("Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet")
             throw KafkaErrorHandlerException(
                 e,
                 insensitiveMessage = "Feil ved prosessering av sykmelding på kafka",

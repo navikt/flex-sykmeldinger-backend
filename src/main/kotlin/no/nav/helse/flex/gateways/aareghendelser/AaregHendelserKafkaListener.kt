@@ -51,6 +51,7 @@ class AaregHendelserConsumer(
         try {
             handterHendelser(rawRecords)
         } catch (e: Exception) {
+            log.error("Feil ved håndtering av aareg notifikasjon, exception: ${e::class.simpleName}. Dette vil bli retryet")
             throw KafkaErrorHandlerException(
                 cause = e,
                 insensitiveMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
