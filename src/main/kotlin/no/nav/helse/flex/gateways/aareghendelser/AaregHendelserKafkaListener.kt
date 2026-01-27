@@ -57,7 +57,7 @@ class AaregHendelserConsumer(
                 secureThrowable = e,
             )
             throw KafkaErrorHandlerException(
-                message = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
+                errorHandlerLoggingEnabled = false,
                 cause = e,
             )
         }

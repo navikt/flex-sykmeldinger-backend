@@ -47,7 +47,7 @@ class SykmeldingListener(
                 secureThrowable = e,
             )
             throw KafkaErrorHandlerException(
-                message = "Feil ved prosessering av sykmelding på kafka",
+                errorHandlerLoggingEnabled = false,
                 cause = e,
             )
         }

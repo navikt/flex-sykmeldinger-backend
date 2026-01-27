@@ -35,7 +35,7 @@ class NarmestelederListener(
                 secureThrowable = e,
             )
             throw KafkaErrorHandlerException(
-                message = "Feil ved håndtering av nærmeste leder hendelse",
+                errorHandlerLoggingEnabled = false,
                 cause = e,
             )
         }
