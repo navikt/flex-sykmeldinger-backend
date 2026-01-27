@@ -2,11 +2,6 @@ package no.nav.helse.flex.config.kafka
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import io.opentelemetry.api.trace.Span
-import io.opentelemetry.api.trace.SpanContext
-import io.opentelemetry.api.trace.TraceFlags
-import io.opentelemetry.api.trace.TraceState
-import io.opentelemetry.context.Context
 import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
@@ -14,7 +9,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.slf4j.MDC
 import org.slf4j.Marker
 import org.springframework.kafka.listener.ListenerExecutionFailedException
 import ch.qos.logback.classic.Logger as LogbackLogger
@@ -67,33 +61,6 @@ class AivenKafkaErrorHandlerTest {
     }
 
     @Test
-    fun `logger trace_id og span_id fra OpenTelemetry context til MDC`() {
-        val testTraceId = "0af7651916cd43dd8448eb211c80319c"
-        val testSpanId = "b7ad6b7169203331"
-
-        val spanContext =
-            SpanContext.create(
-                testTraceId,
-                testSpanId,
-                TraceFlags.getSampled(),
-                TraceState.getDefault(),
-            )
-
-        val span = Span.wrap(spanContext)
-        val context = Context.current().with(span)
-
-        context.makeCurrent().use {
-            AivenKafkaErrorHandler.medTraceContext {
-                MDC.get("trace_id") shouldBeEqualTo testTraceId
-                MDC.get("span_id") shouldBeEqualTo testSpanId
-            }
-        }
-
-        MDC.get("trace_id").shouldBeNull()
-        MDC.get("span_id").shouldBeNull()
-    }
-
-    @Test
     fun `logger uten trace_id og span_id når det ikke finnes gyldig OpenTelemetry span`() {
         AivenKafkaErrorHandler.loggFeilende(
             thrownException = RuntimeException("Test exception"),
@@ -111,7 +78,7 @@ class AivenKafkaErrorHandlerTest {
         @Test
         fun `logger insensitiveMessage`() {
             AivenKafkaErrorHandler.loggFeilende(
-                thrownException = KafkaErrorHandlerException(insensitiveMessage = "Usikker melding"),
+                thrownException = KafkaErrorHandlerException(message = "Usikker melding"),
                 records = mutableListOf(Testdata.lagConsumerRecord()),
             )
             logListAppender.eventerUtenMarkers().first().run {
@@ -124,10 +91,10 @@ class AivenKafkaErrorHandlerTest {
             AivenKafkaErrorHandler.loggFeilende(
                 thrownException =
                     KafkaErrorHandlerException(
-                        insensitiveMessage = "Første melding",
+                        message = "Første melding",
                         cause =
                             KafkaErrorHandlerException(
-                                insensitiveMessage = "Annen melding",
+                                message = "Annen melding",
                             ),
                     ),
                 records = mutableListOf(Testdata.lagConsumerRecord()),

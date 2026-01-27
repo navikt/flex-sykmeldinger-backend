@@ -31,8 +31,8 @@ class NarmestelederListener(
         } catch (e: Exception) {
             log.error("Feil ved håndtering av nærmeste leder hendelse, exception: ${e::class.simpleName}. Dette vil bli retryet")
             throw KafkaErrorHandlerException(
+                message = "Feil ved håndtering av nærmeste leder hendelse",
                 cause = e,
-                insensitiveMessage = "Feil ved håndtering av nærmeste leder hendelse",
             )
         }
         acknowledgment.acknowledge()

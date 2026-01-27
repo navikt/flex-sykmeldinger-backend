@@ -53,8 +53,8 @@ class AaregHendelserConsumer(
         } catch (e: Exception) {
             log.error("Feil ved håndtering av aareg notifikasjon, exception: ${e::class.simpleName}. Dette vil bli retryet")
             throw KafkaErrorHandlerException(
+                message = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
                 cause = e,
-                insensitiveMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
             )
         }
     }
@@ -74,8 +74,8 @@ class AaregHendelserConsumer(
                         null
                     } else {
                         throw KafkaErrorHandlerException(
+                            message = "Feil ved deserialisering",
                             cause = e,
-                            insensitiveMessage = "Feil ved deserialisering",
                         )
                     }
                 }

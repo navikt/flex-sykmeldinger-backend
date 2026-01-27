@@ -43,8 +43,8 @@ class SykmeldingListener(
             }
             log.error("Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet")
             throw KafkaErrorHandlerException(
-                e,
-                insensitiveMessage = "Feil ved prosessering av sykmelding på kafka",
+                message = "Feil ved prosessering av sykmelding på kafka",
+                cause = e,
             )
         }
     }
@@ -61,8 +61,8 @@ class SykmeldingListener(
                     objectMapper.readValue(serialisertSykmelding)
                 } catch (e: Exception) {
                     throw KafkaErrorHandlerException(
+                        message = "Feil ved deserialisering",
                         cause = e,
-                        insensitiveMessage = "Feil ved deserialisering",
                     )
                 }
             }
@@ -70,7 +70,7 @@ class SykmeldingListener(
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
                 throw KafkaErrorHandlerException(
-                    insensitiveMessage =
+                    message =
                         "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
                             "value: ${sykmeldingRecord.sykmelding.id}",
                 )
