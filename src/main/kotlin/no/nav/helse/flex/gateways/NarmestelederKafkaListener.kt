@@ -3,6 +3,7 @@ package no.nav.helse.flex.gateways
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
@@ -29,7 +30,10 @@ class NarmestelederListener(
         try {
             oppdateringAvNarmesteLeder.behandleMeldingFraKafka(cr.value())
         } catch (e: Exception) {
-            log.error("Feil ved håndtering av nærmeste leder hendelse, exception: ${e::class.simpleName}. Dette vil bli retryet")
+            log.errorSecure(
+                message = "Feil ved håndtering av nærmeste leder hendelse, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                secureThrowable = e,
+            )
             throw KafkaErrorHandlerException(
                 message = "Feil ved håndtering av nærmeste leder hendelse",
                 cause = e,

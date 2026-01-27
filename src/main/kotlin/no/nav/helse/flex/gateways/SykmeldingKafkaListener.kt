@@ -6,6 +6,7 @@ import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -41,7 +42,10 @@ class SykmeldingListener(
                 acknowledgment.acknowledge()
                 return
             }
-            log.error("Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet")
+            log.errorSecure(
+                message = "Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                secureThrowable = e,
+            )
             throw KafkaErrorHandlerException(
                 message = "Feil ved prosessering av sykmelding på kafka",
                 cause = e,
