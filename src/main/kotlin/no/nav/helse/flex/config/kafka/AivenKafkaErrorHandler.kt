@@ -5,7 +5,6 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.listener.DefaultErrorHandler
-import org.springframework.kafka.listener.ListenerExecutionFailedException
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
@@ -62,86 +61,33 @@ class AivenKafkaErrorHandler :
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
-            val relevantCauseException = findRelevantCauseException(thrownException)
-
             if (records.isEmpty()) {
-                val message =
-                    composeInsensitiveMessage(
-                        throwable = thrownException,
-                        defaultMessage = "Feil ved kafka listener",
-                        messageSeparator = " -- ",
-                    )
                 log.errorSecure(
-                    "$message: " +
+                    "Feil ved kafka listener: " +
                         mapOf(
                             "listenerId" to listenerId,
                             "listenerTopics" to listenerTopics,
-                            "exceptionType" to relevantCauseException::class.simpleName,
+                            "exceptionType" to thrownException::class.simpleName,
                         ),
-                    secureMessage = relevantCauseException.message ?: "",
-                    secureThrowable = relevantCauseException,
+                    secureMessage = thrownException.message ?: "",
+                    secureThrowable = thrownException,
                 )
             } else {
-                val message =
-                    composeInsensitiveMessage(
-                        throwable = thrownException,
-                        defaultMessage = "Feil ved kafka hendelse",
-                        messageSeparator = " -- ",
-                    )
                 log.errorSecure(
-                    "$message: " +
+                    "Feil ved konsumering av kafka hendelse: " +
                         mapOf(
                             "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
-                            "exceptionType" to relevantCauseException::class.simpleName,
+                            "exceptionType" to thrownException::class.simpleName,
                             "antall" to records.count(),
                             "key" to records.map { it.key() }.limitWithEllipsis(4).nullOrSingleOrList(),
                             "offset" to records.firstOrNull()?.offset(),
                             "partition" to records.map { it.partition() }.distinct().nullOrSingleOrList(),
                             "listenerId" to listenerId,
                         ),
-                    secureMessage = relevantCauseException.message ?: "",
-                    secureThrowable = relevantCauseException,
+                    secureMessage = thrownException.message ?: "",
+                    secureThrowable = thrownException,
                 )
             }
-        }
-
-        private fun findRelevantCauseException(exception: Throwable): Throwable =
-            when (exception) {
-                is ListenerExecutionFailedException,
-                is KafkaErrorHandlerException,
-                -> exception.cause?.let { findRelevantCauseException(it) } ?: exception
-                else -> exception
-            }
-
-        private fun composeInsensitiveMessage(
-            throwable: Throwable,
-            defaultMessage: String,
-            messageSeparator: String = " -- ",
-        ): String {
-            val rootThrowable: Throwable? =
-                if (throwable is ListenerExecutionFailedException) {
-                    throwable.cause
-                } else {
-                    throwable
-                }
-
-            val messageParts = mutableListOf<String?>()
-            var nextThrowable: Throwable? = rootThrowable
-
-            val skipDefaultMessage = rootThrowable is KafkaErrorHandlerException && rootThrowable.message != null
-            if (!skipDefaultMessage) {
-                messageParts.add(defaultMessage)
-            }
-
-            while (nextThrowable != null) {
-                if (nextThrowable is KafkaErrorHandlerException) {
-                    messageParts.add(nextThrowable.message)
-                } else {
-                    messageParts.add(nextThrowable::class.simpleName)
-                }
-                nextThrowable = nextThrowable.cause
-            }
-            return messageParts.filterNotNull().joinToString(messageSeparator)
         }
 
         private fun List<*>.nullOrSingleOrList(): Any? =
