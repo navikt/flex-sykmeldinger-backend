@@ -2,15 +2,34 @@ package no.nav.helse.flex.sykmelding.tsm
 
 import java.time.LocalDate
 
-data class MedisinskVurdering(
-    val hovedDiagnose: DiagnoseInfo?,
-    val biDiagnoser: List<DiagnoseInfo>?,
-    val svangerskap: Boolean,
-    val yrkesskade: Yrkesskade?,
-    val skjermetForPasient: Boolean,
-    val syketilfelletStartDato: LocalDate?,
+sealed interface MedisinskVurdering {
+    val hovedDiagnose: DiagnoseInfo?
+    val biDiagnoser: List<DiagnoseInfo>?
+    val svangerskap: Boolean
+    val yrkesskade: Yrkesskade?
+    val skjermetForPasient: Boolean
+    val syketilfelletStartDato: LocalDate?
+}
+
+data class DigitalMedisinskVurdering(
+    override val hovedDiagnose: DiagnoseInfo?,
+    override val biDiagnoser: List<DiagnoseInfo>?,
+    override val svangerskap: Boolean,
+    override val yrkesskade: Yrkesskade?,
+    override val skjermetForPasient: Boolean,
+    override val syketilfelletStartDato: LocalDate?,
+    val annenFravarsgrunn: AnnenFravarArsakType?,
+) : MedisinskVurdering
+
+data class IkkeDigitalMedisinskVurdering(
+    override val hovedDiagnose: DiagnoseInfo?,
+    override val biDiagnoser: List<DiagnoseInfo>?,
+    override val svangerskap: Boolean,
+    override val yrkesskade: Yrkesskade?,
+    override val skjermetForPasient: Boolean,
+    override val syketilfelletStartDato: LocalDate?,
     val annenFraversArsak: AnnenFraverArsak?,
-)
+) : MedisinskVurdering
 
 data class DiagnoseInfo(
     val system: DiagnoseSystem,
