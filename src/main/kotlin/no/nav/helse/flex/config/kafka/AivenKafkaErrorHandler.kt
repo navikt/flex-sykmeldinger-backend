@@ -1,11 +1,9 @@
 package no.nav.helse.flex.config.kafka
 
-import io.opentelemetry.api.trace.Span
 import no.nav.helse.flex.utils.errorSecure
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.slf4j.MDC
 import org.springframework.kafka.listener.DefaultErrorHandler
 import org.springframework.kafka.listener.ListenerExecutionFailedException
 import org.springframework.kafka.listener.MessageListenerContainer
@@ -30,15 +28,13 @@ class AivenKafkaErrorHandler :
         consumer: Consumer<*, *>,
         container: MessageListenerContainer,
     ) {
-        medTraceContext {
-            loggFeilende(
-                thrownException = thrownException,
-                records = records,
-                listenerId = container.listenerId,
-                listenerTopics = consumer.listTopics().keys,
-            )
-            super.handleRemaining(thrownException, records, consumer, container)
-        }
+        loggFeilende(
+            thrownException = thrownException,
+            records = records,
+            listenerId = container.listenerId,
+            listenerTopics = consumer.listTopics().keys,
+        )
+        super.handleRemaining(thrownException, records, consumer, container)
     }
 
     override fun handleBatch(
@@ -48,15 +44,13 @@ class AivenKafkaErrorHandler :
         container: MessageListenerContainer,
         invokeListener: Runnable,
     ) {
-        medTraceContext {
-            loggFeilende(
-                thrownException = thrownException,
-                records = data.toList(),
-                listenerId = container.listenerId,
-                listenerTopics = consumer.listTopics().keys,
-            )
-            super.handleBatch(thrownException, data, consumer, container, invokeListener)
-        }
+        loggFeilende(
+            thrownException = thrownException,
+            records = data.toList(),
+            listenerId = container.listenerId,
+            listenerTopics = consumer.listTopics().keys,
+        )
+        super.handleBatch(thrownException, data, consumer, container, invokeListener)
     }
 
     companion object {
@@ -68,106 +62,45 @@ class AivenKafkaErrorHandler :
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
-            val relevantCauseException = findRelevantCauseException(thrownException)
-
+            val kafkaErrorHandlerException = findKafkaErrorHandlerException(thrownException)
+            if (kafkaErrorHandlerException != null && !kafkaErrorHandlerException.errorHandlerLoggingEnabled) {
+                return
+            }
             if (records.isEmpty()) {
-                val message =
-                    composeInsensitiveMessage(
-                        throwable = thrownException,
-                        defaultMessage = "Feil ved kafka listener",
-                        messageSeparator = " -- ",
-                    )
                 log.errorSecure(
-                    "$message: " +
+                    "Feil ved kafka listener: " +
                         mapOf(
                             "listenerId" to listenerId,
                             "listenerTopics" to listenerTopics,
-                            "exceptionType" to relevantCauseException::class.simpleName,
+                            "exceptionType" to thrownException::class.simpleName,
                         ),
-                    secureMessage = relevantCauseException.message ?: "",
-                    secureThrowable = relevantCauseException,
+                    secureMessage = thrownException.message ?: "",
+                    secureThrowable = thrownException,
                 )
             } else {
-                val message =
-                    composeInsensitiveMessage(
-                        throwable = thrownException,
-                        defaultMessage = "Feil ved kafka hendelse",
-                        messageSeparator = " -- ",
-                    )
                 log.errorSecure(
-                    "$message: " +
+                    "Feil ved konsumering av kafka hendelse: " +
                         mapOf(
                             "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
-                            "exceptionType" to relevantCauseException::class.simpleName,
+                            "exceptionType" to thrownException::class.simpleName,
                             "antall" to records.count(),
                             "key" to records.map { it.key() }.limitWithEllipsis(4).nullOrSingleOrList(),
                             "offset" to records.firstOrNull()?.offset(),
                             "partition" to records.map { it.partition() }.distinct().nullOrSingleOrList(),
                             "listenerId" to listenerId,
                         ),
-                    secureMessage = relevantCauseException.message ?: "",
-                    secureThrowable = relevantCauseException,
+                    secureMessage = thrownException.message ?: "",
+                    secureThrowable = thrownException,
                 )
             }
         }
 
-        inline fun <T> medTraceContext(block: () -> T): T {
-            val currentSpan = Span.current()
-            val spanContext = currentSpan.spanContext
-
-            if (spanContext.isValid) {
-                MDC.put("trace_id", spanContext.traceId)
-                MDC.put("span_id", spanContext.spanId)
-            }
-
-            try {
-                return block()
-            } finally {
-                if (spanContext.isValid) {
-                    MDC.remove("trace_id")
-                    MDC.remove("span_id")
-                }
-            }
-        }
-
-        private fun findRelevantCauseException(exception: Throwable): Throwable =
+        private fun findKafkaErrorHandlerException(exception: Throwable): KafkaErrorHandlerException? =
             when (exception) {
-                is ListenerExecutionFailedException,
-                is KafkaErrorHandlerException,
-                -> exception.cause?.let { findRelevantCauseException(it) } ?: exception
-                else -> exception
+                is KafkaErrorHandlerException -> exception
+                is ListenerExecutionFailedException -> exception.cause?.let { findKafkaErrorHandlerException(it) }
+                else -> null
             }
-
-        private fun composeInsensitiveMessage(
-            throwable: Throwable,
-            defaultMessage: String,
-            messageSeparator: String = " -- ",
-        ): String {
-            val rootThrowable: Throwable? =
-                if (throwable is ListenerExecutionFailedException) {
-                    throwable.cause
-                } else {
-                    throwable
-                }
-
-            val messageParts = mutableListOf<String?>()
-            var nextThrowable: Throwable? = rootThrowable
-
-            val skipDefaultMessage = rootThrowable is KafkaErrorHandlerException && rootThrowable.message != null
-            if (!skipDefaultMessage) {
-                messageParts.add(defaultMessage)
-            }
-
-            while (nextThrowable != null) {
-                if (nextThrowable is KafkaErrorHandlerException) {
-                    messageParts.add(nextThrowable.message)
-                } else {
-                    messageParts.add(nextThrowable::class.simpleName)
-                }
-                nextThrowable = nextThrowable.cause
-            }
-            return messageParts.filterNotNull().joinToString(messageSeparator)
-        }
 
         private fun List<*>.nullOrSingleOrList(): Any? =
             when (this.size) {

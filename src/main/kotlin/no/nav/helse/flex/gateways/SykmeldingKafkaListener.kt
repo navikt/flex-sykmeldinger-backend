@@ -6,6 +6,7 @@ import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -41,9 +42,13 @@ class SykmeldingListener(
                 acknowledgment.acknowledge()
                 return
             }
+            log.errorSecure(
+                message = "Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                secureThrowable = e,
+            )
             throw KafkaErrorHandlerException(
-                e,
-                insensitiveMessage = "Feil ved prosessering av sykmelding på kafka",
+                errorHandlerLoggingEnabled = false,
+                cause = e,
             )
         }
     }
@@ -60,8 +65,8 @@ class SykmeldingListener(
                     objectMapper.readValue(serialisertSykmelding)
                 } catch (e: Exception) {
                     throw KafkaErrorHandlerException(
+                        message = "Feil ved deserialisering",
                         cause = e,
-                        insensitiveMessage = "Feil ved deserialisering",
                     )
                 }
             }
@@ -69,7 +74,7 @@ class SykmeldingListener(
         if (sykmeldingRecord != null) {
             if (sykmeldingId != sykmeldingRecord.sykmelding.id) {
                 throw KafkaErrorHandlerException(
-                    insensitiveMessage =
+                    message =
                         "SykmeldingId i key og sykmeldingId i value er ikke like. Key: $sykmeldingId, " +
                             "value: ${sykmeldingRecord.sykmelding.id}",
                 )

@@ -8,6 +8,7 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingServi
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -51,9 +52,13 @@ class AaregHendelserConsumer(
         try {
             handterHendelser(rawRecords)
         } catch (e: Exception) {
+            log.errorSecure(
+                message = "Feil ved håndtering av aareg notifikasjon, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                secureThrowable = e,
+            )
             throw KafkaErrorHandlerException(
+                errorHandlerLoggingEnabled = false,
                 cause = e,
-                insensitiveMessage = "Feil ved håndtering av aareg notifikasjon. Dette vil bli retryet",
             )
         }
     }
@@ -73,8 +78,8 @@ class AaregHendelserConsumer(
                         null
                     } else {
                         throw KafkaErrorHandlerException(
+                            message = "Feil ved deserialisering",
                             cause = e,
-                            insensitiveMessage = "Feil ved deserialisering",
                         )
                     }
                 }
