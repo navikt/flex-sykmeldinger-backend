@@ -17,6 +17,7 @@ fun lagArbeidsforhold(
     tom: LocalDate? = null,
     arbeidsforholdType: ArbeidsforholdType? = ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD,
     opprettet: Instant = Instant.parse("2020-01-01T00:00:00Z"),
+    oppdatert: Instant = opprettet,
 ): Arbeidsforhold =
     Arbeidsforhold(
         id = id,
@@ -29,6 +30,7 @@ fun lagArbeidsforhold(
         tom = tom,
         arbeidsforholdType = arbeidsforholdType,
         opprettet = opprettet,
+        oppdatert = oppdatert,
     )
 
 fun lagEksterntArbeidsforhold(

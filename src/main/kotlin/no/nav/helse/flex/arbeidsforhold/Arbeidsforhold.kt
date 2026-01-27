@@ -18,6 +18,7 @@ data class Arbeidsforhold(
     val tom: LocalDate? = null,
     val arbeidsforholdType: ArbeidsforholdType?,
     val opprettet: Instant = Instant.now(),
+    val oppdatert: Instant = opprettet,
 )
 
 enum class ArbeidsforholdType {

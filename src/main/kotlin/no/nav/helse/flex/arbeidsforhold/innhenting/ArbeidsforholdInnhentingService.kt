@@ -103,6 +103,7 @@ class ArbeidsforholdInnhentingService(
                         fom = eksterntArbeidsforhold.fom,
                         tom = eksterntArbeidsforhold.tom,
                         arbeidsforholdType = eksterntArbeidsforhold.arbeidsforholdType,
+                        oppdatert = now,
                     )
                 }
 
