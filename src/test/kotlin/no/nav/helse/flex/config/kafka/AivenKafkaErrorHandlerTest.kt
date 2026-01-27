@@ -7,8 +7,11 @@ import no.nav.helse.flex.utils.logger
 import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.slf4j.Marker
+import org.springframework.kafka.listener.ListenerExecutionFailedException
 import ch.qos.logback.classic.Logger as LogbackLogger
 
 class AivenKafkaErrorHandlerTest {
@@ -58,18 +61,23 @@ class AivenKafkaErrorHandlerTest {
         logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).shouldHaveSingleItem()
     }
 
-    @Test
-    fun `logger uten trace_id og span_id når det ikke finnes gyldig OpenTelemetry span`() {
-        AivenKafkaErrorHandler.loggFeilende(
-            thrownException = RuntimeException("Test exception"),
-            records = mutableListOf(Testdata.lagConsumerRecord()),
-        )
-
-        logListAppender.eventerUtenMarkers().first().run {
-            mdcPropertyMap.containsKey("trace_id").shouldBeFalse()
-            mdcPropertyMap.containsKey("span_id").shouldBeFalse()
+    @TestFactory
+    fun `burde ikke logge dersom KafkaErrorHandlerException med errorHandlerLoggingEnabled = false`() =
+        listOf(
+            KafkaErrorHandlerException(errorHandlerLoggingEnabled = false),
+            ListenerExecutionFailedException(
+                "",
+                KafkaErrorHandlerException(errorHandlerLoggingEnabled = false),
+            ),
+        ).map { ex ->
+            DynamicTest.dynamicTest(ex::class.simpleName) {
+                AivenKafkaErrorHandler.loggFeilende(
+                    thrownException = ex,
+                    records = mutableListOf(Testdata.lagConsumerRecord()),
+                )
+                logListAppender.list.shouldBeEmpty()
+            }
         }
-    }
 
     private fun ListAppender<ILoggingEvent>.eventerUtenMarkers(): List<ILoggingEvent> = this.list.filter { it.markerList.isNullOrEmpty() }
 

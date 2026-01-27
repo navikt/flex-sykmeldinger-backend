@@ -5,6 +5,7 @@ import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.listener.DefaultErrorHandler
+import org.springframework.kafka.listener.ListenerExecutionFailedException
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import org.springframework.util.backoff.ExponentialBackOff
@@ -61,6 +62,10 @@ class AivenKafkaErrorHandler :
             listenerId: String? = null,
             listenerTopics: Collection<String> = emptySet(),
         ) {
+            val kafkaErrorHandlerException = findKafkaErrorHandlerException(thrownException)
+            if (kafkaErrorHandlerException != null && !kafkaErrorHandlerException.errorHandlerLoggingEnabled) {
+                return
+            }
             if (records.isEmpty()) {
                 log.errorSecure(
                     "Feil ved kafka listener: " +
@@ -89,6 +94,13 @@ class AivenKafkaErrorHandler :
                 )
             }
         }
+
+        private fun findKafkaErrorHandlerException(exception: Throwable): KafkaErrorHandlerException? =
+            when (exception) {
+                is KafkaErrorHandlerException -> exception
+                is ListenerExecutionFailedException -> exception.cause?.let { findKafkaErrorHandlerException(it) }
+                else -> null
+            }
 
         private fun List<*>.nullOrSingleOrList(): Any? =
             when (this.size) {
