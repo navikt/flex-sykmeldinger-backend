@@ -318,23 +318,25 @@ class SykmeldingDtoKonverterer(
             biDiagnoser = medisinskVurdering.biDiagnoser?.map { konverterDiagnose(it) } ?: emptyList(),
             yrkesskade = medisinskVurdering.yrkesskade != null,
             yrkesskadeDato = medisinskVurdering.yrkesskade?.yrkesskadeDato,
-            annenFraversArsak =
-                when (medisinskVurdering) {
-                    is DigitalMedisinskVurdering -> {
-                        medisinskVurdering.annenFravarsgrunn?.let {
-                            AnnenFraversArsakDTO(
-                                null,
-                                listOf(it.toAnnenFravarGrunnDTO()),
-                            )
-                        }
-                    }
-
-                    is IkkeDigitalMedisinskVurdering -> {
-                        medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) }
-                    }
-                },
+            annenFraversArsak = konverterAnnenFraversArsakDTO(medisinskVurdering),
             svangerskap = medisinskVurdering.svangerskap,
         )
+
+    private fun konverterAnnenFraversArsakDTO(medisinskVurdering: MedisinskVurdering): AnnenFraversArsakDTO? =
+        when (medisinskVurdering) {
+            is DigitalMedisinskVurdering -> {
+                medisinskVurdering.annenFravarsgrunn?.let {
+                    AnnenFraversArsakDTO(
+                        null,
+                        listOf(it.toAnnenFravarGrunnDTO()),
+                    )
+                }
+            }
+
+            is IkkeDigitalMedisinskVurdering -> {
+                medisinskVurdering.annenFraversArsak?.let { konverterAnnenFraversArsak(it) }
+            }
+        }
 
     internal fun konverterAnnenFraversArsak(annenFraverArsak: AnnenFraverArsak): AnnenFraversArsakDTO? =
         AnnenFraversArsakDTO(
