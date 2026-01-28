@@ -1,13 +1,16 @@
-package no.nav.helse.flex.tidligereArbeidsgivere
+package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
-import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.sykmeldinghendelse.*
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidsgiver
+import no.nav.helse.flex.sykmeldinghendelse.ArbeidsledigTilleggsinfo
+import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerTilleggsinfo
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.PermittertTilleggsinfo
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-object TidligereArbeidsgivereHandterer {
+object FinnTidligereArbeidsgivereForArbeidsledigService {
     fun finnTidligereArbeidsgivere(
         alleSykmeldinger: List<Sykmelding>,
         gjeldendeSykmeldingId: String,
