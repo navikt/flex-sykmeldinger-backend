@@ -17,7 +17,7 @@ object FinnTidligereArbeidsgivereForArbeidsledigService {
     ): List<TidligereArbeidsgiver> {
         val gjeldendeSykmelding =
             alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
-                ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
+                ?: throw SykmeldingIkkeFunnetException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
 
         val tidligereSykmeldinger =
             alleSykmeldinger

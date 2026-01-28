@@ -23,6 +23,7 @@ import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -856,6 +858,46 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     @Nested
+    inner class GetTidligereArbeidsgivere {
+        @Test
+        fun `burde returnere dersom sykmelding eksisterer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "sm-1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/sm-1/tidligere-arbeidsgivere")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val tidligereArbeidsgivere: List<TidligereArbeidsgiverDTO>? = objectMapper.readValue(result)
+            tidligereArbeidsgivere.shouldNotBeNull()
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/tidligere-arbeidsgivere" }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+                expectStatus = MockMvcResultMatchers.status().isNotFound,
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/tidligere-arbeidsgivere" }
+    }
+
+    @Nested
     inner class Funksjoner {
         @Test
         fun `konverterer arbeidsgiverDetaljer dto riktig`() {
@@ -926,8 +968,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     fun sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-        content: String,
+        content: String = "{}",
         httpMethod: HttpMethod = HttpMethod.GET,
+        expectStatus: ResultMatcher = MockMvcResultMatchers.status().isForbidden,
         urlProducer: (sykmeldingId: String) -> String,
     ) {
         sykmeldingRepository.save(
@@ -946,7 +989,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .authorizationHeader(oauth2Server.tokenxToken(fnr = "feil_fnr", clientId = defaultClientId))
                     .content(content)
                     .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(MockMvcResultMatchers.status().isForbidden)
+            ).andExpect(expectStatus)
     }
 
     fun sjekkStatus(
