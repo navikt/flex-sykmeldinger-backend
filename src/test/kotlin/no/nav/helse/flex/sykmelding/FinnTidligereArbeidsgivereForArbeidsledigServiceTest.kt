@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.testdata.lagAktivitetIkkeMulig
 import no.nav.helse.flex.testdata.lagArbeidsgiver
 import no.nav.helse.flex.testdata.lagArbeidsledigTilleggsinfo
