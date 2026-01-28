@@ -24,7 +24,8 @@ import java.util.concurrent.CompletableFuture
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
         mock {
-            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn CompletableFuture.completedFuture(ArbeidsforholdSynkronisering())
+            on { synkroniserArbeidsforholdForPersonFuture(any()) } doReturn
+                CompletableFuture.completedFuture(ArbeidsforholdSynkronisering())
         }
 
     @Test
@@ -80,7 +81,7 @@ class AaregHendelserListenerTest {
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterArbeidsforholdHendelser(listOf(hendelse))
-        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonAsync("fnr_med_sykmelding")
+        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonFuture("fnr_med_sykmelding")
     }
 
     @Test
@@ -90,7 +91,7 @@ class AaregHendelserListenerTest {
                 endringstype = Endringstype.Sletting,
                 entitetsendringer = listOf(Entitetsendring.Permittering),
             )
-        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
         handtering `should be equal to` AaregHendelseHandtering.SLETT
     }
 
@@ -103,7 +104,7 @@ class AaregHendelserListenerTest {
                 endringstype = Endringstype.Endring,
                 entitetsendringer = entitetsendringer,
             )
-        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
         handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
@@ -116,7 +117,7 @@ class AaregHendelserListenerTest {
                 endringstype = Endringstype.Endring,
                 entitetsendringer = entitetsendringer,
             )
-        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
         handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
@@ -126,7 +127,7 @@ class AaregHendelserListenerTest {
             lagArbeidsforholdHendelse(
                 endringstype = Endringstype.Sletting,
             )
-        var handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
+        val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
         handtering `should be equal to` AaregHendelseHandtering.SLETT
     }
 
