@@ -1,8 +1,15 @@
-package no.nav.helse.flex.tidligereArbeidsgivere
+package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
-import no.nav.helse.flex.testdata.*
+import no.nav.helse.flex.testdata.lagAktivitetIkkeMulig
+import no.nav.helse.flex.testdata.lagArbeidsgiver
+import no.nav.helse.flex.testdata.lagArbeidsledigTilleggsinfo
+import no.nav.helse.flex.testdata.lagArbeidstakerTilleggsinfo
+import no.nav.helse.flex.testdata.lagPermittertTilleggsinfo
+import no.nav.helse.flex.testdata.lagSykmelding
+import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingHendelse
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

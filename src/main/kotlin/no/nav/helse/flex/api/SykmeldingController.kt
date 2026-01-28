@@ -10,11 +10,11 @@ import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
+import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
-import no.nav.helse.flex.tidligereArbeidsgivere.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
