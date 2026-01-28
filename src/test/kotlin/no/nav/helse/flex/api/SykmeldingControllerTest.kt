@@ -193,6 +193,27 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 expectedStatus = HttpStatus.UNAUTHORIZED,
             )
         }
+
+        "/api/v1/sykmeldinger/id-1/tidligere-arbeidsgivere".run {
+            sjekkStatus(
+                url = this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = dittSykefravaerFrontendClientId),
+                expectedStatus = HttpStatus.OK,
+            )
+            sjekkStatus(
+                this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = "invalid-client-id"),
+                expectedStatus = HttpStatus.FORBIDDEN,
+            )
+            sjekkStatus(
+                this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", acrClaim = "invalid-claim"),
+                expectedStatus = HttpStatus.UNAUTHORIZED,
+            )
+        }
     }
 
     @Nested
