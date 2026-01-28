@@ -14,7 +14,7 @@ import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
-import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
+import no.nav.helse.flex.tidligereArbeidsgivere.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
@@ -77,7 +77,7 @@ class SykmeldingController(
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
-        val tidligereArbeidsgivere = TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
+        val tidligereArbeidsgivere = FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
 
         return ResponseEntity.ok(tidligereArbeidsgivere)
     }

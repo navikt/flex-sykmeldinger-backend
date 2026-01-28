@@ -5,7 +5,7 @@ import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.tidligereArbeidsgivere.TidligereArbeidsgivereHandterer
+import no.nav.helse.flex.tidligereArbeidsgivere.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 
@@ -103,7 +103,7 @@ class TilleggsinfoSammenstillerService(
         sykmelding: Sykmelding,
     ): TidligereArbeidsgiver {
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer),
                 gjeldendeSykmeldingId = sykmelding.sykmeldingId,
             )

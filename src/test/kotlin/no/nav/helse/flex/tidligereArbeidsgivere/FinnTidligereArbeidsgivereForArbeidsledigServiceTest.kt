@@ -7,7 +7,7 @@ import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class TidligereArbeidsgivereHandtererTest {
+class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
     private val arbeidsgiver1 = "Arbeidsgiver 1"
     private val arbeidsgiver1Orgnummer = "Arbeidsgiver 1 orgnummer"
     private val arbeidsgiver2 = "Arbeidsgiver 2"
@@ -61,7 +61,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -116,7 +116,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelPermitertSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -172,7 +172,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelPermitertSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -229,7 +229,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -286,7 +286,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -343,7 +343,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -429,7 +429,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, gammelSykmeldingMedSammeArbeidsgiver, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -549,7 +549,7 @@ class TidligereArbeidsgivereHandtererTest {
             )
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
@@ -702,7 +702,7 @@ class TidligereArbeidsgivereHandtererTest {
             )
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
@@ -851,7 +851,7 @@ class TidligereArbeidsgivereHandtererTest {
             )
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
@@ -907,7 +907,7 @@ class TidligereArbeidsgivereHandtererTest {
 
         val alleSykmeldinger = listOf(gammelSykmelding1, nySykmelding)
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -979,7 +979,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, gjeldendeSykmelding, fremtidigSykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 gjeldendeSykmelding.sykmeldingId,
             )
@@ -1065,7 +1065,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
@@ -1151,7 +1151,7 @@ class TidligereArbeidsgivereHandtererTest {
         val alleSykmeldinger = listOf(gammelSykmelding, annenGammelSykmelding, nySykmelding)
 
         val tidligereArbeidsgivere =
-            TidligereArbeidsgivereHandterer.finnTidligereArbeidsgivere(
+            FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(
                 alleSykmeldinger,
                 nySykmelding.sykmeldingId,
             )
