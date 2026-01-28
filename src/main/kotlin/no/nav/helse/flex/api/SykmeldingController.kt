@@ -74,13 +74,13 @@ class SykmeldingController(
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<List<TidligereArbeidsgiver>> {
+    ): ResponseEntity<List<TidligereArbeidsgiverDTO>> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val tidligereArbeidsgivere = FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
-
-        return ResponseEntity.ok(tidligereArbeidsgivere)
+        val tidligereArbeidsgivereDto = tidligereArbeidsgivere.map { it.konverterTilDto() }
+        return ResponseEntity.ok(tidligereArbeidsgivereDto)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
@@ -233,6 +233,12 @@ internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO {
         orgnummer = this.orgnummer,
     )
 }
+
+internal fun TidligereArbeidsgiver.konverterTilDto(): TidligereArbeidsgiverDTO =
+    TidligereArbeidsgiverDTO(
+        orgNavn = this.orgNavn,
+        orgnummer = this.orgnummer,
+    )
 
 enum class SykmeldingChangeStatus {
     AVBRYT,

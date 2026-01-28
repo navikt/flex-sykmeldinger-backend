@@ -10,6 +10,7 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SporsmalSvar
+import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
@@ -21,6 +22,7 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -515,47 +517,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     @Nested
-    inner class ExtensionFuncs {
-        @Test
-        fun `konverterer arbeidsgiverDetaljer dto riktig`() {
-            val arbeidsgiverDetaljer =
-                ArbeidsgiverDetaljer(
-                    orgnummer = "orgnr",
-                    juridiskOrgnummer = "jurorgnr",
-                    navn = "Navn",
-                    fom = LocalDate.parse("2021-01-01"),
-                    tom = LocalDate.parse("2021-01-02"),
-                    aktivtArbeidsforhold = true,
-                    naermesteLeder = null,
-                )
-            val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
-            arbeidsgiverDetaljerDTO `should be equal to`
-                ArbeidsgiverDetaljerDTO(
-                    orgnummer = "orgnr",
-                    juridiskOrgnummer = "jurorgnr",
-                    navn = "Navn",
-                    aktivtArbeidsforhold = true,
-                    naermesteLeder = null,
-                )
-        }
-
-        @Test
-        fun `burde konvertere narmeste leder dto riktig`() {
-            val narmesteLeder =
-                lagNarmesteLeder(
-                    narmesteLederNavn = "Navn",
-                    orgnummer = "orgnr",
-                )
-            val narmesteLederDTO = narmesteLeder.konverterTilDto()
-            narmesteLederDTO `should be equal to`
-                NarmesteLederDTO(
-                    navn = "Navn",
-                    orgnummer = "orgnr",
-                )
-        }
-    }
-
-    @Nested
     inner class SendSykmeldingEndepunkt {
         @Test
         fun `burde sende sykmelding for arbeidstaker til arbeidsgiver`() {
@@ -871,6 +832,61 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
                 content = lagSykmeldingGrunnlag().serialisertTilString(),
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
+    }
+
+    @Nested
+    inner class Funksjoner {
+        @Test
+        fun `konverterer arbeidsgiverDetaljer dto riktig`() {
+            val arbeidsgiverDetaljer =
+                ArbeidsgiverDetaljer(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-02"),
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+            val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
+            arbeidsgiverDetaljerDTO `should be equal to`
+                ArbeidsgiverDetaljerDTO(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+        }
+
+        @Test
+        fun `burde konvertere narmeste leder dto riktig`() {
+            val narmesteLeder =
+                lagNarmesteLeder(
+                    narmesteLederNavn = "Navn",
+                    orgnummer = "orgnr",
+                )
+            val narmesteLederDTO = narmesteLeder.konverterTilDto()
+            narmesteLederDTO `should be equal to`
+                NarmesteLederDTO(
+                    navn = "Navn",
+                    orgnummer = "orgnr",
+                )
+        }
+
+        @Test
+        fun `burde konvertere tidligere arbeidsgiver dto riktig`() {
+            val tidligereArbeidsgiver =
+                TidligereArbeidsgiver(
+                    orgnummer = "orgnr",
+                    orgNavn = "Navn",
+                )
+            val tidligereArbeidsgiverDTO = tidligereArbeidsgiver.konverterTilDto()
+            tidligereArbeidsgiverDTO.run {
+                orgnummer shouldBeEqualTo "orgnr"
+                orgNavn shouldBeEqualTo "Navn"
+            }
+        }
     }
 
     fun sjekkFår404NårSykmeldingenIkkeFinnes(
