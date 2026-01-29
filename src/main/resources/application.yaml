@@ -11,7 +11,7 @@ spring:
     url: "${DATABASE_JDBC_URL}&reWriteBatchedInserts=true"
     hikari:
       minimum-idle: 1
-      maximum-pool-size: 30
+      maximum-pool-size: 40
   data:
     redis:
       ssl.enabled: true
