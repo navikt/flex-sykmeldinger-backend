@@ -122,8 +122,8 @@ class RestClientConfig {
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
-                maxTotal = 10
-                defaultMaxPerRoute = 10
+                maxTotal = 40
+                defaultMaxPerRoute = 20
             }
 
         val httpClient =
