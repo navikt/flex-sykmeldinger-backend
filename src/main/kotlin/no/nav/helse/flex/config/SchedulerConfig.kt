@@ -24,6 +24,6 @@ class SchedulerConfig {
     @Bean
     fun aaregHendelserKafkaTaskExecutor(): ConcurrentTaskExecutor =
         ConcurrentTaskExecutor(
-            Executors.newFixedThreadPool(20),
+            Executors.newFixedThreadPool(30),
         )
 }
