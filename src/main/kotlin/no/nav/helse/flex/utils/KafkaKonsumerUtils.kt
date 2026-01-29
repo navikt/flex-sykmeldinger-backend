@@ -5,10 +5,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.slf4j.MDC
 
 object KafkaKonsumerUtils {
-    fun medMdcMetadata(
+    fun <R> medMdcMetadata(
         cr: ConsumerRecord<*, *>,
-        block: () -> Unit,
-    ) {
+        block: () -> R,
+    ): R {
         val mdcVars =
             mapOf(
                 "kafkaKey" to cr.key(),
@@ -16,18 +16,17 @@ object KafkaKonsumerUtils {
                 "kafkaPartition" to cr.partition(),
                 "kafkaOffset" to cr.offset(),
             )
-        withMdcVars(mdcVars) {
+        return withMdcVars(mdcVars) {
             block()
         }
     }
 
-    fun medMdcMetadata(
+    fun <R> medMdcMetadata(
         cr: ConsumerRecords<*, *>,
-        block: () -> Unit,
-    ) {
+        block: () -> R,
+    ): R {
         if (cr.isEmpty) {
-            block()
-            return
+            return block()
         }
         val recordCount = cr.count()
         val topics = cr.map { it.topic() }.distinct()
@@ -44,23 +43,25 @@ object KafkaKonsumerUtils {
                 "kafkaFirstOffset" to firstOffset,
                 "kafkaLastOffset" to lastOffset,
             )
-        withMdcVars(mdcVars) {
+        return withMdcVars(mdcVars) {
             block()
         }
     }
 
-    private fun withMdcVars(
+    private fun <R> withMdcVars(
         mdcVars: Map<String, Any?>,
-        block: () -> Unit,
-    ) {
+        block: () -> R,
+    ): R {
         mdcVars.forEach { (k, v) ->
             MDC.put(k, v.toString())
         }
 
-        block()
-
-        mdcVars.keys.forEach { k ->
-            MDC.remove(k)
+        return try {
+            block()
+        } finally {
+            mdcVars.keys.forEach { k ->
+                MDC.remove(k)
+            }
         }
     }
 }
