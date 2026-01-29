@@ -1,11 +1,11 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidsgiver
 import no.nav.helse.flex.sykmeldinghendelse.ArbeidsledigTilleggsinfo
 import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerTilleggsinfo
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.PermittertTilleggsinfo
+import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -17,7 +17,7 @@ object FinnTidligereArbeidsgivereForArbeidsledigService {
     ): List<TidligereArbeidsgiver> {
         val gjeldendeSykmelding =
             alleSykmeldinger.find { it.sykmeldingId == gjeldendeSykmeldingId }
-                ?: throw IllegalArgumentException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
+                ?: throw SykmeldingIkkeFunnetException("Sykmelding med id $gjeldendeSykmeldingId finnes ikke")
 
         val tidligereSykmeldinger =
             alleSykmeldinger

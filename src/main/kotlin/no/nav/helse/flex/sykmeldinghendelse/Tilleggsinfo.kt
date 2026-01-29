@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import com.fasterxml.jackson.databind.module.SimpleModule
-import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
 enum class TilleggsinfoType {
@@ -100,4 +99,9 @@ data class Arbeidsgiver(
 
 data class NarmesteLeder(
     val navn: String,
+)
+
+data class TidligereArbeidsgiver(
+    val orgNavn: String,
+    val orgnummer: String,
 )

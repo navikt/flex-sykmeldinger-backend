@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
-import no.nav.helse.flex.api.dto.TidligereArbeidsgiver
 import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService

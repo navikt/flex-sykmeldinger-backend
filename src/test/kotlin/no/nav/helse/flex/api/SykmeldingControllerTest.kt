@@ -10,6 +10,7 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SporsmalSvar
+import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
@@ -21,6 +22,8 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be`
 import org.amshove.kluent.`should not be null`
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -188,6 +192,27 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 httpMethod = HttpMethod.POST,
                 token = oauth2Server.tokenxToken(fnr = "fnr", acrClaim = "invalid-claim"),
                 content = content,
+                expectedStatus = HttpStatus.UNAUTHORIZED,
+            )
+        }
+
+        "/api/v1/sykmeldinger/id-1/tidligere-arbeidsgivere".run {
+            sjekkStatus(
+                url = this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = dittSykefravaerFrontendClientId),
+                expectedStatus = HttpStatus.OK,
+            )
+            sjekkStatus(
+                this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = "invalid-client-id"),
+                expectedStatus = HttpStatus.FORBIDDEN,
+            )
+            sjekkStatus(
+                this,
+                httpMethod = HttpMethod.GET,
+                token = oauth2Server.tokenxToken(fnr = "fnr", acrClaim = "invalid-claim"),
                 expectedStatus = HttpStatus.UNAUTHORIZED,
             )
         }
@@ -515,47 +540,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     @Nested
-    inner class ExtensionFuncs {
-        @Test
-        fun `konverterer arbeidsgiverDetaljer dto riktig`() {
-            val arbeidsgiverDetaljer =
-                ArbeidsgiverDetaljer(
-                    orgnummer = "orgnr",
-                    juridiskOrgnummer = "jurorgnr",
-                    navn = "Navn",
-                    fom = LocalDate.parse("2021-01-01"),
-                    tom = LocalDate.parse("2021-01-02"),
-                    aktivtArbeidsforhold = true,
-                    naermesteLeder = null,
-                )
-            val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
-            arbeidsgiverDetaljerDTO `should be equal to`
-                ArbeidsgiverDetaljerDTO(
-                    orgnummer = "orgnr",
-                    juridiskOrgnummer = "jurorgnr",
-                    navn = "Navn",
-                    aktivtArbeidsforhold = true,
-                    naermesteLeder = null,
-                )
-        }
-
-        @Test
-        fun `burde konvertere narmeste leder dto riktig`() {
-            val narmesteLeder =
-                lagNarmesteLeder(
-                    narmesteLederNavn = "Navn",
-                    orgnummer = "orgnr",
-                )
-            val narmesteLederDTO = narmesteLeder.konverterTilDto()
-            narmesteLederDTO `should be equal to`
-                NarmesteLederDTO(
-                    navn = "Navn",
-                    orgnummer = "orgnr",
-                )
-        }
-    }
-
-    @Nested
     inner class SendSykmeldingEndepunkt {
         @Test
         fun `burde sende sykmelding for arbeidstaker til arbeidsgiver`() {
@@ -873,6 +857,101 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
     }
 
+    @Nested
+    inner class GetTidligereArbeidsgivere {
+        @Test
+        fun `burde returnere dersom sykmelding eksisterer`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "sm-1",
+                            pasient = lagPasient(fnr = "fnr"),
+                        ),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/sm-1/tidligere-arbeidsgivere")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val tidligereArbeidsgivere: List<TidligereArbeidsgiverDTO>? = objectMapper.readValue(result)
+            tidligereArbeidsgivere.shouldNotBeNull()
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/tidligere-arbeidsgivere" }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+                expectStatus = MockMvcResultMatchers.status().isNotFound,
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/tidligere-arbeidsgivere" }
+    }
+
+    @Nested
+    inner class Funksjoner {
+        @Test
+        fun `konverterer arbeidsgiverDetaljer dto riktig`() {
+            val arbeidsgiverDetaljer =
+                ArbeidsgiverDetaljer(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    fom = LocalDate.parse("2021-01-01"),
+                    tom = LocalDate.parse("2021-01-02"),
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+            val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
+            arbeidsgiverDetaljerDTO `should be equal to`
+                ArbeidsgiverDetaljerDTO(
+                    orgnummer = "orgnr",
+                    juridiskOrgnummer = "jurorgnr",
+                    navn = "Navn",
+                    aktivtArbeidsforhold = true,
+                    naermesteLeder = null,
+                )
+        }
+
+        @Test
+        fun `burde konvertere narmeste leder dto riktig`() {
+            val narmesteLeder =
+                lagNarmesteLeder(
+                    narmesteLederNavn = "Navn",
+                    orgnummer = "orgnr",
+                )
+            val narmesteLederDTO = narmesteLeder.konverterTilDto()
+            narmesteLederDTO `should be equal to`
+                NarmesteLederDTO(
+                    navn = "Navn",
+                    orgnummer = "orgnr",
+                )
+        }
+
+        @Test
+        fun `burde konvertere tidligere arbeidsgiver dto riktig`() {
+            val tidligereArbeidsgiver =
+                TidligereArbeidsgiver(
+                    orgnummer = "orgnr",
+                    orgNavn = "Navn",
+                )
+            val tidligereArbeidsgiverDTO = tidligereArbeidsgiver.konverterTilDto()
+            tidligereArbeidsgiverDTO.run {
+                orgnummer shouldBeEqualTo "orgnr"
+                orgNavn shouldBeEqualTo "Navn"
+            }
+        }
+    }
+
     fun sjekkFår404NårSykmeldingenIkkeFinnes(
         content: String = "{}",
         httpMethod: HttpMethod = HttpMethod.GET,
@@ -889,8 +968,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     fun sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-        content: String,
+        content: String = "{}",
         httpMethod: HttpMethod = HttpMethod.GET,
+        expectStatus: ResultMatcher = MockMvcResultMatchers.status().isForbidden,
         urlProducer: (sykmeldingId: String) -> String,
     ) {
         sykmeldingRepository.save(
@@ -909,7 +989,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .authorizationHeader(oauth2Server.tokenxToken(fnr = "feil_fnr", clientId = defaultClientId))
                     .content(content)
                     .contentType(MediaType.APPLICATION_JSON),
-            ).andExpect(MockMvcResultMatchers.status().isForbidden)
+            ).andExpect(expectStatus)
     }
 
     fun sjekkStatus(

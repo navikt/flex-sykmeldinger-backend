@@ -15,6 +15,7 @@ import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
+import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
@@ -73,13 +74,13 @@ class SykmeldingController(
     )
     fun getTidligereArbeidsgivere(
         @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<List<TidligereArbeidsgiver>> {
+    ): ResponseEntity<List<TidligereArbeidsgiverDTO>> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
 
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
         val tidligereArbeidsgivere = FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
-
-        return ResponseEntity.ok(tidligereArbeidsgivere)
+        val tidligereArbeidsgivereDto = tidligereArbeidsgivere.map { it.konverterTilDto() }
+        return ResponseEntity.ok(tidligereArbeidsgivereDto)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
@@ -232,6 +233,12 @@ internal fun NarmesteLeder.konverterTilDto(): NarmesteLederDTO {
         orgnummer = this.orgnummer,
     )
 }
+
+internal fun TidligereArbeidsgiver.konverterTilDto(): TidligereArbeidsgiverDTO =
+    TidligereArbeidsgiverDTO(
+        orgNavn = this.orgNavn,
+        orgnummer = this.orgnummer,
+    )
 
 enum class SykmeldingChangeStatus {
     AVBRYT,
