@@ -1,5 +1,6 @@
 package no.nav.helse.flex.config
 
+import io.micrometer.observation.ObservationRegistry
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
@@ -30,6 +31,7 @@ class RestClientConfig {
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         clientConfigurationProperties: ClientConfigurationProperties,
         requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
     ): RestClient {
         val clientProperties =
             clientConfigurationProperties.registration["aareg-client-credentials"]
@@ -39,6 +41,7 @@ class RestClientConfig {
             .builder()
             .baseUrl(url)
             .requestFactory(requestFactory)
+            .observationRegistry(observationRegistry)
             .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
             .build()
     }
@@ -49,6 +52,7 @@ class RestClientConfig {
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         clientConfigurationProperties: ClientConfigurationProperties,
         requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
     ): RestClient {
         val clientProperties =
             clientConfigurationProperties.registration["pdl-api-client-credentials"]
@@ -58,6 +62,7 @@ class RestClientConfig {
             .builder()
             .baseUrl(url)
             .requestFactory(requestFactory)
+            .observationRegistry(observationRegistry)
             .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
             .build()
     }
@@ -66,10 +71,12 @@ class RestClientConfig {
     fun eregRestClient(
         @Value("\${EREG_URL}") url: String,
         requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
     ): RestClient =
         RestClient
             .builder()
             .baseUrl(url)
+            .observationRegistry(observationRegistry)
             .requestFactory(requestFactory)
             .build()
 
@@ -96,6 +103,7 @@ class RestClientConfig {
         oAuth2AccessTokenService: OAuth2AccessTokenService,
         clientConfigurationProperties: ClientConfigurationProperties,
         requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
     ): RestClient {
         val clientProperties =
             clientConfigurationProperties.registration["flex-syketilfelle-tokenx"]
@@ -105,6 +113,7 @@ class RestClientConfig {
             .builder()
             .baseUrl(url)
             .requestFactory(requestFactory)
+            .observationRegistry(observationRegistry)
             .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
             .build()
     }

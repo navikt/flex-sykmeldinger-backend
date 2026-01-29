@@ -1,6 +1,7 @@
 package no.nav.helse.flex.testconfig
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.micrometer.observation.ObservationRegistry
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.gateways.EKSEMPEL_RESPONSE_FRA_EREG
 import no.nav.helse.flex.gateways.pdl.GraphQlRequest
@@ -77,6 +78,9 @@ val defaultPdlDispatcher =
 
 @TestConfiguration
 class MockWebServereConfig {
+    @Bean
+    fun observationRegistry(): ObservationRegistry = ObservationRegistry.create()
+
     @Bean
     fun pdlMockWebServer() = pdlMockWebServer
 
