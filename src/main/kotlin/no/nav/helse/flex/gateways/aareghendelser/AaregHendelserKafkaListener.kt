@@ -14,6 +14,7 @@ import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.seconds
@@ -94,13 +95,10 @@ class AaregHendelserConsumer(
             }
 
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
-        val personerFnrBatcher = personerFnr.chunked(10)
         val (synkroniserteArbeidsforhold, varighet) =
             measureTimedValue {
-                personerFnrBatcher
-                    .flatMap { fnrBatch ->
-                        ventPaAlle(fnrBatch.map { synkroniserForPerson(it) })
-                    }.fold(ArbeidsforholdSynkronisering.INGEN, ArbeidsforholdSynkronisering::plus)
+                ventPaAlle(personerFnr.map { synkroniserForPersonAsync(it) })
+                    .fold(ArbeidsforholdSynkronisering.INGEN, ArbeidsforholdSynkronisering::plus)
             }
 
         if (!synkroniserteArbeidsforhold.erIngen()) {
@@ -121,11 +119,12 @@ class AaregHendelserConsumer(
         }
     }
 
-    internal fun synkroniserForPerson(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
+    @Async("aaregHendelserKafkaTaskExecutor")
+    internal fun synkroniserForPersonAsync(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
         if (!skalSynkroniseres(fnr)) {
             return CompletableFuture.completedFuture(ArbeidsforholdSynkronisering.INGEN)
         }
-        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
+        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonFuture(fnr)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
