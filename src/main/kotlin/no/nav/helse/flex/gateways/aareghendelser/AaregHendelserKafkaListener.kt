@@ -14,7 +14,6 @@ import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.seconds
@@ -97,7 +96,7 @@ class AaregHendelserConsumer(
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
         val (synkroniserteArbeidsforhold, varighet) =
             measureTimedValue {
-                ventPaAlle(personerFnr.map { synkroniserForPersonAsync(it) })
+                ventPaAlle(personerFnr.map { synkroniserForPerson(it) })
                     .fold(ArbeidsforholdSynkronisering.INGEN, ArbeidsforholdSynkronisering::plus)
             }
 
@@ -119,12 +118,11 @@ class AaregHendelserConsumer(
         }
     }
 
-    @Async("aaregHendelserKafkaTaskExecutor")
-    internal fun synkroniserForPersonAsync(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
+    internal fun synkroniserForPerson(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
         if (!skalSynkroniseres(fnr)) {
             return CompletableFuture.completedFuture(ArbeidsforholdSynkronisering.INGEN)
         }
-        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonFuture(fnr)
+        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
     }
 
     fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
