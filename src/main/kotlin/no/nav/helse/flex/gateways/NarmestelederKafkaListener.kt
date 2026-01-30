@@ -3,6 +3,7 @@ package no.nav.helse.flex.gateways
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
+import no.nav.helse.flex.utils.KafkaKonsumerUtils
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -26,7 +27,7 @@ class NarmestelederListener(
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
-    ) {
+    ) = KafkaKonsumerUtils.medMdcMetadata(cr) {
         try {
             oppdateringAvNarmesteLeder.behandleMeldingFraKafka(cr.value())
         } catch (e: Exception) {

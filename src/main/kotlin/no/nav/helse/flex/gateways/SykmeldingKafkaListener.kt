@@ -6,6 +6,7 @@ import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.sykmelding.EksternSykmeldingHandterer
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
+import no.nav.helse.flex.utils.KafkaKonsumerUtils
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -32,7 +33,7 @@ class SykmeldingListener(
     fun listen(
         cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
-    ) {
+    ) = KafkaKonsumerUtils.medMdcMetadata(cr) {
         try {
             prosesserKafkaRecord(cr)
             acknowledgment.acknowledge()
@@ -40,16 +41,16 @@ class SykmeldingListener(
             if (environmentToggles.isDevelopment()) {
                 log.error("Ignorerer feil i dev", e)
                 acknowledgment.acknowledge()
-                return
+            } else {
+                log.errorSecure(
+                    message = "Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                    secureThrowable = e,
+                )
+                throw KafkaErrorHandlerException(
+                    errorHandlerLoggingEnabled = false,
+                    cause = e,
+                )
             }
-            log.errorSecure(
-                message = "Feil ved prosessering av sykmelding på kafka, exception: ${e::class.simpleName}. Dette vil bli retryet",
-                secureThrowable = e,
-            )
-            throw KafkaErrorHandlerException(
-                errorHandlerLoggingEnabled = false,
-                cause = e,
-            )
         }
     }
 

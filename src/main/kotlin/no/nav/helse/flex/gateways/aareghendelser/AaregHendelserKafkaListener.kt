@@ -8,6 +8,7 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingServi
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
+import no.nav.helse.flex.utils.KafkaKonsumerUtils
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -47,21 +48,22 @@ class AaregHendelserConsumer(
         containerFactory = "aivenKafkaBatchListenerContainerFactory",
         properties = ["auto.offset.reset = latest"],
     )
-    fun listen(consumerRecords: ConsumerRecords<String, String>) {
-        val rawRecords = consumerRecords.map(RawHendelse.Companion::fraConsumerRecord)
-        try {
-            handterHendelser(rawRecords)
-        } catch (e: Exception) {
-            log.errorSecure(
-                message = "Feil ved håndtering av aareg notifikasjon, exception: ${e::class.simpleName}. Dette vil bli retryet",
-                secureThrowable = e,
-            )
-            throw KafkaErrorHandlerException(
-                errorHandlerLoggingEnabled = false,
-                cause = e,
-            )
+    fun listen(consumerRecords: ConsumerRecords<String, String>) =
+        KafkaKonsumerUtils.medMdcMetadata(consumerRecords) {
+            val rawRecords = consumerRecords.map(RawHendelse.Companion::fraConsumerRecord)
+            try {
+                handterHendelser(rawRecords)
+            } catch (e: Exception) {
+                log.errorSecure(
+                    message = "Feil ved håndtering av aareg notifikasjon, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                    secureThrowable = e,
+                )
+                throw KafkaErrorHandlerException(
+                    errorHandlerLoggingEnabled = false,
+                    cause = e,
+                )
+            }
         }
-    }
 
     internal fun handterHendelser(hendelser: List<RawHendelse>) {
         val arbeidsforholdHendelser =
