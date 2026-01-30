@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
         mock {
-            on { synkroniserArbeidsforholdForPersonFuture(any()) } doReturn
+            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn
                 CompletableFuture.completedFuture(ArbeidsforholdSynkronisering())
         }
 
@@ -81,7 +81,7 @@ class AaregHendelserListenerTest {
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterArbeidsforholdHendelser(listOf(hendelse))
-        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonFuture("fnr_med_sykmelding")
+        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonAsync("fnr_med_sykmelding")
     }
 
     @Test
