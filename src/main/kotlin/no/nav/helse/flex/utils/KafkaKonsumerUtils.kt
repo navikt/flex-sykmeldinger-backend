@@ -51,17 +51,15 @@ object KafkaKonsumerUtils {
     private fun <R> withMdcVars(
         mdcVars: Map<String, Any?>,
         block: () -> R,
-    ): R {
-        mdcVars.forEach { (k, v) ->
-            MDC.put(k, v.toString())
-        }
-
-        return try {
+    ): R =
+        try {
+            mdcVars.forEach { (k, v) ->
+                MDC.put(k, v.toString())
+            }
             block()
         } finally {
             mdcVars.keys.forEach { k ->
                 MDC.remove(k)
             }
         }
-    }
 }
