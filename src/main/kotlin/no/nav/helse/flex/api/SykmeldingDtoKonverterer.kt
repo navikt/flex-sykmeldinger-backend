@@ -191,12 +191,6 @@ class SykmeldingDtoKonverterer(
                 val ruleHits =
                     validationResult.rules.mapNotNull { rule ->
                         if (rule is InvalidRule) {
-                            if (rule.name !in RuleNameDTO.NAVN_SET) {
-                                log.warn(
-                                    "Ukjent regelnavn for 'InvalidRule': " + mapOf("regelNavn" to rule.name),
-                                )
-                            }
-
                             RegelinfoDTO(
                                 messageForSender = rule.reason.sykmelder,
                                 messageForUser = rule.reason.sykmeldt,

@@ -489,7 +489,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 rules =
                     listOf(
                         InvalidRule(
-                            name = RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
+                            name = "BEHANDLER_MANGLER_AUTORISASJON_I_HPR",
                             timestamp = OffsetDateTime.parse("2021-01-01T00:00:00Z"),
                             validationType = ValidationType.MANUAL,
                             reason =
@@ -516,7 +516,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                             messageForUser =
                                 "Den som har skrevet sykmeldingen, har ikke autorisasjon til å gjøre det." +
                                     " Du må derfor få en annen til å skrive sykmeldingen",
-                            ruleName = RuleNameDTO.BEHANDLER_MANGLER_AUTORISASJON_I_HPR.name,
+                            ruleName = "BEHANDLER_MANGLER_AUTORISASJON_I_HPR",
                         ),
                     ),
             )
