@@ -11,10 +11,10 @@ object KafkaKonsumerUtils {
     ): R {
         val mdcVars =
             mapOf(
-                "kafkaKey" to cr.key(),
-                "kafkaTopic" to cr.topic(),
-                "kafkaPartition" to cr.partition(),
-                "kafkaOffset" to cr.offset(),
+                "kafka-key" to cr.key(),
+                "kafka-topic" to cr.topic(),
+                "kafka-partition" to cr.partition(),
+                "kafka-offset" to cr.offset(),
             )
         return withMdcVars(mdcVars) {
             block()
@@ -37,11 +37,11 @@ object KafkaKonsumerUtils {
 
         val mdcVars =
             mapOf(
-                "kafkaRecordCount" to recordCount,
-                "kafkaTopics" to topics,
-                "kafkaPartitions" to partitions,
-                "kafkaFirstOffset" to firstOffset,
-                "kafkaLastOffset" to lastOffset,
+                "kafka-count" to recordCount,
+                "kafka-topics" to topics,
+                "kafka-partitions" to partitions,
+                "kafka-offset-first" to firstOffset,
+                "kafka-offset-last" to lastOffset,
             )
         return withMdcVars(mdcVars) {
             block()
