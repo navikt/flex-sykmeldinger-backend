@@ -519,6 +519,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                             ruleName = "BEHANDLER_MANGLER_AUTORISASJON_I_HPR",
                         ),
                     ),
+                erUnderBehandling = false,
             )
     }
 
@@ -537,6 +538,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             BehandlingsutfallDTO(
                 status = RegelStatusDTO.OK,
                 ruleHits = emptyList(),
+                erUnderBehandling = true,
             )
     }
 
