@@ -184,6 +184,7 @@ class SykmeldingDtoKonverterer(
                 BehandlingsutfallDTO(
                     status = RegelStatusDTO.OK,
                     ruleHits = emptyList(),
+                    erUnderBehandling = true,
                 )
             }
 
