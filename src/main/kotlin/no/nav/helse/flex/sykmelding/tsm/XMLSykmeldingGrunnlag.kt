@@ -237,59 +237,99 @@ enum class SvarRestriksjon {
 
 enum class Sporsmalstype {
     UTFORDRINGER_MED_GRADERT_ARBEID,
+    UTFORDRINGER_MED_ARBEID,
     MEDISINSK_OPPSUMMERING,
     HENSYN_PA_ARBEIDSPLASSEN,
+    BEHANDLING_OG_FREMTIDIG_ARBEID,
+    UAVKLARTE_FORHOLD,
+    FORVENTET_HELSETILSTAND_UTVIKLING,
+    MEDISINSKE_HENSYN,
 }
 
 data class UtdypendeSporsmal(
     val svar: String,
     val type: Sporsmalstype,
     val skjermetForArbeidsgiver: Boolean = true,
+    val sporsmal: String?,
 )
 
 const val UKE_7_PREFIX = "6.3"
+const val UKE_17_PREFIX = "6.4"
+const val UKE_39_PREFIX = "6.5"
 
-fun sporsmalUke7Mapping(sporsmalType: Sporsmalstype): Pair<String, String> =
-    when (sporsmalType) {
-        Sporsmalstype.MEDISINSK_OPPSUMMERING -> {
-            Pair(
-                "$UKE_7_PREFIX.1",
-                "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
-            )
-        }
+fun spmMapping(prefix: String): Map<Sporsmalstype, Pair<String, String>> =
+    mapOf<Sporsmalstype, Pair<String, String>>(
+        Sporsmalstype.MEDISINSK_OPPSUMMERING to
+            ("$prefix.1" to "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, behandling)"),
+        Sporsmalstype.UTFORDRINGER_MED_ARBEID to
+            (
+                "$prefix.2" to
+                    "Beskriv kort hvilke utfordringer helsetilstanden gir i arbeidssituasjonen nå. Oppgi også kort hva pasienten likevel kan mestre"
+            ),
+        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID to
+            ("$UKE_7_PREFIX.2" to "Beskriv kort hvilke helsemessige begrensninger som gjør det vanskelig å jobbe gradert"),
+        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN to
+            (
+                "$UKE_7_PREFIX.3" to
+                    "Beskriv eventuelle medisinske forhold som bør ivaretas ved eventuell tilbakeføring til nåværende arbeid (ikke obligatorisk)"
+            ),
+        Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID to
+            (
+                "$UKE_17_PREFIX.3" to
+                    "Beskriv pågående og planlagt utredning/behandling, og om dette forventes å påvirke muligheten for økt arbeidsdeltakelse fremover"
+            ),
+        Sporsmalstype.UAVKLARTE_FORHOLD to
+            (
+                "$UKE_17_PREFIX.4" to
+                    "Er det forhold som fortsatt er uavklarte eller hindrer videre arbeidsdeltakelse, som Nav bør være kjent med i sin oppfølging?"
+            ),
+        Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING to
+            (
+                "$UKE_39_PREFIX.3" to
+                    "Hvordan forventes helsetilstanden å utvikle seg de neste 3-6 månedene med tanke på mulighet for økt arbeidsdeltakelse?"
+            ),
+        Sporsmalstype.MEDISINSKE_HENSYN to
+            ("$UKE_39_PREFIX.4" to "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?"),
+    )
 
-        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID -> {
-            Pair(
-                "$UKE_7_PREFIX.2",
-                "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
-            )
-        }
-
-        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN -> {
-            Pair(
-                "$UKE_7_PREFIX.3",
-                "Hvilke hensyn må være på plass for at pasienten kan prøves i det nåværende arbeidet? (ikke obligatorisk)",
-            )
-        }
+fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>> {
+    if (sporsmal.isNullOrEmpty()) {
+        return emptyMap()
     }
 
-fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>>? {
-    if (sporsmal == null) {
-        return null
-    }
+    val prefix =
+        when {
+            sporsmal.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } -> UKE_39_PREFIX
+            sporsmal.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } -> UKE_17_PREFIX
+            sporsmal.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } -> UKE_7_PREFIX
+            else -> throw IllegalArgumentException("Utdypende sporsmal does not have correct prefix ${sporsmal.first().type}")
+        }
 
-    val uke7 =
-        sporsmal
-            .asSequence()
-            .map { sporsmal ->
-                val (key, sporsmalTekst) = sporsmalUke7Mapping(sporsmal.type)
+    val mappings = spmMapping(prefix)
+    val sporsmals =
+        sporsmal.mapNotNull { spm ->
+            mappings[spm.type]?.let { (key, ss) ->
                 key to
                     SporsmalSvar(
-                        sporsmal = sporsmalTekst,
+                        sporsmal = spm.sporsmal ?: ss,
                         restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
-                        svar = sporsmal.svar,
+                        svar = spm.svar,
                     )
-            }.toMap()
+            }
+        }
 
-    return mapOf(UKE_7_PREFIX to uke7)
+    val grouped =
+        sporsmals
+            .groupBy {
+                when {
+                    it.first.startsWith(UKE_39_PREFIX) -> UKE_39_PREFIX
+                    it.first.startsWith(UKE_17_PREFIX) -> UKE_17_PREFIX
+                    it.first.startsWith(UKE_7_PREFIX) -> UKE_7_PREFIX
+                    else -> {
+                        throw IllegalArgumentException("Sporsmal does not have correct prefix ${it.first}")
+                    }
+                }
+            }.mapValues { it.value.toMap() }
+
+    return grouped
 }
