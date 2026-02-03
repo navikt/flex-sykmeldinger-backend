@@ -48,14 +48,17 @@ class SykmeldingGrunnlagTest {
                 UtdypendeSporsmal(
                     type = Sporsmalstype.MEDISINSK_OPPSUMMERING,
                     svar = "svar 1",
+                    sporsmal = "sporsmal",
                 ),
                 UtdypendeSporsmal(
                     type = Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
                     svar = "svar 2",
+                    sporsmal = "sporsmal",
                 ),
                 UtdypendeSporsmal(
                     type = Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
                     svar = "svar 3",
+                    sporsmal = "sporsmal",
                 ),
             )
 
@@ -65,24 +68,20 @@ class SykmeldingGrunnlagTest {
                     mapOf(
                         "6.3.1" to
                             SporsmalSvar(
-                                sporsmal =
-                                    "Gi en kort medisinsk oppsummering av tilstanden " +
-                                        "(sykehistorie, hovedsymptomer, pågående/planlagt behandling)",
                                 svar = "svar 1",
+                                sporsmal = "sporsmal",
                                 restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
                             ),
                         "6.3.2" to
                             SporsmalSvar(
-                                sporsmal = "Hvilke utfordringer har pasienten med å utføre gradert arbeid?",
                                 svar = "svar 2",
+                                sporsmal = "sporsmal",
                                 restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
                             ),
                         "6.3.3" to
                             SporsmalSvar(
-                                sporsmal =
-                                    "Hvilke hensyn må være på plass for at pasienten kan prøves i det " +
-                                        "nåværende arbeidet? (ikke obligatorisk)",
                                 svar = "svar 3",
+                                sporsmal = "sporsmal",
                                 restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
                             ),
                     ),

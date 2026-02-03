@@ -118,14 +118,17 @@ fun lagDigitalSykmeldingGrunnlag(id: String = "1"): DigitalSykmeldingGrunnlag =
                 UtdypendeSporsmal(
                     type = Sporsmalstype.MEDISINSK_OPPSUMMERING,
                     svar = "svar",
+                    sporsmal = "sporsmal",
                 ),
                 UtdypendeSporsmal(
                     type = Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID,
                     svar = "svar",
+                    sporsmal = "sporsmal",
                 ),
                 UtdypendeSporsmal(
                     type = Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN,
                     svar = "svar",
+                    sporsmal = "sporsmal",
                 ),
             ),
     )
