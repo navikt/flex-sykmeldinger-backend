@@ -253,83 +253,155 @@ data class UtdypendeSporsmal(
     val sporsmal: String?,
 )
 
-const val UKE_7_PREFIX = "6.3"
-const val UKE_17_PREFIX = "6.4"
-const val UKE_39_PREFIX = "6.5"
-
-fun spmMapping(prefix: String): Map<Sporsmalstype, Pair<String, String>> =
-    mapOf<Sporsmalstype, Pair<String, String>>(
-        Sporsmalstype.MEDISINSK_OPPSUMMERING to
-            ("$prefix.1" to "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, behandling)"),
-        Sporsmalstype.UTFORDRINGER_MED_ARBEID to
-            (
-                "$prefix.2" to
-                    "Beskriv kort hvilke utfordringer helsetilstanden gir i arbeidssituasjonen nå. Oppgi også kort hva pasienten likevel kan mestre"
-            ),
-        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID to
-            ("$UKE_7_PREFIX.2" to "Beskriv kort hvilke helsemessige begrensninger som gjør det vanskelig å jobbe gradert"),
-        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN to
-            (
-                "$UKE_7_PREFIX.3" to
-                    "Beskriv eventuelle medisinske forhold som bør ivaretas ved eventuell tilbakeføring til nåværende arbeid (ikke obligatorisk)"
-            ),
-        Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID to
-            (
-                "$UKE_17_PREFIX.3" to
-                    "Beskriv pågående og planlagt utredning/behandling, og om dette forventes å påvirke muligheten for økt arbeidsdeltakelse fremover"
-            ),
-        Sporsmalstype.UAVKLARTE_FORHOLD to
-            (
-                "$UKE_17_PREFIX.4" to
-                    "Er det forhold som fortsatt er uavklarte eller hindrer videre arbeidsdeltakelse, som Nav bør være kjent med i sin oppfølging?"
-            ),
-        Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING to
-            (
-                "$UKE_39_PREFIX.3" to
-                    "Hvordan forventes helsetilstanden å utvikle seg de neste 3-6 månedene med tanke på mulighet for økt arbeidsdeltakelse?"
-            ),
-        Sporsmalstype.MEDISINSKE_HENSYN to
-            ("$UKE_39_PREFIX.4" to "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?"),
-    )
+enum class UtdypendeOpplysningHovedgruppe(
+    val notasjon: String,
+) {
+    UKE_7("6.3"),
+    UKE_17("6.4"),
+    UKE_39("6.5"),
+}
 
 fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>> {
     if (sporsmal.isNullOrEmpty()) {
         return emptyMap()
     }
 
-    val prefix =
-        when {
-            sporsmal.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } -> UKE_39_PREFIX
-            sporsmal.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } -> UKE_17_PREFIX
-            sporsmal.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } -> UKE_7_PREFIX
-            else -> throw IllegalArgumentException("Utdypende sporsmal does not have correct prefix ${sporsmal.first().type}")
+    val prioritertHovedgruppe = finnPrioritertUtdypendeOpplysningHovedgruppe(sporsmal)
+
+    val strukturertUtdypendeOpplysninger =
+        sporsmal.map {
+            konverterTilStrukturertUtdypendeOpplysning(sporsmal = it, prioritertHovedgruppe = prioritertHovedgruppe)
         }
 
-    val mappings = spmMapping(prefix)
-    val sporsmals =
-        sporsmal.mapNotNull { spm ->
-            mappings[spm.type]?.let { (key, ss) ->
-                key to
-                    SporsmalSvar(
-                        sporsmal = spm.sporsmal ?: ss,
-                        restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
-                        svar = spm.svar,
-                    )
-            }
-        }
-
-    val grouped =
-        sporsmals
-            .groupBy {
-                when {
-                    it.first.startsWith(UKE_39_PREFIX) -> UKE_39_PREFIX
-                    it.first.startsWith(UKE_17_PREFIX) -> UKE_17_PREFIX
-                    it.first.startsWith(UKE_7_PREFIX) -> UKE_7_PREFIX
-                    else -> {
-                        throw IllegalArgumentException("Sporsmal does not have correct prefix ${it.first}")
-                    }
-                }
-            }.mapValues { it.value.toMap() }
+    val grouped: Map<UtdypendeOpplysningHovedgruppe, List<StrukturertUtdypendeOpplysning>> =
+        strukturertUtdypendeOpplysninger.groupBy { it.hovedgruppe }
 
     return grouped
+        .map { (hovedgruppe, utdypendeOpplysninger) ->
+            val hovedgruppeNotasjon = hovedgruppe.notasjon
+            val konverterteSporsmal =
+                utdypendeOpplysninger.associate { opplysning ->
+                    "$hovedgruppeNotasjon.${opplysning.undergruppe}" to
+                        SporsmalSvar(
+                            sporsmal = opplysning.sporsmal,
+                            svar = opplysning.svar,
+                            restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                        )
+                }
+            hovedgruppeNotasjon to konverterteSporsmal
+        }.toMap()
 }
+
+data class StrukturertUtdypendeOpplysning(
+    val hovedgruppe: UtdypendeOpplysningHovedgruppe,
+    val undergruppe: String,
+    val sporsmal: String,
+    val svar: String,
+) {
+    init {
+        val tillattUndergruppe = setOf("1", "2", "3", "4")
+        require(undergruppe in tillattUndergruppe) {
+            "Undergruppe må være en av $tillattUndergruppe"
+        }
+    }
+}
+
+fun finnPrioritertUtdypendeOpplysningHovedgruppe(sporsmal: List<UtdypendeSporsmal>): UtdypendeOpplysningHovedgruppe =
+    when {
+        sporsmal.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } -> UtdypendeOpplysningHovedgruppe.UKE_39
+        sporsmal.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } -> UtdypendeOpplysningHovedgruppe.UKE_17
+        sporsmal.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } -> UtdypendeOpplysningHovedgruppe.UKE_7
+        else -> throw IllegalArgumentException(
+            "Liste med utdypende sporsmal mangler nødvendig type for konvertering. Eksisterende typer: ${sporsmal.map { it.type }}",
+        )
+    }
+
+private fun konverterTilStrukturertUtdypendeOpplysning(
+    sporsmal: UtdypendeSporsmal,
+    prioritertHovedgruppe: UtdypendeOpplysningHovedgruppe,
+): StrukturertUtdypendeOpplysning =
+    when (sporsmal.type) {
+        Sporsmalstype.MEDISINSK_OPPSUMMERING ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = prioritertHovedgruppe,
+                undergruppe = "1",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, behandling)",
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.UTFORDRINGER_MED_ARBEID ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = prioritertHovedgruppe,
+                undergruppe = "2",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: (
+                            "Beskriv kort hvilke utfordringer helsetilstanden gir i arbeidssituasjonen nå. " +
+                                "Oppgi også kort hva pasienten likevel kan mestre"
+                        ),
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_7,
+                undergruppe = "2",
+                sporsmal = sporsmal.sporsmal ?: "Beskriv kort hvilke helsemessige begrensninger som gjør det vanskelig å jobbe gradert",
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_7,
+                undergruppe = "3",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: (
+                            "Beskriv eventuelle medisinske forhold som bør ivaretas " +
+                                "ved eventuell tilbakeføring til nåværende arbeid (ikke obligatorisk)"
+                        ),
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_17,
+                undergruppe = "3",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: (
+                            "Beskriv pågående og planlagt utredning/behandling, " +
+                                "og om dette forventes å påvirke muligheten for økt arbeidsdeltakelse fremover"
+                        ),
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.UAVKLARTE_FORHOLD ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_17,
+                undergruppe = "4",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: (
+                            "Er det forhold som fortsatt er uavklarte eller hindrer videre arbeidsdeltakelse, " +
+                                "som Nav bør være kjent med i sin oppfølging?"
+                        ),
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_39,
+                undergruppe = "3",
+                sporsmal =
+                    sporsmal.sporsmal
+                        ?: (
+                            "Hvordan forventes helsetilstanden å utvikle seg de neste 3-6 månedene " +
+                                "med tanke på mulighet for økt arbeidsdeltakelse?"
+                        ),
+                svar = sporsmal.svar,
+            )
+        Sporsmalstype.MEDISINSKE_HENSYN ->
+            StrukturertUtdypendeOpplysning(
+                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_39,
+                undergruppe = "4",
+                sporsmal = "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?",
+                svar = sporsmal.svar,
+            )
+    }
