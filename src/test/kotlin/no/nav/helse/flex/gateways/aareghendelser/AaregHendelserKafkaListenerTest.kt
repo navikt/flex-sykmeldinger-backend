@@ -5,12 +5,12 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingRuterService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.utils.objectMapper
 import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be`
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -24,33 +24,13 @@ import java.util.concurrent.CompletableFuture
 class AaregHendelserListenerTest {
     fun arbeidsforholdInnhentingService(): ArbeidsforholdInnhentingService =
         mock {
-            on { synkroniserArbeidsforholdForPersonAsync(any()) } doReturn
+            on { synkroniserArbeidsforholdForPersonFuture(any()) } doReturn
                 CompletableFuture.completedFuture(ArbeidsforholdSynkronisering())
         }
 
     @Test
-    fun `burde synkronisere eksisterende persons arbeidsforhold`() {
-        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
-            mock {
-                on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
-            }
-        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, mock())
-        listener.skalSynkroniseres("fnr_med_sykmelding") `should be` true
-    }
-
-    @Test
-    fun `burde ikke synkronisere ny persons arbeidsforhold`() {
-        val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold =
-            mock {
-                on { erPersonRegistrert("fnr_uten_sykmelding") } doReturn false
-            }
-        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, mock())
-        listener.skalSynkroniseres("fnr_uten_sykmelding") `should be` false
-    }
-
-    @Test
     fun `tar imot aaregHendelse og kaster feil når hendelse har feil format`() {
-        val listener = AaregHendelserConsumer(mock(), mock())
+        val listener = AaregHendelserConsumer(mock())
         val record: ConsumerRecord<String, String> =
             ConsumerRecord(
                 "topic",
@@ -77,11 +57,13 @@ class AaregHendelserListenerTest {
                 on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
             }
         val arbeidsforholdInnhentingService = arbeidsforholdInnhentingService()
-        val listener = AaregHendelserConsumer(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
+        val arbeidsforholdInnhentingRuterService =
+            ArbeidsforholdInnhentingRuterService(registrertePersonerForArbeidsforhold, arbeidsforholdInnhentingService)
+        val listener = AaregHendelserConsumer(arbeidsforholdInnhentingRuterService)
         val hendelse = lagArbeidsforholdHendelse()
 
         listener.handterArbeidsforholdHendelser(listOf(hendelse))
-        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonAsync("fnr_med_sykmelding")
+        verify(arbeidsforholdInnhentingService).synkroniserArbeidsforholdForPersonFuture("fnr_med_sykmelding")
     }
 
     @Test
