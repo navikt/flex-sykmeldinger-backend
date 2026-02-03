@@ -3,7 +3,6 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.IdentService
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -19,9 +18,8 @@ class ArbeidsforholdInnhentingService(
     private val identService: IdentService,
     private val nowFactory: Supplier<Instant> = Supplier { Instant.now() },
 ) {
-    @Async("aaregHendelserKafkaTaskExecutor")
     @Transactional(rollbackFor = [Exception::class])
-    fun synkroniserArbeidsforholdForPersonAsync(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> =
+    fun synkroniserArbeidsforholdForPersonFuture(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> =
         CompletableFuture.completedFuture(synkroniserArbeidsforholdForPerson(fnr))
 
     @Transactional(rollbackFor = [Exception::class])

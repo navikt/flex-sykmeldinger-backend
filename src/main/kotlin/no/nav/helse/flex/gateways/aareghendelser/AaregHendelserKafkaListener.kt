@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
+import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingRuterService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
-import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.utils.KafkaKonsumerUtils
 import no.nav.helse.flex.utils.errorSecure
@@ -37,8 +36,7 @@ data class RawHendelse(
 
 @Component
 class AaregHendelserConsumer(
-    private val registrertePersonerForArbeidsforhold: RegistrertePersonerForArbeidsforhold,
-    private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
+    private val arbeidsforholdInnhentingRuterService: ArbeidsforholdInnhentingRuterService,
 ) {
     val log = logger()
 
@@ -98,7 +96,7 @@ class AaregHendelserConsumer(
         val personerFnr = aktuelleArbeidsforholdHendelser.map { it.arbeidsforhold.arbeidstaker.getFnr() }.distinct()
         val (synkroniserteArbeidsforhold, varighet) =
             measureTimedValue {
-                ventPaAlle(personerFnr.map { synkroniserForPerson(it) })
+                ventPaAlle(personerFnr.map { arbeidsforholdInnhentingRuterService.synkroniserForPersonAsync(it) })
                     .fold(ArbeidsforholdSynkronisering.INGEN, ArbeidsforholdSynkronisering::plus)
             }
 
@@ -119,15 +117,6 @@ class AaregHendelserConsumer(
             )
         }
     }
-
-    internal fun synkroniserForPerson(fnr: String): CompletableFuture<ArbeidsforholdSynkronisering> {
-        if (!skalSynkroniseres(fnr)) {
-            return CompletableFuture.completedFuture(ArbeidsforholdSynkronisering.INGEN)
-        }
-        return arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPersonAsync(fnr)
-    }
-
-    fun skalSynkroniseres(fnr: String): Boolean = registrertePersonerForArbeidsforhold.erPersonRegistrert(fnr)
 
     private fun JsonMappingException.stringPath(): String = this.path.joinToString(".") { it.fieldName ?: it.index.toString() }
 
