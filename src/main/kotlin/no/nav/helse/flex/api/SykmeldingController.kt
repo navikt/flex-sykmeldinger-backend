@@ -62,25 +62,11 @@ class SykmeldingController(
                         true
                     }
                 }
-        val konverterteSykmeldinger = sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) }
-        return ResponseEntity.ok(konverterteSykmeldinger)
-    }
-
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/tidligere-arbeidsgivere")
-    @ProtectedWithClaims(
-        issuer = TOKENX,
-        combineWithOr = true,
-        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
-    )
-    fun getTidligereArbeidsgivere(
-        @PathVariable("sykmeldingId") sykmeldingId: String,
-    ): ResponseEntity<List<TidligereArbeidsgiverDTO>> {
-        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
-
-        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
-        val tidligereArbeidsgivere = FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
-        val tidligereArbeidsgivereDto = tidligereArbeidsgivere.map { it.konverterTilDto() }
-        return ResponseEntity.ok(tidligereArbeidsgivereDto)
+        val sykmeldingDtoer =
+            sykmeldinger
+                .map { sykmeldingDtoKonverterer.konverter(it) }
+                .map { SykmeldingDtoRegler.skjermForPasientDersomSpesifisert(it) }
+        return ResponseEntity.ok(sykmeldingDtoer)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
@@ -101,8 +87,29 @@ class SykmeldingController(
 
         val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
 
-        val konvertertSykmelding = sykmeldingDtoKonverterer.konverter(sykmelding)
-        return ResponseEntity.ok(konvertertSykmelding)
+        val sykmeldingDto =
+            sykmeldingDtoKonverterer.konverter(sykmelding).let {
+                SykmeldingDtoRegler.skjermForPasientDersomSpesifisert(it)
+            }
+
+        return ResponseEntity.ok(sykmeldingDto)
+    }
+
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/tidligere-arbeidsgivere")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun getTidligereArbeidsgivere(
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<List<TidligereArbeidsgiverDTO>> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+
+        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
+        val tidligereArbeidsgivere = FinnTidligereArbeidsgivereForArbeidsledigService.finnTidligereArbeidsgivere(sykmeldinger, sykmeldingId)
+        val tidligereArbeidsgivereDto = tidligereArbeidsgivere.map { it.konverterTilDto() }
+        return ResponseEntity.ok(tidligereArbeidsgivereDto)
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/brukerinformasjon")
