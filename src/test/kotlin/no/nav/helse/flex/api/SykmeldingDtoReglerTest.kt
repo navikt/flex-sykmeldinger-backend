@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 class SykmeldingDtoReglerTest {
     @Test
-    fun `burde ikke skjerme for pasient`() {
+    fun `burde ikke skjermes for pasient dersom ikke spesifisert`() {
         val sykmeldingDto =
             lagSykmeldingDto(
                 skjermesForPasient = false,
@@ -33,7 +33,7 @@ class SykmeldingDtoReglerTest {
     }
 
     @Test
-    fun `burde skjmes for pasient`() {
+    fun `burde skermes for pasient dersom spesifisert`() {
         val sykmeldingDto =
             lagSykmeldingDto(
                 skjermesForPasient = true,
