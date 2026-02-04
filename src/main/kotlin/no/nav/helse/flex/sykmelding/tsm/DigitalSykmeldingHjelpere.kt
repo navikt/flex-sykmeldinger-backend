@@ -6,11 +6,11 @@ object DigitalSykmeldingHjelpere {
             return emptyMap()
         }
 
-        val prioritertHovedgruppe = finnPrioritertUtdypendeOpplysningHovedgruppe(sporsmal)
+        val prioritertSporsmalgruppe = finnPrioritertSporsmalgruppe(sporsmal)
 
         val strukturertUtdypendeOpplysninger =
             sporsmal.map {
-                konverterTilStrukturertUtdypendeOpplysning(sporsmal = it, prioritertHovedgruppe = prioritertHovedgruppe)
+                konverterTilStrukturertUtdypendeOpplysning(sporsmal = it, prioritertSporsmalgruppe = prioritertSporsmalgruppe)
             }
 
         return strukturertUtdypendeOpplysninger
@@ -28,7 +28,7 @@ object DigitalSykmeldingHjelpere {
     }
 }
 
-private enum class UtdypendeOpplysningHovedgruppe(
+private enum class Sporsmalgruppe(
     val notasjon: String,
 ) {
     UKE_7("6.3"),
@@ -37,29 +37,29 @@ private enum class UtdypendeOpplysningHovedgruppe(
 }
 
 private data class StrukturertUtdypendeOpplysning(
-    val hovedgruppe: UtdypendeOpplysningHovedgruppe,
-    val undergruppe: String,
+    val sporsmalgruppe: Sporsmalgruppe,
+    val sporsmalnummer: Int,
     val sporsmal: String,
     val svar: String,
 ) {
     val sporsmalgruppeNotasjon
-        get() = hovedgruppe.notasjon
+        get() = sporsmalgruppe.notasjon
     val sporsmalNotasjon
-        get() = "$sporsmalgruppeNotasjon.$undergruppe"
+        get() = "$sporsmalgruppeNotasjon.$sporsmalnummer"
 
     init {
-        val tillattUndergruppe = setOf("1", "2", "3", "4")
-        require(undergruppe in tillattUndergruppe) {
-            "Undergruppe må være en av $tillattUndergruppe"
+        val tillattSporsmalnummer = (0 until 10)
+        require(sporsmalnummer in tillattSporsmalnummer) {
+            "Spørsmålnummer må være i $tillattSporsmalnummer"
         }
     }
 }
 
-private fun finnPrioritertUtdypendeOpplysningHovedgruppe(sporsmal: List<UtdypendeSporsmal>): UtdypendeOpplysningHovedgruppe =
+private fun finnPrioritertSporsmalgruppe(sporsmal: List<UtdypendeSporsmal>): Sporsmalgruppe =
     when {
-        sporsmal.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } -> UtdypendeOpplysningHovedgruppe.UKE_39
-        sporsmal.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } -> UtdypendeOpplysningHovedgruppe.UKE_17
-        sporsmal.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } -> UtdypendeOpplysningHovedgruppe.UKE_7
+        sporsmal.any { it.type == Sporsmalstype.MEDISINSKE_HENSYN } -> Sporsmalgruppe.UKE_39
+        sporsmal.any { it.type == Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID } -> Sporsmalgruppe.UKE_17
+        sporsmal.any { it.type == Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID } -> Sporsmalgruppe.UKE_7
         else -> throw IllegalArgumentException(
             "Liste med utdypende sporsmal mangler nødvendig type for konvertering. Eksisterende typer: ${sporsmal.map { it.type }}",
         )
@@ -67,13 +67,13 @@ private fun finnPrioritertUtdypendeOpplysningHovedgruppe(sporsmal: List<Utdypend
 
 private fun konverterTilStrukturertUtdypendeOpplysning(
     sporsmal: UtdypendeSporsmal,
-    prioritertHovedgruppe: UtdypendeOpplysningHovedgruppe,
+    prioritertSporsmalgruppe: Sporsmalgruppe,
 ): StrukturertUtdypendeOpplysning =
     when (sporsmal.type) {
         Sporsmalstype.MEDISINSK_OPPSUMMERING ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = prioritertHovedgruppe,
-                undergruppe = "1",
+                sporsmalgruppe = prioritertSporsmalgruppe,
+                sporsmalnummer = 1,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: "Gi en kort medisinsk oppsummering av tilstanden (sykehistorie, hovedsymptomer, behandling)",
@@ -81,8 +81,8 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.UTFORDRINGER_MED_ARBEID ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = prioritertHovedgruppe,
-                undergruppe = "2",
+                sporsmalgruppe = prioritertSporsmalgruppe,
+                sporsmalnummer = 2,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: (
@@ -93,15 +93,15 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.UTFORDRINGER_MED_GRADERT_ARBEID ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_7,
-                undergruppe = "2",
+                sporsmalgruppe = Sporsmalgruppe.UKE_7,
+                sporsmalnummer = 2,
                 sporsmal = sporsmal.sporsmal ?: "Beskriv kort hvilke helsemessige begrensninger som gjør det vanskelig å jobbe gradert",
                 svar = sporsmal.svar,
             )
         Sporsmalstype.HENSYN_PA_ARBEIDSPLASSEN ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_7,
-                undergruppe = "3",
+                sporsmalgruppe = Sporsmalgruppe.UKE_7,
+                sporsmalnummer = 3,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: (
@@ -112,8 +112,8 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.BEHANDLING_OG_FREMTIDIG_ARBEID ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_17,
-                undergruppe = "3",
+                sporsmalgruppe = Sporsmalgruppe.UKE_17,
+                sporsmalnummer = 3,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: (
@@ -124,8 +124,8 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.UAVKLARTE_FORHOLD ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_17,
-                undergruppe = "4",
+                sporsmalgruppe = Sporsmalgruppe.UKE_17,
+                sporsmalnummer = 4,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: (
@@ -136,8 +136,8 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.FORVENTET_HELSETILSTAND_UTVIKLING ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_39,
-                undergruppe = "3",
+                sporsmalgruppe = Sporsmalgruppe.UKE_39,
+                sporsmalnummer = 3,
                 sporsmal =
                     sporsmal.sporsmal
                         ?: (
@@ -148,8 +148,8 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             )
         Sporsmalstype.MEDISINSKE_HENSYN ->
             StrukturertUtdypendeOpplysning(
-                hovedgruppe = UtdypendeOpplysningHovedgruppe.UKE_39,
-                undergruppe = "4",
+                sporsmalgruppe = Sporsmalgruppe.UKE_39,
+                sporsmalnummer = 4,
                 sporsmal = "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?",
                 svar = sporsmal.svar,
             )
