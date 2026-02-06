@@ -16,7 +16,7 @@ class SykmeldingGrunnlagTest {
         val opprinneligSykmelding = lagXMLSykmeldingGrunnlag()
         val sykmeldingSerialisert = opprinneligSykmelding.serialisertTilString()
 
-        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
+        val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
         sykmelding `should be instance of` XMLSykmeldingGrunnlag::class
         sykmelding `should be equal to` opprinneligSykmelding
     }
@@ -26,7 +26,7 @@ class SykmeldingGrunnlagTest {
         val opprinneligUtenlandskSykmelding = lagUtenlandskSykmeldingGrunnlag()
         val utenlandskSykmeldingSerialisert = opprinneligUtenlandskSykmelding.serialisertTilString()
 
-        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
+        val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
         sykmelding `should be instance of` UtenlandskSykmeldingGrunnlag::class
         sykmelding `should be equal to` opprinneligUtenlandskSykmelding
     }
@@ -36,7 +36,7 @@ class SykmeldingGrunnlagTest {
         val opprinneligDigitalSykmelding = lagDigitalSykmeldingGrunnlag()
         val digitalSykmeldingSerialisert = opprinneligDigitalSykmelding.serialisertTilString()
 
-        val sykmelding: ISykmeldingGrunnlag = objectMapper.readValue(digitalSykmeldingSerialisert)
+        val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(digitalSykmeldingSerialisert)
         sykmelding `should be instance of` DigitalSykmeldingGrunnlag::class
         sykmelding `should be equal to` opprinneligDigitalSykmelding
     }

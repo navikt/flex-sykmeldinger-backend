@@ -17,7 +17,7 @@ fun lagSykmeldingGrunnlag(
         ),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
-): ISykmeldingGrunnlag =
+): SykmeldingGrunnlag =
     lagNorskSykmeldingGrunnlag(
         id = id,
         metadata = metadata,

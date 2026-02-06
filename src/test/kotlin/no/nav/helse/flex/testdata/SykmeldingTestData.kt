@@ -1,13 +1,13 @@
 package no.nav.helse.flex.testdata
 
 import no.nav.helse.flex.sykmelding.Sykmelding
-import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import java.time.Instant
 
 fun lagSykmelding(
-    sykmeldingGrunnlag: ISykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
+    sykmeldingGrunnlag: SykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"),
     validation: ValidationResult = lagValidation(),
     hendelser: List<SykmeldingHendelse> =
         listOf(

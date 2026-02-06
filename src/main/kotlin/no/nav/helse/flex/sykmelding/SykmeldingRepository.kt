@@ -2,7 +2,7 @@ package no.nav.helse.flex.sykmelding
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
@@ -137,7 +137,7 @@ data class SykmeldingDbRecord(
     val sykmeldingGrunnlagOppdatert: Instant,
     val validationOppdatert: Instant,
 ) {
-    fun mapTilSykmelding(): ISykmeldingGrunnlag =
+    fun mapTilSykmelding(): SykmeldingGrunnlag =
         this.sykmelding.fraPsqlJson()
             ?: error("sykmelding kolonne burde ikke være null")
 
