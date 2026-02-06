@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
-import no.nav.helse.flex.sykmelding.tsm.ISykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import java.time.Instant
@@ -11,7 +11,7 @@ import kotlin.collections.plus
 
 data class Sykmelding(
     internal val databaseId: String? = null,
-    val sykmeldingGrunnlag: ISykmeldingGrunnlag,
+    val sykmeldingGrunnlag: SykmeldingGrunnlag,
     val validation: ValidationResult,
     val hendelser: List<SykmeldingHendelse>,
     val opprettet: Instant,

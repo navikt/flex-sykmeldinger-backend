@@ -5,7 +5,7 @@ import no.nav.helse.flex.utils.addPolymorphicDeserializer
 
 val SYKMELDING_GRUNNLAG_DESERIALIZER_MODULE: SimpleModule =
     SimpleModule()
-        .addPolymorphicDeserializer(ISykmeldingGrunnlag::type) {
+        .addPolymorphicDeserializer(SykmeldingGrunnlag::type) {
             when (it) {
                 SykmeldingType.XML -> XMLSykmeldingGrunnlag::class
                 SykmeldingType.PAPIR -> PapirSykmeldingGrunnlag::class

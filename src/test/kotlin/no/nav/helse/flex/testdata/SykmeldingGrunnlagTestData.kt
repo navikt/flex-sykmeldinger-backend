@@ -17,6 +17,51 @@ fun lagSykmeldingGrunnlag(
         ),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
+): SykmeldingGrunnlag =
+    lagNorskSykmeldingGrunnlag(
+        id = id,
+        metadata = metadata,
+        pasient = pasient,
+        medisinskVurdering = medisinskVurdering,
+        aktiviteter = aktiviteter,
+        tilbakedatering = null,
+    )
+
+fun lagNorskSykmeldingGrunnlag(
+    id: String = "1",
+    pasient: Pasient = lagPasient(),
+    aktiviteter: List<Aktivitet> =
+        listOf(
+            lagAktivitetIkkeMulig(
+                LocalDate.parse("2021-01-01"),
+                LocalDate.parse("2021-01-10"),
+            ),
+        ),
+    metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
+    medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
+    tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
+): NorskSykmeldingGrunnlag =
+    lagXMLSykmeldingGrunnlag(
+        id = id,
+        metadata = metadata,
+        pasient = pasient,
+        medisinskVurdering = medisinskVurdering,
+        aktiviteter = aktiviteter,
+        tilbakedatering = tilbakedatering,
+    )
+
+fun lagXMLSykmeldingGrunnlag(
+    id: String = "1",
+    pasient: Pasient = lagPasient(),
+    aktiviteter: List<Aktivitet> =
+        listOf(
+            lagAktivitetIkkeMulig(
+                LocalDate.parse("2021-01-01"),
+                LocalDate.parse("2021-01-10"),
+            ),
+        ),
+    metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
+    medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
 ): XMLSykmeldingGrunnlag =
     XMLSykmeldingGrunnlag(

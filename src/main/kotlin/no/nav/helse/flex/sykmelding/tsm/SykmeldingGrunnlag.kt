@@ -17,7 +17,7 @@ enum class SykmeldingType {
     DIGITAL,
 }
 
-sealed interface ISykmeldingGrunnlag {
+sealed interface SykmeldingGrunnlag {
     val type: SykmeldingType
     val id: String
     val metadata: SykmeldingMetadata
@@ -33,11 +33,11 @@ data class UtenlandskSykmeldingGrunnlag(
     override val medisinskVurdering: IkkeDigitalMedisinskVurdering,
     override val aktivitet: List<Aktivitet>,
     val utenlandskInfo: UtenlandskInfo,
-) : ISykmeldingGrunnlag {
+) : SykmeldingGrunnlag {
     override val type = SykmeldingType.UTENLANDSK
 }
 
-sealed interface NorskSykmeldingGrunnlag : ISykmeldingGrunnlag {
+sealed interface NorskSykmeldingGrunnlag : SykmeldingGrunnlag {
     override val id: String
     override val metadata: SykmeldingMetadata
     override val pasient: Pasient
