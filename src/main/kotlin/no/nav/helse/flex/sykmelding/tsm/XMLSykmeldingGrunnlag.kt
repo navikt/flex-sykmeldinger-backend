@@ -90,7 +90,7 @@ data class DigitalSykmeldingGrunnlag(
 
     @get:JsonIgnore
     override val utdypendeOpplysninger: Map<String, Map<String, SporsmalSvar>>
-        get() = DigitalSykmeldingHjelpere.toUtdypendeOpplysninger(utdypendeSporsmal)
+        get() = DigitalSykmeldingHjelpere.tilBakoverkompatibelUtdypendeOpplysninger(utdypendeSporsmal)
 }
 
 data class PapirSykmeldingGrunnlag(

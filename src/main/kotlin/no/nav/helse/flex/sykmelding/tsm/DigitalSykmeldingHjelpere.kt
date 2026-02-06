@@ -1,15 +1,15 @@
 package no.nav.helse.flex.sykmelding.tsm
 
 object DigitalSykmeldingHjelpere {
-    fun toUtdypendeOpplysninger(sporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>> {
-        if (sporsmal.isNullOrEmpty()) {
+    fun tilBakoverkompatibelUtdypendeOpplysninger(utdypendeSporsmal: List<UtdypendeSporsmal>?): Map<String, Map<String, SporsmalSvar>> {
+        if (utdypendeSporsmal.isNullOrEmpty()) {
             return emptyMap()
         }
 
-        val prioritertSporsmalgruppe = finnPrioritertSporsmalgruppe(sporsmal)
+        val prioritertSporsmalgruppe = finnPrioritertSporsmalgruppe(utdypendeSporsmal)
 
         val strukturertUtdypendeOpplysninger =
-            sporsmal.map {
+            utdypendeSporsmal.map {
                 konverterTilStrukturertUtdypendeOpplysning(sporsmal = it, prioritertSporsmalgruppe = prioritertSporsmalgruppe)
             }
 
@@ -150,7 +150,7 @@ private fun konverterTilStrukturertUtdypendeOpplysning(
             StrukturertUtdypendeOpplysning(
                 sporsmalgruppe = Sporsmalgruppe.UKE_39,
                 sporsmalnummer = 4,
-                sporsmal = "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?",
+                sporsmal = sporsmal.sporsmal ?: "Er det medisinske hensyn eller avklaringsbehov Nav bør kjenne til i videre oppfølging?",
                 svar = sporsmal.svar,
             )
     }
