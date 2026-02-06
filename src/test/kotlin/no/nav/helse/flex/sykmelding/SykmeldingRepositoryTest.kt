@@ -69,9 +69,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding.copy(
                 sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(id = "1").copy(
-                        pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
-                    ),
+                    lagSykmeldingGrunnlag(id = "1", pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr")),
             )
 
         sykmeldingRepository.save(oppdatertSykmelding)

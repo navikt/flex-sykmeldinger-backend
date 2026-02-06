@@ -68,7 +68,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
+                        lagNorskSykmeldingGrunnlag(
                             medisinskVurdering = lagIkkeDigitalMedisinskVurdering(syketilfelleStartDato = LocalDate.parse("2025-01-01")),
                             pasient = lagPasient(navnFastlege = "Fastlege Navn"),
                             tilbakedatering = lagTilbakedatering(LocalDate.parse("2025-04-25")),
@@ -477,7 +477,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
     @Test
     fun `burde konvertere kontakt med pasient`() {
-        sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagSykmeldingGrunnlag().tilbakedatering!!).`should not be null`()
+        sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagTilbakedatering()).`should not be null`()
     }
 
     @Test
