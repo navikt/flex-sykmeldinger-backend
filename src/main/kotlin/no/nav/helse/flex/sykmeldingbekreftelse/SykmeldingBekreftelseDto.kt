@@ -9,26 +9,28 @@ data class SykmeldingBekreftelseDto(
     val timestamp: Instant,
     val sykmelding: SykmeldingGrunnlag,
     val validering: SykmeldingValideringDto,
-    val brukerbekreftelse: BrukerbekreftelseDto,
+    val bekreftelse: BekreftelseDto,
 )
 
 data class SykmeldingValideringDto(
     val status: RuleType,
+    val timestamp: Instant,
+    val forsteStatus: RuleType,
 )
 
-enum class BrukerbekreftelseStatusDto {
+enum class BekreftelseStatusDto {
     APEN,
     BEKREFTET,
     BEKREFTET_AVVIST,
     AVBRUTT,
 }
 
-data class BrukerbekreftelseDto(
-    val status: BrukerbekreftelseStatusDto,
+data class BekreftelseDto(
+    val status: BekreftelseStatusDto,
     val brukersituasjon: BrukersituasjonDto? = null,
 ) {
     init {
-        if (status == BrukerbekreftelseStatusDto.BEKREFTET) {
+        if (status == BekreftelseStatusDto.BEKREFTET) {
             requireNotNull(brukersituasjon) { "Må ha brukersituasjon når status er $status" }
         }
     }
