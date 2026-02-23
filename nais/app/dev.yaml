@@ -20,7 +20,7 @@ env:
   DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
   SYKEPENGESOKNAD_CLIENT_ID: dev-gcp:flex:sykepengesoknad
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
-  AAREG_HENDELSE_TOPIC: arbeidsforhold.aareg-arbeidstakerhendelse-v1-q2
+  AAREG_HENDELSE_TOPIC: arbeidsforhold.aapen-aareg-arbeidsforholdhendelse-v1
   EREG_URL: https://ereg-services-q2.dev-fss-pub.nais.io
   AAREG_URL: https://aareg-services-q2.dev-fss-pub.nais.io
   AAREG_AAD_CLIENT_ID: dev-fss.arbeidsforhold.aareg-services-nais-q2
