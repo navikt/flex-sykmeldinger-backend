@@ -1,14 +1,35 @@
 package no.nav.helse.flex.smregmapping
 
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
-import no.nav.helse.flex.smregmapping.dto.*
-import no.nav.helse.flex.sykmelding.tsm.*
+import no.nav.helse.flex.sykmelding.tsm.Aktivitet
+import no.nav.helse.flex.sykmelding.tsm.AktivitetIkkeMulig
+import no.nav.helse.flex.sykmelding.tsm.AktivitetType
+import no.nav.helse.flex.sykmelding.tsm.ArbeidsgiverInfo
+import no.nav.helse.flex.sykmelding.tsm.ArbeidsrelatertArsak
+import no.nav.helse.flex.sykmelding.tsm.ArbeidsrelatertArsakType
+import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
+import no.nav.helse.flex.sykmelding.tsm.Avventende
+import no.nav.helse.flex.sykmelding.tsm.Behandlingsdager
+import no.nav.helse.flex.sykmelding.tsm.EnArbeidsgiver
+import no.nav.helse.flex.sykmelding.tsm.FlereArbeidsgivere
+import no.nav.helse.flex.sykmelding.tsm.Gradert
+import no.nav.helse.flex.sykmelding.tsm.IngenArbeidsgiver
+import no.nav.helse.flex.sykmelding.tsm.InvalidRule
+import no.nav.helse.flex.sykmelding.tsm.NorskSykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.PendingRule
+import no.nav.helse.flex.sykmelding.tsm.Prognose
+import no.nav.helse.flex.sykmelding.tsm.Reisetilskudd
+import no.nav.helse.flex.sykmelding.tsm.Rule
+import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.Tilbakedatering
+import no.nav.helse.flex.sykmelding.tsm.UtenlandskSykmeldingGrunnlag
+import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.sykmelding.tsm.values.Adresse
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.KontaktinfoType
 import no.nav.helse.flex.sykmelding.tsm.values.PersonIdType
 
-object SmregKonverterer {
+object SykmeldingSmregKonverterer {
     fun konverterSykmelding(
         sykmeldingGrunnlag: SykmeldingGrunnlag,
         validation: ValidationResult? = null,
@@ -33,7 +54,9 @@ object SmregKonverterer {
             prognose = norskSykmelding?.prognose?.let(::konverterPrognose),
             tiltakArbeidsplassen = norskSykmelding?.arbeidsgiver?.getTiltakArbeidsplassen(),
             meldingTilArbeidsgiver = norskSykmelding?.arbeidsgiver?.getMeldingTilArbeidsgiver(),
-            kontaktMedPasient = norskSykmelding?.tilbakedatering?.let(::konverterKontaktMedPasient) ?: KontaktMedPasientSmregDto(null),
+            kontaktMedPasient =
+                norskSykmelding?.tilbakedatering?.let(::konverterKontaktMedPasient)
+                    ?: KontaktMedPasientSmregDto(null),
             behandler = norskSykmelding?.behandler?.let(::konverterBehandler),
             utenlandskSykmelding = utenlandskSykmelding?.let(::konverterTilUtenlandskSykmelding),
         )

@@ -1,5 +1,6 @@
-package no.nav.helse.flex.smregmapping.dto
+package no.nav.helse.flex.smregmapping
 
+import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
 import java.time.OffsetDateTime
 
 data class MottattSykmeldingSmregDto(
@@ -10,7 +11,7 @@ data class MottattSykmeldingSmregDto(
 data class BekreftetSendtSykmeldingSmregDto(
     val sykmelding: SykmeldingSmregDto,
     val kafkaMetadata: KafkaMetadataSmregDto,
-    val event: SykmeldingStatusEventSmregDto,
+    val event: SykmeldingStatusKafkaDTO,
 )
 
 data class KafkaMetadataSmregDto(

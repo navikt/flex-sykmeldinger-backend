@@ -2,7 +2,7 @@ package no.nav.helse.flex.sykmeldingbekreftelse
 
 import no.nav.helse.flex.sykmeldinghendelse.*
 
-object BrukersituasjonKonverterer {
+object TilBrukersituasjonKonverterer {
     fun konverterTilBrukersituasjon(
         brukerSvar: BrukerSvar,
         tilleggsinfo: Tilleggsinfo? = null,
@@ -106,64 +106,79 @@ object BrukersituasjonKonverterer {
 
             is UtdatertFormatBrukerSvar -> {
                 require(tilleggsinfo is UtdatertFormatTilleggsinfo)
-                when (val arbeidssituasjon = brukerSvar.arbeidssituasjon.svar) {
-                    Arbeidssituasjon.ARBEIDSTAKER -> {
-                        if (
-                            tilleggsinfo.arbeidsgiver != null &&
-                            // TODO: Vi mister 410 sykmeldinger (før 2020-04-20) dersom vi krever juridiskOrgnummer != null.
-                            // Alternativt må juridiskOrnummer være nullable
-                            tilleggsinfo.arbeidsgiver.juridiskOrgnummer != null
-                        ) {
-                            ArbeidstakerDto(
-                                arbeidssituasjon = ArbeidstakerArbeidssituasjonDto.ARBEIDSTAKER,
-                                arbeidsgiver = konverterArbeidsgiver(tilleggsinfo.arbeidsgiver),
-                                harRiktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.svar ?: true,
-                                egenmeldingsdager = brukerSvar.egenmeldingsdager?.svar ?: emptyList(),
-                            )
-                        } else {
-                            UkjentYrkesgruppeDto(
-                                arbeidssituasjon = UkjentYrkesgruppeArbeidssituasjonDto.UTDATERT,
-                                antattArbeidssituasjon = ArbeidstakerArbeidssituasjonDto.ARBEIDSTAKER,
-                            )
-                        }
-                    }
 
-                    Arbeidssituasjon.ARBEIDSLEDIG -> {
-                        ArbeidsledigDto(
-                            arbeidssituasjon = ArbeidsledigArbeidssituasjonDto.ARBEIDSLEDIG,
-                            tidligereArbeidsgiver = tilleggsinfo.tidligereArbeidsgiver?.let(::konverterTidligereArbeidsgiver),
-                        )
-                    }
-
-                    Arbeidssituasjon.FRILANSER -> {
-                        FrilanserDto(
-                            arbeidssituasjon = FrilanserArbeidssituasjonDto.FRILANSER,
-                            sykForSykmeldingPerioder = konverterTilSykForSykmeldingPerioder(brukerSvar.egenmeldingsperioder),
-                            harForsikringForste16Dager = konverterTilharForsikringForste16Dager(brukerSvar.harForsikring),
-                        )
-                    }
-
-                    Arbeidssituasjon.NAERINGSDRIVENDE -> {
-                        NaringsdrivendeDto(
-                            arbeidssituasjon = NaringsdrivendeArbeidssituasjonDto.NARINGSDRIVENDE,
-                            sykForSykmeldingPerioder = konverterTilSykForSykmeldingPerioder(brukerSvar.egenmeldingsperioder),
-                            harForsikringForste16Dager = konverterTilharForsikringForste16Dager(brukerSvar.harForsikring),
-                        )
-                    }
-
-                    Arbeidssituasjon.ANNET -> {
-                        UkjentYrkesgruppeDto(
-                            arbeidssituasjon = UkjentYrkesgruppeArbeidssituasjonDto.ANNET,
-                        )
-                    }
-
-                    Arbeidssituasjon.JORDBRUKER,
-                    Arbeidssituasjon.FISKER,
-                    Arbeidssituasjon.PERMITTERT,
-                    -> {
-                        throw IllegalArgumentException("UtdatertFormatBrukerSvar kan ikke ha arbeidssituasjon $arbeidssituasjon")
-                    }
+                val skalViStotteHistoriskData = true // TODO
+                if (skalViStotteHistoriskData) {
+                    konverterTilBrukersituasjonFraUtdatertFormat(
+                        brukerSvar = brukerSvar,
+                        tilleggsinfo = tilleggsinfo,
+                    )
+                } else {
+                    throw IllegalArgumentException("Utdaert format støttes ikke")
                 }
+            }
+        }
+
+    fun konverterTilBrukersituasjonFraUtdatertFormat(
+        brukerSvar: UtdatertFormatBrukerSvar,
+        tilleggsinfo: UtdatertFormatTilleggsinfo,
+    ): BrukersituasjonDto =
+        when (val arbeidssituasjon = brukerSvar.arbeidssituasjon.svar) {
+            Arbeidssituasjon.ARBEIDSTAKER -> {
+                if (
+                    tilleggsinfo.arbeidsgiver != null &&
+                    // TODO: Vi mister 410 sykmeldinger (før 2020-04-20) dersom vi krever juridiskOrgnummer != null.
+                    // Alternativt må juridiskOrnummer være nullable
+                    tilleggsinfo.arbeidsgiver.juridiskOrgnummer != null
+                ) {
+                    ArbeidstakerDto(
+                        arbeidssituasjon = ArbeidstakerArbeidssituasjonDto.ARBEIDSTAKER,
+                        arbeidsgiver = konverterArbeidsgiver(tilleggsinfo.arbeidsgiver),
+                        harRiktigNarmesteLeder = brukerSvar.riktigNarmesteLeder?.svar ?: true,
+                        egenmeldingsdager = brukerSvar.egenmeldingsdager?.svar ?: emptyList(),
+                    )
+                } else {
+                    UkjentYrkesgruppeDto(
+                        arbeidssituasjon = UkjentYrkesgruppeArbeidssituasjonDto.UTDATERT,
+                        antattArbeidssituasjon = ArbeidstakerArbeidssituasjonDto.ARBEIDSTAKER,
+                    )
+                }
+            }
+
+            Arbeidssituasjon.ARBEIDSLEDIG -> {
+                ArbeidsledigDto(
+                    arbeidssituasjon = ArbeidsledigArbeidssituasjonDto.ARBEIDSLEDIG,
+                    tidligereArbeidsgiver = tilleggsinfo.tidligereArbeidsgiver?.let(::konverterTidligereArbeidsgiver),
+                )
+            }
+
+            Arbeidssituasjon.FRILANSER -> {
+                FrilanserDto(
+                    arbeidssituasjon = FrilanserArbeidssituasjonDto.FRILANSER,
+                    sykForSykmeldingPerioder = konverterTilSykForSykmeldingPerioder(brukerSvar.egenmeldingsperioder),
+                    harForsikringForste16Dager = konverterTilharForsikringForste16Dager(brukerSvar.harForsikring),
+                )
+            }
+
+            Arbeidssituasjon.NAERINGSDRIVENDE -> {
+                NaringsdrivendeDto(
+                    arbeidssituasjon = NaringsdrivendeArbeidssituasjonDto.NARINGSDRIVENDE,
+                    sykForSykmeldingPerioder = konverterTilSykForSykmeldingPerioder(brukerSvar.egenmeldingsperioder),
+                    harForsikringForste16Dager = konverterTilharForsikringForste16Dager(brukerSvar.harForsikring),
+                )
+            }
+
+            Arbeidssituasjon.ANNET -> {
+                UkjentYrkesgruppeDto(
+                    arbeidssituasjon = UkjentYrkesgruppeArbeidssituasjonDto.ANNET,
+                )
+            }
+
+            Arbeidssituasjon.JORDBRUKER,
+            Arbeidssituasjon.FISKER,
+            Arbeidssituasjon.PERMITTERT,
+            -> {
+                throw IllegalArgumentException("UtdatertFormatBrukerSvar kan ikke ha arbeidssituasjon $arbeidssituasjon")
             }
         }
 

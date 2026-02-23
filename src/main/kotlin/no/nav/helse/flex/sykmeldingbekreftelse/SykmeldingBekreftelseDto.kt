@@ -20,17 +20,18 @@ data class SykmeldingValideringDto(
 
 enum class BekreftelseStatusDto {
     APEN,
-    BEKREFTET,
+    SENDT,
     BEKREFTET_AVVIST,
     AVBRUTT,
 }
 
 data class BekreftelseDto(
     val status: BekreftelseStatusDto,
+    val hendelseOpprettet: Instant,
     val brukersituasjon: BrukersituasjonDto? = null,
 ) {
     init {
-        if (status == BekreftelseStatusDto.BEKREFTET) {
+        if (status == BekreftelseStatusDto.SENDT) {
             requireNotNull(brukersituasjon) { "Må ha brukersituasjon når status er $status" }
         }
     }

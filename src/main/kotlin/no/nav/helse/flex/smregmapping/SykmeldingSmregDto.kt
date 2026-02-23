@@ -1,4 +1,4 @@
-package no.nav.helse.flex.smregmapping.dto
+package no.nav.helse.flex.smregmapping
 
 import java.time.LocalDate
 import java.time.OffsetDateTime

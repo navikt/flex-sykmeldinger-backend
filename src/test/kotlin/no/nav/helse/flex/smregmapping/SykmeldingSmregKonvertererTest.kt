@@ -1,18 +1,5 @@
 package no.nav.helse.flex.smregmapping
 
-import no.nav.helse.flex.smregmapping.dto.AdresseSmregDto
-import no.nav.helse.flex.smregmapping.dto.AktivitetIkkeMuligSmregDto
-import no.nav.helse.flex.smregmapping.dto.ArbeidsgiverSmregDto
-import no.nav.helse.flex.smregmapping.dto.ArbeidsrelatertArsakSmregDto
-import no.nav.helse.flex.smregmapping.dto.ArbeidsrelatertArsakTypeSmregDto
-import no.nav.helse.flex.smregmapping.dto.BehandlerSmregDto
-import no.nav.helse.flex.smregmapping.dto.GradertSmregDto
-import no.nav.helse.flex.smregmapping.dto.KontaktMedPasientSmregDto
-import no.nav.helse.flex.smregmapping.dto.MerknadSmregDto
-import no.nav.helse.flex.smregmapping.dto.MerknadtypeSmregDto
-import no.nav.helse.flex.smregmapping.dto.PeriodetypeSmregDto
-import no.nav.helse.flex.smregmapping.dto.PrognoseSmregDto
-import no.nav.helse.flex.smregmapping.dto.SykmeldingsperiodeSmregDto
 import no.nav.helse.flex.sykmelding.tsm.ArbeidsrelatertArsak
 import no.nav.helse.flex.sykmelding.tsm.ArbeidsrelatertArsakType
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystem
@@ -62,7 +49,7 @@ private val OFFSET_DATE_TIME_4 = OffsetDateTime.parse("2024-01-01T00:00:00.00Z")
 private val LOCAL_DATE_1 = LocalDate.parse("2020-01-01")
 private val LOCAL_DATE_2 = LocalDate.parse("2020-01-02")
 
-class SmregKonvertererTest {
+class SykmeldingSmregKonvertererTest {
     @Test
     fun `burde konvertere sykmelding med maksimal data`() {
         val sykmelding =
@@ -103,7 +90,7 @@ class SmregKonvertererTest {
                     ),
             )
 
-        val result = SmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding)
+        val result = SykmeldingSmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding)
 
         result.run {
             id shouldBeEqualTo "id-1"
@@ -167,7 +154,7 @@ class SmregKonvertererTest {
                 behandler = lagBehandler(),
             )
 
-        val result = SmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding)
+        val result = SykmeldingSmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding)
 
         result.run {
             id shouldBeEqualTo "id-2"
@@ -193,7 +180,7 @@ class SmregKonvertererTest {
     @Test
     fun `burde konvertere egenmeldt`() {
         val konvertert =
-            SmregKonverterer
+            SykmeldingSmregKonverterer
                 .konverterSykmelding(
                     lagNorskSykmeldingGrunnlag(
                         metadata =
@@ -215,7 +202,7 @@ class SmregKonvertererTest {
             lagUtenlandskSykmeldingGrunnlag(
                 utenlandskInfo = lagUtenlandskInfo(land = "land 1"),
             )
-        val konvertert = SmregKonverterer.konverterSykmelding(sykmelding)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmelding(sykmelding)
         konvertert.utenlandskSykmelding.shouldNotBeNull().land shouldBeEqualTo "land 1"
     }
 
@@ -232,7 +219,7 @@ class SmregKonvertererTest {
                         lagValidationInvalidRule(),
                     ),
             )
-        val konvertert = SmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding, validation = validation)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmelding(sykmeldingGrunnlag = sykmelding, validation = validation)
         konvertert.merknader.shouldNotBeNull() shouldHaveSize 2
     }
 
@@ -248,7 +235,7 @@ class SmregKonvertererTest {
                         arsak = listOf(ArbeidsrelatertArsakType.MANGLENDE_TILRETTELEGGING),
                     ),
             )
-        val konvertert = SmregKonverterer.konverterSykmeldingsperiode(aktivitet)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmeldingsperiode(aktivitet)
         konvertert shouldBeEqualTo
             SykmeldingsperiodeSmregDto(
                 fom = LOCAL_DATE_1,
@@ -277,7 +264,7 @@ class SmregKonvertererTest {
                 tom = LOCAL_DATE_2,
                 antallBehandlingsdager = 10,
             )
-        val konvertert = SmregKonverterer.konverterSykmeldingsperiode(aktivitet)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmeldingsperiode(aktivitet)
         konvertert shouldBeEqualTo
             SykmeldingsperiodeSmregDto(
                 fom = LOCAL_DATE_1,
@@ -300,7 +287,7 @@ class SmregKonvertererTest {
                 grad = 10,
                 reisetilskudd = true,
             )
-        val konvertert = SmregKonverterer.konverterSykmeldingsperiode(aktivitet)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmeldingsperiode(aktivitet)
         konvertert shouldBeEqualTo
             SykmeldingsperiodeSmregDto(
                 fom = LOCAL_DATE_1,
@@ -325,7 +312,7 @@ class SmregKonvertererTest {
                 fom = LOCAL_DATE_1,
                 tom = LOCAL_DATE_2,
             )
-        val konvertert = SmregKonverterer.konverterSykmeldingsperiode(aktivitet)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmeldingsperiode(aktivitet)
         konvertert shouldBeEqualTo
             SykmeldingsperiodeSmregDto(
                 fom = LOCAL_DATE_1,
@@ -347,7 +334,7 @@ class SmregKonvertererTest {
                 tom = LOCAL_DATE_2,
                 innspillTilArbeidsgiver = "innspill 1",
             )
-        val konvertert = SmregKonverterer.konverterSykmeldingsperiode(aktivitet)
+        val konvertert = SykmeldingSmregKonverterer.konverterSykmeldingsperiode(aktivitet)
         konvertert shouldBeEqualTo
             SykmeldingsperiodeSmregDto(
                 fom = LOCAL_DATE_1,
@@ -385,7 +372,7 @@ class SmregKonvertererTest {
                     name = "TILBAKEDATERING_DELVIS_GODKJENT",
                 ),
             )
-        val merknader = SmregKonverterer.konverterMerknader(validationRules)
+        val merknader = SykmeldingSmregKonverterer.konverterMerknader(validationRules)
         merknader.shouldHaveSize(3)
         merknader[0] shouldBeEqualTo
             MerknadSmregDto(
@@ -409,7 +396,7 @@ class SmregKonvertererTest {
 
     @Test
     fun `test konverter behandler maksimal`() {
-        SmregKonverterer.konverterBehandler(
+        SykmeldingSmregKonverterer.konverterBehandler(
             lagBehandler(
                 navn =
                     Navn(
@@ -448,7 +435,7 @@ class SmregKonvertererTest {
 
     @Test
     fun `test konverter behandler minimal`() {
-        SmregKonverterer.konverterBehandler(
+        SykmeldingSmregKonverterer.konverterBehandler(
             lagBehandler(
                 navn =
                     Navn(

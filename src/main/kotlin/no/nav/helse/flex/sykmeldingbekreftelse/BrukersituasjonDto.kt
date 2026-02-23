@@ -113,6 +113,7 @@ data class UkjentYrkesgruppeDto(
     init {
         if (arbeidssituasjon == UkjentYrkesgruppeArbeidssituasjonDto.UTDATERT) {
             requireNotNull(antattArbeidssituasjon)
+            require(antattArbeidssituasjon != UkjentYrkesgruppeArbeidssituasjonDto.UTDATERT)
         }
     }
 }
