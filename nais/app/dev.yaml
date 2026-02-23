@@ -11,7 +11,7 @@ db_pointInTimeRecovery: false
 external-host:
   - pdl-api.dev-fss-pub.nais.io
   - aareg-services-q2.dev-fss-pub.nais.io
-  - ereg-services.dev-fss-pub.nais.io
+  - ereg-services-q2.dev-fss-pub.nais.io
 flex-openapi-docs-ui: true
 env:
   SPRING_PROFILES_ACTIVE: default,testdata
@@ -21,7 +21,7 @@ env:
   SYKEPENGESOKNAD_CLIENT_ID: dev-gcp:flex:sykepengesoknad
   AIVEN_KAFKA_AUTO_OFFSET_RESET: latest
   AAREG_HENDELSE_TOPIC: arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1
-  EREG_URL: https://ereg-services-q1.dev-fss-pub.nais.io
+  EREG_URL: https://ereg-services-q2.dev-fss-pub.nais.io
   AAREG_URL: https://aareg-services-q2.dev-fss-pub.nais.io
   AAREG_AAD_CLIENT_ID: dev-fss.arbeidsforhold.aareg-services-nais-q2
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
