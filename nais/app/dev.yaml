@@ -23,6 +23,6 @@ env:
   AAREG_HENDELSE_TOPIC: arbeidsforhold.aapen-aareg-arbeidsforholdhendelse-v1
   EREG_URL: https://ereg-services-q2.dev-fss-pub.nais.io
   AAREG_URL: https://aareg-services-q2.dev-fss-pub.nais.io
-  AAREG_AAD_CLIENT_ID: dev-fss.arbeidsforhold.aareg-services-nais-q2
+  AAREG_AAD_CLIENT_ID: dev-fss.arbeidsforhold.aareg-services-nais
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
   FLEX_SYKETILFELLE_TOKENX_CLIENT_ID: dev-gcp:flex:flex-syketilfelle
