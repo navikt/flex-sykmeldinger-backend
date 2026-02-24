@@ -4,8 +4,16 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
 import java.time.Instant
 
+enum class SykmeldingHendelseType {
+    NY,
+    SYKMELING_OPPDATERT,
+    VALIDERING_OPPDATERT,
+    BEKREFTELSE_OPPDATERT,
+}
+
 data class SykmeldingBekreftelseDto(
     val sykmeldingId: String,
+    val hendelseType: SykmeldingHendelseType,
     val timestamp: Instant,
     val sykmelding: SykmeldingGrunnlag,
     val validering: SykmeldingValideringDto,
