@@ -71,7 +71,7 @@ no.nav.security.jwt:
 
 elector.get_url: dont_look_for_leader
 
-AAREG_HENDELSE_TOPIC: "arbeidsforhold.aapen-aareg-q1-arbeidsforholdhendelse-v1"
+AAREG_HENDELSE_TOPIC: "arbeidsforhold.aapen-aareg-arbeidsforholdhendelse-v1"
 AAREG_URL: "url"
 EREG_URL: "url"
 PDL_BASE_URL: "url"
