@@ -2,8 +2,8 @@ package no.nav.helse.flex.api
 
 import com.nimbusds.jwt.JWTParser
 import no.nav.helse.flex.gateways.texas.TexasClient
+import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
-import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.springframework.stereotype.Service
 
 @Service
@@ -38,12 +38,15 @@ class TokenValideringService(
         forventetClientIder: List<String>,
     ): Boolean {
         val jwtClaimsSet = JWTParser.parse(token).jwtClaimsSet
-        val clientIdFraToken =
-            JwtTokenClaims(jwtClaimsSet)
-                .getStringClaim("azp")
+        val clientIdFraToken = jwtClaimsSet.getStringClaim("azp")
 
-        log.info("ClientId fra token: $clientIdFraToken")
-
-        return clientIdFraToken in forventetClientIder
+        val harClientTilgang = clientIdFraToken in forventetClientIder
+        if (!harClientTilgang) {
+            log.error(
+                LogMarker.TEAM_LOG,
+                "Clientid $clientIdFraToken ikke en del av $forventetClientIder. Faktisk: $token $jwtClaimsSet",
+            )
+        }
+        return harClientTilgang
     }
 }
