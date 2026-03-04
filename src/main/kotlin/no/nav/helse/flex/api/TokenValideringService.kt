@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import com.nimbusds.jwt.JWTParser
 import no.nav.helse.flex.gateways.texas.TexasClient
+import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 
@@ -25,6 +26,8 @@ class TokenValideringService(
                 token = token,
             )
 
+        log.info("Roller etter introspection ${respons.roles}")
+
         if (!respons.active) {
             log.info(respons.error)
         }
@@ -42,7 +45,13 @@ class TokenValideringService(
                 .getStringListClaim("roles")
                 .mapNotNull { it.asRolleOrNull() }
 
-        return roles.any { it in forventetRoles }
+        val harRolleMedTilgang = roles.any { it in forventetRoles }
+
+        if (!harRolleMedTilgang) {
+            log.warn("Ingen av rollene $roles er forventet ${forventetRoles.joinToString()}")
+            log.error(LogMarker.TEAM_LOG, "Claims: $jwtClaimsSet")
+        }
+        return harRolleMedTilgang
     }
 
     private fun String.asRolleOrNull(): Roles? {

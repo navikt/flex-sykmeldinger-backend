@@ -12,6 +12,7 @@ data class TexasRequest(
 
 data class TexasResponse(
     val active: Boolean,
+    val roles: List<String> = emptyList(),
     val error: String? = null,
 )
 
