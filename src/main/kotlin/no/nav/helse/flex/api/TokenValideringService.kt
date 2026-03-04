@@ -2,7 +2,7 @@ package no.nav.helse.flex.api
 
 import com.nimbusds.jwt.JWTParser
 import no.nav.helse.flex.gateways.texas.TexasClient
-import no.nav.helse.flex.utils.LogMarker
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 
@@ -26,8 +26,6 @@ class TokenValideringService(
                 token = token,
             )
 
-        log.info("Roller etter introspection ${respons.roles}")
-
         if (!respons.active) {
             log.info(respons.error)
         }
@@ -48,8 +46,10 @@ class TokenValideringService(
         val harRolleMedTilgang = roles.any { it in forventetRoles }
 
         if (!harRolleMedTilgang) {
-            log.warn("Ingen av rollene $roles er forventet ${forventetRoles.joinToString()}")
-            log.error(LogMarker.TEAM_LOG, "Claims: $jwtClaimsSet")
+            logger().errorSecure(
+                message = "Mangler rolle for tilgang til api",
+                secureMessage = "Ingen av rollene $roles er forventet ${forventetRoles.joinToString()}",
+            )
         }
         return harRolleMedTilgang
     }
@@ -67,4 +67,5 @@ enum class Roles(
     val value: String,
 ) {
     ROLE_SYKEPENGESOKNAD_BACKEND("role-sykepengesoknad-backend"),
+    ROLE_ACCESS_AS_APPLICATION("access_as_application"),
 }
