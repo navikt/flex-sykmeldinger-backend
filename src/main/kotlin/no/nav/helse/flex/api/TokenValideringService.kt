@@ -45,15 +45,17 @@ class TokenValideringService(
         return roles.any { it in forventetRoles }
     }
 
-    private fun String.asRolleOrNull(): Roles? =
-        try {
-            Roles.valueOf(this)
-        } catch (_: Exception) {
+    private fun String.asRolleOrNull(): Roles? {
+        val role = Roles.entries.firstOrNull { it.value == this }
+        if (role == null) {
             log.warn("Ukjent rolle i JWT token: $this")
-            null
         }
+        return role
+    }
 }
 
-enum class Roles {
-    ROLE_SYKEPENGESOKNAD_BACKEND,
+enum class Roles(
+    val value: String,
+) {
+    ROLE_SYKEPENGESOKNAD_BACKEND("role-sykepengesoknad-backend"),
 }

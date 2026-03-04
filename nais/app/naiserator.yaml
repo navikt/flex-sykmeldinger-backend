@@ -62,7 +62,7 @@ spec:
         - application: sykepengesoknad-backend
           permissions:
             roles:
-              - "ROLE_SYKEPENGESOKNAD_BACKEND"
+              - "role-sykepengesoknad-backend"
   observability:
     autoInstrumentation:
       enabled: true
