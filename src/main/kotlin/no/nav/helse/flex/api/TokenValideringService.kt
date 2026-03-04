@@ -41,7 +41,8 @@ class TokenValideringService(
         val clientIdFraToken =
             JwtTokenClaims(jwtClaimsSet)
                 .getStringClaim("azp")
-                ?: return false
+
+        log.info("ClientId fra token: $clientIdFraToken")
 
         return clientIdFraToken in forventetClientIder
     }
