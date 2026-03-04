@@ -59,6 +59,7 @@ spec:
       rules:
         - application: ditt-sykefravaer
         - application: sykepengesoknad
+        - application: sykepengesoknad-backend
   observability:
     autoInstrumentation:
       enabled: true

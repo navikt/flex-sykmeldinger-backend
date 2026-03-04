@@ -1,0 +1,47 @@
+package no.nav.helse.flex.gateways.texas
+
+import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.toEntity
+
+data class TexasRequest(
+    val identityProvider: String,
+    val token: String,
+)
+
+data class TexasResponse(
+    val active: Boolean,
+    val error: String? = null,
+)
+
+interface TexasClient {
+    fun introspect(
+        identityProvider: String,
+        token: String,
+    ): TexasResponse
+}
+
+@Component
+class TexasEksternClient(
+    private val texasRestClient: RestClient,
+) : TexasClient {
+    override fun introspect(
+        identityProvider: String,
+        token: String,
+    ): TexasResponse =
+        texasRestClient
+            .post()
+            .uri { uriBuilder -> uriBuilder.build() }
+            .headers {
+                it.contentType = MediaType.APPLICATION_JSON
+            }.body(
+                TexasRequest(
+                    identityProvider = identityProvider,
+                    token = token,
+                ),
+            ).retrieve()
+            .toEntity<TexasResponse>()
+            .body
+            ?: throw RuntimeException("Texas introspection mangler body")
+}

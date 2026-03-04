@@ -28,8 +28,10 @@ spring:
     redis:
       time-to-live: 1h
 
+NAIS_TOKEN_INTROSPECTION_ENDPOINT: test
 DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: ditt-sykefravaer-frontend-client-id
 SYKEPENGESOKNAD_CLIENT_ID: sykepengesoknad-client-id
+SYKEPENGESOKNAD_BACKEND_CLIENT_ID: sykepengesoknad-backend-client-id
 
 management:
   endpoint.prometheus.enabled: true

@@ -35,4 +35,6 @@ class SykmeldingLeser(
         }
         return sykmelding
     }
+
+    fun hentAlleSykmeldingerFraIder(sykmeldingIder: List<String>): List<Sykmelding> = sykmeldingRepository.findAllIn(sykmeldingIder)
 }
