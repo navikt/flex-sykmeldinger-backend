@@ -6,7 +6,7 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity
 
 data class TexasRequest(
-    val identityProvider: String,
+    val identity_provider: String,
     val token: String,
 )
 
@@ -37,7 +37,7 @@ class TexasEksternClient(
                 it.contentType = MediaType.APPLICATION_JSON
             }.body(
                 TexasRequest(
-                    identityProvider = identityProvider,
+                    identity_provider = identityProvider,
                     token = token,
                 ),
             ).retrieve()
