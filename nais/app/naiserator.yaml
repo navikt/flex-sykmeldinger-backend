@@ -60,6 +60,9 @@ spec:
         - application: ditt-sykefravaer
         - application: sykepengesoknad
         - application: sykepengesoknad-backend
+          permissions:
+            roles:
+              - "ROLE_SYKEPENGESOKNAD_BACKEND"
   observability:
     autoInstrumentation:
       enabled: true

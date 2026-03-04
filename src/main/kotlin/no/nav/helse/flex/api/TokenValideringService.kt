@@ -2,7 +2,6 @@ package no.nav.helse.flex.api
 
 import com.nimbusds.jwt.JWTParser
 import no.nav.helse.flex.gateways.texas.TexasClient
-import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 
@@ -35,18 +34,26 @@ class TokenValideringService(
 
     fun validerClientIdFraToken(
         token: String,
-        forventetClientIder: List<String>,
+        forventetRoles: List<Roles>,
     ): Boolean {
         val jwtClaimsSet = JWTParser.parse(token).jwtClaimsSet
-        val clientIdFraToken = jwtClaimsSet.getStringClaim("azp")
+        val roles =
+            jwtClaimsSet
+                .getStringListClaim("roles")
+                .mapNotNull { it.asRolleOrNull() }
 
-        val harClientTilgang = clientIdFraToken in forventetClientIder
-        if (!harClientTilgang) {
-            log.error(
-                LogMarker.TEAM_LOG,
-                "Clientid $clientIdFraToken ikke en del av $forventetClientIder. Faktisk: $token $jwtClaimsSet",
-            )
-        }
-        return harClientTilgang
+        return roles.any { it in forventetRoles }
     }
+
+    private fun String.asRolleOrNull(): Roles? =
+        try {
+            Roles.valueOf(this)
+        } catch (_: Exception) {
+            log.warn("Ukjent rolle i JWT token: $this")
+            null
+        }
+}
+
+enum class Roles {
+    ROLE_SYKEPENGESOKNAD_BACKEND,
 }

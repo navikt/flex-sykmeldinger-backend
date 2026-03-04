@@ -41,7 +41,7 @@ class SykmeldingTexasController(
         if (!tokenValideringService.validerToken(token, "entra_id")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
-        if (!tokenValideringService.validerClientIdFraToken(token!!, listOf(sykepengesoknadBackendClientId))) {
+        if (!tokenValideringService.validerClientIdFraToken(token!!, listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
 
