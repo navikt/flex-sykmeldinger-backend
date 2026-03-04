@@ -1,6 +1,5 @@
 package no.nav.helse.flex.api
 
-import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
@@ -8,26 +7,21 @@ import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
-import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
-import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.OffsetDateTime
 
 @RestController
 class SykmeldingController(
@@ -44,9 +38,6 @@ class SykmeldingController(
     private val dittSykefravaerFrontendClientId: String,
     @param:Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
     private val sykepengesoknadClientId: String,
-    @param:Value("\${SYKEPENGESOKNAD_BACKEND_CLIENT_ID}")
-    private val sykepengesoknadBackendClientId: String,
-    private val tokenValideringService: TokenValideringService,
 ) {
     private val logger = logger()
 
@@ -77,57 +68,6 @@ class SykmeldingController(
                 .map { SykmeldingDtoRegler.skjermForPasientDersomSpesifisert(it) }
         return ResponseEntity.ok(sykmeldingDtoer)
     }
-
-    data class SykmeldingKafkaMessageResponse(
-        val sykmeldinger: List<SykmeldingKafkaMessage>,
-    )
-
-    data class SykmeldingerRequest(
-        val sykmeldingIder: List<String>,
-    )
-
-    @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
-    @ResponseBody
-    fun hentSykmeldingKafkaMessage(
-        @RequestBody sykmeldingerRequest: SykmeldingerRequest,
-        request: HttpServletRequest,
-    ): ResponseEntity<SykmeldingKafkaMessageResponse> {
-        val token = request.getToken()
-        if (!tokenValideringService.validerToken(token, "entra_id")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-        if (!tokenValideringService.validerClientIdFraToken(token!!, listOf(sykepengesoknadBackendClientId))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
-
-        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerRequest.sykmeldingIder)
-
-        val sykmeldingDtoer =
-            sykmeldinger.map {
-                val sykmeldingDTO = SykmeldingDtoRegler.skjermForPasientDersomSpesifisert(sykmeldingDtoKonverterer.konverter(it))
-                val timestampIkkeRelevant = OffsetDateTime.MIN
-                val kafkaMetadata =
-                    KafkaMetadataDTO(
-                        sykmeldingId = it.sykmeldingId,
-                        timestamp = timestampIkkeRelevant,
-                        fnr = it.pasientFnr,
-                        source = SYKMELDINGSTATUS_LEESAH_SOURCE,
-                    )
-                val event =
-                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingHendelse = it.sisteHendelse(),
-                        sykmeldingId = it.sykmeldingId,
-                    )
-                SykmeldingKafkaMessage(
-                    kafkaMetadata = kafkaMetadata,
-                    event = event,
-                    sykmelding = sykmeldingDTO,
-                )
-            }
-        return ResponseEntity.ok(SykmeldingKafkaMessageResponse(sykmeldingDtoer))
-    }
-
-    private fun HttpServletRequest.getToken(): String? = this.getHeader("Authorization")?.removePrefix("Bearer ")
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}")
     @ProtectedWithClaims(

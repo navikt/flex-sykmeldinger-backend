@@ -11,7 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @EnableCaching
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(
+    ignore = ["org.springframework", "no.nav.helse.flex.api.SykmeldingTexasController"],
+)
 class Application
 
 @Profile("default")
