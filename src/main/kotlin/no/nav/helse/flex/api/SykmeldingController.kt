@@ -79,7 +79,7 @@ class SykmeldingController(
     }
 
     data class SykmeldingKafkaMessageResponse(
-        val sykmeldingerKafakMessage: List<SykmeldingKafkaMessage>,
+        val sykmeldinger: List<SykmeldingKafkaMessage>,
     )
 
     data class SykmeldingerRequest(
