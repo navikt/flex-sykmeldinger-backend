@@ -45,7 +45,19 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             )
             sjekkStatus(
                 this,
+                token = "gyldig-token-annen-rolle",
+                expectedStatus = HttpStatus.FORBIDDEN,
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+            )
+            sjekkStatus(
+                this,
                 token = "ikke-gyldig-token",
+                expectedStatus = HttpStatus.UNAUTHORIZED,
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+            )
+            sjekkStatus(
+                this,
+                token = null,
                 expectedStatus = HttpStatus.UNAUTHORIZED,
                 content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
             )
@@ -68,7 +80,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
     fun sjekkStatus(
         url: String,
         httpMethod: HttpMethod = HttpMethod.POST,
-        token: String,
+        token: String?,
         content: Any? = null,
         expectedStatus: HttpStatus = HttpStatus.OK,
     ) {
@@ -119,5 +131,5 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
     }
 }
 
-private fun MockHttpServletRequestBuilder.authorizationHeader(token: String): MockHttpServletRequestBuilder =
+private fun MockHttpServletRequestBuilder.authorizationHeader(token: String?): MockHttpServletRequestBuilder =
     this.header("Authorization", "Bearer $token")

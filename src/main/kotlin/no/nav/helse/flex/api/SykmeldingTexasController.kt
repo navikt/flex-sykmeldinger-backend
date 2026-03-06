@@ -24,7 +24,7 @@ class SykmeldingTexasController(
 ) {
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
-    fun hentSykmeldingKafkaMessage(
+    fun hentSykmeldingerKafkaMessage(
         @RequestBody sykmeldingerKafkaMessageRequest: SykmeldingerKafkaMessageRequest,
         request: HttpServletRequest,
     ): ResponseEntity<SykmeldingKafkaMessageResponse> {

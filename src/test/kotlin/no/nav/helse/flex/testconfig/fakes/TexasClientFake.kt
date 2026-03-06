@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testconfig.fakes
 
+import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.gateways.texas.TexasClient
 import no.nav.helse.flex.gateways.texas.TexasResponse
 
@@ -10,10 +11,11 @@ class TexasClientFake : TexasClient {
     ): TexasResponse =
         when (token) {
             "gyldig-token-uten-rolle" -> TexasResponse(true)
+            "gyldig-token-annen-rolle" -> TexasResponse(true, listOf(Roles.ROLE_ACCESS_AS_APPLICATION.value))
             "gyldig-token-role-sykepengesoknad-backend" ->
                 TexasResponse(
                     true,
-                    listOf("role-sykepengesoknad-backend"),
+                    listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND.value),
                 )
 
             "ikke-gyldig-token" -> TexasResponse(false)
