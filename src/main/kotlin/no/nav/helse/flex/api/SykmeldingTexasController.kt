@@ -38,7 +38,13 @@ class SykmeldingTexasController(
     ): ResponseEntity<SykmeldingKafkaMessageResponse> {
         request
             .getToken()
-            .let { tokenValideringService.validerTokenOgRolle(token = it, identityProvider = "entra_id", listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND)) }
+            .let {
+                tokenValideringService.validerTokenOgRolle(
+                    token = it,
+                    identityProvider = "entra_id",
+                    forventedeRoller = listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND),
+                )
+            }
 
         val sykmeldinger =
             sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerRequest.sykmeldingIder)
