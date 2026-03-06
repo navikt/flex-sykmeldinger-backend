@@ -1,12 +1,11 @@
 package no.nav.helse.flex.api
 
-import no.nav.helse.flex.api.SykmeldingTexasController.SykmeldingerRequest
-import no.nav.helse.flex.sykmelding.Sykmelding
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
+import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
@@ -24,34 +23,44 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
     @Test
     fun `burde ha riktig tilgangskontroll`() {
-        val sykmelding: Sykmelding =
-            sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "id-1", pasient = lagPasient(fnr = "fnr"))),
-            )
+        val sykmelding = sykmeldingRepository.save(lagSykmelding())
         "/api/v1/sykmeldinger/kafka".run {
             sjekkStatus(
                 url = this,
                 token = "gyldig-token-role-sykepengesoknad-backend",
                 expectedStatus = HttpStatus.OK,
-                content = SykmeldingerRequest(listOf(sykmelding.sykmeldingId)),
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
             )
             sjekkStatus(
                 url = this,
                 token = "gyldig-token-role-sykepengesoknad-backend",
                 expectedStatus = HttpStatus.OK,
-                content = SykmeldingerRequest(listOf(sykmelding.sykmeldingId)),
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
             )
             sjekkStatus(
                 this,
                 token = "gyldig-token-uten-rolle",
                 expectedStatus = HttpStatus.FORBIDDEN,
-                content = SykmeldingerRequest(listOf(sykmelding.sykmeldingId)),
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
             )
             sjekkStatus(
                 this,
                 token = "ikke-gyldig-token",
                 expectedStatus = HttpStatus.UNAUTHORIZED,
-                content = SykmeldingerRequest(listOf(sykmelding.sykmeldingId)),
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+            )
+        }
+    }
+
+    @Test
+    fun `burde returnere sykmelding i kafka format`() {
+        val sykmelding = sykmeldingRepository.save(lagSykmelding())
+        "/api/v1/sykmeldinger/kafka".run {
+            sjekkAtViReturnererSykmeldingKafka(
+                url = this,
+                token = "gyldig-token-role-sykepengesoknad-backend",
+                expectedStatus = HttpStatus.OK,
+                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
             )
         }
     }
@@ -75,6 +84,38 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                         }
                     },
             ).andExpect(MockMvcResultMatchers.status().`is`(expectedStatus.value()))
+    }
+
+    fun sjekkAtViReturnererSykmeldingKafka(
+        url: String,
+        httpMethod: HttpMethod = HttpMethod.POST,
+        token: String,
+        content: SykmeldingerKafkaMessageRequest? = null,
+        expectedStatus: HttpStatus = HttpStatus.OK,
+    ) {
+        val respons =
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .request(httpMethod, url)
+                        .authorizationHeader(token)
+                        .apply {
+                            if (content != null) {
+                                this.contentType(MediaType.APPLICATION_JSON)
+                                this.content(content.serialisertTilString())
+                            }
+                        },
+                ).andExpect(MockMvcResultMatchers.status().`is`(expectedStatus.value()))
+                .andReturn()
+                .response
+                .contentAsString
+
+        val responsVerdi: SykmeldingKafkaMessageResponse = objectMapper.readValue(respons)
+
+        responsVerdi.sykmeldinger.size `should be equal to` 1
+        responsVerdi.sykmeldinger
+            .first()
+            .sykmelding.id `should be equal to` "1"
     }
 }
 

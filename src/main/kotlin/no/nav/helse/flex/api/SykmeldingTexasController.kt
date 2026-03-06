@@ -22,18 +22,10 @@ class SykmeldingTexasController(
     private val sykmeldingLeser: SykmeldingLeser,
     private val tokenValideringService: TokenValideringService,
 ) {
-    data class SykmeldingKafkaMessageResponse(
-        val sykmeldinger: List<SykmeldingKafkaMessage>,
-    )
-
-    data class SykmeldingerRequest(
-        val sykmeldingIder: List<String>,
-    )
-
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
     fun hentSykmeldingKafkaMessage(
-        @RequestBody sykmeldingerRequest: SykmeldingerRequest,
+        @RequestBody sykmeldingerKafkaMessageRequest: SykmeldingerKafkaMessageRequest,
         request: HttpServletRequest,
     ): ResponseEntity<SykmeldingKafkaMessageResponse> {
         request
@@ -47,7 +39,7 @@ class SykmeldingTexasController(
             }
 
         val sykmeldinger =
-            sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerRequest.sykmeldingIder)
+            sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerKafkaMessageRequest.sykmeldingIder)
 
         val sykmeldingDtoer =
             sykmeldinger.map {
@@ -75,3 +67,11 @@ class SykmeldingTexasController(
         return ResponseEntity.ok(SykmeldingKafkaMessageResponse(sykmeldingDtoer))
     }
 }
+
+data class SykmeldingKafkaMessageResponse(
+    val sykmeldinger: List<SykmeldingKafkaMessage>,
+)
+
+data class SykmeldingerKafkaMessageRequest(
+    val sykmeldingIder: List<String>,
+)
