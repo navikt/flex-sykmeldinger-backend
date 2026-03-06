@@ -40,3 +40,12 @@ class IngenTilgang(
         reason = "INGEN_TILGANG",
         loglevel = LogLevel.WARN,
     )
+
+class Uautorisert(
+    override val message: String,
+) : AbstractApiError(
+        message = message,
+        httpStatus = HttpStatus.UNAUTHORIZED,
+        reason = "UAUTORISERT",
+        loglevel = LogLevel.WARN,
+    )

@@ -25,6 +25,8 @@ interface ISykmeldingRepository {
 
     fun findAll(): List<Sykmelding>
 
+    fun findAllIn(sykmeldingIder: List<String>): List<Sykmelding>
+
     fun deleteBySykmeldingId(sykmeldingId: String)
 
     fun delete(sykmelding: Sykmelding)
@@ -77,6 +79,16 @@ class SykmeldingRepository(
         }
     }
 
+    override fun findAllIn(sykmeldingIder: List<String>): List<Sykmelding> {
+        val dbRecords = sykmeldingDbRepository.findAllBySykmeldingIdIn(sykmeldingIder)
+        val statusDbRecords =
+            sykmeldingHendelseDbRepository.findAllBySykmeldingIdIn(dbRecords.map { it.sykmeldingId })
+        return dbRecords.map { dbRecord ->
+            val statusDbRecords = statusDbRecords.filter { it.sykmeldingId == dbRecord.sykmeldingId }
+            mapTilSykmelding(dbRecord, statusDbRecords)
+        }
+    }
+
     @Transactional(rollbackFor = [Exception::class])
     override fun deleteBySykmeldingId(sykmeldingId: String) {
         val sykmelding = findBySykmeldingId(sykmeldingId)
@@ -122,6 +134,8 @@ interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
     fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord>
 
     fun findBySykmeldingId(sykmeldingUuid: String): SykmeldingDbRecord?
+
+    fun findAllBySykmeldingIdIn(sykmeldingIder: List<String>): List<SykmeldingDbRecord>
 }
 
 @Table("sykmelding")

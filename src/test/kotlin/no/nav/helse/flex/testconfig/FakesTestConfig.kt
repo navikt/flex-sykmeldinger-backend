@@ -57,4 +57,7 @@ class FakesTestConfig {
 
     @Bean
     fun sykmeldingBrukernotifikasjonProducer(): SykmeldingBrukernotifikasjonProducerFake = SykmeldingBrukernotifikasjonProducerFake()
+
+    @Bean
+    fun texasClient(): TexasClientFake = TexasClientFake()
 }

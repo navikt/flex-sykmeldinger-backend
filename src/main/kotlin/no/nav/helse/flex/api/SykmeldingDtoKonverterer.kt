@@ -65,8 +65,8 @@ class SykmeldingDtoKonverterer(
             rulesetVersion = metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
             legekontorOrgnummer = null,
-            arbeidsgiver = null,
-            kontaktMedPasient = null,
+            arbeidsgiver = ArbeidsgiverDTO(navn = null, stillingsprosent = null),
+            kontaktMedPasient = KontaktMedPasientDTO(kontaktDato = null, begrunnelseIkkeKontakt = null),
             utdypendeOpplysninger = emptyMap(),
             tiltakArbeidsplassen = null,
             tiltakNAV = null,
@@ -101,7 +101,7 @@ class SykmeldingDtoKonverterer(
                 kontaktMedPasient =
                     sykmelding.sykmeldingGrunnlag.tilbakedatering?.let {
                         konverterKontaktMedPasient(it)
-                    },
+                    } ?: KontaktMedPasientDTO(kontaktDato = null, begrunnelseIkkeKontakt = null),
                 behandler = konverterBehandler(sykmelding.sykmeldingGrunnlag.behandler),
             )
         }
@@ -498,7 +498,7 @@ fun ArbeidsgiverInfo.getTiltakArbeidsplassen(): String? =
         is IngenArbeidsgiver -> null
     }
 
-fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
+fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO =
     when (this) {
         is EnArbeidsgiver -> {
             ArbeidsgiverDTO(
@@ -515,6 +515,9 @@ fun ArbeidsgiverInfo.tilArbeidsgiverDTO(): ArbeidsgiverDTO? =
         }
 
         is IngenArbeidsgiver -> {
-            null
+            ArbeidsgiverDTO(
+                navn = null,
+                stillingsprosent = null,
+            )
         }
     }

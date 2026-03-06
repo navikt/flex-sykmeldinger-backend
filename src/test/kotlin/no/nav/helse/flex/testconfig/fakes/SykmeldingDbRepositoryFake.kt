@@ -17,4 +17,9 @@ class SykmeldingDbRepositoryFake :
             it.sykmeldingId ==
                 sykmeldingUuid
         }
+
+    override fun findAllBySykmeldingIdIn(sykmeldingIder: List<String>): List<SykmeldingDbRecord> =
+        this.entities.values.filter {
+            it.sykmeldingId in sykmeldingIder
+        }
 }

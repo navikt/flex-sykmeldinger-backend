@@ -57,7 +57,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             dto.behandlingsutfall `should be equal to` sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
             dto.merknader `should be equal to` sykmeldingDtoKonverterer.konverterMerknader(sykmelding.validation)
 
-            dto.arbeidsgiver.`should be null`()
+            dto.arbeidsgiver `should be equal to` ArbeidsgiverDTO(null, null)
             dto.prognose.`should be null`()
             dto.behandler.`should be null`()
             dto.utenlandskSykmelding.`should be null`()
@@ -132,12 +132,12 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 )
             dto.utenlandskSykmelding!!.land `should be equal to` sykmeldingGrunnlag.utenlandskInfo.land
 
-            dto.arbeidsgiver.`should be null`()
+            dto.arbeidsgiver `should be equal to` ArbeidsgiverDTO(null, null)
             dto.prognose.`should be null`()
             dto.behandler.`should be null`()
             dto.meldingTilNAV.`should be null`()
             dto.meldingTilArbeidsgiver.`should be null`()
-            dto.kontaktMedPasient.`should be null`()
+            dto.kontaktMedPasient `should be equal to` KontaktMedPasientDTO(null, null)
         }
     }
 
@@ -188,7 +188,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         }
 
         @Test fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-            IngenArbeidsgiver().tilArbeidsgiverDTO().`should be null`()
+            IngenArbeidsgiver().tilArbeidsgiverDTO() `should be equal to` ArbeidsgiverDTO(null, null)
         }
     }
 

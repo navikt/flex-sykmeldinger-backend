@@ -15,7 +15,7 @@ fun lagSykmeldingDto(
             erUnderBehandling = false,
         ),
     legekontorOrgnummer: String? = "123456789",
-    arbeidsgiver: ArbeidsgiverDTO? = ArbeidsgiverDTO(navn = "Bedrift AS", stillingsprosent = 100),
+    arbeidsgiver: ArbeidsgiverDTO = ArbeidsgiverDTO(navn = "Bedrift AS", stillingsprosent = 100),
     sykmeldingsperioder: List<SykmeldingsperiodeDTO> =
         listOf(
             SykmeldingsperiodeDTO(
@@ -45,14 +45,14 @@ fun lagSykmeldingDto(
     andreTiltak: String? = null,
     meldingTilNAV: MeldingTilNavDTO? = null,
     meldingTilArbeidsgiver: String? = null,
-    kontaktMedPasient: KontaktMedPasientDTO? = null,
+    kontaktMedPasient: KontaktMedPasientDTO = KontaktMedPasientDTO(null, null),
     behandletTidspunkt: OffsetDateTime = OffsetDateTime.now(),
     behandler: BehandlerDTO? = null,
     syketilfelleStartDato: LocalDate? = null,
     navnFastlege: String? = null,
-    egenmeldt: Boolean? = null,
-    papirsykmelding: Boolean? = null,
-    harRedusertArbeidsgiverperiode: Boolean? = null,
+    egenmeldt: Boolean = false,
+    papirsykmelding: Boolean = false,
+    harRedusertArbeidsgiverperiode: Boolean = false,
     merknader: List<MerknadDTO>? = null,
     rulesetVersion: String? = null,
     utenlandskSykmelding: UtenlandskSykmelding? = null,

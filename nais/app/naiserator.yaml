@@ -59,6 +59,10 @@ spec:
       rules:
         - application: ditt-sykefravaer
         - application: sykepengesoknad
+        - application: sykepengesoknad-backend
+          permissions:
+            roles:
+              - "role-sykepengesoknad-backend"
   observability:
     autoInstrumentation:
       enabled: true

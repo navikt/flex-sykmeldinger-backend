@@ -119,6 +119,19 @@ class RestClientConfig {
     }
 
     @Bean
+    fun texasRestClient(
+        @Value($$"${NAIS_TOKEN_INTROSPECTION_ENDPOINT}") url: String,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
+    ): RestClient =
+        RestClient
+            .builder()
+            .baseUrl(url)
+            .observationRegistry(observationRegistry)
+            .requestFactory(requestFactory)
+            .build()
+
+    @Bean
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
         val connectionManager =
             PoolingHttpClientConnectionManager().apply {
