@@ -1,8 +1,7 @@
-package no.nav.helse.flex.api
+package no.nav.helse.flex.config
 
-import com.nimbusds.jwt.JWTParser
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.gateways.texas.TexasClient
-import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 
@@ -12,12 +11,13 @@ class TokenValideringService(
 ) {
     private val log = logger()
 
-    fun validerToken(
+    fun validerTokenOgRolle(
         token: String?,
         identityProvider: String,
-    ): Boolean {
+        forventedeRoller: List<Roles>,
+    ) {
         if (token == null) {
-            return false
+            throw Uautorisert("Fant ikke token i request")
         }
 
         val respons =
@@ -28,30 +28,17 @@ class TokenValideringService(
 
         if (!respons.active) {
             log.info(respons.error)
+            throw Uautorisert("Ugyldig token, ${respons.error}")
         }
 
-        return respons.active
-    }
-
-    fun validerClientIdFraToken(
-        token: String,
-        forventetRoles: List<Roles>,
-    ): Boolean {
-        val jwtClaimsSet = JWTParser.parse(token).jwtClaimsSet
-        val roles =
-            jwtClaimsSet
-                .getStringListClaim("roles")
-                .mapNotNull { it.asRolleOrNull() }
-
-        val harRolleMedTilgang = roles.any { it in forventetRoles }
+        val harRolleMedTilgang =
+            respons.roles
+                .map { it.asRolleOrNull() }
+                .any { it in forventedeRoller }
 
         if (!harRolleMedTilgang) {
-            logger().errorSecure(
-                message = "Mangler rolle for tilgang til api",
-                secureMessage = "Ingen av rollene $roles er forventet ${forventetRoles.joinToString()}",
-            )
+            throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
         }
-        return harRolleMedTilgang
     }
 
     private fun String.asRolleOrNull(): Roles? {
@@ -69,3 +56,5 @@ enum class Roles(
     ROLE_SYKEPENGESOKNAD_BACKEND("role-sykepengesoknad-backend"),
     ROLE_ACCESS_AS_APPLICATION("access_as_application"),
 }
+
+fun HttpServletRequest.getToken(): String? = this.getHeader("Authorization")?.removePrefix("Bearer ")

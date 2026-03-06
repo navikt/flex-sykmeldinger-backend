@@ -1,13 +1,14 @@
 package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.helse.flex.config.Roles
+import no.nav.helse.flex.config.TokenValideringService
+import no.nav.helse.flex.config.getToken
 import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,8 +20,6 @@ import java.time.OffsetDateTime
 class SykmeldingTexasController(
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
     private val sykmeldingLeser: SykmeldingLeser,
-    @param:Value("\${SYKEPENGESOKNAD_BACKEND_CLIENT_ID}")
-    private val sykepengesoknadBackendClientId: String,
     private val tokenValideringService: TokenValideringService,
 ) {
     data class SykmeldingKafkaMessageResponse(
@@ -37,13 +36,9 @@ class SykmeldingTexasController(
         @RequestBody sykmeldingerRequest: SykmeldingerRequest,
         request: HttpServletRequest,
     ): ResponseEntity<SykmeldingKafkaMessageResponse> {
-        val token = request.getToken()
-        if (!tokenValideringService.validerToken(token, "entra_id")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-        if (!tokenValideringService.validerClientIdFraToken(token!!, listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        request
+            .getToken()
+            .let { tokenValideringService.validerTokenOgRolle(token = it, identityProvider = "entra_id", listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND)) }
 
         val sykmeldinger =
             sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerRequest.sykmeldingIder)
@@ -73,6 +68,4 @@ class SykmeldingTexasController(
             }
         return ResponseEntity.ok(SykmeldingKafkaMessageResponse(sykmeldingDtoer))
     }
-
-    private fun HttpServletRequest.getToken(): String? = this.getHeader("Authorization")?.removePrefix("Bearer ")
 }
