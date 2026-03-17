@@ -10,11 +10,13 @@ import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import java.time.LocalDate
 
 interface ISykmeldingRepository {
     fun save(sykmelding: Sykmelding): Sykmelding
@@ -25,7 +27,10 @@ interface ISykmeldingRepository {
 
     fun findAll(): List<Sykmelding>
 
-    fun findAllIn(sykmeldingIder: List<String>): List<Sykmelding>
+    fun findAllInFom(
+        sykmeldingIder: List<String>,
+        fom: LocalDate?,
+    ): List<Sykmelding>
 
     fun deleteBySykmeldingId(sykmeldingId: String)
 
@@ -79,8 +84,16 @@ class SykmeldingRepository(
         }
     }
 
-    override fun findAllIn(sykmeldingIder: List<String>): List<Sykmelding> {
-        val dbRecords = sykmeldingDbRepository.findAllBySykmeldingIdIn(sykmeldingIder)
+    override fun findAllInFom(
+        sykmeldingIder: List<String>,
+        fom: LocalDate?,
+    ): List<Sykmelding> {
+        val dbRecords =
+            if (fom != null) {
+                sykmeldingDbRepository.findAllBySykmeldingIdInAndLatestTomOnOrAfter(sykmeldingIder, fom)
+            } else {
+                sykmeldingDbRepository.findAllBySykmeldingIdIn(sykmeldingIder)
+            }
         val statusDbRecords =
             sykmeldingHendelseDbRepository.findAllBySykmeldingIdIn(dbRecords.map { it.sykmeldingId })
         return dbRecords.map { dbRecord ->
@@ -134,6 +147,22 @@ interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
     fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord>
 
     fun findBySykmeldingId(sykmeldingUuid: String): SykmeldingDbRecord?
+
+    @Query(
+        """
+    SELECT *
+    FROM sykmelding
+    WHERE sykmelding_id IN (:sykmeldingIder)
+      AND (
+        SELECT MAX((a->>'tom')::date)
+        FROM jsonb_array_elements(sykmelding->'aktivitet') a
+      ) >= :fom
+    """,
+    )
+    fun findAllBySykmeldingIdInAndLatestTomOnOrAfter(
+        sykmeldingIder: List<String>,
+        fom: LocalDate,
+    ): List<SykmeldingDbRecord>
 
     fun findAllBySykmeldingIdIn(sykmeldingIder: List<String>): List<SykmeldingDbRecord>
 }

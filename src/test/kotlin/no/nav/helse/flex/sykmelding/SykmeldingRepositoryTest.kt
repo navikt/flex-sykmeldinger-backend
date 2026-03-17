@@ -32,6 +32,33 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
+    fun `burde finne sykmelding uten dato`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+
+        sykmeldingRepository.save(sykmelding)
+        sykmeldingRepository.findAllInFom(listOf("1"), null).first().sykmeldingId `should be equal to` sykmelding.sykmeldingId
+    }
+
+    @Test
+    fun `burde finne sykmelding på eller etter dato`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+
+        sykmeldingRepository.save(sykmelding)
+        sykmeldingRepository.findAllInFom(listOf("1"), sykmelding.tom).first().sykmeldingId `should be equal to`
+            sykmelding.sykmeldingId
+        sykmeldingRepository.findAllInFom(listOf("1"), sykmelding.tom.minusDays(1)).first().sykmeldingId `should be equal to`
+            sykmelding.sykmeldingId
+    }
+
+    @Test
+    fun `burde ikke finne sykmelding før dato`() {
+        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
+
+        sykmeldingRepository.save(sykmelding)
+        sykmeldingRepository.findAllInFom(listOf("1"), sykmelding.tom.plusDays(1)) `should be equal to` emptyList()
+    }
+
+    @Test
     fun `burde lese og returnere lagret sykmelding med riktig data`() {
         val sykmelding =
             Sykmelding(

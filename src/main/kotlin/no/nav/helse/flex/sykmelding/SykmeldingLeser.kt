@@ -3,6 +3,7 @@ package no.nav.helse.flex.sykmelding
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class SykmeldingLeser(
@@ -36,5 +37,8 @@ class SykmeldingLeser(
         return sykmelding
     }
 
-    fun hentAlleSykmeldingerFraIder(sykmeldingIder: List<String>): List<Sykmelding> = sykmeldingRepository.findAllIn(sykmeldingIder)
+    fun hentAlleSykmeldingerFraIderFom(
+        sykmeldingIder: List<String>,
+        fom: LocalDate?,
+    ): List<Sykmelding> = sykmeldingRepository.findAllInFom(sykmeldingIder, fom)
 }
