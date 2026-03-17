@@ -14,6 +14,7 @@ data class TexasResponse(
     val active: Boolean,
     val roles: List<String> = emptyList(),
     val error: String? = null,
+    val NAVident: String? = null,
 )
 
 interface TexasClient {

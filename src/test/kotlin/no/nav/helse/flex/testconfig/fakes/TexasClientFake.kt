@@ -18,6 +18,13 @@ class TexasClientFake : TexasClient {
                     listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND.value),
                 )
 
+            "gyldig-token-role-flex-internal-frontend" ->
+                TexasResponse(
+                    active = true,
+                    roles = listOf(Roles.ROLE_FLEX_INTERNAL_FRONTEND.value),
+                    NAVident = "A123456",
+                )
+
             "ikke-gyldig-token" -> TexasResponse(false)
             else -> TexasResponse(false)
         }

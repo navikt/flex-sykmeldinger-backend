@@ -60,4 +60,7 @@ class FakesTestConfig {
 
     @Bean
     fun texasClient(): TexasClientFake = TexasClientFake()
+
+    @Bean
+    fun auditLogProducer(): AuditLogProducerFake = AuditLogProducerFake()
 }

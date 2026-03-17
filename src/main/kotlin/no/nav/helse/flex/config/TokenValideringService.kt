@@ -16,6 +16,23 @@ class TokenValideringService(
         identityProvider: String,
         forventedeRoller: List<Roles>,
     ) {
+        validerTokenOgRolleOgHentRespons(token, identityProvider, forventedeRoller)
+    }
+
+    fun validerOgHentNavIdent(
+        token: String?,
+        identityProvider: String,
+        forventedeRoller: List<Roles>,
+    ): String {
+        val respons = validerTokenOgRolleOgHentRespons(token, identityProvider, forventedeRoller)
+        return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
+    }
+
+    private fun validerTokenOgRolleOgHentRespons(
+        token: String?,
+        identityProvider: String,
+        forventedeRoller: List<Roles>,
+    ): no.nav.helse.flex.gateways.texas.TexasResponse {
         if (token == null) {
             throw Uautorisert("Fant ikke token i request")
         }
@@ -39,6 +56,8 @@ class TokenValideringService(
         if (!harRolleMedTilgang) {
             throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
         }
+
+        return respons
     }
 
     private fun String.asRolleOrNull(): Roles? {
@@ -55,6 +74,7 @@ enum class Roles(
 ) {
     ROLE_SYKEPENGESOKNAD_BACKEND("role-sykepengesoknad-backend"),
     ROLE_ACCESS_AS_APPLICATION("access_as_application"),
+    ROLE_FLEX_INTERNAL_FRONTEND("role-flex-internal-frontend"),
 }
 
 fun HttpServletRequest.getToken(): String? = this.getHeader("Authorization")?.removePrefix("Bearer ")

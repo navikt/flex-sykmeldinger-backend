@@ -63,6 +63,10 @@ spec:
           permissions:
             roles:
               - "role-sykepengesoknad-backend"
+        - application: flex-internal-frontend
+          permissions:
+            roles:
+              - "role-flex-internal-frontend"
   observability:
     autoInstrumentation:
       enabled: true
