@@ -3,6 +3,7 @@ package no.nav.helse.flex.testconfig.fakes
 import no.nav.helse.flex.sykmelding.SykmeldingDbRecord
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
+import java.time.LocalDate
 
 class SykmeldingDbRepositoryFake :
     AbstractCrudRepositoryFake<SykmeldingDbRecord>(
@@ -22,4 +23,19 @@ class SykmeldingDbRepositoryFake :
         this.entities.values.filter {
             it.sykmeldingId in sykmeldingIder
         }
+
+    override fun findAllBySykmeldingIdInAndLatestTomOnOrAfter(
+        sykmeldingIder: List<String>,
+        fom: LocalDate,
+    ): List<SykmeldingDbRecord> =
+        entities.values
+            .filter {
+                it.sykmeldingId in sykmeldingIder
+            }.filterNot {
+                it
+                    .mapTilSykmelding()
+                    .aktivitet
+                    .maxOfOrNull { aktivitet -> aktivitet.tom }
+                    ?.isBefore(fom) ?: false
+            }
 }

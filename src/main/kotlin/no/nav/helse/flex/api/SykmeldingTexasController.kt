@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @RestController
@@ -39,7 +40,10 @@ class SykmeldingTexasController(
             }
 
         val sykmeldinger =
-            sykmeldingLeser.hentAlleSykmeldingerFraIder(sykmeldingIder = sykmeldingerKafkaMessageRequest.sykmeldingIder)
+            sykmeldingLeser.hentAlleSykmeldingerFraIderFom(
+                sykmeldingIder = sykmeldingerKafkaMessageRequest.sykmeldingIder,
+                fom = sykmeldingerKafkaMessageRequest.fom,
+            )
 
         val sykmeldingDtoer =
             sykmeldinger.map {
@@ -74,4 +78,5 @@ data class SykmeldingKafkaMessageResponse(
 
 data class SykmeldingerKafkaMessageRequest(
     val sykmeldingIder: List<String>,
+    val fom: LocalDate? = null,
 )

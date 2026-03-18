@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.Instant
+import java.time.LocalDate
 
 class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -29,6 +30,32 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.save(sykmelding)
         sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
+    }
+
+    @Test
+    fun `burde finne sykmelding uten dato`() {
+        val sykmeldinger = opprettSykmeldinger()
+
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, null).size `should be equal to` 3
+    }
+
+    @Test
+    fun `burde finne sykmelding på eller etter dato`() {
+        val sykmeldinger = opprettSykmeldinger()
+
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom).size `should be equal to` 3
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom.minusDays(1)).size `should be equal to`
+            3
+    }
+
+    @Test
+    fun `burde ikke finne sykmelding før dato`() {
+        val sykmeldinger = opprettSykmeldinger()
+
+        val resultat =
+            sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom.plusDays(1))
+        resultat.size `should be equal to` 2
+        resultat.none { it.sykmeldingId == sykmeldinger[0].sykmeldingId } `should be equal to` true
     }
 
     @Test
@@ -61,7 +88,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `burde oppdatere en sykmelding`() {
-        val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")))
+        val sykmelding =
+            lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")))
 
         sykmeldingRepository.save(sykmelding)
 
@@ -69,7 +97,10 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val oppdatertSykmelding =
             hentetSykmelding.copy(
                 sykmeldingGrunnlag =
-                    lagSykmeldingGrunnlag(id = "1", pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr")),
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        pasient = hentetSykmelding.sykmeldingGrunnlag.pasient.copy(fnr = "nyttFnr"),
+                    ),
             )
 
         sykmeldingRepository.save(oppdatertSykmelding)
@@ -287,4 +318,55 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                     it.copy(databaseId = null)
                 },
         )
+
+    private fun opprettSykmeldinger(): List<Sykmelding> {
+        val sykmelding1 =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    LocalDate.parse("2021-01-01"),
+                                    LocalDate.parse("2021-01-10"),
+                                ),
+                            ),
+                    ),
+            )
+        val sykmelding2 =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "2",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    LocalDate.parse("2021-01-11"),
+                                    LocalDate.parse("2021-01-20"),
+                                ),
+                            ),
+                    ),
+            )
+        val sykmelding3 =
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "3",
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    LocalDate.parse("2021-01-21"),
+                                    LocalDate.parse("2021-01-25"),
+                                ),
+                            ),
+                    ),
+            )
+
+        return listOf(
+            sykmeldingRepository.save(sykmelding1),
+            sykmeldingRepository.save(sykmelding2),
+            sykmeldingRepository.save(sykmelding3),
+        )
+    }
 }

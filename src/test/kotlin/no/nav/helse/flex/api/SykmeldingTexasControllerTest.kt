@@ -68,12 +68,53 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
     fun `burde returnere sykmelding i kafka format`() {
         val sykmelding = sykmeldingRepository.save(lagSykmelding())
         "/api/v1/sykmeldinger/kafka".run {
-            sjekkAtViReturnererSykmeldingKafka(
-                url = this,
-                token = "gyldig-token-role-sykepengesoknad-backend",
-                expectedStatus = HttpStatus.OK,
-                content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
-            )
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = this,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .sykmelding.id `should be equal to` "1"
+        }
+    }
+
+    @Test
+    fun `burde returnere sykmelding i kafka format etter oppgitt dato`() {
+        val sykmelding = sykmeldingRepository.save(lagSykmelding())
+        "/api/v1/sykmeldinger/kafka".run {
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = this,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId), sykmelding.tom),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .sykmelding.id `should be equal to` "1"
+        }
+    }
+
+    @Test
+    fun `burde ikke returnere sykmelding i kafka format før oppgitt dato`() {
+        val sykmelding = sykmeldingRepository.save(lagSykmelding())
+        "/api/v1/sykmeldinger/kafka".run {
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = this,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId), sykmelding.tom.plusDays(1)),
+                )
+
+            respons.sykmeldinger `should be equal to` emptyList()
         }
     }
 
@@ -98,13 +139,13 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             ).andExpect(MockMvcResultMatchers.status().`is`(expectedStatus.value()))
     }
 
-    fun sjekkAtViReturnererSykmeldingKafka(
+    fun utførHentSykmeldingerMedKafkaFormat(
         url: String,
         httpMethod: HttpMethod = HttpMethod.POST,
         token: String,
         content: SykmeldingerKafkaMessageRequest? = null,
         expectedStatus: HttpStatus = HttpStatus.OK,
-    ) {
+    ): SykmeldingKafkaMessageResponse {
         val respons =
             mockMvc
                 .perform(
@@ -122,12 +163,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                 .response
                 .contentAsString
 
-        val responsVerdi: SykmeldingKafkaMessageResponse = objectMapper.readValue(respons)
-
-        responsVerdi.sykmeldinger.size `should be equal to` 1
-        responsVerdi.sykmeldinger
-            .first()
-            .sykmelding.id `should be equal to` "1"
+        return objectMapper.readValue(respons)
     }
 }
 
