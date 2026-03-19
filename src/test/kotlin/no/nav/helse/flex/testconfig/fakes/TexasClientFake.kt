@@ -5,6 +5,10 @@ import no.nav.helse.flex.gateways.texas.TexasClient
 import no.nav.helse.flex.gateways.texas.TexasResponse
 
 class TexasClientFake : TexasClient {
+    companion object {
+        private const val FLEX_INTERNAL_GROUP_ID = "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+    }
+
     override fun introspect(
         identityProvider: String,
         token: String,
@@ -22,6 +26,20 @@ class TexasClientFake : TexasClient {
                 TexasResponse(
                     active = true,
                     roles = listOf(Roles.ROLE_FLEX_INTERNAL_FRONTEND.value),
+                    NAVident = "A123456",
+                )
+
+            "gyldig-token-flex-internal-gruppe" ->
+                TexasResponse(
+                    active = true,
+                    groups = listOf(FLEX_INTERNAL_GROUP_ID),
+                    NAVident = "A123456",
+                )
+
+            "gyldig-token-annen-gruppe" ->
+                TexasResponse(
+                    active = true,
+                    groups = listOf("annen-gruppe"),
                     NAVident = "A123456",
                 )
 

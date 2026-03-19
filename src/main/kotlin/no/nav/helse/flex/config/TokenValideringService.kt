@@ -11,6 +11,10 @@ class TokenValideringService(
 ) {
     private val log = logger()
 
+    private companion object {
+        const val FLEX_INTERNAL_GROUP_ID = "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+    }
+
     fun validerTokenOgRolle(
         token: String?,
         identityProvider: String,
@@ -28,10 +32,40 @@ class TokenValideringService(
         return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
     }
 
+    fun validerGruppeOgHentNavIdent(
+        token: String?,
+        identityProvider: String,
+        forventetGruppe: String = FLEX_INTERNAL_GROUP_ID,
+    ): String {
+        val respons = validerTokenOgHentRespons(token, identityProvider)
+        if (!respons.groups.contains(forventetGruppe)) {
+            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $forventetGruppe")
+        }
+        return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
+    }
+
     private fun validerTokenOgRolleOgHentRespons(
         token: String?,
         identityProvider: String,
         forventedeRoller: List<Roles>,
+    ): no.nav.helse.flex.gateways.texas.TexasResponse {
+        val respons = validerTokenOgHentRespons(token, identityProvider)
+
+        val harRolleMedTilgang =
+            respons.roles
+                .map { it.asRolleOrNull() }
+                .any { it in forventedeRoller }
+
+        if (!harRolleMedTilgang) {
+            throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
+        }
+
+        return respons
+    }
+
+    private fun validerTokenOgHentRespons(
+        token: String?,
+        identityProvider: String,
     ): no.nav.helse.flex.gateways.texas.TexasResponse {
         if (token == null) {
             throw Uautorisert("Fant ikke token i request")
@@ -46,15 +80,6 @@ class TokenValideringService(
         if (!respons.active) {
             log.info(respons.error)
             throw Uautorisert("Ugyldig token, ${respons.error}")
-        }
-
-        val harRolleMedTilgang =
-            respons.roles
-                .map { it.asRolleOrNull() }
-                .any { it in forventedeRoller }
-
-        if (!harRolleMedTilgang) {
-            throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
         }
 
         return respons

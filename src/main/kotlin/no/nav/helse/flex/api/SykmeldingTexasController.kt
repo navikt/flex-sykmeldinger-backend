@@ -99,10 +99,9 @@ class SykmeldingTexasController(
         request: HttpServletRequest,
     ): ResponseEntity<List<SykmeldingDTO>> {
         val navIdent =
-            tokenValideringService.validerOgHentNavIdent(
+            tokenValideringService.validerGruppeOgHentNavIdent(
                 token = request.getToken(),
                 identityProvider = "entra_id",
-                forventedeRoller = listOf(Roles.ROLE_FLEX_INTERNAL_FRONTEND),
             )
 
         val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnrRequest.fnr)

@@ -36,7 +36,10 @@ spec:
   azure:
     application:
       enabled: true
-      allowAllUsers: false
+      allowAllUsers: true
+      claims:
+        groups:
+          - id: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
       tenant: {{azureTenant}}
   kafka:
     pool: {{kafkaPool}}
@@ -64,9 +67,6 @@ spec:
             roles:
               - "role-sykepengesoknad-backend"
         - application: flex-internal-frontend
-          permissions:
-            roles:
-              - "role-flex-internal-frontend"
   observability:
     autoInstrumentation:
       enabled: true
