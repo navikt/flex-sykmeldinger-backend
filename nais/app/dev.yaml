@@ -13,7 +13,6 @@ external-host:
   - aareg-services-q2.dev-fss-pub.nais.io
   - ereg-services-q2.dev-fss-pub.nais.io
 flex-openapi-docs-ui: true
-allowAllUsers: true
 env:
   SPRING_PROFILES_ACTIVE: default,testdata
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io

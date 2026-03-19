@@ -27,14 +27,6 @@ class TexasClientFake(
                 )
             }
 
-            "gyldig-token-role-flex-internal-frontend" -> {
-                TexasResponse(
-                    active = true,
-                    roles = listOf(Roles.ROLE_FLEX_INTERNAL_FRONTEND.value),
-                    NAVident = "A123456",
-                )
-            }
-
             "gyldig-token-flex-gruppe" -> {
                 TexasResponse(
                     active = true,

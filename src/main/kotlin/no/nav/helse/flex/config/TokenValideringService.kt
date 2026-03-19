@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service
 class TokenValideringService(
     private val texasClient: TexasClient,
     @param:Value($$"${flex.group.id}")
-    private val flexGroupId: String,
+    private val flexGruppe: String,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     private val log = logger()
 
@@ -26,11 +27,10 @@ class TokenValideringService(
     fun validerGruppeOgHentNavIdent(
         token: String?,
         identityProvider: String,
-        forventetGruppe: String = flexGroupId,
     ): String {
         val respons = validerTokenOgHentRespons(token, identityProvider)
-        if (!respons.groups.contains(forventetGruppe)) {
-            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $forventetGruppe")
+        if (environmentToggles.isProduction() && !respons.groups.contains(flexGruppe)) {
+            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $flexGruppe")
         }
         return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
     }
@@ -90,7 +90,6 @@ enum class Roles(
 ) {
     ROLE_SYKEPENGESOKNAD_BACKEND("role-sykepengesoknad-backend"),
     ROLE_ACCESS_AS_APPLICATION("access_as_application"),
-    ROLE_FLEX_INTERNAL_FRONTEND("role-flex-internal-frontend"),
 }
 
 fun HttpServletRequest.getToken(): String? = this.getHeader("Authorization")?.removePrefix("Bearer ")

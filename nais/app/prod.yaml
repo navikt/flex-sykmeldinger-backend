@@ -16,7 +16,6 @@ db_flags:
   cloudsql.enable_pgaudit: "true"
   pgaudit.log: 'write,ddl,role'
   pgaudit.log_parameter: "on"
-allowAllUsers: false
 env:
   SPRING_PROFILES_ACTIVE: default
   PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io

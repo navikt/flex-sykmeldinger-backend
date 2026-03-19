@@ -80,4 +80,4 @@ no.nav.security.jwt:
 
 pdl.api.url: ${PDL_BASE_URL}
 elector.get_url: ${ELECTOR_GET_URL}
-flex.group.id: ${FLEX_GROUP_ID}
+flex.group.id: ${FLEX_GROUP_ID:flex-gruppe}
