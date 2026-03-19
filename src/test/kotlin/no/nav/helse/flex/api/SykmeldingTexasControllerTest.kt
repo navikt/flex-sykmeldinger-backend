@@ -114,7 +114,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         @TestFactory
         fun tilgangskontroll() =
             listOf(
-                Triple("gyldig-token-flex-internal-gruppe", HttpStatus.OK, "godtar riktig gruppe"),
+                Triple("gyldig-token-flex-gruppe", HttpStatus.OK, "godtar riktig gruppe"),
                 Triple("gyldig-token-uten-rolle", HttpStatus.FORBIDDEN, "avviser token uten rolle"),
                 Triple("gyldig-token-annen-gruppe", HttpStatus.FORBIDDEN, "avviser token med annen gruppe"),
                 Triple("gyldig-token-role-sykepengesoknad-backend", HttpStatus.FORBIDDEN, "avviser sykepengesoknad-backend-rolle"),
@@ -171,7 +171,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     .perform(
                         MockMvcRequestBuilders
                             .post(url)
-                            .header("Authorization", "Bearer gyldig-token-flex-internal-gruppe")
+                            .header("Authorization", "Bearer gyldig-token-flex-gruppe")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body.serialisertTilString()),
                     ).andExpect(MockMvcResultMatchers.status().isOk)

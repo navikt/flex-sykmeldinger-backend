@@ -16,6 +16,7 @@ db_flags:
   cloudsql.enable_pgaudit: "true"
   pgaudit.log: 'write,ddl,role'
   pgaudit.log_parameter: "on"
+allowAllUsers: false
 env:
   SPRING_PROFILES_ACTIVE: default
   PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
@@ -28,3 +29,4 @@ env:
   AAREG_AAD_CLIENT_ID: prod-fss.arbeidsforhold.aareg-services-nais
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
   FLEX_SYKETILFELLE_TOKENX_CLIENT_ID: prod-gcp:flex:flex-syketilfelle
+  FLEX_GROUP_ID: "5206a646-a99e-4cd5-90e4-758cf7948cc8"

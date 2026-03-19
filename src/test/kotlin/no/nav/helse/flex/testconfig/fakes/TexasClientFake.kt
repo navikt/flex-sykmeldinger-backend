@@ -4,46 +4,59 @@ import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.gateways.texas.TexasClient
 import no.nav.helse.flex.gateways.texas.TexasResponse
 
-class TexasClientFake : TexasClient {
-    companion object {
-        private const val FLEX_INTERNAL_GROUP_ID = "5206a646-a99e-4cd5-90e4-758cf7948cc8"
-    }
-
+class TexasClientFake(
+    private val flexGroupId: String,
+) : TexasClient {
     override fun introspect(
         identityProvider: String,
         token: String,
     ): TexasResponse =
         when (token) {
-            "gyldig-token-uten-rolle" -> TexasResponse(true)
-            "gyldig-token-annen-rolle" -> TexasResponse(true, listOf(Roles.ROLE_ACCESS_AS_APPLICATION.value))
-            "gyldig-token-role-sykepengesoknad-backend" ->
+            "gyldig-token-uten-rolle" -> {
+                TexasResponse(true)
+            }
+
+            "gyldig-token-annen-rolle" -> {
+                TexasResponse(true, listOf(Roles.ROLE_ACCESS_AS_APPLICATION.value))
+            }
+
+            "gyldig-token-role-sykepengesoknad-backend" -> {
                 TexasResponse(
                     true,
                     listOf(Roles.ROLE_SYKEPENGESOKNAD_BACKEND.value),
                 )
+            }
 
-            "gyldig-token-role-flex-internal-frontend" ->
+            "gyldig-token-role-flex-internal-frontend" -> {
                 TexasResponse(
                     active = true,
                     roles = listOf(Roles.ROLE_FLEX_INTERNAL_FRONTEND.value),
                     NAVident = "A123456",
                 )
+            }
 
-            "gyldig-token-flex-internal-gruppe" ->
+            "gyldig-token-flex-gruppe" -> {
                 TexasResponse(
                     active = true,
-                    groups = listOf(FLEX_INTERNAL_GROUP_ID),
+                    groups = listOf(flexGroupId),
                     NAVident = "A123456",
                 )
+            }
 
-            "gyldig-token-annen-gruppe" ->
+            "gyldig-token-annen-gruppe" -> {
                 TexasResponse(
                     active = true,
                     groups = listOf("annen-gruppe"),
                     NAVident = "A123456",
                 )
+            }
 
-            "ikke-gyldig-token" -> TexasResponse(false)
-            else -> TexasResponse(false)
+            "ikke-gyldig-token" -> {
+                TexasResponse(false)
+            }
+
+            else -> {
+                TexasResponse(false)
+            }
         }
 }

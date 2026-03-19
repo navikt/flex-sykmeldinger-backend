@@ -2,18 +2,18 @@ package no.nav.helse.flex.config
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.gateways.texas.TexasClient
+import no.nav.helse.flex.gateways.texas.TexasResponse
 import no.nav.helse.flex.utils.logger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class TokenValideringService(
     private val texasClient: TexasClient,
+    @param:Value($$"${flex.group.id}")
+    private val flexGroupId: String,
 ) {
     private val log = logger()
-
-    private companion object {
-        const val FLEX_INTERNAL_GROUP_ID = "5206a646-a99e-4cd5-90e4-758cf7948cc8"
-    }
 
     fun validerTokenOgRolle(
         token: String?,
@@ -23,19 +23,10 @@ class TokenValideringService(
         validerTokenOgRolleOgHentRespons(token, identityProvider, forventedeRoller)
     }
 
-    fun validerOgHentNavIdent(
-        token: String?,
-        identityProvider: String,
-        forventedeRoller: List<Roles>,
-    ): String {
-        val respons = validerTokenOgRolleOgHentRespons(token, identityProvider, forventedeRoller)
-        return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
-    }
-
     fun validerGruppeOgHentNavIdent(
         token: String?,
         identityProvider: String,
-        forventetGruppe: String = FLEX_INTERNAL_GROUP_ID,
+        forventetGruppe: String = flexGroupId,
     ): String {
         val respons = validerTokenOgHentRespons(token, identityProvider)
         if (!respons.groups.contains(forventetGruppe)) {
@@ -48,7 +39,7 @@ class TokenValideringService(
         token: String?,
         identityProvider: String,
         forventedeRoller: List<Roles>,
-    ): no.nav.helse.flex.gateways.texas.TexasResponse {
+    ): TexasResponse {
         val respons = validerTokenOgHentRespons(token, identityProvider)
 
         val harRolleMedTilgang =
@@ -66,7 +57,7 @@ class TokenValideringService(
     private fun validerTokenOgHentRespons(
         token: String?,
         identityProvider: String,
-    ): no.nav.helse.flex.gateways.texas.TexasResponse {
+    ): TexasResponse {
         if (token == null) {
             throw Uautorisert("Fant ikke token i request")
         }

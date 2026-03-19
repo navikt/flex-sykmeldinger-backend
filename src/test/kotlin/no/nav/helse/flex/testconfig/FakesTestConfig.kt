@@ -7,8 +7,7 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testconfig.fakes.*
-import no.nav.helse.flex.testconfig.fakes.SykmeldingDbRepositoryFake
-import no.nav.helse.flex.testconfig.fakes.SykmeldingHendelseDbRepositoryFake
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.support.NoOpCacheManager
@@ -59,7 +58,9 @@ class FakesTestConfig {
     fun sykmeldingBrukernotifikasjonProducer(): SykmeldingBrukernotifikasjonProducerFake = SykmeldingBrukernotifikasjonProducerFake()
 
     @Bean
-    fun texasClient(): TexasClientFake = TexasClientFake()
+    fun texasClient(
+        @Value($$"${flex.group.id}") flexGroupId: String,
+    ): TexasClientFake = TexasClientFake(flexGroupId)
 
     @Bean
     fun auditLogProducer(): AuditLogProducerFake = AuditLogProducerFake()
