@@ -79,7 +79,10 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             respons.sykmeldinger.size `should be equal to` 1
             respons.sykmeldinger
                 .first()
-                .sykmelding.id `should be equal to` "1"
+                .run {
+                    this.sykmelding.id `should be equal to` "1"
+                    this.sykmelding.merknader `should be equal to` null
+                }
         }
     }
 
