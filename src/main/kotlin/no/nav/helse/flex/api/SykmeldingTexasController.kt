@@ -50,8 +50,17 @@ class SykmeldingTexasController(
                 val sykmeldingDTO =
                     SykmeldingDtoRegler
                         .skjermForPasientDersomSpesifisert(sykmeldingDtoKonverterer.konverter(it))
-                        // tilpasning for hva vi får fra syfosmregister
-                        .let { dto -> dto.copy(merknader = dto.merknader?.ifEmpty { null }) }
+                        // tilpasning for hva vi får fra gammel kafka kø
+                        .let { dto ->
+                            dto.copy(
+                                merknader =
+                                    if (dto.behandlingsutfall.erUnderBehandling) {
+                                        listOfNotNull(dto.merknader?.first())
+                                    } else {
+                                        null
+                                    },
+                            )
+                        }
                 val timestampIkkeRelevant = OffsetDateTime.MIN
                 val kafkaMetadata =
                     KafkaMetadataDTO(

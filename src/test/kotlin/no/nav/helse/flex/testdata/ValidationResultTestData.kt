@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testdata
 
+import no.nav.helse.flex.sykmelding.tsm.OKRule
 import no.nav.helse.flex.sykmelding.tsm.PendingRule
 import no.nav.helse.flex.sykmelding.tsm.Reason
 import no.nav.helse.flex.sykmelding.tsm.RuleType
@@ -13,7 +14,22 @@ fun lagValidation(status: RuleType = RuleType.OK): ValidationResult =
             ValidationResult(
                 status = status,
                 timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-                rules = listOf(),
+                rules =
+                    listOf(
+                        OKRule(
+                            name = "TILBAKEDATERING_UNDER_BEHANDLING",
+                            timestamp = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
+                        ),
+                        PendingRule(
+                            name = "TILBAKEDATERING_UNDER_BEHANDLING",
+                            timestamp = OffsetDateTime.now().minusDays(1).withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
+                            reason =
+                                Reason(
+                                    sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                                    sykmelder = "Sykmeldingen er til manuell behandling",
+                                ),
+                        ),
+                    ),
             )
         }
 
@@ -26,6 +42,15 @@ fun lagValidation(status: RuleType = RuleType.OK): ValidationResult =
                         PendingRule(
                             name = "TILBAKEDATERING_UNDER_BEHANDLING",
                             timestamp = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
+                            reason =
+                                Reason(
+                                    sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
+                                    sykmelder = "Sykmeldingen er til manuell behandling",
+                                ),
+                        ),
+                        PendingRule(
+                            name = "TILBAKEDATERING_UGYLDIG_TILBAKEDATERING",
+                            timestamp = OffsetDateTime.now().minusDays(1).withOffsetSameInstant(ZoneOffset.UTC), // Timestamp for the rule
                             reason =
                                 Reason(
                                     sykmeldt = "Sykmeldingen blir manuelt behandlet fordi den er tilbakedatert",
