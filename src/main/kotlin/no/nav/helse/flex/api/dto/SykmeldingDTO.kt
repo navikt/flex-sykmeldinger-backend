@@ -30,6 +30,7 @@ data class SykmeldingDTO(
     val papirsykmelding: Boolean,
     val harRedusertArbeidsgiverperiode: Boolean,
     val merknader: List<MerknadDTO>?,
+    val signaturDato: OffsetDateTime?,
     val rulesetVersion: String?,
     val utenlandskSykmelding: UtenlandskSykmelding?,
 )

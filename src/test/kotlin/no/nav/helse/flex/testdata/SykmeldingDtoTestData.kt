@@ -56,6 +56,7 @@ fun lagSykmeldingDto(
     merknader: List<MerknadDTO>? = null,
     rulesetVersion: String? = null,
     utenlandskSykmelding: UtenlandskSykmelding? = null,
+    signaturDato: OffsetDateTime? = null,
 ): SykmeldingDTO =
     SykmeldingDTO(
         id = id,
@@ -86,4 +87,5 @@ fun lagSykmeldingDto(
         merknader = merknader,
         rulesetVersion = rulesetVersion,
         utenlandskSykmelding = utenlandskSykmelding,
+        signaturDato = signaturDato,
     )

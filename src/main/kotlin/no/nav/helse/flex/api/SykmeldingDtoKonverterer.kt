@@ -64,6 +64,7 @@ class SykmeldingDtoKonverterer(
                 ),
             rulesetVersion = metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
+            signaturDato = metadata.genDate,
             legekontorOrgnummer = null,
             arbeidsgiver = ArbeidsgiverDTO(navn = null, stillingsprosent = null),
             kontaktMedPasient = KontaktMedPasientDTO(kontaktDato = null, begrunnelseIkkeKontakt = null),
