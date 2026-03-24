@@ -1,6 +1,7 @@
 package no.nav.helse.flex.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett

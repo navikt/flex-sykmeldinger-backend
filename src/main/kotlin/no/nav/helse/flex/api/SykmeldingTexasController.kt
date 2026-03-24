@@ -1,6 +1,7 @@
 package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
