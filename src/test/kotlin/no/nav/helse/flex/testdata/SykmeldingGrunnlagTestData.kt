@@ -8,13 +8,7 @@ import java.time.OffsetDateTime
 fun lagSykmeldingGrunnlag(
     id: String = "1",
     pasient: Pasient = lagPasient(),
-    aktiviteter: List<Aktivitet> =
-        listOf(
-            lagAktivitetIkkeMulig(
-                LocalDate.parse("2021-01-01"),
-                LocalDate.parse("2021-01-10"),
-            ),
-        ),
+    aktiviteter: List<Aktivitet> = listOf(lagAktivitetIkkeMulig()),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
 ): SykmeldingGrunnlag =
@@ -30,16 +24,15 @@ fun lagSykmeldingGrunnlag(
 fun lagNorskSykmeldingGrunnlag(
     id: String = "1",
     pasient: Pasient = lagPasient(),
-    aktiviteter: List<Aktivitet> =
-        listOf(
-            lagAktivitetIkkeMulig(
-                LocalDate.parse("2021-01-01"),
-                LocalDate.parse("2021-01-10"),
-            ),
-        ),
+    aktiviteter: List<Aktivitet> = listOf(lagAktivitetIkkeMulig()),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
+    behandler: Behandler = lagBehandler(),
+    arbeidsgiver: ArbeidsgiverInfo = lagArbeidsgiverInfoFlereArbeidsgivere(),
+    prognose: Prognose? = lagPrognose(),
+    tiltak: Tiltak = lagTiltak(),
+    bistandNav: BistandNav = lagBistandNav(),
 ): NorskSykmeldingGrunnlag =
     lagXMLSykmeldingGrunnlag(
         id = id,
@@ -48,21 +41,25 @@ fun lagNorskSykmeldingGrunnlag(
         medisinskVurdering = medisinskVurdering,
         aktiviteter = aktiviteter,
         tilbakedatering = tilbakedatering,
+        behandler = behandler,
+        arbeidsgiver = arbeidsgiver,
+        prognose = prognose,
+        tiltak = tiltak,
+        bistandNav = bistandNav,
     )
 
 fun lagXMLSykmeldingGrunnlag(
     id: String = "1",
     pasient: Pasient = lagPasient(),
-    aktiviteter: List<Aktivitet> =
-        listOf(
-            lagAktivitetIkkeMulig(
-                LocalDate.parse("2021-01-01"),
-                LocalDate.parse("2021-01-10"),
-            ),
-        ),
+    aktiviteter: List<Aktivitet> = listOf(lagAktivitetIkkeMulig()),
     metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
     medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
     tilbakedatering: Tilbakedatering? = lagTilbakedatering(),
+    behandler: Behandler = lagBehandler(),
+    arbeidsgiver: ArbeidsgiverInfo = lagArbeidsgiverInfoFlereArbeidsgivere(),
+    prognose: Prognose? = lagPrognose(),
+    tiltak: Tiltak = lagTiltak(),
+    bistandNav: BistandNav = lagBistandNav(),
 ): XMLSykmeldingGrunnlag =
     XMLSykmeldingGrunnlag(
         id = id,
@@ -70,15 +67,8 @@ fun lagXMLSykmeldingGrunnlag(
         pasient = pasient,
         medisinskVurdering = medisinskVurdering,
         aktivitet = aktiviteter,
-        behandler = lagBehandler(),
-        arbeidsgiver =
-            FlereArbeidsgivere(
-                meldingTilArbeidsgiver = "Melding til arbeidsgiver",
-                tiltakArbeidsplassen = "Dette er et tiltak",
-                navn = "Arbeidsgivernavn",
-                yrkesbetegnelse = "Arbeider",
-                stillingsprosent = 99,
-            ),
+        behandler = behandler,
+        arbeidsgiver = arbeidsgiver,
         sykmelder =
             Sykmelder(
                 ids =
@@ -87,22 +77,9 @@ fun lagXMLSykmeldingGrunnlag(
                     ),
                 helsepersonellKategori = HelsepersonellKategori.LEGE,
             ),
-        prognose =
-            Prognose(
-                arbeidsforEtterPeriode = true,
-                hensynArbeidsplassen = "Tilrettelegging på arbeidsplassen anbefales",
-                arbeid = null,
-            ),
-        tiltak =
-            Tiltak(
-                tiltakNav = "Behov for tilrettelegging",
-                andreTiltak = "Redusert arbeidstid",
-            ),
-        bistandNav =
-            BistandNav(
-                bistandUmiddelbart = false,
-                beskrivBistand = "Ingen behov for bistand per nå",
-            ),
+        prognose = prognose,
+        tiltak = tiltak,
+        bistandNav = bistandNav,
         tilbakedatering = tilbakedatering,
         utdypendeOpplysninger =
             mapOf(
@@ -124,19 +101,32 @@ fun lagTilbakedatering(kontaktDato: LocalDate? = LocalDate.parse("2025-01-01")):
         begrunnelse = "Pasienten kunne ikke oppsøke lege tidligere",
     )
 
-fun lagUtenlandskSykmeldingGrunnlag(id: String = "1"): UtenlandskSykmeldingGrunnlag =
+fun lagUtenlandskInfo(
+    land: String = "Sverige",
+    folkeRegistertAdresseErBrakkeEllerTilsvarende: Boolean = false,
+    erAdresseUtland: Boolean = false,
+): UtenlandskInfo =
+    UtenlandskInfo(
+        land = land,
+        folkeRegistertAdresseErBrakkeEllerTilsvarende = folkeRegistertAdresseErBrakkeEllerTilsvarende,
+        erAdresseUtland = erAdresseUtland,
+    )
+
+fun lagUtenlandskSykmeldingGrunnlag(
+    id: String = "1",
+    metadata: SykmeldingMetadata = lagSykmeldingMetadata(),
+    pasient: Pasient = lagPasient(),
+    medisinskVurdering: IkkeDigitalMedisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
+    aktivitet: List<Aktivitet> = listOf(lagAktivitetIkkeMulig()),
+    utenlandskInfo: UtenlandskInfo = lagUtenlandskInfo(),
+): UtenlandskSykmeldingGrunnlag =
     UtenlandskSykmeldingGrunnlag(
         id = id,
-        metadata = lagSykmeldingMetadata(),
-        pasient = lagPasient(),
-        medisinskVurdering = lagIkkeDigitalMedisinskVurdering(),
-        aktivitet = listOf(lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-10"))),
-        utenlandskInfo =
-            UtenlandskInfo(
-                land = "Sverige",
-                folkeRegistertAdresseErBrakkeEllerTilsvarende = false,
-                erAdresseUtland = false,
-            ),
+        metadata = metadata,
+        pasient = pasient,
+        medisinskVurdering = medisinskVurdering,
+        aktivitet = aktivitet,
+        utenlandskInfo = utenlandskInfo,
     )
 
 fun lagDigitalSykmeldingGrunnlag(id: String = "1"): DigitalSykmeldingGrunnlag =
@@ -271,75 +261,166 @@ fun lagDigitalMedisinskVurdering(
         syketilfelletStartDato = syketilfelleStartDato,
     )
 
-fun lagAktivitetBehandlingsdager(): Behandlingsdager =
+fun lagAktivitetBehandlingsdager(
+    fom: LocalDate = LocalDate.parse("2021-01-01"),
+    tom: LocalDate = LocalDate.parse("2021-01-10"),
+    antallBehandlingsdager: Int = 1,
+): Behandlingsdager =
     Behandlingsdager(
-        antallBehandlingsdager = 1,
-        fom = LocalDate.now().minusDays(1),
-        tom = LocalDate.now().plusDays(1),
+        antallBehandlingsdager = antallBehandlingsdager,
+        fom = fom,
+        tom = tom,
     )
 
-fun lagAktivitetGradert(): Gradert =
+fun lagAktivitetGradert(
+    fom: LocalDate = LocalDate.parse("2021-01-01"),
+    tom: LocalDate = LocalDate.parse("2021-01-10"),
+    grad: Int = 1,
+    reisetilskudd: Boolean = false,
+): Gradert =
     Gradert(
-        grad = 1,
-        fom = LocalDate.now().minusDays(1),
-        tom = LocalDate.now().plusDays(1),
-        reisetilskudd = false,
+        grad = grad,
+        fom = fom,
+        tom = tom,
+        reisetilskudd = reisetilskudd,
     )
 
-fun lagAktivitetReisetilskudd(): Reisetilskudd =
+fun lagAktivitetReisetilskudd(
+    fom: LocalDate = LocalDate.parse("2021-01-01"),
+    tom: LocalDate = LocalDate.parse("2021-01-10"),
+): Reisetilskudd =
     Reisetilskudd(
-        fom = LocalDate.now().minusDays(1),
-        tom = LocalDate.now().plusDays(1),
+        fom = fom,
+        tom = tom,
     )
 
-fun lagAktivitetAvventende(): Avventende =
+fun lagAktivitetAvventende(
+    fom: LocalDate = LocalDate.parse("2021-01-01"),
+    tom: LocalDate = LocalDate.parse("2021-01-10"),
+    innspillTilArbeidsgiver: String = "Ingen",
+): Avventende =
     Avventende(
-        innspillTilArbeidsgiver = "Ingen",
-        fom = LocalDate.now().minusDays(1),
-        tom = LocalDate.now().plusDays(1),
+        innspillTilArbeidsgiver = innspillTilArbeidsgiver,
+        fom = fom,
+        tom = tom,
     )
 
 fun lagAktivitetIkkeMulig(
-    fom: LocalDate = LocalDate.now().minusDays(1),
-    tom: LocalDate = LocalDate.now().plusDays(1),
-) = AktivitetIkkeMulig(
-    medisinskArsak =
+    fom: LocalDate = LocalDate.parse("2021-01-01"),
+    tom: LocalDate = LocalDate.parse("2021-01-10"),
+    medisinskArsak: MedisinskArsak? =
         MedisinskArsak(
             arsak = listOf(MedisinskArsakType.TILSTAND_HINDRER_AKTIVITET),
             beskrivelse = "Pasient er syk",
         ),
-    arbeidsrelatertArsak = null,
+    arbeidsrelatertArsak: ArbeidsrelatertArsak? = null,
+) = AktivitetIkkeMulig(
+    medisinskArsak = medisinskArsak,
+    arbeidsrelatertArsak = arbeidsrelatertArsak,
     fom = fom,
     tom = tom,
 )
 
-fun lagBehandler() =
+fun lagAddresse(
+    type: AdresseType = AdresseType.BOSTEDSADRESSE,
+    gateadresse: String? = "Hovedgaten 1",
+    postnummer: String? = "0101",
+    poststed: String? = "Oslo",
+    postboks: String? = null,
+    kommune: String? = "Oslo",
+    land: String? = "Norge",
+): Adresse =
+    Adresse(
+        type = type,
+        gateadresse = gateadresse,
+        postnummer = postnummer,
+        poststed = poststed,
+        postboks = postboks,
+        kommune = kommune,
+        land = land,
+    )
+
+fun lagBehandler(
+    navn: Navn =
+        Navn(
+            fornavn = "Kari",
+            mellomnavn = null,
+            etternavn = "Hansen",
+        ),
+    adresse: Adresse? = lagAddresse(),
+    ids: List<PersonId> = listOf(PersonId(id = "00000000000", type = PersonIdType.DKF)),
+    kontaktinfo: List<Kontaktinfo> =
+        listOf(
+            Kontaktinfo(
+                type = KontaktinfoType.TLF,
+                value = "11111111",
+            ),
+        ),
+): Behandler =
     Behandler(
-        ids =
-            listOf(
-                PersonId(id = "00000000000", type = PersonIdType.DKF),
-            ),
-        navn =
-            Navn(
-                fornavn = "Kari",
-                mellomnavn = null,
-                etternavn = "Hansen",
-            ),
-        kontaktinfo =
-            listOf(
-                Kontaktinfo(
-                    type = KontaktinfoType.TLF,
-                    value = "11111111",
-                ),
-            ),
-        adresse =
-            Adresse(
-                type = AdresseType.BOSTEDSADRESSE,
-                gateadresse = "Hovedgaten 1",
-                postnummer = "0101",
-                poststed = "Oslo",
-                postboks = null,
-                kommune = "Oslo",
-                land = "Norge",
-            ),
+        navn = navn,
+        adresse = adresse,
+        ids = ids,
+        kontaktinfo = kontaktinfo,
+    )
+
+fun lagArbeidsgiverInfoEnArbeidsgiver(
+    meldingTilArbeidsgiver: String? = "Melding til arbeidsgiver",
+    tiltakArbeidsplassen: String? = "Dette er et tiltak",
+    navn: String? = "Arbeidsgivernavn",
+    yrkesbetegnelse: String? = "Arbeider",
+    stillingsprosent: Int? = 99,
+): EnArbeidsgiver =
+    EnArbeidsgiver(
+        meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+        tiltakArbeidsplassen = tiltakArbeidsplassen,
+        navn = navn,
+        yrkesbetegnelse = yrkesbetegnelse,
+        stillingsprosent = stillingsprosent,
+    )
+
+fun lagArbeidsgiverInfoFlereArbeidsgivere(
+    meldingTilArbeidsgiver: String? = "Melding til arbeidsgiver",
+    tiltakArbeidsplassen: String? = "Dette er et tiltak",
+    navn: String? = "Arbeidsgivernavn",
+    yrkesbetegnelse: String? = "Arbeider",
+    stillingsprosent: Int? = 99,
+): FlereArbeidsgivere =
+    FlereArbeidsgivere(
+        meldingTilArbeidsgiver = meldingTilArbeidsgiver,
+        tiltakArbeidsplassen = tiltakArbeidsplassen,
+        navn = navn,
+        yrkesbetegnelse = yrkesbetegnelse,
+        stillingsprosent = stillingsprosent,
+    )
+
+fun lagArbeidsgiverInfoIngenArbeidsgiver(): IngenArbeidsgiver = IngenArbeidsgiver()
+
+fun lagPrognose(
+    arbeidsforEtterPeriode: Boolean = false,
+    hensynArbeidsplassen: String? = "Tilrettelegging på arbeidsplassen anbefales",
+    arbeid: IArbeid? = null,
+): Prognose =
+    Prognose(
+        arbeidsforEtterPeriode = arbeidsforEtterPeriode,
+        hensynArbeidsplassen = hensynArbeidsplassen,
+        arbeid = arbeid,
+    )
+
+fun lagTiltak(
+    tiltakNav: String? = "Behov for tilrettelegging",
+    andreTiltak: String? = "Redusert arbeidstid",
+): Tiltak =
+    Tiltak(
+        tiltakNav = tiltakNav,
+        andreTiltak = andreTiltak,
+    )
+
+fun lagBistandNav(
+    bistandUmiddelbart: Boolean = false,
+    beskrivBistand: String? = "Ingen behov for bistand per nå",
+): BistandNav =
+    BistandNav(
+        bistandUmiddelbart = bistandUmiddelbart,
+        beskrivBistand = beskrivBistand,
     )
