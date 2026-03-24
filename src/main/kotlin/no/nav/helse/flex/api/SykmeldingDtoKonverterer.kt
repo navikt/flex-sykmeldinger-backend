@@ -122,6 +122,7 @@ class SykmeldingDtoKonverterer(
 
     internal fun konverterMerknader(validationResult: ValidationResult): List<MerknadDTO> =
         validationResult.rules
+            .sortedByDescending { it.timestamp }
             .map {
                 MerknadDTO(
                     type =
