@@ -2,7 +2,6 @@ package no.nav.helse.flex.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
-import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagPasient
@@ -191,7 +190,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             entries.first().oppslagPå `should be equal to` fnr
         }
 
-        private fun postOgParseRespons(body: FnrRequest): List<SykmeldingDTO> {
+        private fun postOgParseRespons(body: FnrRequest): List<FlexInternalSykmeldingDto> {
             val respons =
                 mockMvc
                     .perform(
@@ -204,7 +203,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     .andReturn()
                     .response
                     .contentAsString
-            return objectMapper.readValue(respons)
+            return objectMapper.readValue<FlexInternalResponse>(respons).sykmeldinger
         }
     }
 

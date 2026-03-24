@@ -1,7 +1,6 @@
 package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
-import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
@@ -97,7 +96,7 @@ class SykmeldingTexasController(
     fun hentSykmeldingerForFlexInternal(
         @RequestBody fnrRequest: FnrRequest,
         request: HttpServletRequest,
-    ): ResponseEntity<List<SykmeldingDTO>> {
+    ): ResponseEntity<FlexInternalResponse> {
         val navIdent =
             tokenValideringService.validerGruppeOgHentNavIdent(
                 token = request.getToken(),
@@ -121,7 +120,13 @@ class SykmeldingTexasController(
             ),
         )
 
-        return ResponseEntity.ok(sykmeldinger.map { sykmeldingDtoKonverterer.konverter(it) })
+        return ResponseEntity.ok(
+            FlexInternalResponse(
+                sykmeldinger.map {
+                    FlexInternalSykmeldingDto.konverterTilFlexInternal(sykmeldingDtoKonverterer.konverter(it))
+                },
+            ),
+        )
     }
 }
 
@@ -136,4 +141,8 @@ data class SykmeldingerKafkaMessageRequest(
 
 data class FnrRequest(
     val fnr: String,
+)
+
+data class FlexInternalResponse(
+    val sykmeldinger: List<FlexInternalSykmeldingDto>,
 )
