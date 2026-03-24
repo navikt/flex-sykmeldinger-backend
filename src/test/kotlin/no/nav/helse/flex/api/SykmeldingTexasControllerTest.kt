@@ -1,11 +1,14 @@
 package no.nav.helse.flex.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.api.dto.SykmeldingDTO
+import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
@@ -50,7 +53,30 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         }
 
         @Test
-        fun `burde returnere sykmelding i kafka format`() {
+        fun `burde returnere sykmelding i kafka format med siste pending merknad`() {
+            val sykmelding = sykmeldingRepository.save(lagSykmelding(validation = lagValidation(RuleType.PENDING)))
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = url,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .run {
+                    this.sykmelding.id `should be equal to` "1"
+                    this.sykmelding.merknader!!.size `should be equal to` 1
+                    this.sykmelding.merknader
+                        .first()
+                        .type `should be equal to` MerknadtypeDTO.UNDER_BEHANDLING
+                }
+        }
+
+        @Test
+        fun `burde returnere sykmelding i kafka format uten merknader med ok validering`() {
             val sykmelding = sykmeldingRepository.save(lagSykmelding())
             val respons =
                 utførHentSykmeldingerMedKafkaFormat(
