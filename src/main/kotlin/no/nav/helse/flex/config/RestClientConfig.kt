@@ -5,9 +5,10 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import org.apache.hc.client5.http.config.ConnectionConfig
 import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
 import org.apache.hc.core5.util.Timeout
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -134,16 +135,23 @@ class RestClientConfig {
 
     @Bean
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
+        val connectionConfig =
+            ConnectionConfig
+                .custom()
+                .setConnectTimeout(Timeout.ofSeconds(API_CONNECT_TIMEOUT))
+                .build()
+
         val connectionManager =
-            PoolingHttpClientConnectionManager().apply {
-                maxTotal = 40
-                defaultMaxPerRoute = 20
-            }
+            PoolingHttpClientConnectionManagerBuilder
+                .create()
+                .setMaxConnTotal(40)
+                .setMaxConnPerRoute(20)
+                .setDefaultConnectionConfig(connectionConfig)
+                .build()
 
         val requestConfig =
             RequestConfig
                 .custom()
-                .setConnectTimeout(Timeout.ofSeconds(API_CONNECT_TIMEOUT))
                 .setResponseTimeout(Timeout.ofSeconds(API_READ_TIMEOUT))
                 .build()
 
