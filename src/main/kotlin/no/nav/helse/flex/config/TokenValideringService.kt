@@ -3,7 +3,9 @@ package no.nav.helse.flex.config
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.gateways.texas.TexasClient
 import no.nav.helse.flex.gateways.texas.TexasResponse
+import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
+import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -30,6 +32,7 @@ class TokenValideringService(
     ): String {
         val respons = validerTokenOgHentRespons(token, identityProvider)
         if (environmentToggles.isProduction() && !respons.groups.contains(flexGruppe)) {
+            log.errorSecure("Token inneholder ikke forventet gruppe $flexGruppe, token respons: ${respons.serialisertTilString()}")
             throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $flexGruppe")
         }
         return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
