@@ -5,8 +5,11 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
+import org.apache.hc.client5.http.config.ConnectionConfig
+import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
+import org.apache.hc.core5.util.Timeout
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,7 +20,6 @@ import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestClient
 import org.springframework.web.util.UriComponentsBuilder
-import java.time.Duration
 
 const val API_CONNECT_TIMEOUT = 5L
 const val API_READ_TIMEOUT = 10L
@@ -133,22 +135,34 @@ class RestClientConfig {
 
     @Bean
     fun requestFactory(): HttpComponentsClientHttpRequestFactory {
+        val connectionConfig =
+            ConnectionConfig
+                .custom()
+                .setConnectTimeout(Timeout.ofSeconds(API_CONNECT_TIMEOUT))
+                .build()
+
         val connectionManager =
-            PoolingHttpClientConnectionManager().apply {
-                maxTotal = 40
-                defaultMaxPerRoute = 20
-            }
+            PoolingHttpClientConnectionManagerBuilder
+                .create()
+                .setMaxConnTotal(40)
+                .setMaxConnPerRoute(20)
+                .setDefaultConnectionConfig(connectionConfig)
+                .build()
+
+        val requestConfig =
+            RequestConfig
+                .custom()
+                .setResponseTimeout(Timeout.ofSeconds(API_READ_TIMEOUT))
+                .build()
 
         val httpClient =
             HttpClientBuilder
                 .create()
                 .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(requestConfig)
                 .build()
 
-        return HttpComponentsClientHttpRequestFactory(httpClient).apply {
-            setConnectTimeout(Duration.ofSeconds(API_CONNECT_TIMEOUT))
-            setReadTimeout(Duration.ofSeconds(API_READ_TIMEOUT))
-        }
+        return HttpComponentsClientHttpRequestFactory(httpClient)
     }
 
     @Bean
