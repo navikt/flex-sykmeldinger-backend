@@ -2,12 +2,17 @@ package no.nav.helse.flex.config
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.gateways.texas.TexasClient
+import no.nav.helse.flex.gateways.texas.TexasResponse
 import no.nav.helse.flex.utils.logger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class TokenValideringService(
     private val texasClient: TexasClient,
+    @param:Value($$"${flex.group.id}")
+    private val flexGruppe: String,
+    private val environmentToggles: EnvironmentToggles,
 ) {
     private val log = logger()
 
@@ -16,6 +21,43 @@ class TokenValideringService(
         identityProvider: String,
         forventedeRoller: List<Roles>,
     ) {
+        validerTokenOgRolleOgHentRespons(token, identityProvider, forventedeRoller)
+    }
+
+    fun validerGruppeOgHentNavIdent(
+        token: String?,
+        identityProvider: String,
+    ): String {
+        val respons = validerTokenOgHentRespons(token, identityProvider)
+        if (environmentToggles.isProduction() && !respons.groups.contains(flexGruppe)) {
+            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $flexGruppe")
+        }
+        return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
+    }
+
+    private fun validerTokenOgRolleOgHentRespons(
+        token: String?,
+        identityProvider: String,
+        forventedeRoller: List<Roles>,
+    ): TexasResponse {
+        val respons = validerTokenOgHentRespons(token, identityProvider)
+
+        val harRolleMedTilgang =
+            respons.roles
+                .map { it.asRolleOrNull() }
+                .any { it in forventedeRoller }
+
+        if (!harRolleMedTilgang) {
+            throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
+        }
+
+        return respons
+    }
+
+    private fun validerTokenOgHentRespons(
+        token: String?,
+        identityProvider: String,
+    ): TexasResponse {
         if (token == null) {
             throw Uautorisert("Fant ikke token i request")
         }
@@ -31,14 +73,7 @@ class TokenValideringService(
             throw Uautorisert("Ugyldig token, ${respons.error}")
         }
 
-        val harRolleMedTilgang =
-            respons.roles
-                .map { it.asRolleOrNull() }
-                .any { it in forventedeRoller }
-
-        if (!harRolleMedTilgang) {
-            throw IngenTilgang("Ingen av rollene ${respons.roles} er forventet ${forventedeRoller.joinToString()}")
-        }
+        return respons
     }
 
     private fun String.asRolleOrNull(): Roles? {

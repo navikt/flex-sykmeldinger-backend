@@ -35,9 +35,9 @@ spec:
       memory: {{memory}}
   azure:
     application:
-      enabled: true
-      allowAllUsers: false
       tenant: {{azureTenant}}
+      enabled: true
+      allowAllUsers: true
   kafka:
     pool: {{kafkaPool}}
   tokenx:
@@ -63,6 +63,7 @@ spec:
           permissions:
             roles:
               - "role-sykepengesoknad-backend"
+        - application: flex-internal-frontend
   observability:
     autoInstrumentation:
       enabled: true

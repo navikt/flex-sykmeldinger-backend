@@ -28,3 +28,4 @@ env:
   AAREG_AAD_CLIENT_ID: prod-fss.arbeidsforhold.aareg-services-nais
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
   FLEX_SYKETILFELLE_TOKENX_CLIENT_ID: prod-gcp:flex:flex-syketilfelle
+  FLEX_GROUP_ID: "5206a646-a99e-4cd5-90e4-758cf7948cc8"

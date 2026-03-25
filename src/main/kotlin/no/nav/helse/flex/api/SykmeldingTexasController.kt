@@ -1,9 +1,14 @@
 package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
+import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
 import no.nav.helse.flex.config.getToken
+import no.nav.helse.flex.domain.AuditEntry
+import no.nav.helse.flex.domain.EventType
+import no.nav.helse.flex.gateways.AuditLogProducer
 import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
@@ -14,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
+import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -22,6 +29,8 @@ class SykmeldingTexasController(
     private val sykmeldingDtoKonverterer: SykmeldingDtoKonverterer,
     private val sykmeldingLeser: SykmeldingLeser,
     private val tokenValideringService: TokenValideringService,
+    private val identService: IdentService,
+    private val auditLogProducer: AuditLogProducer,
 ) {
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
@@ -82,6 +91,44 @@ class SykmeldingTexasController(
             }
         return ResponseEntity.ok(SykmeldingKafkaMessageResponse(sykmeldingDtoer))
     }
+
+    @PostMapping(value = ["/api/v1/flex/sykmeldinger"])
+    @ResponseBody
+    fun hentSykmeldingerForFlexInternal(
+        @RequestBody fnrRequest: FnrRequest,
+        request: HttpServletRequest,
+    ): ResponseEntity<FlexInternalResponse> {
+        val navIdent =
+            tokenValideringService.validerGruppeOgHentNavIdent(
+                token = request.getToken(),
+                identityProvider = "entra_id",
+            )
+
+        val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnrRequest.fnr)
+        val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
+
+        auditLogProducer.lagAuditLog(
+            AuditEntry(
+                appNavn = "flex-sykmeldinger-backend",
+                utførtAv = navIdent,
+                oppslagPå = fnrRequest.fnr,
+                eventType = EventType.READ,
+                forespørselTillatt = true,
+                oppslagUtførtTid = Instant.now(),
+                beskrivelse = "Henter alle sykmeldinger",
+                requestUrl = URI.create(request.requestURL.toString()),
+                requestMethod = "POST",
+            ),
+        )
+
+        return ResponseEntity.ok(
+            FlexInternalResponse(
+                sykmeldinger.map {
+                    FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(it))
+                },
+            ),
+        )
+    }
 }
 
 data class SykmeldingKafkaMessageResponse(
@@ -91,4 +138,12 @@ data class SykmeldingKafkaMessageResponse(
 data class SykmeldingerKafkaMessageRequest(
     val sykmeldingIder: List<String>,
     val fom: LocalDate? = null,
+)
+
+data class FnrRequest(
+    val fnr: String,
+)
+
+data class FlexInternalResponse(
+    val sykmeldinger: List<FlexInternalSykmeldingDto>,
 )

@@ -31,6 +31,8 @@ spring:
 NAIS_TOKEN_INTROSPECTION_ENDPOINT: test
 DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: ditt-sykefravaer-frontend-client-id
 SYKEPENGESOKNAD_CLIENT_ID: sykepengesoknad-client-id
+FLEX_GROUP_ID: flex-gruppe
+flex.group.id: ${FLEX_GROUP_ID}
 
 management:
   endpoint.prometheus.enabled: true
