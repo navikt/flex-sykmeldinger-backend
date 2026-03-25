@@ -28,7 +28,7 @@ data class FlexInternalSykmeldingDto(
     val utenlandskSykmelding: UtenlandskSykmelding?,
 ) {
     companion object {
-        fun konverterTilFlexInternal(sykmeldingDto: SykmeldingDTO): FlexInternalSykmeldingDto =
+        fun fra(sykmeldingDto: SykmeldingDTO) =
             FlexInternalSykmeldingDto(
                 id = sykmeldingDto.id,
                 pasient = FlexInternalPasientDto(fnr = sykmeldingDto.pasient.fnr, overSyttiAar = sykmeldingDto.pasient.overSyttiAar),

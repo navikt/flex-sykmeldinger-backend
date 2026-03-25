@@ -124,7 +124,7 @@ class SykmeldingTexasController(
         return ResponseEntity.ok(
             FlexInternalResponse(
                 sykmeldinger.map {
-                    FlexInternalSykmeldingDto.konverterTilFlexInternal(sykmeldingDtoKonverterer.konverter(it))
+                    FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(it))
                 },
             ),
         )
