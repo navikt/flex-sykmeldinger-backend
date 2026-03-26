@@ -20,6 +20,10 @@ class TexasClientFake(
                 TexasResponse(true, listOf(Roles.ROLE_ACCESS_AS_APPLICATION.value))
             }
 
+            "gyldig-token-uten-gruppe" -> {
+                TexasResponse(active = true, groups = emptyList())
+            }
+
             "gyldig-token-role-sykepengesoknad-backend" -> {
                 TexasResponse(
                     true,

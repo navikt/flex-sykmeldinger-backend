@@ -29,7 +29,7 @@ class TokenValideringService(
         identityProvider: String,
     ): String {
         val respons = validerTokenOgHentRespons(token, identityProvider)
-        if (environmentToggles.isProduction() && !respons.groups.contains(flexGruppe)) {
+        if (!respons.groups.contains(flexGruppe)) {
             throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $flexGruppe")
         }
         return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")

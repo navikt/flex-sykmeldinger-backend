@@ -5,6 +5,7 @@ import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
@@ -14,6 +15,7 @@ import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should contain`
 import org.junit.jupiter.api.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -22,6 +24,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 class SykmeldingTexasControllerTest : FakesTestOppsett() {
+    @Autowired
+    private lateinit var environmentToggles: EnvironmentTogglesFake
+
+    @BeforeAll
+    fun setup() {
+        environmentToggles.setEnvironment("prod")
+    }
+
     @AfterEach
     fun ryddOpp() {
         slettDatabase()
@@ -141,7 +151,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         fun tilgangskontroll() =
             listOf(
                 Triple("gyldig-token-flex-gruppe", HttpStatus.OK, "godtar riktig gruppe"),
-                Triple("gyldig-token-uten-rolle", HttpStatus.FORBIDDEN, "avviser token uten rolle"),
+                Triple("gyldig-token-uten-gruppe", HttpStatus.FORBIDDEN, "avviser token uten gruppe"),
                 Triple("gyldig-token-annen-gruppe", HttpStatus.FORBIDDEN, "avviser token med annen gruppe"),
                 Triple("gyldig-token-role-sykepengesoknad-backend", HttpStatus.FORBIDDEN, "avviser sykepengesoknad-backend-rolle"),
                 Triple("ikke-gyldig-token", HttpStatus.UNAUTHORIZED, "avviser ugyldig token"),
