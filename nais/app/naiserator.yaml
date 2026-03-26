@@ -37,7 +37,10 @@ spec:
     application:
       tenant: {{azureTenant}}
       enabled: true
-      allowAllUsers: true
+      allowAllUsers: false
+      claims:
+        groups:
+        - id: {{flex_group_id}}
   kafka:
     pool: {{kafkaPool}}
   tokenx:
