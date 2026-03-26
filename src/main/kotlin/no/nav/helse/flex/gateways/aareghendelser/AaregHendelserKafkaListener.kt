@@ -121,30 +121,15 @@ class AaregHendelserConsumer(
     private fun JsonMappingException.stringPath(): String = this.path.joinToString(".") { it.fieldName ?: it.index.toString() }
 
     companion object {
-        internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering {
-            return when (hendelse.endringstype) {
-                Endringstype.Opprettelse, Endringstype.Endring -> {
-                    return if (harGyldigEndringstype(hendelse)) {
-                        AaregHendelseHandtering.OPPRETT_OPPDATER
-                    } else {
-                        AaregHendelseHandtering.IGNORER
-                    }
+        internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering =
+            when (hendelse.endringstype) {
+                Endringstype.Opprettelse, Endringstype.Endring, Endringstype.UKJENT -> {
+                    AaregHendelseHandtering.OPPRETT_OPPDATER
                 }
 
                 Endringstype.Sletting -> {
-                    return AaregHendelseHandtering.SLETT
+                    AaregHendelseHandtering.SLETT
                 }
-
-                Endringstype.UKJENT -> {
-                    AaregHendelseHandtering.IGNORER
-                }
-            }
-        }
-
-        private fun harGyldigEndringstype(arbeidsforholdHendelse: ArbeidsforholdHendelse): Boolean =
-            arbeidsforholdHendelse.entitetsendringer.any { endring ->
-                endring == Entitetsendring.Ansettelsesdetaljer ||
-                    endring == Entitetsendring.Ansettelsesperiode
             }
     }
 }

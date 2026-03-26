@@ -121,7 +121,7 @@ class AaregHendelserListenerTest {
                 entitetsendringer = listOf(Entitetsendring.Permittering),
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.IGNORER
+        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
     @Test
@@ -133,7 +133,7 @@ class AaregHendelserListenerTest {
         val deserialisertUgyldigeVerdier: ArbeidsforholdHendelse = objectMapper.readValue(hendelseMedUgyldigeVerdier)
 
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(deserialisertUgyldigeVerdier)
-        handtering `should be equal to` AaregHendelseHandtering.IGNORER
+        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 }
 
