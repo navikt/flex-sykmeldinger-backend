@@ -13,7 +13,7 @@ external-host:
   - aareg-services-q2.dev-fss-pub.nais.io
   - ereg-services-q2.dev-fss-pub.nais.io
 flex-openapi-docs-ui: true
-flex_group_id: "34094735-b8f7-4bef-9136-47de2307541a" //0000-GA-TEMA_SYK
+flex_group_id: "34094735-b8f7-4bef-9136-47de2307541a" #0000-GA-TEMA_SYK
 env:
   SPRING_PROFILES_ACTIVE: default,testdata
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
@@ -27,4 +27,4 @@ env:
   AAREG_AAD_CLIENT_ID: dev-fss.arbeidsforhold.aareg-services-nais
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
   FLEX_SYKETILFELLE_TOKENX_CLIENT_ID: dev-gcp:flex:flex-syketilfelle
-  FLEX_GROUP_ID: "34094735-b8f7-4bef-9136-47de2307541a" //0000-GA-TEMA_SYK
+  FLEX_GROUP_ID: "34094735-b8f7-4bef-9136-47de2307541a" #0000-GA-TEMA_SYK
