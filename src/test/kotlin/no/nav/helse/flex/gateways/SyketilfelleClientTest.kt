@@ -2,6 +2,7 @@ package no.nav.helse.flex.gateways
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleEksternClient
 import no.nav.helse.flex.testconfig.RestClientOppsett
@@ -45,12 +46,15 @@ class SyketilfelleClientTest {
                         ErUtenforVentetidResponse(
                             erUtenforVentetid = true,
                             oppfolgingsdato = LocalDate.parse("2025-01-01"),
+                            ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
                         ).serialisertTilString(),
                     ).addHeader("Content-Type", "application/json")
             }
         val erUtenforVentetidResponse = syketilfelleEksternClient.getErUtenforVentetid(PersonIdenter("fnr"), "sykmeldingId")
         erUtenforVentetidResponse.erUtenforVentetid.`should be true`()
         erUtenforVentetidResponse.oppfolgingsdato `should be equal to` LocalDate.parse("2025-01-01")
+        erUtenforVentetidResponse.ventetid!!.fom `should be equal to` LocalDate.parse("2025-01-01")
+        erUtenforVentetidResponse.ventetid.tom `should be equal to` LocalDate.parse("2025-01-20")
     }
 
     @Test

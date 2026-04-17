@@ -52,6 +52,11 @@ fun lagSykmeldingSporsmalSvarDto(
                     ),
             ),
         riktigNarmesteLeder = riktigNarmesteLeder,
+        sykFoerSykmeldingen =
+            FormSporsmalSvar(
+                sporsmaltekst = "Var du syk før sykmeldingen?",
+                svar = JaEllerNei.JA,
+            ),
         harBruktEgenmelding =
             FormSporsmalSvar(
                 sporsmaltekst = "Har du brukt egenmelding?",

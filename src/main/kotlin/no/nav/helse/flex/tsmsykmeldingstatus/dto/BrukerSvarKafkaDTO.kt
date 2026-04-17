@@ -11,6 +11,7 @@ data class BrukerSvarKafkaDTO(
     val riktigNarmesteLeder: FormSporsmalSvar<JaEllerNei>?,
     val harBruktEgenmelding: FormSporsmalSvar<JaEllerNei>?,
     val egenmeldingsperioder: FormSporsmalSvar<List<EgenmeldingsperiodeFormDTO>>?,
+    val sykFoerSykmeldingen: FormSporsmalSvar<JaEllerNei>?,
     val harForsikring: FormSporsmalSvar<JaEllerNei>?,
     val egenmeldingsdager: FormSporsmalSvar<List<LocalDate>>?,
     val harBruktEgenmeldingsdager: FormSporsmalSvar<JaEllerNei>?,
