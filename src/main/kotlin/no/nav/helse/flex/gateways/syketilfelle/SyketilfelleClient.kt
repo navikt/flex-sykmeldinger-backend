@@ -7,4 +7,6 @@ interface SyketilfelleClient {
         identer: PersonIdenter,
         sykmeldingId: String,
     ): ErUtenforVentetidResponse
+
+    fun getPerioderMedSammeVentetid(sykmeldingId: String): SammeVentetidResponse
 }

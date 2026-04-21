@@ -3,6 +3,8 @@ package no.nav.helse.flex.gateways
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
+import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
+import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleEksternClient
 import no.nav.helse.flex.testconfig.RestClientOppsett
@@ -15,6 +17,7 @@ import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be true`
 import org.amshove.kluent.`should throw`
+import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -80,6 +83,53 @@ class SyketilfelleClientTest {
             }
         invoking {
             syketilfelleEksternClient.getErUtenforVentetid(PersonIdenter("fnr"), "sykmeldingId")
+        } `should throw` RuntimeException::class
+    }
+
+    @Test
+    fun `burde returnere perioder med samme ventetid`() {
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setBody(
+                        SammeVentetidResponse(
+                            ventetidPerioder =
+                                listOf(
+                                    SammeVentetidPeriode(
+                                        ressursId = "sykmelding-1",
+                                        ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
+                                    ),
+                                ),
+                        ).serialisertTilString(),
+                    ).addHeader("Content-Type", "application/json")
+            }
+        val response = syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
+        response.ventetidPerioder shouldHaveSize 1
+        response.ventetidPerioder.first().ressursId `should be equal to` "sykmelding-1"
+    }
+
+    @Test
+    fun `burde kaste feil ved error ved henting av perioderMedSammeVentetid`() {
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .addHeader("Content-Type", "application/json")
+            }
+        invoking {
+            syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
+        } `should throw` RestClientException::class
+    }
+
+    @Test
+    fun `burde kaste feil ved tom body for perioderMedSammeVentetid`() {
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
+            }
+        invoking {
+            syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
         } `should throw` RuntimeException::class
     }
 }
