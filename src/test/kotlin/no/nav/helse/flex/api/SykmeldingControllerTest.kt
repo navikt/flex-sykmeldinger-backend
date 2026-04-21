@@ -900,6 +900,45 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     @Nested
+    inner class GetErForsteSykmelding {
+        @AfterEach
+        fun ryddOpp() {
+            syketilfelleClient.reset()
+        }
+
+        @Test
+        fun `burde returnere true dersom det ikke finnes andre sykmeldinger med samme ventetid`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                ),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/ANNET")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
+            response.erForsteSykmelding `should be equal to` true
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/ANNET" }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/ANNET" }
+    }
+
+    @Nested
     inner class Funksjoner {
         @Test
         fun `konverterer arbeidsgiverDetaljer dto riktig`() {

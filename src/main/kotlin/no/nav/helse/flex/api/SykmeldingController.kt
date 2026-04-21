@@ -13,6 +13,8 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
+import no.nav.helse.flex.sykmelding.SykmeldingVentetidService
+import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
@@ -38,6 +40,7 @@ class SykmeldingController(
     private val dittSykefravaerFrontendClientId: String,
     @param:Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
     private val sykepengesoknadClientId: String,
+    private val sykmeldingVentetidService: SykmeldingVentetidService,
 ) {
     private val logger = logger()
 
@@ -171,6 +174,29 @@ class SykmeldingController(
         return ResponseEntity.ok(erUtenforVentetid)
     }
 
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/er-forste-sykmelding/{arbeidssituasjon}")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun getErForsteSykmelding(
+        @PathVariable sykmeldingId: String,
+        @PathVariable arbeidssituasjon: Arbeidssituasjon,
+    ): ResponseEntity<ErForsteSykmeldingResponse> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val erForsteSykmelding =
+            sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                sykmelding = sykmelding,
+                arbeidssituasjon = arbeidssituasjon,
+            )
+
+        return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding))
+    }
+
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -255,3 +281,7 @@ enum class SykmeldingChangeStatus {
     AVBRYT,
     BEKREFT_AVVIST,
 }
+
+data class ErForsteSykmeldingResponse(
+    val erForsteSykmelding: Boolean,
+)
