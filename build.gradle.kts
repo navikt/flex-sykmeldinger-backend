@@ -29,7 +29,7 @@ val sykepengesoknadKafkaVersion = "2025.11.18-06.24-f860ace9"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.61.0"
-val opentelemetryInstrumentationVersion = "2.26.1"
+val opentelemetryInstrumentationVersion = "2.27.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
