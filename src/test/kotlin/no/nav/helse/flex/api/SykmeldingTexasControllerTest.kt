@@ -218,6 +218,74 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         }
     }
 
+    @Nested
+    inner class HentSykmeldingForFlexInternal {
+        private val url = "/api/v1/flex/sykmeldinger/1"
+        private val fnr = "01010112345"
+
+        @TestFactory
+        fun tilgangskontroll(): List<DynamicTest> {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+            return listOf(
+                Triple("gyldig-token-flex-gruppe", HttpStatus.OK, "godtar riktig gruppe"),
+                Triple("gyldig-token-uten-gruppe", HttpStatus.FORBIDDEN, "avviser token uten gruppe"),
+                Triple("gyldig-token-annen-gruppe", HttpStatus.FORBIDDEN, "avviser token med annen gruppe"),
+                Triple("gyldig-token-role-sykepengesoknad-backend", HttpStatus.FORBIDDEN, "avviser sykepengesoknad-backend-rolle"),
+                Triple("ikke-gyldig-token", HttpStatus.UNAUTHORIZED, "avviser ugyldig token"),
+                Triple(null, HttpStatus.UNAUTHORIZED, "avviser manglende token"),
+            ).map { (token, expectedStatus, name) ->
+                DynamicTest.dynamicTest(name) {
+                    sjekkStatus(url = url, token = token, expectedStatus = expectedStatus, httpMethod = HttpMethod.GET)
+                }
+            }
+        }
+
+        @Test
+        fun `returnerer sykmelding med riktig id`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+
+            val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
+
+            sykmelding.id `should be equal to` "1"
+        }
+
+        @Test
+        fun `returnerer 404 når sykmelding ikke finnes`() {
+            sjekkStatus(
+                url = "/api/v1/flex/sykmeldinger/finnes-ikke",
+                httpMethod = HttpMethod.GET,
+                token = "gyldig-token-flex-gruppe",
+                expectedStatus = HttpStatus.NOT_FOUND,
+            )
+        }
+
+        @Test
+        fun `produserer audit-logg med riktig navident og fnr`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+
+            hentSykmeldingOgParseRespons(sykmeldingId = "1")
+
+            val entries = auditLogProducer.hentAuditEntries()
+            entries.size `should be equal to` 1
+            entries.first().utførtAv `should be equal to` "A123456"
+            entries.first().oppslagPå `should be equal to` fnr
+        }
+
+        private fun hentSykmeldingOgParseRespons(sykmeldingId: String): FlexInternalSykmeldingDto {
+            val respons =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get(url.replace("1", sykmeldingId))
+                            .header("Authorization", "Bearer gyldig-token-flex-gruppe"),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response
+                    .contentAsString
+            return objectMapper.readValue(respons)
+        }
+    }
+
     fun sjekkStatus(
         url: String,
         httpMethod: HttpMethod = HttpMethod.POST,
