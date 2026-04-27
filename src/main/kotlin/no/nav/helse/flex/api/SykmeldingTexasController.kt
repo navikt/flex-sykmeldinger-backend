@@ -15,10 +15,7 @@ import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
@@ -127,6 +124,41 @@ class SykmeldingTexasController(
                     FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(it))
                 },
             ),
+        )
+    }
+
+    @GetMapping(value = ["/api/v1/flex/sykmeldinger/{sykmeldingId}"])
+    @ResponseBody
+    fun hentSykmeldingerForFlexInternal(
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<FlexInternalSykmeldingDto> {
+        val navIdent =
+            tokenValideringService.validerGruppeOgHentNavIdent(
+                token = request.getToken(),
+                identityProvider = "entra_id",
+            )
+
+        val sykmelding =
+            sykmeldingLeser.hentSykmelding(sykmeldingId)
+                ?: return ResponseEntity.notFound().build()
+
+        auditLogProducer.lagAuditLog(
+            AuditEntry(
+                appNavn = "flex-sykmeldinger-backend",
+                utførtAv = navIdent,
+                oppslagPå = sykmelding.pasientFnr,
+                eventType = EventType.READ,
+                forespørselTillatt = true,
+                oppslagUtførtTid = Instant.now(),
+                beskrivelse = "Henter en sykmelding",
+                requestUrl = URI.create(request.requestURL.toString()),
+                requestMethod = "GET",
+            ),
+        )
+
+        return ResponseEntity.ok(
+            FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(sykmelding)),
         )
     }
 }

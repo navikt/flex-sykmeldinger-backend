@@ -16,6 +16,8 @@ class SykmeldingLeser(
         identer: PersonIdenter,
     ): Sykmelding = finnValidertSykmelding(sykmeldingId, identer)
 
+    fun hentSykmelding(sykmeldingId: String): Sykmelding? = sykmeldingRepository.findBySykmeldingId(sykmeldingId)
+
     fun hentAlleSykmeldinger(identer: PersonIdenter): List<Sykmelding> {
         val sykmeldinger = sykmeldingRepository.findAllByPersonIdenter(identer)
         return sykmeldinger
