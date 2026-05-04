@@ -43,25 +43,23 @@ class SykmeldingVentetidService(
         )
         return erForsteSykmelding
     }
-
-    companion object {
-        fun Sykmelding.tilsvarendeVentetidForArbeidssituasjon(arbeidssituasjon: Arbeidssituasjon): Boolean =
-            when (arbeidssituasjon) {
-                FISKER,
-                NAERINGSDRIVENDE,
-                ->
-                    when (val brukerSvar = this.sisteHendelse().brukerSvar) {
-                        is NaringsdrivendeBrukerSvar -> true
-                        is FiskerBrukerSvar -> brukerSvar.blad.svar == FiskerBlad.A && brukerSvar.lottOgHyre.svar == FiskerLottOgHyre.LOTT
-                        else -> false
-                    }
-                FRILANSER -> this.sisteHendelse().brukerSvar is FrilanserBrukerSvar
-                JORDBRUKER -> this.sisteHendelse().brukerSvar is JordbrukerBrukerSvar
-                ARBEIDSTAKER,
-                ARBEIDSLEDIG,
-                PERMITTERT,
-                ANNET,
-                -> throw IllegalArgumentException("Ventetid er ikke relevant for Arbeidssituasjon $arbeidssituasjon")
-            }
-    }
 }
+
+fun Sykmelding.tilsvarendeVentetidForArbeidssituasjon(arbeidssituasjon: Arbeidssituasjon): Boolean =
+    when (arbeidssituasjon) {
+        FISKER,
+        NAERINGSDRIVENDE,
+        ->
+            when (val brukerSvar = this.sisteHendelse().brukerSvar) {
+                is NaringsdrivendeBrukerSvar -> true
+                is FiskerBrukerSvar -> brukerSvar.blad.svar == FiskerBlad.A && brukerSvar.lottOgHyre.svar == FiskerLottOgHyre.LOTT
+                else -> false
+            }
+        FRILANSER -> this.sisteHendelse().brukerSvar is FrilanserBrukerSvar
+        JORDBRUKER -> this.sisteHendelse().brukerSvar is JordbrukerBrukerSvar
+        ARBEIDSTAKER,
+        ARBEIDSLEDIG,
+        PERMITTERT,
+        ANNET,
+        -> throw IllegalArgumentException("Ventetid er ikke relevant for Arbeidssituasjon $arbeidssituasjon")
+    }

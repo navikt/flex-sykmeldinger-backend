@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding
 
-import no.nav.helse.flex.sykmelding.SykmeldingVentetidService.Companion.tilsvarendeVentetidForArbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.BrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.FiskerBlad
