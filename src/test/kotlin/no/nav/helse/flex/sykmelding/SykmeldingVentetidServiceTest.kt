@@ -9,6 +9,9 @@ import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
+import no.nav.helse.flex.testdata.lagFiskerHyreBrukerSvar
+import no.nav.helse.flex.testdata.lagFiskerLottBrukerSvar
+import no.nav.helse.flex.testdata.lagNaringsdrivendeBrukerSvar
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -38,7 +41,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
             val result =
                 sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
                     sykmelding = sykmelding,
-                    arbeidssituasjon = Arbeidssituasjon.ANNET,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
                 )
 
             result `should be equal to` true
@@ -51,20 +54,20 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     id = "1",
                     fom = LocalDate.parse("2021-01-01"),
                     tom = LocalDate.parse("2021-01-10"),
-                    brukerSvar = lagArbeidsledigBrukerSvar(),
+                    brukerSvar = lagFrilanserBrukerSvar(),
                 )
             lagreSykmelding(
                 id = "2",
                 fom = LocalDate.parse("2021-01-05"),
                 tom = LocalDate.parse("2021-01-15"),
-                brukerSvar = lagArbeidsledigBrukerSvar(),
+                brukerSvar = lagFrilanserBrukerSvar(),
             )
             settPerioderMedSammeVentetid("1", "2")
 
             val result =
                 sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
                     sykmelding = tidligsteSykmelding,
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
                 )
 
             result `should be equal to` true
@@ -76,24 +79,128 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                 id = "1",
                 fom = LocalDate.parse("2021-01-01"),
                 tom = LocalDate.parse("2021-01-10"),
-                brukerSvar = lagArbeidsledigBrukerSvar(),
+                brukerSvar = lagFrilanserBrukerSvar(),
             )
             val sendreSykmelding =
                 lagreSykmelding(
                     id = "2",
                     fom = LocalDate.parse("2021-01-05"),
                     tom = LocalDate.parse("2021-01-15"),
-                    brukerSvar = lagArbeidsledigBrukerSvar(),
+                    brukerSvar = lagFrilanserBrukerSvar(),
                 )
             settPerioderMedSammeVentetid("1", "2")
 
             val result =
                 sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
                     sykmelding = sendreSykmelding,
-                    arbeidssituasjon = Arbeidssituasjon.ARBEIDSLEDIG,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
                 )
 
             result `should be equal to` false
+        }
+
+        @Test
+        fun `burde ignorere sykmelding med samme arbeidssituasjon der tom er mer enn 16 dager før fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2020-12-20"),
+                tom = LocalDate.parse("2020-12-31"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-17"),
+                    tom = LocalDate.parse("2021-01-25"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+            settPerioderMedSammeVentetid("1", "2")
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+
+            result `should be equal to` true
+        }
+
+        @Test
+        fun `burde telle med sykmelding med samme arbeidssituasjon der tom er innenfor 16 dager før fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-01"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-17"),
+                    tom = LocalDate.parse("2021-01-25"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+            settPerioderMedSammeVentetid("1", "2")
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+
+            result `should be equal to` false
+        }
+
+        @Test
+        fun `burde telle FISKER lott blad A som tilsvarende NAERINGSDRIVENDE`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-10"),
+                brukerSvar = lagFiskerLottBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-17"),
+                    tom = LocalDate.parse("2021-01-25"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+            settPerioderMedSammeVentetid("1", "2")
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+
+            result `should be equal to` false
+        }
+
+        @Test
+        fun `burde ikke telle FISKER hyre som tilsvarende NAERINGSDRIVENDE`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-10"),
+                brukerSvar = lagFiskerHyreBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-17"),
+                    tom = LocalDate.parse("2021-01-25"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+            settPerioderMedSammeVentetid("1", "2")
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+
+            result `should be equal to` true
         }
 
         @Test
@@ -103,20 +210,20 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     id = "1",
                     fom = LocalDate.parse("2021-01-05"),
                     tom = LocalDate.parse("2021-01-15"),
-                    brukerSvar = lagAnnetArbeidssituasjonBrukerSvar(),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
                 )
             lagreSykmelding(
                 id = "2",
                 fom = LocalDate.parse("2021-01-01"),
                 tom = LocalDate.parse("2021-01-10"),
-                brukerSvar = lagArbeidsledigBrukerSvar(),
+                brukerSvar = lagFrilanserBrukerSvar(),
             )
             settPerioderMedSammeVentetid("1", "2")
 
             val result =
                 sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
                     sykmelding = sykmelding,
-                    arbeidssituasjon = Arbeidssituasjon.ANNET,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
                 )
 
             result `should be equal to` true
