@@ -31,6 +31,12 @@ class SykmeldingVentetidService(
                 .ventetidPerioder
                 .map { it.ressursId }
 
+        if (sykmeldingerMedSammeVentetid.isEmpty()) {
+            throw RuntimeException(
+                "Fant ingen sykmeldinger med samme ventetid for ${sykmelding.sykmeldingId}, selv ikke sykmeldingen selv. Kanskje feil i flex-syketilfelle?",
+            )
+        }
+
         val tidligsteSykmelding =
             sykmeldingLeser
                 .hentAlleSykmeldingerFraIderFom(sykmeldingerMedSammeVentetid, sykmelding.fom.minusDays(VENTETID_ANTALL_DAGER))

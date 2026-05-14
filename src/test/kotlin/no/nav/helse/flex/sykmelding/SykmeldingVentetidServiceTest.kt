@@ -16,6 +16,7 @@ import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -38,6 +39,8 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
         fun `burde returnere true dersom ingen andre sykmeldinger har samme ventetid`() {
             val sykmelding = lagreSykmelding(id = "1")
 
+            settPerioderMedSammeVentetid("1")
+
             val result =
                 sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
                     sykmelding = sykmelding,
@@ -45,6 +48,18 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                 )
 
             result `should be equal to` true
+        }
+
+        @Test
+        fun `burde returnere kaste feil dersom ingen sykmeldinger har samme ventetid`() {
+            val sykmelding = lagreSykmelding(id = "1")
+
+            assertThrows<RuntimeException> {
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                )
+            }
         }
 
         @Test
