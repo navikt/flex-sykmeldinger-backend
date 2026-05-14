@@ -6,6 +6,8 @@ import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
+import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
+import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
@@ -908,17 +910,20 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde returnere true dersom det ikke finnes andre sykmeldinger med samme ventetid`() {
-            sykmeldingRepository.save(
+            val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
-                ),
+                ).also { sykmeldingRepository.save(it) }
+
+            syketilfelleClient.setPerioderMedSammeVentetid(
+                SammeVentetidResponse(listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom)))),
             )
 
             val result =
                 mockMvc
                     .perform(
                         MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/ANNET")
+                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/FRILANSER")
                             .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
                             .contentType(MediaType.APPLICATION_JSON),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
@@ -931,11 +936,11 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde få 404 når sykmeldingen ikke finnes`() =
-            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/ANNET" }
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/FRILANSER" }
 
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
-            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/ANNET" }
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/FRILANSER" }
     }
 
     @Nested
