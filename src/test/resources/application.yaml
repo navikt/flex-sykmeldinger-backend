@@ -10,7 +10,7 @@ aiven-kafka:
 
 spring:
   profiles:
-    active: test,testdata
+    active: test
   flyway:
     enabled: true
   datasource:
