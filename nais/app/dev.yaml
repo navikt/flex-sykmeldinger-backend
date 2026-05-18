@@ -15,7 +15,7 @@ external-host:
 flex-openapi-docs-ui: true
 flex_group_id: "34094735-b8f7-4bef-9136-47de2307541a" #0000-GA-TEMA_SYK
 env:
-  SPRING_PROFILES_ACTIVE: default,testdata
+  SPRING_PROFILES_ACTIVE: default
   PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
   PDL_API_AAD_CLIENT_ID: dev-fss.pdl.pdl-api
   DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID: dev-gcp:flex:ditt-sykefravaer
