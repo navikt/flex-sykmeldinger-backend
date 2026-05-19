@@ -144,8 +144,8 @@ class RestClientConfig {
         val connectionManager =
             PoolingHttpClientConnectionManagerBuilder
                 .create()
-                .setMaxConnTotal(100)
-                .setMaxConnPerRoute(50)
+                .setMaxConnTotal(200)
+                .setMaxConnPerRoute(120)
                 .setDefaultConnectionConfig(connectionConfig)
                 .build()
 
