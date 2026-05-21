@@ -71,6 +71,14 @@ no.nav.security.jwt:
           client-id: client-id
           client-secret: secretzz
           client-auth-method: client_secret_basic
+      sykepengesoknad-backend-tokenx:
+        token-endpoint-url: http://localhost:${mock-oauth2-server.port}/tokenx/token
+        grant-type: client_credentials
+        scope: sykepengesoknad-backend-api
+        authentication:
+          client-id: client-id
+          client-secret: secretzz
+          client-auth-method: client_secret_basic
 
 elector.get_url: dont_look_for_leader
 
@@ -79,3 +87,4 @@ AAREG_URL: "url"
 EREG_URL: "url"
 PDL_BASE_URL: "url"
 FLEX_SYKETILFELLE_URL: "url"
+SYKEPENGESOKNAD_BACKEND_URL: "url"

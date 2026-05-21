@@ -55,6 +55,9 @@ class FakesTestConfig {
     fun syketilfelleClient(): SyketilfelleClientFake = SyketilfelleClientFake()
 
     @Bean
+    fun sykepengesoknadBackendClient(): SykepengesoknadBackendClientFake = SykepengesoknadBackendClientFake()
+
+    @Bean
     fun sykmeldingBrukernotifikasjonProducer(): SykmeldingBrukernotifikasjonProducerFake = SykmeldingBrukernotifikasjonProducerFake()
 
     @Bean
