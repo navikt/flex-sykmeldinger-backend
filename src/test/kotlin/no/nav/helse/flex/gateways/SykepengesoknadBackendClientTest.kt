@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import java.util.concurrent.TimeUnit
 
 @RestClientOppsett
 @Import(SykepengesoknadBackendEksternClient::class)
@@ -88,6 +89,13 @@ class SykepengesoknadBackendClientTest {
                     .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
                     .addHeader("Content-Type", "application/json")
             }
+
+        // Tøm eventuelle tidligere forespørsler som ligger i køen, slik at
+        // takeRequest() returnerer requesten fra dette testkallet.
+        while (sykepengesoknadBackendMockWebServer.takeRequest(10, TimeUnit.MILLISECONDS) != null) {
+            // discard
+        }
+
         sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id")
 
         val request = sykepengesoknadBackendMockWebServer.takeRequest()
