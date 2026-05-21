@@ -9,6 +9,7 @@ import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
-import java.util.concurrent.TimeUnit
 
 @RestClientOppsett
 @Import(SykepengesoknadBackendEksternClient::class)
@@ -83,22 +83,18 @@ class SykepengesoknadBackendClientTest {
 
     @Test
     fun `burde sende riktig path`() {
+        var recordedRequest: RecordedRequest? = null
         sykepengesoknadBackendMockWebServer.dispatcher =
-            simpleDispatcher {
+            simpleDispatcher { request ->
+                recordedRequest = request
                 MockResponse()
                     .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
                     .addHeader("Content-Type", "application/json")
             }
 
-        // Tøm eventuelle tidligere forespørsler som ligger i køen, slik at
-        // takeRequest() returnerer requesten fra dette testkallet.
-        while (sykepengesoknadBackendMockWebServer.takeRequest(10, TimeUnit.MILLISECONDS) != null) {
-            // discard
-        }
-
         sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id")
 
-        val request = sykepengesoknadBackendMockWebServer.takeRequest()
+        val request = recordedRequest!!
         request.path `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad"
     }
 }
