@@ -10,10 +10,10 @@ import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
-import org.amshove.kluent.invoking
 import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

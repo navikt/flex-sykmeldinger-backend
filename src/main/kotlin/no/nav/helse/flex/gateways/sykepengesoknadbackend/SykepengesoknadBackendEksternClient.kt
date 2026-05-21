@@ -20,16 +20,14 @@ class SykepengesoknadBackendEksternClient(
                 .get()
                 .uri { uriBuilder ->
                     uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingUuid/harSoknad").build()
-                }
-                .retrieve()
+                }.retrieve()
                 .onStatus(HttpStatusCode::isError) { _, httpResponse ->
                     throw RuntimeException(
                         "Kall til harSoknad feilet med HTTP-${httpResponse.statusCode.value()} for sykmelding $sykmeldingUuid",
                     ).also {
                         log.error(it.message)
                     }
-                }
-                .toEntity<HarSoknadResponse>()
+                }.toEntity<HarSoknadResponse>()
 
         return response.body?.harSoknad
             ?: throw RuntimeException("harSoknad response inneholdt ikke data for sykmelding $sykmeldingUuid")
