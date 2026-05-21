@@ -13,6 +13,8 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should be true`
+import org.amshove.kluent.invoking
+import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,27 +60,41 @@ class SykepengesoknadBackendClientTest {
     }
 
     @Test
-    fun `burde returnere false ved 401`() {
+    fun `burde kaste feil ved 401`() {
         sykepengesoknadBackendMockWebServer.dispatcher =
             simpleDispatcher {
                 MockResponse()
                     .setResponseCode(HttpStatus.UNAUTHORIZED.value())
                     .addHeader("Content-Type", "application/json")
             }
-        val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
-        resultat.`should be false`()
+        invoking {
+            sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+        } `should throw` RuntimeException::class
     }
 
     @Test
-    fun `burde returnere false ved 403`() {
+    fun `burde kaste feil ved 403`() {
         sykepengesoknadBackendMockWebServer.dispatcher =
             simpleDispatcher {
                 MockResponse()
                     .setResponseCode(HttpStatus.FORBIDDEN.value())
                     .addHeader("Content-Type", "application/json")
             }
-        val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
-        resultat.`should be false`()
+        invoking {
+            sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+        } `should throw` RuntimeException::class
+    }
+
+    @Test
+    fun `burde kaste feil ved tom body`() {
+        sykepengesoknadBackendMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
+            }
+        invoking {
+            sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+        } `should throw` RuntimeException::class
     }
 
     @Test

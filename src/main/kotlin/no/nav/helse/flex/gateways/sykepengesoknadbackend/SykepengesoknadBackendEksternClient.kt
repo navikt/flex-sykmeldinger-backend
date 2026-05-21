@@ -22,18 +22,17 @@ class SykepengesoknadBackendEksternClient(
                     uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingUuid/harSoknad").build()
                 }
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError) { _, httpResponse ->
-                    when (httpResponse.statusCode.value()) {
-                        401 -> log.warn("Ugyldig token ved kall til harSoknad for sykmelding $sykmeldingUuid")
-                        403 -> log.warn("Søknaden tilhører annen bruker ved kall til harSoknad for sykmelding $sykmeldingUuid")
-                        else -> throw RuntimeException(
-                            "Uventet 4xx-feil (${httpResponse.statusCode.value()}) ved kall til harSoknad for sykmelding $sykmeldingUuid",
-                        )
+                .onStatus(HttpStatusCode::isError) { _, httpResponse ->
+                    throw RuntimeException(
+                        "Kall til harSoknad feilet med HTTP-${httpResponse.statusCode.value()} for sykmelding $sykmeldingUuid",
+                    ).also {
+                        log.error(it.message)
                     }
                 }
                 .toEntity<HarSoknadResponse>()
 
-        return response.body?.harSoknad ?: false
+        return response.body?.harSoknad
+            ?: throw RuntimeException("harSoknad response inneholdt ikke data for sykmelding $sykmeldingUuid")
     }
 }
 
