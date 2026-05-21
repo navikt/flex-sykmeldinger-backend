@@ -52,6 +52,7 @@ spec:
     outbound:
       rules:
         - application: flex-syketilfelle
+        - application: sykepengesoknad-backend
         - application: logging
           namespace: nais-system
       external:
