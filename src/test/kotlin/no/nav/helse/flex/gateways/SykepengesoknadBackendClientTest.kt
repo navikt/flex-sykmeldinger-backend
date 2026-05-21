@@ -10,11 +10,7 @@ import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should be true`
-import org.amshove.kluent.`should throw`
+import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -112,5 +108,22 @@ class SykepengesoknadBackendClientTest {
 
         val request = recordedRequest!!
         request.path `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad"
+    }
+
+    @Test
+    fun `burde sende bearer token i authorization header`() {
+        var recordedRequest: RecordedRequest? = null
+        sykepengesoknadBackendMockWebServer.dispatcher =
+            simpleDispatcher { request ->
+                recordedRequest = request
+                MockResponse()
+                    .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        sykepengesoknadBackendEksternClient.harSoknad("test-id")
+
+        val request = recordedRequest!!
+        request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
     }
 }

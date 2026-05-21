@@ -13,7 +13,7 @@ class SykepengesoknadBackendEksternClient(
 ) : SykepengesoknadBackendClient {
     val log = logger()
 
-    @Retryable
+    @Retryable(exclude = [SykepengesoknadBackendClientException::class])
     override fun harSoknad(sykmeldingUuid: String): Boolean {
         val response =
             sykepengesoknadBackendRestClient
@@ -22,9 +22,21 @@ class SykepengesoknadBackendEksternClient(
                     uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingUuid/harSoknad").build()
                 }.retrieve()
                 .onStatus(HttpStatusCode::isError) { _, httpResponse ->
-                    throw RuntimeException(
-                        "Kall til harSoknad feilet med HTTP-${httpResponse.statusCode.value()} for sykmelding $sykmeldingUuid",
-                    ).also {
+                    val exception =
+                        when {
+                            httpResponse.statusCode.is4xxClientError -> {
+                                SykepengesoknadBackendClientException(
+                                    "Kall til harSoknad feilet med HTTP-${httpResponse.statusCode.value()} for sykmelding $sykmeldingUuid",
+                                )
+                            }
+                            else -> {
+                                SykepengesoknadBackendServerException(
+                                    "Kall til harSoknad feilet med HTTP-${httpResponse.statusCode.value()} for sykmelding $sykmeldingUuid",
+                                )
+                            }
+                        }
+
+                    throw exception.also {
                         log.error(it.message)
                     }
                 }.toEntity<HarSoknadResponse>()
@@ -37,3 +49,11 @@ class SykepengesoknadBackendEksternClient(
 data class HarSoknadResponse(
     val harSoknad: Boolean,
 )
+
+private class SykepengesoknadBackendClientException(
+    message: String,
+) : RuntimeException(message)
+
+private class SykepengesoknadBackendServerException(
+    message: String,
+) : RuntimeException(message)
