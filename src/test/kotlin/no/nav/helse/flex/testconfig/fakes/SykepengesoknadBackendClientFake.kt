@@ -5,6 +5,13 @@ import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 
 class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
     val opprettOptInRequests = mutableListOf<SykmeldingKafkaMessage>()
+    private var harSoknadResponse: Boolean = false
+
+    override fun harSoknad(sykmeldingUuid: String): Boolean = harSoknadResponse
+
+    fun setHarSoknad(verdi: Boolean) {
+        harSoknadResponse = verdi
+    }
 
     override fun opprettOptIn(sykmeldingKafkaMessage: SykmeldingKafkaMessage) {
         opprettOptInRequests.add(sykmeldingKafkaMessage)
@@ -14,5 +21,6 @@ class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
 
     fun reset() {
         opprettOptInRequests.clear()
+        harSoknadResponse = false
     }
 }
