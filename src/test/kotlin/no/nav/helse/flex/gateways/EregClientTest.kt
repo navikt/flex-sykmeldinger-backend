@@ -3,6 +3,7 @@ package no.nav.helse.flex.gateways
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.gateways.ereg.EregClient
 import no.nav.helse.flex.gateways.ereg.EregEksternClient
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
@@ -88,6 +89,69 @@ class EregClientTest {
             eregEksternClient.hentNokkelinfo("suksess_uten_body_orgnummer")
         } `should throw` RuntimeException::class
     }
+
+    @Test
+    fun `hentOrganisasjoner burde kalle med riktig path`() {
+        var path: String? = null
+        var body: String? = null
+        eregMockWebServer.dispatcher =
+            simpleDispatcher { request ->
+                path = request.path
+                body = request.body.readUtf8()
+                MockResponse()
+                    .setBody(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        eregEksternClient.hentOrganisasjoner(listOf("123456789", "987654321"))
+
+        path `should be equal to` "/v2/organisasjon/hentOrganisasjoner"
+        val requestBody = objectMapper.readValue(body, HentOrganisasjonerRequest::class.java)
+        requestBody.organisasjonsnummere `should be equal to` listOf("123456789", "987654321")
+    }
+
+    @Test
+    fun `hentOrganisasjoner burde returnere organisasjoner`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setBody(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        val response = eregEksternClient.hentOrganisasjoner(listOf("990983666"))
+
+        response.organisasjoner.size `should be equal to` 1
+        response.organisasjoner["990983666"]!!.navn.sammensattnavn `should be equal to` "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+    }
+
+    @Test
+    fun `hentOrganisasjoner burde kaste feil ved error response`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_EREG.serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+                    .setResponseCode(500)
+            }
+
+        invoking {
+            eregEksternClient.hentOrganisasjoner(listOf("123"))
+        } `should throw` RestClientException::class
+    }
+
+    @Test
+    fun `hentOrganisasjoner burde kaste RuntimeException ved tom respons body`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        invoking {
+            eregEksternClient.hentOrganisasjoner(listOf("123"))
+        } `should throw` RuntimeException::class
+    }
 }
 
 val EKSEMPEL_ERROR_RESPONSE_FRA_EREG: JsonNode =
@@ -136,4 +200,21 @@ val EKSEMPEL_RESPONSE_FRA_EREG: JsonNode =
   "opphoersdato": "2016-12-31"
 }
 """,
+    )
+
+val EKSEMPEL_HENT_ORGANISASJONER_RESPONSE: JsonNode =
+    objectMapper.readTree(
+        """
+    {
+      "organisasjoner": {
+        "990983666": {
+          "navn": {
+            "sammensattnavn": "NAV FAMILIE- OG PENSJONSYTELSER OSL",
+            "navnelinje1": "NAV FAMILIE- OG PENSJONSYTELSER",
+            "navnelinje2": "OSL"
+          }
+        }
+      }
+    }
+    """,
     )

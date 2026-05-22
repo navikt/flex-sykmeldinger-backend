@@ -53,23 +53,34 @@ class EksternArbeidsforholdHenter(
                 }
             }
 
-        val eksterneArbeidsforhold =
+        val arbeidsforholdUnderenheter =
             result.arbeidsforholdoversikter
                 .filter { it.arbeidssted.type == ArbeidsstedType.Underenhet }
-                .map { arbeidsforholdOversikt ->
-                    val orgnummer = arbeidsforholdOversikt.arbeidssted.finnOrgnummer()
-                    val orgNokkelinfo = eregClient.hentNokkelinfo(orgnummer)
-                    val orgnavn = orgNokkelinfo.navn.sammensattnavn
-                    EksterntArbeidsforhold(
-                        navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
-                        orgnummer = orgnummer,
-                        juridiskOrgnummer = arbeidsforholdOversikt.opplysningspliktig.finnOrgnummer(),
-                        orgnavn = orgnavn,
-                        fom = arbeidsforholdOversikt.startdato,
-                        tom = arbeidsforholdOversikt.sluttdato,
-                        arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
-                    )
-                }
+
+        val orgnumre = arbeidsforholdUnderenheter.map { it.arbeidssted.finnOrgnummer() }.distinct()
+        val organisasjoner =
+            if (orgnumre.isNotEmpty()) {
+                eregClient.hentOrganisasjoner(orgnumre).organisasjoner
+            } else {
+                emptyMap()
+            }
+
+        val eksterneArbeidsforhold =
+            arbeidsforholdUnderenheter.map { arbeidsforholdOversikt ->
+                val orgnummer = arbeidsforholdOversikt.arbeidssted.finnOrgnummer()
+                val orgnavn =
+                    organisasjoner[orgnummer]?.navn?.sammensattnavn
+                        ?: throw RuntimeException("Fant ikke organisasjonsnavn for $orgnummer")
+                EksterntArbeidsforhold(
+                    navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
+                    orgnummer = orgnummer,
+                    juridiskOrgnummer = arbeidsforholdOversikt.opplysningspliktig.finnOrgnummer(),
+                    orgnavn = orgnavn,
+                    fom = arbeidsforholdOversikt.startdato,
+                    tom = arbeidsforholdOversikt.sluttdato,
+                    arbeidsforholdType = parseArbeidsforholdType(arbeidsforholdOversikt.type.kode),
+                )
+            }
         val identer =
             PersonIdenter(
                 originalIdent = fnr,

@@ -19,4 +19,18 @@ class EregEksternClient(
 
         return res ?: throw RuntimeException("hentNokkelinfo response inneholdt ikke data")
     }
+
+    @Retryable
+    override fun hentOrganisasjoner(orgnummere: List<String>): HentOrganisasjonerResponse {
+        val res =
+            eregRestClient
+                .post()
+                .uri { uriBuilder -> uriBuilder.path("/v2/organisasjon/hentOrganisasjoner").build() }
+                .body(HentOrganisasjonerRequest(orgnummere))
+                .retrieve()
+                .toEntity<HentOrganisasjonerResponse>()
+                .body
+
+        return res ?: throw RuntimeException("hentOrganisasjoner response inneholdt ikke data")
+    }
 }
