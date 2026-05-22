@@ -107,7 +107,7 @@ class EregClientTest {
 
         path `should be equal to` "/v2/organisasjon/hentOrganisasjoner"
         val requestBody = objectMapper.readValue(body, HentOrganisasjonerRequest::class.java)
-        requestBody.organisasjonsnumre `should be equal to` listOf("123456789", "987654321")
+        requestBody.organisasjonsnummere `should be equal to` listOf("123456789", "987654321")
     }
 
     @Test

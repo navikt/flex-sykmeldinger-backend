@@ -41,7 +41,7 @@ val defaultEregDispatcher =
         val response =
             HentOrganisasjonerResponse(
                 organisasjoner =
-                    body.organisasjonsnumre.associateWith {
+                    body.organisasjonsnummere.associateWith {
                         OrganisasjonInfo(Navn("Org Navn"))
                     },
             )

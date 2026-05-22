@@ -9,7 +9,7 @@ data class Navn(
 )
 
 data class HentOrganisasjonerRequest(
-    val organisasjonsnumre: List<String>,
+    val organisasjonsnummere: List<String>,
 )
 
 data class HentOrganisasjonerResponse(
