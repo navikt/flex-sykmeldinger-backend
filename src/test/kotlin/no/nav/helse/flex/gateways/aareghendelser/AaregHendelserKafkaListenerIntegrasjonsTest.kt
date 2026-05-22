@@ -1,7 +1,10 @@
 package no.nav.helse.flex.gateways.aareghendelser
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.gateways.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
+import no.nav.helse.flex.gateways.ereg.Navn
+import no.nav.helse.flex.gateways.ereg.OrganisasjonInfo
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
@@ -12,6 +15,7 @@ import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -52,9 +56,17 @@ class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
             }
 
         eregMockWebServer.dispatcher =
-            simpleDispatcher {
+            simpleDispatcher { request ->
+                val body = objectMapper.readValue(request.body.readUtf8(), HentOrganisasjonerRequest::class.java)
+                val response =
+                    HentOrganisasjonerResponse(
+                        organisasjoner =
+                            body.organisasjonsnumre.associateWith {
+                                OrganisasjonInfo(Navn("Org Navn"))
+                            },
+                    )
                 MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
+                    .setBody(response.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
             }
     }

@@ -7,3 +7,15 @@ data class Nokkelinfo(
 data class Navn(
     val sammensattnavn: String,
 )
+
+data class HentOrganisasjonerRequest(
+    val organisasjonsnumre: List<String>,
+)
+
+data class HentOrganisasjonerResponse(
+    val organisasjoner: Map<String, OrganisasjonInfo>,
+)
+
+data class OrganisasjonInfo(
+    val navn: Navn,
+)

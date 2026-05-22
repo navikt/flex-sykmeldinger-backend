@@ -2,8 +2,9 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.gateways.aareg.*
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
 import no.nav.helse.flex.gateways.ereg.Navn
-import no.nav.helse.flex.gateways.ereg.Nokkelinfo
+import no.nav.helse.flex.gateways.ereg.OrganisasjonInfo
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
@@ -115,13 +116,15 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
         aaregClient.setArbeidsforholdoversikt(
             arbeidsforhold = lagArbeidsforholdOversiktResponse(),
         )
-        eregClient.setNokkelinfo(
-            nokkelinfo = Nokkelinfo(Navn("Org Navn")),
+        eregClient.setHentOrganisasjonerResponse(
+            HentOrganisasjonerResponse(
+                organisasjoner = mapOf("910825518" to OrganisasjonInfo(Navn("Testbedriften AS"))),
+            ),
         )
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
         resultat.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            orgnavn `should be equal to` "Org Navn"
+            orgnavn `should be equal to` "Testbedriften AS"
         }
     }
 
