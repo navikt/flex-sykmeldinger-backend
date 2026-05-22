@@ -12,6 +12,8 @@ import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
+import no.nav.helse.flex.sykmeldinghendelse.ArbeidstakerBrukerSvar
+import no.nav.helse.flex.sykmeldinghendelse.FrilanserBrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SporsmalSvar
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
@@ -1080,11 +1082,43 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sykepengesoknadBackendClient.reset()
         }
 
+        private fun lagGyldigOptInSykmelding(
+            id: String = "1",
+            fnr: String = "fnr",
+            arbeidssituasjon: Arbeidssituasjon,
+        ) = lagSykmelding(
+            sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = id, pasient = lagPasient(fnr = fnr)),
+            hendelser =
+                listOf(
+                    lagSykmeldingHendelse(
+                        status = HendelseStatus.SENDT_TIL_NAV,
+                        brukerSvar =
+                            FrilanserBrukerSvar(
+                                erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "Er opplysningene riktige?", svar = true),
+                                arbeidssituasjon = SporsmalSvar(sporsmaltekst = "Arbeidssituasjon?", svar = arbeidssituasjon),
+                            ),
+                    ),
+                ),
+        )
+
         @Test
-        fun `burde kalle opprettOptIn og returnere 204`() {
-            sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
-            )
+        fun `burde kalle opprettOptIn for frilanser og returnere 204`() {
+            sykmeldingRepository.save(lagGyldigOptInSykmelding(arbeidssituasjon = Arbeidssituasjon.FRILANSER))
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNoContent)
+
+            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+        }
+
+        @Test
+        fun `burde kalle opprettOptIn for naeringsdrivende og returnere 204`() {
+            sykmeldingRepository.save(lagGyldigOptInSykmelding(arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE))
 
             mockMvc
                 .perform(
@@ -1099,9 +1133,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde videresende sykmeldingId i opprettOptIn-kallet`() {
-            sykmeldingRepository.save(
-                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
-            )
+            sykmeldingRepository.save(lagGyldigOptInSykmelding(arbeidssituasjon = Arbeidssituasjon.FRILANSER))
 
             mockMvc
                 .perform(
@@ -1114,6 +1146,95 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             val request = sykepengesoknadBackendClient.opprettOptInRequests.first()
             request.kafkaMetadata.sykmeldingId `should be equal to` "1"
             request.kafkaMetadata.fnr `should be equal to` "fnr"
+        }
+
+        @Test
+        fun `burde returnere 409 CONFLICT når status ikke er SENDT_TIL_NAV`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.APEN,
+                                brukerSvar =
+                                    FrilanserBrukerSvar(
+                                        erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "Er opplysningene riktige?", svar = true),
+                                        arbeidssituasjon =
+                                            SporsmalSvar(
+                                                sporsmaltekst = "Arbeidssituasjon?",
+                                                svar = Arbeidssituasjon.FRILANSER,
+                                            ),
+                                    ),
+                            ),
+                        ),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isConflict)
+        }
+
+        @Test
+        fun `burde returnere 409 CONFLICT når arbeidssituasjon er ARBEIDSTAKER`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_NAV,
+                                brukerSvar =
+                                    ArbeidstakerBrukerSvar(
+                                        erOpplysningeneRiktige = SporsmalSvar(sporsmaltekst = "Er opplysningene riktige?", svar = true),
+                                        arbeidssituasjon =
+                                            SporsmalSvar(
+                                                sporsmaltekst = "Arbeidssituasjon?",
+                                                svar = Arbeidssituasjon.ARBEIDSTAKER,
+                                            ),
+                                        arbeidsgiverOrgnummer = SporsmalSvar(sporsmaltekst = "Orgnummer?", svar = "123456789"),
+                                    ),
+                            ),
+                        ),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isConflict)
+        }
+
+        @Test
+        fun `burde returnere 409 CONFLICT når brukerSvar er null`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_NAV,
+                                brukerSvar = null,
+                            ),
+                        ),
+                ),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isConflict)
         }
 
         @Test

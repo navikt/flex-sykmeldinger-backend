@@ -18,6 +18,7 @@ import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmelding.SykmeldingVentetidService
+import no.nav.helse.flex.sykmelding.UgyldigOptinException
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
@@ -228,6 +229,19 @@ class SykmeldingController(
     ): ResponseEntity<Unit> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
         val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+        val sisteHendelse = sykmelding.sisteHendelse()
+
+        logger.info("Opt-in: Henter sykmelding ${sykmelding.sykmeldingId} med status ${sisteHendelse.status}")
+
+        if (sisteHendelse.status != HendelseStatus.SENDT_TIL_NAV) {
+            throw UgyldigOptinException("Opt-in: Sykmeldingen ${sykmelding.sykmeldingId} har feil status ${sisteHendelse.status}")
+        }
+
+        if (sisteHendelse.brukerSvar?.arbeidssituasjon?.svar !in setOf(Arbeidssituasjon.NAERINGSDRIVENDE, Arbeidssituasjon.FRILANSER)) {
+            throw UgyldigOptinException(
+                "Opt-in: Sykmeldingen ${sykmelding.sykmeldingId} har feil arbeidssituasjon ${sisteHendelse.brukerSvar?.arbeidssituasjon?.svar}",
+            )
+        }
 
         val sykmeldingDto = sykmeldingDtoKonverterer.konverter(sykmelding)
         val kafkaMetadata =
@@ -239,7 +253,7 @@ class SykmeldingController(
             )
         val event =
             SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                sykmeldingHendelse = sykmelding.sisteHendelse(),
+                sykmeldingHendelse = sisteHendelse,
                 sykmeldingId = sykmelding.sykmeldingId,
             )
         val sykmeldingKafkaMessage =
@@ -250,6 +264,7 @@ class SykmeldingController(
             )
 
         sykepengesoknadBackendClient.opprettOptIn(sykmeldingKafkaMessage)
+        logger.info("Opt-in: Opprettet søknad for sykmelding ${sykmelding.sykmeldingId}")
         return ResponseEntity.noContent().build()
     }
 
