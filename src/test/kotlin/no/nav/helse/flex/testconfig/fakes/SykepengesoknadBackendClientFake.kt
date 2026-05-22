@@ -1,17 +1,26 @@
 package no.nav.helse.flex.testconfig.fakes
 
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
+import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 
 class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
-    private var harSoknadResponse = false
+    val opprettOptInRequests = mutableListOf<SykmeldingKafkaMessage>()
+    private var harSoknadResponse: Boolean = false
 
     override fun harSoknad(sykmeldingUuid: String): Boolean = harSoknadResponse
 
-    fun setHarSoknad(harSoknad: Boolean) {
-        harSoknadResponse = harSoknad
+    fun setHarSoknad(verdi: Boolean) {
+        harSoknadResponse = verdi
     }
 
+    override fun opprettOptIn(sykmeldingKafkaMessage: SykmeldingKafkaMessage) {
+        opprettOptInRequests.add(sykmeldingKafkaMessage)
+    }
+
+    fun antallOpprettOptInKall(): Int = opprettOptInRequests.size
+
     fun reset() {
+        opprettOptInRequests.clear()
         harSoknadResponse = false
     }
 }
