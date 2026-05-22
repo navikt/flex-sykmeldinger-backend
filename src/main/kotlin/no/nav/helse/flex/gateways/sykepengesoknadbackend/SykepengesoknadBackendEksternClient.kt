@@ -71,8 +71,7 @@ class SykepengesoknadBackendEksternClient(
                 throw exception.also {
                     log.error(it.message)
                 }
-            }
-            .toEntity<Unit>()
+            }.toEntity<Unit>()
     }
 }
 
