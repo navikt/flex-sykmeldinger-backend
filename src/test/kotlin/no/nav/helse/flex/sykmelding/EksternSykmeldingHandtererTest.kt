@@ -4,8 +4,9 @@ import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
 import no.nav.helse.flex.gateways.ereg.Navn
-import no.nav.helse.flex.gateways.ereg.Nokkelinfo
+import no.nav.helse.flex.gateways.ereg.OrganisasjonInfo
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
@@ -165,15 +166,21 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `burde hente arbeidsforhold nar sykmelding lagres`() {
+    fun `burde hente arbeidsforhold nar sykmelding lagres selv om henting fra ereg feiler en gang`() {
         aaregClient.setArbeidsforholdoversikt(
             lagArbeidsforholdOversiktResponse(
                 listOf(lagArbeidsforholdOversikt(arbeidstakerIdenter = listOf("fnr"), arbeidsstedOrgnummer = "910825518")),
             ),
             "fnr",
         )
-        eregClient.setNokkelinfo(failure = RuntimeException())
-        eregClient.setNokkelinfo(nokkelinfo = Nokkelinfo(Navn("Org Navn")), orgnummer = "910825518")
+        eregClient.setHentOrganisasjonerResponse(
+            failure = RuntimeException(),
+        )
+        eregClient.setHentOrganisasjonerResponse(
+            HentOrganisasjonerResponse(
+                organisasjoner = mapOf("910825518" to OrganisasjonInfo(Navn("Testbedriften AS"))),
+            ),
+        )
 
         val sykmeldingMedBehandlingsutfall =
             EksternSykmeldingMelding(
@@ -185,7 +192,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
         arbeidsforhold.size `should be equal to` 1
-        arbeidsforhold.first().orgnavn `should be equal to` "Org Navn"
+        arbeidsforhold.first().orgnavn `should be equal to` "Testbedriften AS"
     }
 
     @Test

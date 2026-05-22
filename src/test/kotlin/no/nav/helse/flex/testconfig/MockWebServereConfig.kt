@@ -3,7 +3,10 @@ package no.nav.helse.flex.testconfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.micrometer.observation.ObservationRegistry
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
-import no.nav.helse.flex.gateways.EKSEMPEL_RESPONSE_FRA_EREG
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
+import no.nav.helse.flex.gateways.ereg.Navn
+import no.nav.helse.flex.gateways.ereg.OrganisasjonInfo
 import no.nav.helse.flex.gateways.pdl.GraphQlRequest
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
@@ -34,10 +37,18 @@ val defaultAaregDispatcher =
     }
 
 val defaultEregDispatcher =
-    simpleDispatcher {
+    simpleDispatcher { request ->
+        val body = objectMapper.readValue(request.body.readUtf8(), HentOrganisasjonerRequest::class.java)
+        val response =
+            HentOrganisasjonerResponse(
+                organisasjoner =
+                    body.organisasjonsnummere.associateWith {
+                        OrganisasjonInfo(Navn("Org Navn"))
+                    },
+            )
         MockResponse()
             .setHeader("Content-Type", "application/json")
-            .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
+            .setBody(response.serialisertTilString())
     }
 
 val defaultSyketilfelleDispatcher =

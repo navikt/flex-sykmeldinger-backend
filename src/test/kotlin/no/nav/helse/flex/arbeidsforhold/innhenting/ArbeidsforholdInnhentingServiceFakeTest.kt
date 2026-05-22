@@ -2,8 +2,9 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
+import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
 import no.nav.helse.flex.gateways.ereg.Navn
-import no.nav.helse.flex.gateways.ereg.Nokkelinfo
+import no.nav.helse.flex.gateways.ereg.OrganisasjonInfo
 import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
@@ -109,11 +110,10 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             ),
             fnr = "fnr",
         )
-        eregClientFake.setNokkelinfo(
-            Nokkelinfo(
-                navn = Navn("Orgnavn"),
+        eregClientFake.setHentOrganisasjonerResponse(
+            HentOrganisasjonerResponse(
+                organisasjoner = mapOf("orgnummer" to OrganisasjonInfo(Navn("Testbedriften AS"))),
             ),
-            orgnummer = "orgnummer",
         )
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
         arbeidsforholdRepository
@@ -123,7 +123,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 fnr shouldBeEqualTo "fnr"
                 orgnummer shouldBeEqualTo "orgnummer"
                 juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
-                orgnavn shouldBeEqualTo "Orgnavn"
+                orgnavn shouldBeEqualTo "Testbedriften AS"
                 arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
                 fom shouldBeEqualTo LocalDate.parse("2020-01-01")
                 tom shouldBeEqualTo null
@@ -160,11 +160,10 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             ),
             fnr = "fnr",
         )
-        eregClientFake.setNokkelinfo(
-            Nokkelinfo(
-                navn = Navn("Orgnavn-2"),
+        eregClientFake.setHentOrganisasjonerResponse(
+            HentOrganisasjonerResponse(
+                organisasjoner = mapOf("orgnummer-2" to OrganisasjonInfo(Navn("Oppdatert Bedrift AS"))),
             ),
-            orgnummer = "orgnummer-2",
         )
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("fnr")
         arbeidsforholdRepository
@@ -174,7 +173,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                 fnr shouldBeEqualTo "fnr"
                 orgnummer shouldBeEqualTo "orgnummer-2"
                 juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer-2"
-                orgnavn shouldBeEqualTo "Orgnavn-2"
+                orgnavn shouldBeEqualTo "Oppdatert Bedrift AS"
                 arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
                 fom shouldBeEqualTo LocalDate.parse("2020-01-02")
                 tom shouldBeEqualTo null
