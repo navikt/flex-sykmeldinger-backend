@@ -121,6 +121,27 @@ class RestClientConfig {
     }
 
     @Bean
+    fun sykepengesoknadBackendRestClient(
+        @Value("\${SYKEPENGESOKNAD_BACKEND_URL}") url: String,
+        oAuth2AccessTokenService: OAuth2AccessTokenService,
+        clientConfigurationProperties: ClientConfigurationProperties,
+        requestFactory: HttpComponentsClientHttpRequestFactory,
+        observationRegistry: ObservationRegistry,
+    ): RestClient {
+        val clientProperties =
+            clientConfigurationProperties.registration["sykepengesoknad-backend-tokenx"]
+                ?: throw RuntimeException("Fant ikke config for sykepengesoknad-backend-tokenx.")
+
+        return RestClient
+            .builder()
+            .baseUrl(url)
+            .requestFactory(requestFactory)
+            .observationRegistry(observationRegistry)
+            .requestInterceptor(BearerTokenInterceptor(oAuth2AccessTokenService, clientProperties))
+            .build()
+    }
+
+    @Bean
     fun texasRestClient(
         @Value($$"${NAIS_TOKEN_INTROSPECTION_ENDPOINT}") url: String,
         requestFactory: HttpComponentsClientHttpRequestFactory,
