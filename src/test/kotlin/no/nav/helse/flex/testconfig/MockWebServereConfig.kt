@@ -11,6 +11,7 @@ import no.nav.helse.flex.gateways.pdl.GraphQlRequest
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
+import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
@@ -85,6 +86,13 @@ val defaultPdlDispatcher =
         }
     }
 
+val defaultSykepengesoknadBackendDispatcher =
+    simpleDispatcher {
+        MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody(HarSoknadResponse(harSoknad = false).serialisertTilString())
+    }
+
 @TestConfiguration
 class MockWebServereConfig {
     @Bean
@@ -101,6 +109,9 @@ class MockWebServereConfig {
 
     @Bean
     fun syketilfelleMockWebServer() = syketilfelleMockWebServer
+
+    @Bean
+    fun sykepengesoknadBackendMockWebServer() = sykepengesoknadBackendMockWebServer
 
     companion object {
         val logger = logger()
@@ -129,11 +140,17 @@ class MockWebServereConfig {
                 dispatcher = defaultSyketilfelleDispatcher
             }
 
+        val sykepengesoknadBackendMockWebServer =
+            MockWebServer().apply {
+                dispatcher = defaultSykepengesoknadBackendDispatcher
+            }
+
         init {
             System.setProperty("PDL_BASE_URL", "http://localhost:${pdlMockWebServer.port}")
             System.setProperty("AAREG_URL", "http://localhost:${aaregMockWebServer.port}")
             System.setProperty("EREG_URL", "http://localhost:${eregMockWebServer.port}")
             System.setProperty("FLEX_SYKETILFELLE_URL", "http://localhost:${syketilfelleMockWebServer.port}")
+            System.setProperty("SYKEPENGESOKNAD_BACKEND_URL", "http://localhost:${sykepengesoknadBackendMockWebServer.port}")
         }
     }
 }

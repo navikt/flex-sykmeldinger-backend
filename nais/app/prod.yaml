@@ -29,5 +29,7 @@ env:
   AAREG_AAD_CLIENT_ID: prod-fss.arbeidsforhold.aareg-services-nais
   FLEX_SYKETILFELLE_URL: http://flex-syketilfelle
   FLEX_SYKETILFELLE_TOKENX_CLIENT_ID: prod-gcp:flex:flex-syketilfelle
+  SYKEPENGESOKNAD_BACKEND_URL: http://sykepengesoknad-backend
+  SYKEPENGESOKNAD_BACKEND_TOKENX_CLIENT_ID: prod-gcp:flex:sykepengesoknad-backend
   FLEX_GROUP_ID: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
   MAX_DB_CONNECTIONS: 50
