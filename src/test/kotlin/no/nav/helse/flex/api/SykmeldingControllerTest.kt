@@ -828,8 +828,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             syketilfelleClient.setErUtenforVentetid(
                 ErUtenforVentetidResponse(
                     erUtenforVentetid = true,
-                    oppfolgingsdato = LocalDate.parse("2025-01-01"),
-                    ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
                 ),
             )
 

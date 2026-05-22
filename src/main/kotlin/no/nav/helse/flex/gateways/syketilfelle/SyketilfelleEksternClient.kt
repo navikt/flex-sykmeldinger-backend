@@ -42,8 +42,6 @@ class SyketilfelleEksternClient(
 
 data class ErUtenforVentetidResponse(
     val erUtenforVentetid: Boolean,
-    val oppfolgingsdato: LocalDate?,
-    val ventetid: FomTomPeriode? = null,
 )
 
 data class FomTomPeriode(
