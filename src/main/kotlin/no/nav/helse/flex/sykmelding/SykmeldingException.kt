@@ -14,3 +14,8 @@ open class SykmeldingErIkkeDinException(
     message: String,
     cause: Throwable? = null,
 ) : SykmeldingException(message, cause)
+
+open class UgyldigOptinException(
+    message: String,
+    cause: Throwable? = null,
+) : RuntimeException(message, cause)

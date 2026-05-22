@@ -3,6 +3,7 @@ package no.nav.helse.flex.api
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.SykmeldingIkkeFunnetException
+import no.nav.helse.flex.sykmelding.UgyldigOptinException
 import no.nav.helse.flex.sykmeldinghendelse.KunneIkkeFinneTilleggsinfoException
 import no.nav.helse.flex.sykmeldinghendelse.UgyldigSykmeldingStatusException
 import no.nav.helse.flex.utils.logger
@@ -37,6 +38,7 @@ class GlobalExceptionHandler {
             is SykmeldingIkkeFunnetException -> skapResponseEntity(HttpStatus.NOT_FOUND)
             is SykmeldingErIkkeDinException -> skapResponseEntity(HttpStatus.FORBIDDEN)
             is UgyldigSykmeldingStatusException -> skapResponseEntity(HttpStatus.CONFLICT)
+            is UgyldigOptinException -> skapResponseEntity(HttpStatus.CONFLICT)
             is JwtTokenInvalidClaimException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is JwtTokenUnauthorizedException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is HttpMediaTypeNotAcceptableException -> skapResponseEntity(HttpStatus.NOT_ACCEPTABLE)
