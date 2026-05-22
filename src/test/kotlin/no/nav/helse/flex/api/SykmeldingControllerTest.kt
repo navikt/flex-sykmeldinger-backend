@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
+import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
@@ -15,6 +16,7 @@ import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SporsmalSvar
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.SykepengesoknadBackendClientFake
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
@@ -52,6 +54,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
     @Autowired
     lateinit var syketilfelleClient: SyketilfelleClientFake
+
+    @Autowired
+    lateinit var sykepengesoknadBackendClient: SykepengesoknadBackendClientFake
 
     @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
     lateinit var dittSykefravaerFrontendClientId: String
@@ -993,6 +998,147 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 orgnummer shouldBeEqualTo "orgnr"
                 orgNavn shouldBeEqualTo "Navn"
             }
+        }
+    }
+
+    @Nested
+    inner class HarSoknadEndepunkt {
+        @AfterEach
+        fun reset() {
+            sykepengesoknadBackendClient.reset()
+        }
+
+        @Test
+        fun `burde returnere harSoknad fra sykepengesoknad-backend`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+            sykepengesoknadBackendClient.setHarSoknad(true)
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/har-soknad")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val response: HarSoknadResponse = objectMapper.readValue(result)
+            response.harSoknad `should be equal to` true
+        }
+
+        @Test
+        fun `burde returnere false om søknad ikke finnes`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+            sykepengesoknadBackendClient.setHarSoknad(false)
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/har-soknad")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val response: HarSoknadResponse = objectMapper.readValue(result)
+            response.harSoknad `should be equal to` false
+        }
+
+        @Test
+        fun `burde returnere 404 om sykmelding ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/har-soknad" }
+
+        @Test
+        fun `burde returnere 403 for feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/har-soknad" }
+
+        @Test
+        fun `burde avvise kall fra sykepengesoknad client-id`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+            sjekkStatus(
+                url = "/api/v1/sykmeldinger/1/har-soknad",
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = sykepengesoknadClientId),
+                expectedStatus = HttpStatus.FORBIDDEN,
+            )
+        }
+    }
+
+    @Nested
+    inner class OptInEndepunkt {
+        @AfterEach
+        fun reset() {
+            sykepengesoknadBackendClient.reset()
+        }
+
+        @Test
+        fun `burde kalle opprettOptIn og returnere 204`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNoContent)
+
+            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+        }
+
+        @Test
+        fun `burde videresende sykmeldingId i opprettOptIn-kallet`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+
+            mockMvc
+                .perform(
+                    MockMvcRequestBuilders
+                        .post("/api/v1/sykmeldinger/1/opt-in")
+                        .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                        .contentType(MediaType.APPLICATION_JSON),
+                ).andExpect(MockMvcResultMatchers.status().isNoContent)
+
+            val request = sykepengesoknadBackendClient.opprettOptInRequests.first()
+            request.kafkaMetadata.sykmeldingId `should be equal to` "1"
+            request.kafkaMetadata.fnr `should be equal to` "fnr"
+        }
+
+        @Test
+        fun `burde returnere 404 om sykmelding ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes(
+                httpMethod = HttpMethod.POST,
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/opt-in" }
+
+        @Test
+        fun `burde returnere 403 for feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
+                httpMethod = HttpMethod.POST,
+            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/opt-in" }
+
+        @Test
+        fun `burde avvise kall fra sykepengesoknad client-id`() {
+            sykmeldingRepository.save(
+                lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
+            )
+            sjekkStatus(
+                url = "/api/v1/sykmeldinger/1/opt-in",
+                httpMethod = HttpMethod.POST,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = sykepengesoknadClientId),
+                expectedStatus = HttpStatus.FORBIDDEN,
+            )
         }
     }
 

@@ -7,23 +7,30 @@ import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
+import no.nav.helse.flex.gateways.KafkaMetadataDTO
+import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
+import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmelding.SykmeldingVentetidService
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
+import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
+import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.OffsetDateTime
 
 @RestController
 class SykmeldingController(
@@ -41,6 +48,7 @@ class SykmeldingController(
     @param:Value("\${SYKEPENGESOKNAD_CLIENT_ID}")
     private val sykepengesoknadClientId: String,
     private val sykmeldingVentetidService: SykmeldingVentetidService,
+    private val sykepengesoknadBackendClient: SykepengesoknadBackendClient,
 ) {
     private val logger = logger()
 
@@ -191,6 +199,58 @@ class SykmeldingController(
             )
 
         return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding))
+    }
+
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/har-soknad")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun getHarSoknad(
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<HarSoknadResponse> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+        sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val harSoknad = sykepengesoknadBackendClient.harSoknad(sykmeldingId)
+        return ResponseEntity.ok(HarSoknadResponse(harSoknad = harSoknad))
+    }
+
+    @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/opt-in")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun postOptIn(
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+    ): ResponseEntity<Unit> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val sykmeldingDto = sykmeldingDtoKonverterer.konverter(sykmelding)
+        val kafkaMetadata =
+            KafkaMetadataDTO(
+                sykmeldingId = sykmelding.sykmeldingId,
+                timestamp = OffsetDateTime.now(),
+                fnr = sykmelding.pasientFnr,
+                source = SYKMELDINGSTATUS_LEESAH_SOURCE,
+            )
+        val event =
+            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                sykmeldingHendelse = sykmelding.sisteHendelse(),
+                sykmeldingId = sykmelding.sykmeldingId,
+            )
+        val sykmeldingKafkaMessage =
+            SykmeldingKafkaMessage(
+                kafkaMetadata = kafkaMetadata,
+                event = event,
+                sykmelding = sykmeldingDto,
+            )
+
+        sykepengesoknadBackendClient.opprettOptIn(sykmeldingKafkaMessage)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/send")
