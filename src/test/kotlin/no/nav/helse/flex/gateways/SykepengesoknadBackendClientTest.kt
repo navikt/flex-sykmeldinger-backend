@@ -217,4 +217,21 @@ class SykepengesoknadBackendClientTest {
             request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
     }
+
+    @Test
+    fun `burde sende bearer token i authorization header`() {
+        var recordedRequest: RecordedRequest? = null
+        sykepengesoknadBackendMockWebServer.dispatcher =
+            simpleDispatcher { request ->
+                recordedRequest = request
+                MockResponse()
+                    .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                    .addHeader("Content-Type", "application/json")
+            }
+
+        sykepengesoknadBackendEksternClient.harSoknad("test-id")
+
+        val request = recordedRequest!!
+        request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
+    }
 }
