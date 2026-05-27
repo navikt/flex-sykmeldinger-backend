@@ -13,17 +13,8 @@ import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendC
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
-import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
-import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
-import no.nav.helse.flex.sykmelding.SykmeldingLeser
-import no.nav.helse.flex.sykmelding.SykmeldingVentetidService
-import no.nav.helse.flex.sykmelding.UgyldigOptinException
-import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
-import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
-import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
-import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
-import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
+import no.nav.helse.flex.sykmelding.*
+import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -225,7 +216,7 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun postOptIn(
-        @PathVariable("sykmeldingId") sykmeldingId: String,
+        @PathVariable sykmeldingId: String,
     ): ResponseEntity<Unit> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
         val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
