@@ -16,6 +16,7 @@ import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.function.Supplier
 
 @Service
@@ -35,13 +36,13 @@ class SykmeldingOptInService(
 
         val sisteHendelse = sykmelding.sisteHendelse()
         logger.info("Opt-in: Henter sykmelding ${sykmelding.sykmeldingId} med status ${sisteHendelse.status}")
-        validerOptInKanUtføres(sykmelding, sisteHendelse)
+        validerOptInKanUtfores(sykmelding, sisteHendelse)
 
         sykepengesoknadBackendClient.opprettOptIn(lagOptInMelding(sykmelding, sisteHendelse))
         logger.info("Opt-in: Opprettet søknad for sykmelding ${sykmelding.sykmeldingId}")
     }
 
-    private fun validerOptInKanUtføres(
+    private fun validerOptInKanUtfores(
         sykmelding: Sykmelding,
         sisteHendelse: SykmeldingHendelse,
     ) {
@@ -64,7 +65,7 @@ class SykmeldingOptInService(
             kafkaMetadata =
                 KafkaMetadataDTO(
                     sykmeldingId = sykmelding.sykmeldingId,
-                    timestamp = OffsetDateTime.ofInstant(nowFactory.get(), java.time.ZoneOffset.UTC),
+                    timestamp = OffsetDateTime.ofInstant(nowFactory.get(), ZoneOffset.UTC),
                     fnr = sykmelding.pasientFnr,
                     source = SYKMELDINGSTATUS_LEESAH_SOURCE,
                 ),

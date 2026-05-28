@@ -204,7 +204,7 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getHarSoknad(
-        @PathVariable("sykmeldingId") sykmeldingId: String,
+        @PathVariable sykmeldingId: String,
     ): ResponseEntity<HarSoknadResponse> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
         sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
