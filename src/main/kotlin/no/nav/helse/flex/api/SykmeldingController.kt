@@ -7,7 +7,6 @@ import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
-import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
 import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
@@ -15,23 +14,18 @@ import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
-import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmelding.SykmeldingVentetidService
-import no.nav.helse.flex.sykmelding.UgyldigOptinException
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
-import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.OffsetDateTime
 
 @RestController
 class SykmeldingController(
@@ -50,6 +44,7 @@ class SykmeldingController(
     private val sykepengesoknadClientId: String,
     private val sykmeldingVentetidService: SykmeldingVentetidService,
     private val sykepengesoknadBackendClient: SykepengesoknadBackendClient,
+    private val sykmeldingOptInService: SykmeldingOptInService,
 ) {
     private val logger = logger()
 
@@ -209,7 +204,7 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun getHarSoknad(
-        @PathVariable("sykmeldingId") sykmeldingId: String,
+        @PathVariable sykmeldingId: String,
     ): ResponseEntity<HarSoknadResponse> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
         sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
@@ -225,46 +220,10 @@ class SykmeldingController(
         claimMap = ["acr=Level4", "acr=idporten-loa-high"],
     )
     fun postOptIn(
-        @PathVariable("sykmeldingId") sykmeldingId: String,
+        @PathVariable sykmeldingId: String,
     ): ResponseEntity<Unit> {
         val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
-        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
-        val sisteHendelse = sykmelding.sisteHendelse()
-
-        logger.info("Opt-in: Henter sykmelding ${sykmelding.sykmeldingId} med status ${sisteHendelse.status}")
-
-        if (sisteHendelse.status != HendelseStatus.SENDT_TIL_NAV) {
-            throw UgyldigOptinException("Opt-in: Sykmeldingen ${sykmelding.sykmeldingId} har feil status ${sisteHendelse.status}")
-        }
-
-        if (sisteHendelse.brukerSvar?.arbeidssituasjon?.svar !in setOf(Arbeidssituasjon.NAERINGSDRIVENDE, Arbeidssituasjon.FRILANSER)) {
-            throw UgyldigOptinException(
-                "Opt-in: Sykmeldingen ${sykmelding.sykmeldingId} har feil arbeidssituasjon ${sisteHendelse.brukerSvar?.arbeidssituasjon?.svar}",
-            )
-        }
-
-        val sykmeldingDto = sykmeldingDtoKonverterer.konverter(sykmelding)
-        val kafkaMetadata =
-            KafkaMetadataDTO(
-                sykmeldingId = sykmelding.sykmeldingId,
-                timestamp = OffsetDateTime.now(),
-                fnr = sykmelding.pasientFnr,
-                source = SYKMELDINGSTATUS_LEESAH_SOURCE,
-            )
-        val event =
-            SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                sykmeldingHendelse = sisteHendelse,
-                sykmeldingId = sykmelding.sykmeldingId,
-            )
-        val sykmeldingKafkaMessage =
-            SykmeldingKafkaMessage(
-                kafkaMetadata = kafkaMetadata,
-                event = event,
-                sykmelding = sykmeldingDto,
-            )
-
-        sykepengesoknadBackendClient.opprettOptIn(sykmeldingKafkaMessage)
-        logger.info("Opt-in: Opprettet søknad for sykmelding ${sykmelding.sykmeldingId}")
+        sykmeldingOptInService.behandleOptIn(sykmeldingId = sykmeldingId, identer = identer)
         return ResponseEntity.noContent().build()
     }
 

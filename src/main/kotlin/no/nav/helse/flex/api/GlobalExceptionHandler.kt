@@ -29,10 +29,8 @@ class GlobalExceptionHandler {
                 when (ex.loglevel) {
                     LogLevel.WARN -> log.warn(ex.message, ex)
                     LogLevel.ERROR -> log.error(ex.message, ex)
-                    LogLevel.OFF -> {
-                    }
+                    LogLevel.OFF -> {}
                 }
-
                 ResponseEntity(ApiError(ex.reason), ex.httpStatus)
             }
             is SykmeldingIkkeFunnetException -> skapResponseEntity(HttpStatus.NOT_FOUND)

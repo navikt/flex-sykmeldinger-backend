@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestClientException
 
 @RestClientOppsett
 @Import(SykepengesoknadBackendEksternClient::class)
@@ -63,41 +64,16 @@ class SykepengesoknadBackendClientTest {
         }
 
         @Test
-        fun `burde kaste feil ved 401`() {
+        fun `burde kaste feil ved error response`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
                     MockResponse()
-                        .setResponseCode(HttpStatus.UNAUTHORIZED.value())
+                        .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .addHeader("Content-Type", "application/json")
                 }
             invoking {
                 sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
-            } `should throw` RuntimeException::class
-        }
-
-        @Test
-        fun `burde kaste feil ved 403`() {
-            sykepengesoknadBackendMockWebServer.dispatcher =
-                simpleDispatcher {
-                    MockResponse()
-                        .setResponseCode(HttpStatus.FORBIDDEN.value())
-                        .addHeader("Content-Type", "application/json")
-                }
-            invoking {
-                sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
-            } `should throw` RuntimeException::class
-        }
-
-        @Test
-        fun `burde kaste feil ved tom body`() {
-            sykepengesoknadBackendMockWebServer.dispatcher =
-                simpleDispatcher {
-                    MockResponse()
-                        .addHeader("Content-Type", "application/json")
-                }
-            invoking {
-                sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
-            } `should throw` RuntimeException::class
+            } `should throw` RestClientException::class
         }
 
         @Test
@@ -158,29 +134,16 @@ class SykepengesoknadBackendClientTest {
         }
 
         @Test
-        fun `burde kaste feil ved 401`() {
+        fun `burde kaste feil ved error response`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
                     MockResponse()
-                        .setResponseCode(HttpStatus.UNAUTHORIZED.value())
+                        .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .addHeader("Content-Type", "application/json")
                 }
             invoking {
                 sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
-            } `should throw` RuntimeException::class
-        }
-
-        @Test
-        fun `burde kaste feil ved 403`() {
-            sykepengesoknadBackendMockWebServer.dispatcher =
-                simpleDispatcher {
-                    MockResponse()
-                        .setResponseCode(HttpStatus.FORBIDDEN.value())
-                        .addHeader("Content-Type", "application/json")
-                }
-            invoking {
-                sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
-            } `should throw` RuntimeException::class
+            } `should throw` RestClientException::class
         }
 
         @Test

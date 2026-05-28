@@ -7,7 +7,7 @@ class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
     val opprettOptInRequests = mutableListOf<SykmeldingKafkaMessage>()
     private var harSoknadResponse: Boolean = false
 
-    override fun harSoknad(sykmeldingUuid: String): Boolean = harSoknadResponse
+    override fun harSoknad(sykmeldingId: String): Boolean = harSoknadResponse
 
     fun setHarSoknad(verdi: Boolean) {
         harSoknadResponse = verdi
