@@ -13,7 +13,9 @@ import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
+import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatException
 import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
+import no.nav.helse.flex.utils.logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -29,6 +31,8 @@ class SykmeldingTexasController(
     private val identService: IdentService,
     private val auditLogProducer: AuditLogProducer,
 ) {
+    private val log = logger()
+
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
     fun hentSykmeldingerKafkaMessage(
@@ -52,7 +56,7 @@ class SykmeldingTexasController(
             )
 
         val sykmeldingDtoer =
-            sykmeldinger.map {
+            sykmeldinger.mapNotNull {
                 val sykmeldingDTO =
                     SykmeldingDtoRegler
                         .skjermForPasientDersomSpesifisert(sykmeldingDtoKonverterer.konverter(it))
@@ -76,10 +80,15 @@ class SykmeldingTexasController(
                         source = SYKMELDINGSTATUS_LEESAH_SOURCE,
                     )
                 val event =
-                    SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingHendelse = it.sisteHendelse(),
-                        sykmeldingId = it.sykmeldingId,
-                    )
+                    try {
+                        SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
+                            sykmeldingHendelse = it.sisteHendelse(),
+                            sykmeldingId = it.sykmeldingId,
+                        )
+                    } catch (e: UtdatertFormatException) {
+                        log.warn("Hopper over: ${e.message}", e)
+                        return@mapNotNull null
+                    }
                 SykmeldingKafkaMessage(
                     kafkaMetadata = kafkaMetadata,
                     event = event,

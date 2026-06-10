@@ -57,11 +57,15 @@ object SykmeldingHendelseTilKafkaKonverterer {
         requireNotNull(hendelse.brukerSvar) {
             "BrukerSvar kan ikke være null for hendelsestatus ${hendelse.status}. For sykmelding: $sykmeldingId"
         }
-        require(hendelse.brukerSvar !is UtdatertFormatBrukerSvar) {
-            "UtdatertFormatBrukerSvar er ikke støttet. For sykmelding: $sykmeldingId"
+        if (hendelse.brukerSvar is UtdatertFormatBrukerSvar) {
+            throw UtdatertFormatException(
+                "UtdatertFormatBrukerSvar er ikke støttet. For sykmelding: $sykmeldingId",
+            )
         }
-        require(hendelse.tilleggsinfo !is UtdatertFormatTilleggsinfo) {
-            "UtdatertFormatTilleggsinfo er ikke støttet. For sykmelding: $sykmeldingId"
+        if (hendelse.tilleggsinfo is UtdatertFormatTilleggsinfo) {
+            throw UtdatertFormatException(
+                "UtdatertFormatTilleggsinfo er ikke støttet. For sykmelding: $sykmeldingId",
+            )
         }
 
         val arbeidsgiver: Arbeidsgiver? =

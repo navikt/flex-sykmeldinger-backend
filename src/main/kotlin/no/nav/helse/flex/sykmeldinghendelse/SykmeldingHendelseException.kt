@@ -14,3 +14,8 @@ open class KunneIkkeFinneTilleggsinfoException(
     message: String,
     cause: Throwable? = null,
 ) : SykmeldingHendelseException(message, cause)
+
+open class UtdatertFormatException(
+    message: String,
+    cause: Throwable? = null,
+) : IllegalArgumentException(message, cause)

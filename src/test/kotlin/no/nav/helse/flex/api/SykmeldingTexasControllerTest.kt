@@ -4,11 +4,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.sykmelding.tsm.RuleType
+import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
+import no.nav.helse.flex.testdata.lagArbeidstakerBrukerSvar
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
+import no.nav.helse.flex.testdata.lagSykmeldingHendelse
+import no.nav.helse.flex.testdata.lagUtdatertFormatBrukerSvar
+import no.nav.helse.flex.testdata.lagUtdatertFormatTilleggsinfo
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -138,6 +143,79 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                 )
 
             respons.sykmeldinger `should be equal to` emptyList()
+        }
+
+        @Test
+        fun `burde hoppe over sykmelding med utdatert brukersvar format`() {
+            val utdatertSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        hendelser =
+                            listOf(
+                                lagSykmeldingHendelse(
+                                    status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                                    brukerSvar = lagUtdatertFormatBrukerSvar(),
+                                ),
+                            ),
+                    ),
+                )
+            val gyldigSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")),
+                )
+
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = url,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content =
+                        SykmeldingerKafkaMessageRequest(
+                            listOf(utdatertSykmelding.sykmeldingId, gyldigSykmelding.sykmeldingId),
+                        ),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .sykmelding.id `should be equal to` gyldigSykmelding.sykmeldingId
+        }
+
+        @Test
+        fun `burde hoppe over sykmelding med utdatert tilleggsinfo format`() {
+            val utdatertSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        hendelser =
+                            listOf(
+                                lagSykmeldingHendelse(
+                                    status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                                    brukerSvar = lagArbeidstakerBrukerSvar(),
+                                    tilleggsinfo = lagUtdatertFormatTilleggsinfo(),
+                                ),
+                            ),
+                    ),
+                )
+            val gyldigSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")),
+                )
+
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = url,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content =
+                        SykmeldingerKafkaMessageRequest(
+                            listOf(utdatertSykmelding.sykmeldingId, gyldigSykmelding.sykmeldingId),
+                        ),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .sykmelding.id `should be equal to` gyldigSykmelding.sykmeldingId
         }
     }
 
