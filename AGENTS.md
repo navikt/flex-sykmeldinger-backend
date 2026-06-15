@@ -69,6 +69,14 @@ gh pr create --fill
 - Aldri hardkode hemmeligheter eller credentials
 - Aldri commit med rød format/test/build
 
+## 7) Verktøypreferanser
+
+- Foretrekk **IntelliJ MCP** (`com-jetbrains-intellij-*`) for søk og teksterstatning i kode
+- Bruk `search_in_files_by_text`/`search_in_files_by_regex` fremfor grep/ripgrep
+- Bruk `replace_text_in_file` fremfor manuell redigering der mulig
+- Bruk `find_files_by_glob`/`find_files_by_name_keyword` fremfor shell-basert filsøk
+- IntelliJ MCP skal alltid være tilgjengelig i dette repoet
+
 ## Når du trenger mer kontekst
 
 - `README.md` - prosjektformål og dataflyt
