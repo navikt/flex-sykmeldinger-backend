@@ -28,7 +28,6 @@ data class SykmeldingDTO(
     val navnFastlege: String?,
     val egenmeldt: Boolean,
     val papirsykmelding: Boolean,
-    val harRedusertArbeidsgiverperiode: Boolean,
     val merknader: List<MerknadDTO>?,
     val signaturDato: OffsetDateTime?,
     val rulesetVersion: String?,

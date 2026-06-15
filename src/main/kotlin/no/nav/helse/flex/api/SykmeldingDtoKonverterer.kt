@@ -55,13 +55,6 @@ class SykmeldingDtoKonverterer(
             navnFastlege = sykmelding.sykmeldingGrunnlag.pasient.navnFastlege,
             egenmeldt = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.EGENMELDT,
             papirsykmelding = sykmelding.avsenderSystemNavn == AvsenderSystemNavn.PAPIRSYKMELDING,
-            harRedusertArbeidsgiverperiode =
-                sykmeldingRegelAvklaringer.harRedusertArbeidsgiverperiode(
-                    hovedDiagnose = medisinskVurdering.hovedDiagnose,
-                    biDiagnoser = medisinskVurdering.biDiagnoser,
-                    sykmeldingsperioder = sykmeldingsperioder,
-                    annenFraversArsakDTO = medisinskVurdering.annenFraversArsak,
-                ),
             rulesetVersion = metadata.regelsettVersjon,
             merknader = konverterMerknader(sykmelding.validation),
             signaturDato = metadata.genDate,
