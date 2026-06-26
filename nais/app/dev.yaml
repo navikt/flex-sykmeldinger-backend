@@ -12,7 +12,6 @@ external-host:
   - pdl-api.dev-fss-pub.nais.io
   - aareg-services-q2.dev-fss-pub.nais.io
   - ereg-services-q2.dev-fss-pub.nais.io
-flex-openapi-docs-ui: true
 flex_group_id: "34094735-b8f7-4bef-9136-47de2307541a" #0000-GA-TEMA_SYK
 env:
   SPRING_PROFILES_ACTIVE: default
