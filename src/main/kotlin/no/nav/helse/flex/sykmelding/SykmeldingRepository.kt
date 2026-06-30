@@ -265,7 +265,7 @@ private fun Any.tilPsqlJson(): PGobject {
     return pgObject
 }
 
-private inline fun <reified T> PGobject.fraPsqlJson(): T? =
-    this.value?.let {
-        objectMapper.readValue<T>(it)
-    }
+private inline fun <reified T> PGobject.fraPsqlJson(): T? {
+    val json: String = this.value ?: return null
+    return objectMapper.readValue(json)
+}

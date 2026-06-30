@@ -195,7 +195,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .also {
                     it.type `should be equal to` TilleggsinfoType.ARBEIDSLEDIG
                     it.tidligereArbeidsgiver.`should not be null`()
-                    it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
+                    it.tidligereArbeidsgiver.orgnummer `should be equal to` "orgnr"
                 }
         }
 
@@ -316,7 +316,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .also {
                     it.type `should be equal to` TilleggsinfoType.PERMITTERT
                     it.tidligereArbeidsgiver.`should not be null`()
-                    it.tidligereArbeidsgiver?.orgnummer `should be equal to` "orgnr"
+                    it.tidligereArbeidsgiver.orgnummer `should be equal to` "orgnr"
                 }
         }
 
