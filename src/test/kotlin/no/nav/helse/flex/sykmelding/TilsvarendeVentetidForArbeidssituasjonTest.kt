@@ -20,6 +20,12 @@ class TilsvarendeVentetidForArbeidssituasjonTest {
         }
 
         @Test
+        fun `JordbrukerBrukerSvar matcher NAERINGSDRIVENDE`() {
+            lagSykmelding(brukerSvar = lagJordbrukerBrukerSvar())
+                .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.NAERINGSDRIVENDE) `should be equal to` true
+        }
+
+        @Test
         fun `FiskerLott blad A matcher NAERINGSDRIVENDE`() {
             lagSykmelding(brukerSvar = lagFiskerLottBrukerSvar(blad = lagSporsmalSvar(FiskerBlad.A)))
                 .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.NAERINGSDRIVENDE) `should be equal to` true
@@ -81,6 +87,12 @@ class TilsvarendeVentetidForArbeidssituasjonTest {
         }
 
         @Test
+        fun `JordbrukerBrukerSvar matcher FISKER`() {
+            lagSykmelding(brukerSvar = lagJordbrukerBrukerSvar())
+                .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.FISKER) `should be equal to` true
+        }
+
+        @Test
         fun `ArbeidsledigBrukerSvar matcher ikke FISKER`() {
             lagSykmelding(brukerSvar = lagArbeidsledigBrukerSvar())
                 .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.FISKER) `should be equal to` false
@@ -107,6 +119,18 @@ class TilsvarendeVentetidForArbeidssituasjonTest {
         @Test
         fun `JordbrukerBrukerSvar matcher JORDBRUKER`() {
             lagSykmelding(brukerSvar = lagJordbrukerBrukerSvar())
+                .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.JORDBRUKER) `should be equal to` true
+        }
+
+        @Test
+        fun `Fisker lott blad a matcher JORDBRUKER`() {
+            lagSykmelding(brukerSvar = lagFiskerLottBrukerSvar(blad = lagSporsmalSvar(FiskerBlad.A)))
+                .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.JORDBRUKER) `should be equal to` true
+        }
+
+        @Test
+        fun `NaringsdrivendeBrukerSvar matcher JORDBRUKER`() {
+            lagSykmelding(brukerSvar = lagNaringsdrivendeBrukerSvar())
                 .tilsvarendeVentetidForArbeidssituasjon(Arbeidssituasjon.JORDBRUKER) `should be equal to` true
         }
 

@@ -56,14 +56,15 @@ fun Sykmelding.tilsvarendeVentetidForArbeidssituasjon(arbeidssituasjon: Arbeidss
         when (arbeidssituasjon) {
             FISKER,
             NAERINGSDRIVENDE,
+            JORDBRUKER,
             ->
                 when (brukerSvar) {
                     is NaringsdrivendeBrukerSvar -> true
+                    is JordbrukerBrukerSvar -> true
                     is FiskerBrukerSvar -> brukerSvar.blad.svar == FiskerBlad.A && brukerSvar.lottOgHyre.svar == FiskerLottOgHyre.LOTT
                     else -> false
                 }
             FRILANSER -> brukerSvar is FrilanserBrukerSvar
-            JORDBRUKER -> brukerSvar is JordbrukerBrukerSvar
             ARBEIDSTAKER,
             ARBEIDSLEDIG,
             PERMITTERT,
