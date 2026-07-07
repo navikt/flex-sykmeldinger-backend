@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
+import no.nav.helse.flex.api.dto.RegelStatusDTO
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
@@ -64,7 +65,7 @@ class SykmeldingTexasController(
                         .let { dto ->
                             dto.copy(
                                 merknader =
-                                    if (dto.behandlingsutfall.erUnderBehandling) {
+                                    if (dto.behandlingsutfall.erUnderBehandling || dto.behandlingsutfall.status == RegelStatusDTO.INVALID) {
                                         listOfNotNull(dto.merknader?.first())
                                     } else {
                                         null
