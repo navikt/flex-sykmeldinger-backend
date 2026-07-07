@@ -2,7 +2,6 @@ package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
-import no.nav.helse.flex.api.dto.RegelStatusDTO
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
@@ -10,19 +9,13 @@ import no.nav.helse.flex.config.getToken
 import no.nav.helse.flex.domain.AuditEntry
 import no.nav.helse.flex.domain.EventType
 import no.nav.helse.flex.gateways.AuditLogProducer
-import no.nav.helse.flex.gateways.KafkaMetadataDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
-import no.nav.helse.flex.sykmeldinghendelse.SYKMELDINGSTATUS_LEESAH_SOURCE
-import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatException
-import no.nav.helse.flex.tsmsykmeldingstatus.SykmeldingHendelseTilKafkaKonverterer
-import no.nav.helse.flex.utils.logger
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
-import java.time.OffsetDateTime
 
 @RestController
 class SykmeldingTexasController(
@@ -31,9 +24,8 @@ class SykmeldingTexasController(
     private val tokenValideringService: TokenValideringService,
     private val identService: IdentService,
     private val auditLogProducer: AuditLogProducer,
+    private val sykmeldingKafkaMessageKonverterer: SykmeldingKafkaMessageKonverterer,
 ) {
-    private val log = logger()
-
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
     fun hentSykmeldingerKafkaMessage(
@@ -58,43 +50,7 @@ class SykmeldingTexasController(
 
         val sykmeldingDtoer =
             sykmeldinger.mapNotNull {
-                val sykmeldingDTO =
-                    SykmeldingDtoRegler
-                        .skjermForPasientDersomSpesifisert(sykmeldingDtoKonverterer.konverter(it))
-                        // tilpasning for hva vi får fra gammel kafka kø
-                        .let { dto ->
-                            dto.copy(
-                                merknader =
-                                    if (dto.behandlingsutfall.erUnderBehandling || dto.behandlingsutfall.status == RegelStatusDTO.INVALID) {
-                                        listOfNotNull(dto.merknader?.first())
-                                    } else {
-                                        null
-                                    },
-                            )
-                        }
-                val timestampIkkeRelevant = OffsetDateTime.MIN
-                val kafkaMetadata =
-                    KafkaMetadataDTO(
-                        sykmeldingId = it.sykmeldingId,
-                        timestamp = timestampIkkeRelevant,
-                        fnr = it.pasientFnr,
-                        source = SYKMELDINGSTATUS_LEESAH_SOURCE,
-                    )
-                val event =
-                    try {
-                        SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                            sykmeldingHendelse = it.sisteHendelse(),
-                            sykmeldingId = it.sykmeldingId,
-                        )
-                    } catch (e: UtdatertFormatException) {
-                        log.warn("Hopper over: ${e.message}", e)
-                        return@mapNotNull null
-                    }
-                SykmeldingKafkaMessage(
-                    kafkaMetadata = kafkaMetadata,
-                    event = event,
-                    sykmelding = sykmeldingDTO,
-                )
+                sykmeldingKafkaMessageKonverterer.opprettTilsvarendeSykmeldingKafkaMessage(it)
             }
         return ResponseEntity.ok(SykmeldingKafkaMessageResponse(sykmeldingDtoer))
     }
