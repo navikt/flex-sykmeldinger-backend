@@ -3,6 +3,7 @@ package no.nav.helse.flex.api
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
+import no.nav.helse.flex.api.dto.RegelStatusDTO
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -87,6 +88,30 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     this.sykmelding.merknader
                         .first()
                         .type `should be equal to` MerknadtypeDTO.UNDER_BEHANDLING
+                }
+        }
+
+        @Test
+        fun `burde returnere sykmelding i kafka format med siste merknad ved avvist validering`() {
+            val sykmelding = sykmeldingRepository.save(lagSykmelding(validation = lagValidation(RuleType.INVALID)))
+            val respons =
+                utførHentSykmeldingerMedKafkaFormat(
+                    url = url,
+                    token = "gyldig-token-role-sykepengesoknad-backend",
+                    expectedStatus = HttpStatus.OK,
+                    content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
+                )
+
+            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger
+                .first()
+                .run {
+                    this.sykmelding.id `should be equal to` "1"
+                    this.sykmelding.behandlingsutfall.status `should be equal to` RegelStatusDTO.INVALID
+                    this.sykmelding.merknader!!.size `should be equal to` 1
+                    this.sykmelding.merknader
+                        .first()
+                        .type `should be equal to` MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
                 }
         }
 
