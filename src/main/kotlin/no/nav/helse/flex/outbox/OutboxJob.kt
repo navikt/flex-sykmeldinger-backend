@@ -7,14 +7,14 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class OutboxJob(
-    private val outboxService: OutboxService,
+    private val outboxPubliserer: OutboxPubliserer,
 ) {
     val log = logger()
 
     @Scheduled(initialDelay = 2_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørJobb() {
         try {
-            outboxService.sendUsendteForEldsteLedigeFnr()
+            outboxPubliserer.sendUsendteForEldsteLedigeFnr()
         } catch (e: Exception) {
             log.error("Feil under kjøring av OutboxJob", e)
         }

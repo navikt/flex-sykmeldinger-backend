@@ -1,8 +1,10 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.outbox.OutboxService
-import no.nav.helse.flex.sykmelding.*
+import no.nav.helse.flex.outbox.OutboxPubliserer
+import no.nav.helse.flex.sykmelding.ISykmeldingRepository
+import no.nav.helse.flex.sykmelding.Sykmelding
+import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,9 +17,8 @@ class SykmeldingHendelseHandterer(
     private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingStatusEndrer: SykmeldingStatusEndrer,
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
-    private val sykmeldingStatusPubliserer: SykmeldingHendelsePubliserer,
     private val nowFactory: Supplier<Instant>,
-    private val outboxService: OutboxService,
+    private val outboxPubliserer: OutboxPubliserer,
 ) {
     private val logger = logger()
 
@@ -73,7 +74,7 @@ class SykmeldingHendelseHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        outboxService.outboxSykmeldingHendelse(
+        outboxPubliserer.outboxSykmeldingHendelse(
             fnr = lagretSykmelding.pasientFnr,
             sykmeldingId = lagretSykmelding.sykmeldingId,
             sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
@@ -91,7 +92,11 @@ class SykmeldingHendelseHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.AVBRUTT)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sykmeldingStatusPubliserer.publiserSisteHendelse(lagretSykmelding)
+        outboxPubliserer.outboxSykmeldingHendelse(
+            fnr = lagretSykmelding.pasientFnr,
+            sykmeldingId = lagretSykmelding.sykmeldingId,
+            sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
+        )
         return lagretSykmelding
     }
 
@@ -106,7 +111,11 @@ class SykmeldingHendelseHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = HendelseStatus.BEKREFTET_AVVIST)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sykmeldingStatusPubliserer.publiserSisteHendelse(lagretSykmelding)
+        outboxPubliserer.outboxSykmeldingHendelse(
+            fnr = lagretSykmelding.pasientFnr,
+            sykmeldingId = lagretSykmelding.sykmeldingId,
+            sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
+        )
         return lagretSykmelding
     }
 

@@ -6,6 +6,8 @@ import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
+import no.nav.helse.flex.sykmelding.SykmeldingLeser
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 import no.nav.helse.flex.testconfig.fakes.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
@@ -64,6 +66,16 @@ class FakesTestConfig {
     fun texasClient(
         @Value($$"${flex.group.id}") flexGroupId: String,
     ): TexasClientFake = TexasClientFake(flexGroupId)
+
+    @Bean
+    fun outboxService(
+        sykmeldingLeser: SykmeldingLeser,
+        sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
+    ): OutboxPublisererFake =
+        OutboxPublisererFake(
+            sykmeldingLeser = sykmeldingLeser,
+            sykmeldingHendelsePubliserer = sykmeldingHendelsePubliserer,
+        )
 
     @Bean
     fun auditLogProducer(): AuditLogProducerFake = AuditLogProducerFake()

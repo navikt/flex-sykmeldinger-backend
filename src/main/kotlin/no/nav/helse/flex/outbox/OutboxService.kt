@@ -14,10 +14,10 @@ class OutboxService(
     private val outboxDbRepository: OutboxDbRepository,
     private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
-) {
+) : OutboxPubliserer {
     private val logger = logger()
 
-    fun outboxSykmeldingHendelse(
+    override fun outboxSykmeldingHendelse(
         fnr: String,
         sykmeldingId: String,
         sykmeldingHendelseId: String,
@@ -38,7 +38,7 @@ class OutboxService(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    fun sendUsendteForEldsteLedigeFnr() {
+    override fun sendUsendteForEldsteLedigeFnr() {
         val usendte = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
         if (usendte.isEmpty()) {
             return
