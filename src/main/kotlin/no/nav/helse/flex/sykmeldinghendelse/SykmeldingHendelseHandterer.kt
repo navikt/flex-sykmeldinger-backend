@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.outbox.OutboxService
 import no.nav.helse.flex.sykmelding.*
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
@@ -16,6 +17,7 @@ class SykmeldingHendelseHandterer(
     private val tilleggsinfoSammenstillerService: TilleggsinfoSammenstillerService,
     private val sykmeldingStatusPubliserer: SykmeldingHendelsePubliserer,
     private val nowFactory: Supplier<Instant>,
+    private val outboxService: OutboxService,
 ) {
     private val logger = logger()
 
@@ -71,7 +73,11 @@ class SykmeldingHendelseHandterer(
             sjekkStatusOgLeggTilHendelse(sykmelding = sykmelding, status = nyStatus, brukerSvar = brukerSvar, tilleggsinfo = tilleggsinfo)
 
         val lagretSykmelding = sykmeldingRepository.save(oppdatertSykmelding)
-        sykmeldingStatusPubliserer.publiserSisteHendelse(lagretSykmelding)
+        outboxService.outboxSykmeldingHendelse(
+            fnr = lagretSykmelding.pasientFnr,
+            sykmeldingId = lagretSykmelding.sykmeldingId,
+            sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
+        )
         return lagretSykmelding
     }
 

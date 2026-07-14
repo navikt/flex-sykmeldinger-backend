@@ -17,13 +17,25 @@ class SykmeldingHendelsePubliserer(
     private val sykmeldingStatusKafkaProducer: SykmeldingStatusKafkaProducer,
 ) {
     fun publiserSisteHendelse(sykmelding: Sykmelding) {
+        publiserHendelse(
+            fnr = sykmelding.pasientFnr,
+            sykmeldingId = sykmelding.sykmeldingId,
+            sykmeldingHendelse = sykmelding.sisteHendelse(),
+        )
+    }
+
+    fun publiserHendelse(
+        fnr: String,
+        sykmeldingId: String,
+        sykmeldingHendelse: SykmeldingHendelse,
+    ) {
         val status =
             sammenstillSykmeldingStatusKafkaMessageDTO(
-                fnr = sykmelding.pasientFnr,
+                fnr = fnr,
                 sykmeldingStatusKafkaDTO =
                     SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
-                        sykmeldingHendelse = sykmelding.sisteHendelse(),
-                        sykmeldingId = sykmelding.sykmeldingId,
+                        sykmeldingHendelse = sykmeldingHendelse,
+                        sykmeldingId = sykmeldingId,
                     ),
             )
         sykmeldingStatusKafkaProducer.produserSykmeldingStatus(status)
