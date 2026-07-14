@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
-import no.nav.helse.flex.gateways.SykmeldingBrukernotifikasjonProducer
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
 import no.nav.helse.flex.outbox.OutboxPubliserer
@@ -18,7 +17,6 @@ import java.util.function.Supplier
 class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
-    private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
     private val nowFactory: Supplier<Instant>,
     private val outboxPubliserer: OutboxPubliserer,
 ) {
@@ -54,9 +52,9 @@ class EksternSykmeldingHandterer(
                 sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
             )
 
-            sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {
-                log.info("Brukernotifikasjon produsert for sykmelding med id ${sykmelding.sykmeldingId}")
-            }
+            outboxPubliserer.outboxSykmeldingBrukernotifikasjon(
+                sykmeldingNotifikasjon = lagSykemldingNotifikasjon(lagretSykmelding),
+            )
             log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
         }
     }

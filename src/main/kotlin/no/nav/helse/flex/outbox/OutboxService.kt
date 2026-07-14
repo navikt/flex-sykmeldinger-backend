@@ -1,5 +1,7 @@
 package no.nav.helse.flex.outbox
 
+import no.nav.helse.flex.gateways.SykmeldingBrukernotifikasjonProducer
+import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 import no.nav.helse.flex.utils.fraPsqlJson
@@ -14,6 +16,7 @@ class OutboxService(
     private val outboxDbRepository: OutboxDbRepository,
     private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
+    private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
 ) : OutboxPubliserer {
     private val logger = logger()
 
@@ -37,6 +40,18 @@ class OutboxService(
         outboxDbRepository.save(outboxRecord)
     }
 
+    override fun outboxSykmeldingBrukernotifikasjon(sykmeldingNotifikasjon: SykmeldingNotifikasjon) {
+        val outboxRecord =
+            OutboxDbRecord(
+                type = OutboxType.SYKMELDING_BRUKERNOTIFIKASJON,
+                fnr = sykmeldingNotifikasjon.fnr,
+                payload = sykmeldingNotifikasjon.tilPsqlJson(),
+                opprettetTimestamp = Instant.now(),
+                sendtTimestamp = null,
+            )
+        outboxDbRepository.save(outboxRecord)
+    }
+
     @Transactional(rollbackFor = [Exception::class])
     override fun sendUsendteForEldsteLedigeFnr() {
         val usendte = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
@@ -52,6 +67,7 @@ class OutboxService(
     private fun sendOutboxRecord(record: OutboxDbRecord) {
         when (record.type) {
             OutboxType.SYKMELDING_HENDELSE -> sendSykmeldingHendelse(record)
+            OutboxType.SYKMELDING_BRUKERNOTIFIKASJON -> sendSykmeldingBrukernotifikasjon(record)
         }
     }
 
@@ -71,7 +87,18 @@ class OutboxService(
             sykmeldingId = sykmelding.sykmeldingId,
             sykmeldingHendelse = hendelse,
         )
-        logger.info("Sendte outbox-rad ${record.id} for sykmelding ${payload.sykmeldingId}")
+        logger.info(
+            "Sendte outbox-rad ${record.type} ${record.id} for sykmelding ${payload.sykmeldingId} og hendelse ${payload.sykmeldingHendelseId}",
+        )
+    }
+
+    private fun sendSykmeldingBrukernotifikasjon(record: OutboxDbRecord) {
+        val notifikasjon =
+            record.payload.fraPsqlJson<SykmeldingNotifikasjon>()
+                ?: error("Mangler payload på outbox-rad ${record.id}")
+
+        sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(notifikasjon)
+        logger.info("Sendte outbox-rad ${record.type} ${record.id} for sykmelding ${notifikasjon.sykmeldingId}")
     }
 }
 

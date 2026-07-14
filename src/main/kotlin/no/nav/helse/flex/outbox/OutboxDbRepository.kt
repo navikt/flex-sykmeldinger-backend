@@ -15,6 +15,14 @@ interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
      * instanser hopper over fnr som allerede er låst (pg_try_advisory_xact_lock
      * gir false), og velger neste ledige fnr i stedet.
      *
+     * Kandidatene materialiseres (WITH ... AS MATERIALIZED) og sorteres FØR
+     * advisory-låsen tas. Det er avgjørende: uten materialisering pusher Postgres
+     * pg_try_advisory_xact_lock ned i aggregeringen og evaluerer den for ALLE
+     * kandidat-fnr, slik at én instans låser samtlige ledige fnr og de andre
+     * ikke får noe. Med materialisering evalueres låsen på den ferdig sorterte
+     * lista, i rekkefølge, og stopper på første ledige fnr (LIMIT 1) – da låses
+     * kun det valgte fnr-et.
+     *
      * Rekkefølgen bevares slik at meldinger for samme fnr sendes i opprettet-rekkefølge.
      * id (monotont økende sekvens) brukes som tie-breaker når flere rader deler
      * opprettet_timestamp, slik at rekkefølgen alltid er deterministisk (innsettingsrekkefølge).
@@ -23,18 +31,19 @@ interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
      */
     @Query(
         """
+    WITH kandidater AS MATERIALIZED (
+        SELECT fnr
+        FROM outbox
+        WHERE sendt_timestamp IS NULL
+        GROUP BY fnr
+        ORDER BY MIN(opprettet_timestamp), MIN(id)
+    )
     SELECT *
     FROM outbox
     WHERE sendt_timestamp IS NULL
       AND fnr = (
           SELECT fnr
-          FROM (
-              SELECT fnr, MIN(opprettet_timestamp) AS eldste, MIN(id) AS eldste_id
-              FROM outbox
-              WHERE sendt_timestamp IS NULL
-              GROUP BY fnr
-              ORDER BY eldste, eldste_id
-          ) kandidater
+          FROM kandidater
           WHERE pg_try_advisory_xact_lock(hashtext(fnr))
           LIMIT 1
       )

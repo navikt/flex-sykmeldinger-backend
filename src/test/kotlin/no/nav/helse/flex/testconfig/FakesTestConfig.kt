@@ -71,10 +71,12 @@ class FakesTestConfig {
     fun outboxService(
         sykmeldingLeser: SykmeldingLeser,
         sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
+        sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducerFake,
     ): OutboxPublisererFake =
         OutboxPublisererFake(
             sykmeldingLeser = sykmeldingLeser,
             sykmeldingHendelsePubliserer = sykmeldingHendelsePubliserer,
+            sykmeldingBrukernotifikasjonProducer = sykmeldingBrukernotifikasjonProducer,
         )
 
     @Bean
