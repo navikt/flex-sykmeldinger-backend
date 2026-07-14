@@ -6,11 +6,7 @@ import no.nav.helse.flex.testconfig.ventPåRecords
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldHaveSingleItem
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
+import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -20,9 +16,6 @@ import java.time.Duration
 class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var outboxService: OutboxService
-
-    @Autowired
-    lateinit var outboxDbRepository: OutboxDbRepository
 
     @Autowired
     lateinit var sykmeldingStatusConsumer: KafkaConsumer<String, String>
