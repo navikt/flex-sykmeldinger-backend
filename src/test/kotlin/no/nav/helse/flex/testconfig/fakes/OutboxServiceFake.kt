@@ -2,15 +2,15 @@ package no.nav.helse.flex.testconfig.fakes
 
 import no.nav.helse.flex.gateways.SykmeldingBrukernotifikasjonProducer
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
-import no.nav.helse.flex.outbox.OutboxPubliserer
+import no.nav.helse.flex.outbox.OutboxService
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 
-class OutboxPublisererFake(
+class OutboxServiceFake(
     private val sykmeldingLeser: SykmeldingLeser,
     private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
     private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
-) : OutboxPubliserer {
+) : OutboxService {
     override fun outboxSykmeldingHendelse(
         fnr: String,
         sykmeldingId: String,

@@ -68,12 +68,12 @@ class FakesTestConfig {
     ): TexasClientFake = TexasClientFake(flexGroupId)
 
     @Bean
-    fun outboxService(
+    fun outboxServiceImpl(
         sykmeldingLeser: SykmeldingLeser,
         sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
         sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducerFake,
-    ): OutboxPublisererFake =
-        OutboxPublisererFake(
+    ): OutboxServiceFake =
+        OutboxServiceFake(
             sykmeldingLeser = sykmeldingLeser,
             sykmeldingHendelsePubliserer = sykmeldingHendelsePubliserer,
             sykmeldingBrukernotifikasjonProducer = sykmeldingBrukernotifikasjonProducer,

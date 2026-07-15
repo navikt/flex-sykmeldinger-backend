@@ -3,7 +3,7 @@ package no.nav.helse.flex.sykmelding
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
-import no.nav.helse.flex.outbox.OutboxPubliserer
+import no.nav.helse.flex.outbox.OutboxService
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
@@ -18,7 +18,7 @@ class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
     private val nowFactory: Supplier<Instant>,
-    private val outboxPubliserer: OutboxPubliserer,
+    private val outboxService: OutboxService,
 ) {
     val log = logger()
 
@@ -46,13 +46,13 @@ class EksternSykmeldingHandterer(
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
-            outboxPubliserer.outboxSykmeldingHendelse(
+            outboxService.outboxSykmeldingHendelse(
                 fnr = lagretSykmelding.pasientFnr,
                 sykmeldingId = lagretSykmelding.sykmeldingId,
                 sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
             )
 
-            outboxPubliserer.outboxSykmeldingBrukernotifikasjon(
+            outboxService.outboxSykmeldingBrukernotifikasjon(
                 sykmeldingNotifikasjon = lagSykemldingNotifikasjon(lagretSykmelding),
             )
             log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
