@@ -3,9 +3,7 @@ package no.nav.helse.flex.outbox
 import no.nav.helse.flex.utils.logger
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -38,7 +36,7 @@ class OutboxJob(
         }
     }
 
-    @Scheduled(initialDelay = 20_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    // @Scheduled(initialDelay = 20_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørJobb() {
         lock.readLock().withLock {
             try {
