@@ -24,7 +24,7 @@ class OutboxServiceFake(
         sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(sykmeldingNotifikasjon)
     }
 
-    override fun sendUsendteForEldsteLedigeFnr() {
+    override fun sendUsendteForEldsteLedigeFnr(): Boolean {
         TODO("Not yet implemented")
     }
 }

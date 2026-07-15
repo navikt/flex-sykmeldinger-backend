@@ -11,5 +11,5 @@ interface OutboxService {
 
     fun outboxSykmeldingBrukernotifikasjon(sykmeldingNotifikasjon: SykmeldingNotifikasjon)
 
-    fun sendUsendteForEldsteLedigeFnr()
+    fun sendUsendteForEldsteLedigeFnr(): Boolean
 }

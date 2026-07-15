@@ -123,6 +123,33 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
+    fun `sendUsendteForEldsteLedigeFnr returnerer true når noe ble prosessert`() {
+        sykmeldingStatusConsumer.subscribe(listOf(SYKMELDING_BRUKERNOTIFIKASJON_TOPIC))
+
+        outboxService.outboxSykmeldingBrukernotifikasjon(
+            SykmeldingNotifikasjon(
+                sykmeldingId = "sykmelding-1",
+                status = SykmeldingNotifikasjonStatus.INVALID,
+                mottattDato = LocalDateTime.parse("2024-06-01T12:00:00"),
+                fnr = "fnr-1",
+            ),
+        )
+
+        val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
+
+        bleProsessert shouldBeEqualTo true
+        // Konsumer den produserte meldingen slik at den ikke lekker til andre tester
+        sykmeldingStatusConsumer.ventPåRecords(antall = 1)
+    }
+
+    @Test
+    fun `sendUsendteForEldsteLedigeFnr returnerer false når det ikke er noe å sende`() {
+        val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
+
+        bleProsessert shouldBeEqualTo false
+    }
+
+    @Test
     fun `burde velge eldste ledige fnr og returnere radene i opprettet-rekkefolge`() {
         lagreUsendtOutboxRad(fnr = "fnr-nyest", opprettetTimestamp = Instant.now().minusSeconds(10))
         val eldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = Instant.now().minusSeconds(60))

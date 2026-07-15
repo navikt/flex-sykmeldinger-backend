@@ -1,9 +1,15 @@
 package no.nav.helse.flex.outbox
 
 import no.nav.helse.flex.utils.logger
+import org.springframework.context.event.ContextClosedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.withLock
 
 @Component
 class OutboxJob(
@@ -11,12 +17,37 @@ class OutboxJob(
 ) {
     val log = logger()
 
-    @Scheduled(initialDelay = 2_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
-    fun kjørJobb() {
+    private val shutdown = AtomicBoolean()
+    private val lock = ReentrantReadWriteLock()
+
+    @EventListener
+    fun onShutdownEvent(event: ContextClosedEvent) {
+        log.info("OutboxJob shutdown starter")
+        shutdown.set(true)
         try {
-            outboxService.sendUsendteForEldsteLedigeFnr()
-        } catch (e: Exception) {
-            log.error("Feil under kjøring av OutboxJob", e)
+            val ventePåStopp = lock.writeLock().tryLock(20, SECONDS)
+            if (!ventePåStopp) {
+                log.warn("OutboxJob shutdown fullførte ikke innenfor 20 sekunder")
+            } else {
+                log.info("OutboxJob shutdown avsluttet gracefully")
+                lock.writeLock().unlock()
+            }
+        } catch (_: InterruptedException) {
+            log.error("OutboxJob shutdown avbrutt av interrupt")
+            Thread.currentThread().interrupt()
+        }
+    }
+
+    @Scheduled(initialDelay = 120_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    fun kjørJobb() {
+        lock.readLock().withLock {
+            try {
+                do {
+                    val prosesserteNoe = outboxService.sendUsendteForEldsteLedigeFnr()
+                } while (prosesserteNoe && !shutdown.get())
+            } catch (e: Exception) {
+                log.error("Feil under kjøring av OutboxJob", e)
+            }
         }
     }
 }

@@ -53,15 +53,16 @@ class OutboxServiceImpl(
     }
 
     @Transactional(rollbackFor = [Exception::class])
-    override fun sendUsendteForEldsteLedigeFnr() {
+    override fun sendUsendteForEldsteLedigeFnr(): Boolean {
         val usendte = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
         if (usendte.isEmpty()) {
-            return
+            return false
         }
         usendte.forEach { record ->
             sendOutboxRecord(record)
             outboxDbRepository.save(record.copy(sendtTimestamp = Instant.now()))
         }
+        return true
     }
 
     private fun sendOutboxRecord(record: OutboxDbRecord) {
