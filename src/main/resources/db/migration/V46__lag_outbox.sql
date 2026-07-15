@@ -2,7 +2,7 @@ CREATE TABLE outbox (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     type TEXT NOT NULL,
     fnr TEXT NOT NULL,
-    payload JSON NOT NULL,
+    payload JSONB NOT NULL,
     opprettet_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     sendt_timestamp TIMESTAMP WITH TIME ZONE
 );

@@ -38,7 +38,7 @@ class OutboxJob(
         }
     }
 
-    @Scheduled(initialDelay = 120_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Scheduled(initialDelay = 20_000, fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     fun kjørJobb() {
         lock.readLock().withLock {
             try {
