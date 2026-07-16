@@ -1,10 +1,7 @@
 package no.nav.helse.flex.testutils
 
 import org.springframework.data.repository.CrudRepository
-import java.util.Optional
-import java.util.UUID
-import kotlin.collections.forEach
-import kotlin.collections.remove
+import java.util.*
 import kotlin.reflect.KProperty1
 
 abstract class AbstractCrudRepositoryFake<T : Any>(
@@ -29,12 +26,7 @@ abstract class AbstractCrudRepositoryFake<T : Any>(
         return entityWithId as (S & Any)
     }
 
-    override fun <S : T> saveAll(entities: MutableIterable<S>): MutableIterable<S> {
-        entities.forEach {
-            save(it)
-        }
-        return entities
-    }
+    override fun <S : T> saveAll(entities: MutableIterable<S>): MutableIterable<S> = entities.map { save(it) }.toMutableList()
 
     override fun findById(id: String): Optional<T> = Optional.ofNullable(entities.values.find { getEntityId(it) == id })
 

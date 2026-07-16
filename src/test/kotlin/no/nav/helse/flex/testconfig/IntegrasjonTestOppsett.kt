@@ -3,6 +3,7 @@ package no.nav.helse.flex.testconfig
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
+import no.nav.helse.flex.outbox.OutboxDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.apache.kafka.clients.producer.Producer
@@ -31,6 +32,9 @@ import org.springframework.test.web.servlet.MockMvc
 )
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
 abstract class IntegrasjonTestOppsett {
+    @Autowired
+    lateinit var outboxDbRepository: OutboxDbRepository
+
     @Autowired
     lateinit var mockMvc: MockMvc
 
@@ -67,6 +71,7 @@ abstract class IntegrasjonTestOppsett {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
+        outboxDbRepository.deleteAll()
     }
 
     private fun ventPaConsumers() {

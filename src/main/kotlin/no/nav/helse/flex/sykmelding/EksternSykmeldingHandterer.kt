@@ -1,13 +1,12 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
-import no.nav.helse.flex.gateways.SykmeldingBrukernotifikasjonProducer
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjonStatus
+import no.nav.helse.flex.outbox.OutboxService
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
-import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -18,9 +17,8 @@ import java.util.function.Supplier
 class EksternSykmeldingHandterer(
     private val sykmeldingRepository: ISykmeldingRepository,
     private val arbeidsforholdInnhentingService: ArbeidsforholdInnhentingService,
-    private val sykmeldingBrukernotifikasjonProducer: SykmeldingBrukernotifikasjonProducer,
     private val nowFactory: Supplier<Instant>,
-    private val sykmeldingHendelsePubliserer: SykmeldingHendelsePubliserer,
+    private val outboxService: OutboxService,
 ) {
     val log = logger()
 
@@ -44,15 +42,19 @@ class EksternSykmeldingHandterer(
             log.info("Sykmelding oppdatert: ${eksisterendeSykmelding.sykmeldingId}")
         } else {
             val sykmelding = lagNySykmelding(eksternSykmeldingMelding, tidspunkt = nowFactory.get())
-            sykmeldingRepository.save(sykmelding)
+            val lagretSykmelding = sykmeldingRepository.save(sykmelding)
             arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson(sykmelding.pasientFnr).also {
                 log.info("Synkroniserer arbeidsforhold ved sykmelding mottatt: ${it.toLogString()}")
             }
-            sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
+            outboxService.outboxSykmeldingHendelse(
+                fnr = lagretSykmelding.pasientFnr,
+                sykmeldingId = lagretSykmelding.sykmeldingId,
+                sykmeldingHendelseId = lagretSykmelding.sisteHendelse().databaseId!!,
+            )
 
-            sykmeldingBrukernotifikasjonProducer.produserSykmeldingBrukernotifikasjon(lagSykemldingNotifikasjon(sykmelding)).also {
-                log.info("Brukernotifikasjon produsert for sykmelding med id ${sykmelding.sykmeldingId}")
-            }
+            outboxService.outboxSykmeldingBrukernotifikasjon(
+                sykmeldingNotifikasjon = lagSykemldingNotifikasjon(lagretSykmelding),
+            )
             log.info("Sykmelding lagret: ${eksternSykmeldingMelding.sykmelding.id}")
         }
     }

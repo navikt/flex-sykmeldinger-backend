@@ -1,13 +1,12 @@
 package no.nav.helse.flex.sykmelding
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.tsm.SykmeldingGrunnlag
 import no.nav.helse.flex.sykmelding.tsm.ValidationResult
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
-import no.nav.helse.flex.utils.objectMapper
-import no.nav.helse.flex.utils.serialisertTilString
+import no.nav.helse.flex.utils.fraPsqlJson
+import no.nav.helse.flex.utils.tilPsqlJson
 import org.postgresql.util.PGobject
 import org.springframework.data.annotation.Id
 import org.springframework.data.jdbc.repository.query.Query
@@ -256,16 +255,4 @@ data class SykmeldingHendelseDbRecord(
                 lokaltOpprettet = hendelse.lokaltOpprettet,
             )
     }
-}
-
-private fun Any.tilPsqlJson(): PGobject {
-    val pgObject = PGobject()
-    pgObject.type = "json"
-    pgObject.value = this.serialisertTilString()
-    return pgObject
-}
-
-private inline fun <reified T> PGobject.fraPsqlJson(): T? {
-    val json: String = this.value ?: return null
-    return objectMapper.readValue(json)
 }
