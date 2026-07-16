@@ -46,7 +46,7 @@ class OutboxJob(
                     val prosesserteNoe = outboxService.sendUsendteForEldsteLedigeFnr()
                 } while (prosesserteNoe && !shutdown.get())
             } catch (e: Exception) {
-                log.error("Feil under kjøring av OutboxJob", e)
+                log.error("Feil under kjøring av OutboxJob: ${e.message}", e)
             }
         }
     }

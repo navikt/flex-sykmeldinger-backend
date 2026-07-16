@@ -78,7 +78,9 @@ class OutboxServiceImpl(
                 ?: error("Mangler payload på outbox-rad ${record.id}")
         val sykmelding =
             sykmeldingLeser.hentSykmelding(payload.sykmeldingId)
-                ?: error("Fant ikke sykmelding ${payload.sykmeldingId} for outbox-rad ${record.id}")
+                ?: error(
+                    "Fant ikke sykmelding ${payload.sykmeldingId} for outbox-rad ${record.id}. Kan ha blitt slettet av tombstone. Burde kanskje bare returnere i dette senarioet.",
+                )
         val hendelse =
             sykmelding.hendelser.firstOrNull { it.databaseId == payload.sykmeldingHendelseId }
                 ?: error("Fant ikke hendelse ${payload.sykmeldingHendelseId} på sykmelding ${payload.sykmeldingId}")
