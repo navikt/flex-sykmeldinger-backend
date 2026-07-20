@@ -8,14 +8,7 @@ import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
-import no.nav.helse.flex.testdata.lagArbeidstakerBrukerSvar
-import no.nav.helse.flex.testdata.lagPasient
-import no.nav.helse.flex.testdata.lagSykmelding
-import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import no.nav.helse.flex.testdata.lagSykmeldingHendelse
-import no.nav.helse.flex.testdata.lagUtdatertFormatBrukerSvar
-import no.nav.helse.flex.testdata.lagUtdatertFormatTilleggsinfo
-import no.nav.helse.flex.testdata.lagValidation
+import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
@@ -372,6 +365,29 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             entries.size `should be equal to` 1
             entries.first().utførtAv `should be equal to` "A123456"
             entries.first().oppslagPå `should be equal to` fnr
+        }
+
+        @Test
+        fun `returnerer hendelser for sykmeldingen`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr)),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(status = HendelseStatus.APEN),
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                                brukerSvar = lagArbeidstakerBrukerSvar(),
+                            ),
+                        ),
+                ),
+            )
+
+            val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
+
+            sykmelding.hendelser.size `should be equal to` 2
+            sykmelding.hendelser[0].status `should be equal to` "APEN"
+            sykmelding.hendelser[1].status `should be equal to` "SENDT_TIL_ARBEIDSGIVER"
         }
 
         private fun hentSykmeldingOgParseRespons(sykmeldingId: String): FlexInternalSykmeldingDto {
