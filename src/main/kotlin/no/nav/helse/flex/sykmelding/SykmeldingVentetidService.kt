@@ -43,7 +43,7 @@ class SykmeldingVentetidService(
                 .filter { it.tilsvarendeVentetidForArbeidssituasjon(arbeidssituasjon) }
                 .minByOrNull { it.fom }
 
-        val erForsteSykmelding = if (tidligsteSykmelding != null) sykmelding.fom <= tidligsteSykmelding.fom else true
+        val erForsteSykmelding = tidligsteSykmelding == null || sykmelding.fom <= tidligsteSykmelding.fom
         logger.info(
             "Sykmelding ${sykmelding.sykmeldingId} arbeidssituasjon $arbeidssituasjon er forst: $erForsteSykmelding tidligste eksisterende ${tidligsteSykmelding?.fom}",
         )
