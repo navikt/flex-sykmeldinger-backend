@@ -239,6 +239,62 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
     }
 
     @Test
+    fun `findAllByPersonIdenterFom burde hente sykmelding med tom paa eller etter fom`() {
+        lagreSykmeldingMedPeriode(id = "1", fnr = "fnr", fom = LocalDate.parse("2021-01-01"), tom = LocalDate.parse("2021-01-10"))
+
+        sykmeldingRepository
+            .findAllByPersonIdenterFom(PersonIdenter("fnr"), LocalDate.parse("2021-01-05"))
+            .shouldHaveSize(1)
+        sykmeldingRepository
+            .findAllByPersonIdenterFom(PersonIdenter("fnr"), LocalDate.parse("2021-01-10"))
+            .shouldHaveSize(1)
+    }
+
+    @Test
+    fun `findAllByPersonIdenterFom burde ikke hente sykmelding med tom foer fom`() {
+        lagreSykmeldingMedPeriode(id = "1", fnr = "fnr", fom = LocalDate.parse("2021-01-01"), tom = LocalDate.parse("2021-01-10"))
+
+        sykmeldingRepository
+            .findAllByPersonIdenterFom(PersonIdenter("fnr"), LocalDate.parse("2021-01-11"))
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun `findAllByPersonIdenterFom burde kun hente sykmeldinger for de angitte identene`() {
+        lagreSykmeldingMedPeriode(id = "1", fnr = "1", fom = LocalDate.parse("2021-01-01"), tom = LocalDate.parse("2021-01-10"))
+        lagreSykmeldingMedPeriode(id = "2", fnr = "2", fom = LocalDate.parse("2021-01-01"), tom = LocalDate.parse("2021-01-10"))
+        lagreSykmeldingMedPeriode(id = "3", fnr = "3", fom = LocalDate.parse("2021-01-01"), tom = LocalDate.parse("2021-01-10"))
+
+        val resultat =
+            sykmeldingRepository.findAllByPersonIdenterFom(PersonIdenter("1", listOf("2")), LocalDate.parse("2021-01-01"))
+
+        resultat.shouldHaveSize(2)
+        resultat.map { it.sykmeldingId }.shouldContainAll(listOf("1", "2"))
+    }
+
+    @Test
+    fun `findAllByPersonIdenterFom burde bruke seneste tom blant flere aktiviteter`() {
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        pasient = lagPasient(fnr = "fnr"),
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-05")),
+                                lagAktivitetIkkeMulig(LocalDate.parse("2021-01-06"), LocalDate.parse("2021-01-20")),
+                            ),
+                    ),
+            ),
+        )
+
+        sykmeldingRepository
+            .findAllByPersonIdenterFom(PersonIdenter("fnr"), LocalDate.parse("2021-01-15"))
+            .shouldHaveSize(1)
+    }
+
+    @Test
     fun `deleteBySykmeldingId burde slette bestemt sykmelding`() {
         sykmeldingRepository.save(
             lagSykmelding(
@@ -317,6 +373,23 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 this.hendelser.map {
                     it.copy(databaseId = null)
                 },
+        )
+
+    private fun lagreSykmeldingMedPeriode(
+        id: String,
+        fnr: String,
+        fom: LocalDate,
+        tom: LocalDate,
+    ): Sykmelding =
+        sykmeldingRepository.save(
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = id,
+                        pasient = lagPasient(fnr = fnr),
+                        aktiviteter = listOf(lagAktivitetIkkeMulig(fom, tom)),
+                    ),
+            ),
         )
 
     private fun opprettSykmeldinger(): List<Sykmelding> {

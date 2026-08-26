@@ -43,4 +43,9 @@ class SykmeldingLeser(
         sykmeldingIder: List<String>,
         fom: LocalDate?,
     ): List<Sykmelding> = sykmeldingRepository.findAllInFom(sykmeldingIder, fom)
+
+    fun hentAlleSykmeldingerFraIdenterFom(
+        identer: PersonIdenter,
+        fom: LocalDate,
+    ): List<Sykmelding> = sykmeldingRepository.findAllByPersonIdenterFom(identer, fom)
 }

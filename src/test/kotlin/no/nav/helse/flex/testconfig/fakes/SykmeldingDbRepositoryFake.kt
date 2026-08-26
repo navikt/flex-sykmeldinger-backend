@@ -38,4 +38,19 @@ class SykmeldingDbRepositoryFake :
                     .maxOfOrNull { aktivitet -> aktivitet.tom }
                     ?.isBefore(fom) ?: false
             }
+
+    override fun findAllByFnrInAndLatestTomOnOrAfter(
+        identer: List<String>,
+        fom: LocalDate,
+    ): List<SykmeldingDbRecord> =
+        entities.values
+            .filter {
+                it.fnr in identer
+            }.filterNot {
+                it
+                    .mapTilSykmelding()
+                    .aktivitet
+                    .maxOfOrNull { aktivitet -> aktivitet.tom }
+                    ?.isBefore(fom) ?: false
+            }
 }
