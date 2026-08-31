@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testconfig
 
+import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
@@ -55,9 +56,13 @@ abstract class FakesTestOppsett {
     @Autowired
     lateinit var auditLogProducer: AuditLogProducerFake
 
+    @Autowired
+    lateinit var fakeUnleash: FakeUnleash
+
     @AfterAll
-    fun `Vi resetter databasen`() {
+    fun `Reset db og unleash`() {
         slettDatabase()
+        fakeUnleash.resetAll()
     }
 
     fun slettDatabase() {

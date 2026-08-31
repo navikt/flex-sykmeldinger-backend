@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testconfig
 
+import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
@@ -53,6 +54,9 @@ abstract class IntegrasjonTestOppsett {
     @Autowired
     lateinit var kafkaListenerEndpointRegistry: KafkaListenerEndpointRegistry
 
+    @Autowired
+    lateinit var fakeUnleash: FakeUnleash
+
     init {
         TestcontainersOppsett.initIfNotRunning()
     }
@@ -65,6 +69,7 @@ abstract class IntegrasjonTestOppsett {
     @AfterAll
     fun afterAllFelles() {
         slettDatabase()
+        fakeUnleash.resetAll()
     }
 
     fun slettDatabase() {
