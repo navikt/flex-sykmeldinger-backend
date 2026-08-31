@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 class SykmeldingController(
@@ -194,7 +195,18 @@ class SykmeldingController(
                 arbeidssituasjon = arbeidssituasjon,
             )
 
-        return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding))
+        val tidligsteFom =
+            if (erForsteSykmelding) {
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = arbeidssituasjon,
+                    identer = identer,
+                )
+            } else {
+                null
+            }
+
+        return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding, tidligsteFom = tidligsteFom))
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/har-soknad")
@@ -314,4 +326,5 @@ enum class SykmeldingChangeStatus {
 
 data class ErForsteSykmeldingResponse(
     val erForsteSykmelding: Boolean,
+    val tidligsteFom: LocalDate? = null,
 )

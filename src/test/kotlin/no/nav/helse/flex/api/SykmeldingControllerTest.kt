@@ -937,6 +937,78 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
             response.erForsteSykmelding `should be equal to` true
+            response.tidligsteFom `should be equal to` null
+        }
+
+        @Test
+        fun `burde returnere true med begrenset tidligsteFom når det finnes en tidligere sykmelding uten samme ventetid`() {
+            val forrigeSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "2",
+                                pasient = lagPasient(fnr = "fnr"),
+                                aktiviteter =
+                                    listOf(
+                                        lagAktivitetIkkeMulig(
+                                            fom = LocalDate.parse("2021-01-01"),
+                                            tom = LocalDate.parse("2021-01-10"),
+                                        ),
+                                    ),
+                            ),
+                        hendelser =
+                            listOf(
+                                lagSykmeldingHendelse(
+                                    status = HendelseStatus.SENDT_TIL_NAV,
+                                    brukerSvar = lagFrilanserBrukerSvar(),
+                                ),
+                            ),
+                    ),
+                )
+
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2021-01-20"),
+                                        tom = LocalDate.parse("2021-01-25"),
+                                    ),
+                                ),
+                        ),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_NAV,
+                                brukerSvar = lagFrilanserBrukerSvar(),
+                            ),
+                        ),
+                ).also { sykmeldingRepository.save(it) }
+
+            // Kun sykmelding "1" har samme ventetid, så den er fortsatt første
+            syketilfelleClient.setPerioderMedSammeVentetid(
+                SammeVentetidResponse(listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom)))),
+            )
+
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/FRILANSER")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
+            response.erForsteSykmelding `should be equal to` true
+            response.tidligsteFom `should be equal to` forrigeSykmelding.tom.plusDays(1)
         }
 
         @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
+import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
@@ -242,6 +243,176 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                 )
 
             result `should be equal to` true
+        }
+    }
+
+    @Nested
+    inner class FinnTidligsteFomForMeldingTilNavDager {
+        @Test
+        fun `burde returnere null når det ikke finnes en tidligere sykmelding`() {
+            val sykmelding =
+                lagreSykmelding(
+                    id = "1",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` null
+        }
+
+        @Test
+        fun `burde returnere dagen etter forrige sykmeldings tom når den er før fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-05"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` LocalDate.parse("2021-01-06")
+        }
+
+        @Test
+        fun `burde ignorere tidligere sykmelding som ikke er sendt til nav`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2021-01-01"),
+                                        tom = LocalDate.parse("2021-01-05"),
+                                    ),
+                                ),
+                        ),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.APEN,
+                                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                            ),
+                        ),
+                ),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` null
+        }
+
+        @Test
+        fun `burde ignorere tidligere sykmelding som slutter på eller etter nåværende fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-12"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` null
+        }
+
+        @Test
+        fun `burde returnere fom når forrige sykmelding slutter dagen før fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-09"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` LocalDate.parse("2021-01-10")
+        }
+
+        @Test
+        fun `burde ignorere tidligere sykmelding der tom er mer enn 16 dager før fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2020-12-01"),
+                tom = LocalDate.parse("2020-12-20"),
+                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-10"),
+                    tom = LocalDate.parse("2021-01-20"),
+                    brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.NAERINGSDRIVENDE,
+                    identer = PersonIdenter(originalIdent = "fnr"),
+                )
+
+            result `should be equal to` null
         }
     }
 

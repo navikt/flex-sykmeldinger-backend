@@ -31,6 +31,11 @@ interface ISykmeldingRepository {
         fom: LocalDate?,
     ): List<Sykmelding>
 
+    fun findAllByPersonIdenterFom(
+        identer: PersonIdenter,
+        fom: LocalDate,
+    ): List<Sykmelding>
+
     fun deleteBySykmeldingId(sykmeldingId: String)
 
     fun delete(sykmelding: Sykmelding)
@@ -101,6 +106,20 @@ class SykmeldingRepository(
         }
     }
 
+    override fun findAllByPersonIdenterFom(
+        identer: PersonIdenter,
+        fom: LocalDate,
+    ): List<Sykmelding> {
+        val dbRecords =
+            sykmeldingDbRepository.findAllByFnrInAndLatestTomOnOrAfter(identer.alle(), fom)
+        val statusDbRecords =
+            sykmeldingHendelseDbRepository.findAllBySykmeldingIdIn(dbRecords.map { it.sykmeldingId })
+        return dbRecords.map { dbRecord ->
+            val statusDbRecords = statusDbRecords.filter { it.sykmeldingId == dbRecord.sykmeldingId }
+            mapTilSykmelding(dbRecord, statusDbRecords)
+        }
+    }
+
     @Transactional(rollbackFor = [Exception::class])
     override fun deleteBySykmeldingId(sykmeldingId: String) {
         val sykmelding = findBySykmeldingId(sykmeldingId)
@@ -160,6 +179,22 @@ interface SykmeldingDbRepository : CrudRepository<SykmeldingDbRecord, String> {
     )
     fun findAllBySykmeldingIdInAndLatestTomOnOrAfter(
         sykmeldingIder: List<String>,
+        fom: LocalDate,
+    ): List<SykmeldingDbRecord>
+
+    @Query(
+        """
+    SELECT *
+    FROM sykmelding
+    WHERE fnr IN (:identer)
+      AND (
+        SELECT MAX((a->>'tom')::date)
+        FROM jsonb_array_elements(sykmelding->'aktivitet') a
+      ) >= :fom
+    """,
+    )
+    fun findAllByFnrInAndLatestTomOnOrAfter(
+        identer: List<String>,
         fom: LocalDate,
     ): List<SykmeldingDbRecord>
 
