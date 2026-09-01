@@ -22,6 +22,7 @@ import no.nav.helse.flex.testconfig.fakes.SykepengesoknadBackendClientFake
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
+import no.nav.helse.flex.unleash.UNLEASH_CONTEXT_BEGRENS_NAV_DAGER
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -32,6 +33,7 @@ import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,6 +70,11 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
     val defaultClientId: String
         get() = dittSykefravaerFrontendClientId
+
+    @BeforeAll
+    fun setup() {
+        fakeUnleash.enable(UNLEASH_CONTEXT_BEGRENS_NAV_DAGER)
+    }
 
     @Test
     fun `burde ha riktig tilgangskontroll`() {

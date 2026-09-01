@@ -20,6 +20,7 @@ import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelseHandterer
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
+import no.nav.helse.flex.unleash.UnleashToggles
 import no.nav.helse.flex.utils.logger
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.beans.factory.annotation.Value
@@ -46,6 +47,7 @@ class SykmeldingController(
     private val sykmeldingVentetidService: SykmeldingVentetidService,
     private val sykepengesoknadBackendClient: SykepengesoknadBackendClient,
     private val sykmeldingOptInService: SykmeldingOptInService,
+    private val unleashToggles: UnleashToggles,
 ) {
     private val logger = logger()
 
@@ -196,7 +198,7 @@ class SykmeldingController(
             )
 
         val tidligsteFom =
-            if (erForsteSykmelding) {
+            if (erForsteSykmelding && unleashToggles.begrensNavDagerEnabled(sykmelding.pasientFnr)) {
                 sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
                     sykmelding = sykmelding,
                     arbeidssituasjon = arbeidssituasjon,

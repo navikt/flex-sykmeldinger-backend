@@ -101,6 +101,8 @@ spec:
           - name: {{@key}}
             value: "{{this}}"
         {{/each}}
+  envFrom:
+    - secret: flex-sykmeldinger-backend-unleash-api-token
   env:
   {{#each env}}
      - name: {{@key}}

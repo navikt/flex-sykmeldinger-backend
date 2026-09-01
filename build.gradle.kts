@@ -30,6 +30,7 @@ val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.65.0"
 val opentelemetryInstrumentationVersion = "2.30.0"
+val unleashVersion = "12.2.3"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -52,6 +53,7 @@ dependencies {
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
+    implementation("io.getunleash:unleash-client-java:$unleashVersion")
     implementation("io.opentelemetry:opentelemetry-api:$opentelemetryApiVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryInstrumentationVersion")
     implementation("org.aspectj:aspectjweaver")

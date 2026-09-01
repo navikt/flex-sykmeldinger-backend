@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 @EnableMockOAuth2Server
 @SpringBootTest(classes = [Application::class])
 @AutoConfigureMockMvc(print = MockMvcPrint.NONE, printOnlyOnFailure = false)
-@ActiveProfiles("default")
+@ActiveProfiles("default", "fakeunleash")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class ApplicationTest {
     @Autowired
