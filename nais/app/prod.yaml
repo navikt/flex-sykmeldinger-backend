@@ -13,9 +13,10 @@ external-host:
   - ereg-services.prod-fss-pub.nais.io
 db_pointInTimeRecovery: true
 db_flags:
-  cloudsql.enable_pgaudit: "true"
+  cloudsql.enable_pgaudit: "on"
   pgaudit.log: 'write,ddl,role'
   pgaudit.log_parameter: "on"
+  pgaudit.log_relation: "on"
 flex_group_id: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
 env:
   SPRING_PROFILES_ACTIVE: default
