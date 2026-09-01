@@ -198,12 +198,13 @@ class SykmeldingController(
             )
 
         val tidligsteFom =
-            if (erForsteSykmelding && unleashToggles.begrensNavDagerEnabled(sykmelding.pasientFnr)) {
-                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
-                    sykmelding = sykmelding,
-                    arbeidssituasjon = arbeidssituasjon,
-                    identer = identer,
-                )
+            if (erForsteSykmelding) {
+                sykmeldingVentetidService
+                    .finnTidligsteFomForMeldingTilNavDager(
+                        sykmelding = sykmelding,
+                        arbeidssituasjon = arbeidssituasjon,
+                        identer = identer,
+                    )?.let { if (unleashToggles.begrensNavDagerEnabled(sykmelding.pasientFnr)) it else null }
             } else {
                 null
             }
