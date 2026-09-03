@@ -22,7 +22,6 @@ import no.nav.helse.flex.testconfig.fakes.SykepengesoknadBackendClientFake
 import no.nav.helse.flex.testconfig.fakes.SyketilfelleClientFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testutils.tokenxToken
-import no.nav.helse.flex.unleash.UNLEASH_CONTEXT_BEGRENS_NAV_DAGER
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -917,7 +916,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde returnere true dersom det ikke finnes andre sykmeldinger med samme ventetid`() {
-            fakeUnleash.enable(UNLEASH_CONTEXT_BEGRENS_NAV_DAGER)
             val sykmelding =
                 lagSykmelding(
                     sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
@@ -945,7 +943,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde returnere true med begrenset tidligsteFom når det finnes en tidligere sykmelding uten samme ventetid`() {
-            fakeUnleash.enable(UNLEASH_CONTEXT_BEGRENS_NAV_DAGER)
             val forrigeSykmelding =
                 sykmeldingRepository.save(
                     lagSykmelding(
@@ -1013,23 +1010,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
             response.erForsteSykmelding `should be equal to` true
             response.tidligsteFom `should be equal to` forrigeSykmelding.tom.plusDays(1)
-
-            fakeUnleash.disable(UNLEASH_CONTEXT_BEGRENS_NAV_DAGER)
-
-            val resultDisabled =
-                mockMvc
-                    .perform(
-                        MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/FRILANSER")
-                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
-                            .contentType(MediaType.APPLICATION_JSON),
-                    ).andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn()
-                    .response.contentAsString
-
-            val responseDisabled: ErForsteSykmeldingResponse = objectMapper.readValue(resultDisabled)
-            responseDisabled.erForsteSykmelding `should be equal to` true
-            responseDisabled.tidligsteFom `should be equal to` null
         }
 
         @Test
