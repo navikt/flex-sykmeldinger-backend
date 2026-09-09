@@ -30,7 +30,7 @@ val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.65.0"
 val opentelemetryInstrumentationVersion = "2.31.1"
-val unleashVersion = "12.2.3"
+val unleashVersion = "12.3.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
