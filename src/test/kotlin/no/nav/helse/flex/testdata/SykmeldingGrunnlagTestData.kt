@@ -176,6 +176,7 @@ fun lagDigitalSykmeldingGrunnlag(id: String = "1"): DigitalSykmeldingGrunnlag =
                     sporsmal = "sporsmal",
                 ),
             ),
+        prognose = null,
     )
 
 fun lagSykmeldingMetadata(
