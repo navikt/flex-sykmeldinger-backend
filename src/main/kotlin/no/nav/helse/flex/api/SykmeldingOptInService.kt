@@ -2,6 +2,8 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
+import no.nav.helse.flex.optin.OptInDbRecord
+import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmelding.UgyldigOptinException
@@ -10,15 +12,21 @@ import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.utils.logger
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.util.function.Supplier
 
 @Service
 class SykmeldingOptInService(
     private val sykmeldingLeser: SykmeldingLeser,
     private val sykepengesoknadBackendClient: SykepengesoknadBackendClient,
     private val sykmeldingKafkaMessageKonverterer: SykmeldingKafkaMessageKonverterer,
+    private val optInDbRepository: OptInDbRepository,
+    private val nowFactory: Supplier<Instant>,
 ) {
     private val logger = logger()
 
+    @Transactional(rollbackFor = [Exception::class])
     fun behandleOptIn(
         sykmeldingId: String,
         identer: PersonIdenter,
@@ -29,6 +37,12 @@ class SykmeldingOptInService(
         logger.info("Opt-in: Henter sykmelding ${sykmelding.sykmeldingId} med status ${sisteHendelse.status}")
         validerOptInKanUtfores(sykmelding, sisteHendelse)
 
+        optInDbRepository.save(
+            OptInDbRecord(
+                sykmeldingId = sykmelding.sykmeldingId,
+                opprettet = nowFactory.get(),
+            ),
+        )
         sykepengesoknadBackendClient.opprettOptIn(sykmeldingKafkaMessageKonverterer.opprettTilsvarendeSykmeldingKafkaMessage(sykmelding)!!)
         logger.info("Opt-in: Opprettet søknad for sykmelding ${sykmelding.sykmeldingId}")
     }

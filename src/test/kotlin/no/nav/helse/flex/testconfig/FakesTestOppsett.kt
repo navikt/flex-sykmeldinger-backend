@@ -4,6 +4,7 @@ import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
+import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testconfig.fakes.AuditLogProducerFake
@@ -51,6 +52,9 @@ abstract class FakesTestOppsett {
     lateinit var sykmeldingRepository: ISykmeldingRepository
 
     @Autowired
+    lateinit var optInDbRepository: OptInDbRepository
+
+    @Autowired
     lateinit var advisoryLock: AdvisoryLockFake
 
     @Autowired
@@ -69,6 +73,7 @@ abstract class FakesTestOppsett {
         narmesteLederRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
+        optInDbRepository.deleteAll()
         advisoryLock.reset()
         auditLogProducer.reset()
     }

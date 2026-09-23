@@ -4,6 +4,7 @@ import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
+import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.outbox.OutboxDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingRepository
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
@@ -35,6 +36,9 @@ import org.springframework.test.web.servlet.MockMvc
 abstract class IntegrasjonTestOppsett {
     @Autowired
     lateinit var outboxDbRepository: OutboxDbRepository
+
+    @Autowired
+    lateinit var optInDbRepository: OptInDbRepository
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -77,6 +81,7 @@ abstract class IntegrasjonTestOppsett {
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         outboxDbRepository.deleteAll()
+        optInDbRepository.deleteAll()
     }
 
     private fun ventPaConsumers() {

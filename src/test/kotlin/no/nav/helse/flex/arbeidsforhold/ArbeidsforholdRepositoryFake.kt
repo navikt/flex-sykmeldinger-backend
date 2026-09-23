@@ -1,11 +1,13 @@
 package no.nav.helse.flex.arbeidsforhold
 
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
+import no.nav.helse.flex.testutils.uuidIdGenerator
 
 class ArbeidsforholdRepositoryFake :
-    AbstractCrudRepositoryFake<Arbeidsforhold>(
+    AbstractCrudRepositoryFake<Arbeidsforhold, String>(
         getEntityId = { it.id },
         setEntityId = { entity, id -> entity.copy(id = id) },
+        lagId = uuidIdGenerator(),
         uniqueConstraints =
             listOf(
                 Arbeidsforhold::navArbeidsforholdId,
