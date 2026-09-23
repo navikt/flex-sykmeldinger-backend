@@ -1,6 +1,7 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.config.PersonIdenter
+import no.nav.helse.flex.optin.OptInDbRecord
 import no.nav.helse.flex.sykmeldinghendelse.FiskerBrukerSvar
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
@@ -364,6 +365,20 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
         sykmeldingRepository.delete(sykmelding1)
         sykmeldingHendelseDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
+    }
+
+    @Test
+    fun `delete burde slette opt-in for sykmeldingen`() {
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1")))
+        sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2")))
+        optInDbRepository.save(OptInDbRecord(sykmeldingId = "1", opprettet = Instant.parse("2025-01-01T12:00:00Z")))
+        optInDbRepository.save(OptInDbRecord(sykmeldingId = "2", opprettet = Instant.parse("2025-01-01T12:00:00Z")))
+
+        val sykmelding1 = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        sykmeldingRepository.delete(sykmelding1)
+
+        optInDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
+        optInDbRepository.findAllBySykmeldingId("2").shouldNotBeEmpty()
     }
 
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =

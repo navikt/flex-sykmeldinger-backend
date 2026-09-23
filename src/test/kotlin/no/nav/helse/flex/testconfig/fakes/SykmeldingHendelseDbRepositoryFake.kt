@@ -3,11 +3,13 @@ package no.nav.helse.flex.testconfig.fakes
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRecord
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
+import no.nav.helse.flex.testutils.uuidIdGenerator
 
 class SykmeldingHendelseDbRepositoryFake :
-    AbstractCrudRepositoryFake<SykmeldingHendelseDbRecord>(
+    AbstractCrudRepositoryFake<SykmeldingHendelseDbRecord, String>(
         getEntityId = { it.id },
         setEntityId = { entity, id -> entity.copy(id = id) },
+        lagId = uuidIdGenerator(),
     ),
     SykmeldingHendelseDbRepository {
     override fun findAllBySykmeldingId(sykmeldingUuid: String): List<SykmeldingHendelseDbRecord> =

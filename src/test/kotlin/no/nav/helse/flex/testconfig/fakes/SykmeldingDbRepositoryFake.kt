@@ -3,12 +3,14 @@ package no.nav.helse.flex.testconfig.fakes
 import no.nav.helse.flex.sykmelding.SykmeldingDbRecord
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
 import no.nav.helse.flex.testutils.AbstractCrudRepositoryFake
+import no.nav.helse.flex.testutils.uuidIdGenerator
 import java.time.LocalDate
 
 class SykmeldingDbRepositoryFake :
-    AbstractCrudRepositoryFake<SykmeldingDbRecord>(
+    AbstractCrudRepositoryFake<SykmeldingDbRecord, String>(
         getEntityId = { it.id },
         setEntityId = { entity, id -> entity.copy(id = id) },
+        lagId = uuidIdGenerator(),
     ),
     SykmeldingDbRepository {
     override fun findAllByFnrIn(identer: List<String>): List<SykmeldingDbRecord> = this.entities.values.filter { it.fnr in identer }

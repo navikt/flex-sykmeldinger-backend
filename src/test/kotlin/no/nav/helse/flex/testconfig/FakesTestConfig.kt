@@ -4,6 +4,7 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
+import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
@@ -34,6 +35,9 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
+
+    @Bean
+    fun optInDbRepository(): OptInDbRepository = OptInDbRepositoryFake()
 
     @Bean
     fun advisoryLock(): AdvisoryLockFake = AdvisoryLockFake()

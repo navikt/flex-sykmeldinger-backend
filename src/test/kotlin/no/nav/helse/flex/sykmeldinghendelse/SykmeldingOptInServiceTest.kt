@@ -5,6 +5,7 @@ import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
 import no.nav.helse.flex.sykmelding.UgyldigOptinException
 import no.nav.helse.flex.testconfig.FakesTestOppsett
+import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testconfig.fakes.SykepengesoknadBackendClientFake
 import no.nav.helse.flex.testdata.*
 import org.amshove.kluent.`should be equal to`
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 class SykmeldingOptInServiceTest : FakesTestOppsett() {
     @Autowired
@@ -21,10 +23,14 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
     @Autowired
     lateinit var sykepengesoknadBackendClient: SykepengesoknadBackendClientFake
 
+    @Autowired
+    lateinit var nowFactory: NowFactoryFake
+
     @AfterEach
     fun cleanUp() {
         slettDatabase()
         sykepengesoknadBackendClient.reset()
+        nowFactory.reset()
     }
 
     @Nested
@@ -89,6 +95,29 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
             sykepengesoknadBackendClient.opprettOptInRequests
                 .first()
                 .kafkaMetadata.sykmeldingId `should be equal to` "1"
+        }
+
+        @Test
+        fun `burde lagre opt-in med sykmeldingId og tidspunkt`() {
+            nowFactory.setNow(Instant.parse("2025-01-01T12:00:00Z"))
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_NAV,
+                                brukerSvar = lagNaringsdrivendeBrukerSvar(),
+                            ),
+                        ),
+                ),
+            )
+
+            sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
+
+            val optIns = optInDbRepository.findAllBySykmeldingId("1")
+            optIns.size `should be equal to` 1
+            optIns.first().opprettet `should be equal to` Instant.parse("2025-01-01T12:00:00Z")
         }
     }
 
