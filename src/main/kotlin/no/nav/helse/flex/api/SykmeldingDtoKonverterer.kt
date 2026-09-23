@@ -81,7 +81,7 @@ class SykmeldingDtoKonverterer(
         return konverterTilSykmeldingDTO(sykmelding) {
             copy(
                 arbeidsgiver = arbeidsgiver.tilArbeidsgiverDTO(),
-                prognose = sykmelding.sykmeldingGrunnlag.prognose?.let { konverterPrognose(it) },
+                prognose = konverterPrognose(sykmelding.sykmeldingGrunnlag),
                 utdypendeOpplysninger =
                     konverterUtdypendeOpplysninger(
                         sykmelding.sykmeldingGrunnlag.utdypendeOpplysninger,
@@ -383,6 +383,28 @@ class SykmeldingDtoKonverterer(
             tekst = diagnose.tekst,
             system = diagnose.system.name,
             kode = diagnose.kode,
+        )
+
+    internal fun konverterPrognose(sykmelding: SykmeldingGrunnlag): PrognoseDTO? =
+        when (sykmelding) {
+            is DigitalSykmeldingGrunnlag -> sykmelding.prognose?.let { konverterPrognose(it) }
+            is PapirSykmeldingGrunnlag -> sykmelding.prognose?.let { konverterPrognose(it) }
+            is XMLSykmeldingGrunnlag -> sykmelding.prognose?.let { konverterPrognose(it) }
+            is UtenlandskSykmeldingGrunnlag -> null
+        }
+
+    internal fun konverterPrognose(prognose: DigitalPrognose): PrognoseDTO =
+        PrognoseDTO(
+            arbeidsforEtterPeriode = false,
+            hensynArbeidsplassen = null,
+            erIkkeIArbeid = null,
+            erIArbeid =
+                ErIArbeidDTO(
+                    egetArbeidPaSikt = false,
+                    annetArbeidPaSikt = prognose.friskmeldingTilArbeidsformidling,
+                    arbeidFOM = null,
+                    vurderingsdato = null,
+                ),
         )
 
     internal fun konverterPrognose(prognose: Prognose): PrognoseDTO {

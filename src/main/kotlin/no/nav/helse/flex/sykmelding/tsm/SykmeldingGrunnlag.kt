@@ -46,7 +46,6 @@ sealed interface NorskSykmeldingGrunnlag : SykmeldingGrunnlag {
     val behandler: Behandler
     val arbeidsgiver: ArbeidsgiverInfo
     val sykmelder: Sykmelder
-    val prognose: Prognose?
     val tiltak: Tiltak?
     val bistandNav: BistandNav?
     val tilbakedatering: Tilbakedatering?
@@ -62,7 +61,7 @@ data class XMLSykmeldingGrunnlag(
     override val behandler: Behandler,
     override val arbeidsgiver: ArbeidsgiverInfo,
     override val sykmelder: Sykmelder,
-    override val prognose: Prognose?,
+    val prognose: Prognose?,
     override val tiltak: Tiltak?,
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
@@ -83,8 +82,8 @@ data class DigitalSykmeldingGrunnlag(
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
     val utdypendeSporsmal: List<UtdypendeSporsmal>? = null,
+    val prognose: DigitalPrognose?,
 ) : NorskSykmeldingGrunnlag {
-    override val prognose: Prognose? = null
     override val tiltak: Tiltak? = null
     override val type = SykmeldingType.DIGITAL
 
@@ -102,7 +101,7 @@ data class PapirSykmeldingGrunnlag(
     override val behandler: Behandler,
     override val arbeidsgiver: ArbeidsgiverInfo,
     override val sykmelder: Sykmelder,
-    override val prognose: Prognose?,
+    val prognose: Prognose?,
     override val tiltak: Tiltak?,
     override val bistandNav: BistandNav?,
     override val tilbakedatering: Tilbakedatering?,
@@ -204,6 +203,10 @@ data class BistandNav(
 data class Tiltak(
     val tiltakNav: String?,
     val andreTiltak: String?,
+)
+
+data class DigitalPrognose(
+    val friskmeldingTilArbeidsformidling: Boolean,
 )
 
 data class Prognose(

@@ -90,10 +90,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     sykmeldingGrunnlag.medisinskVurdering,
                 )
             dto.arbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
-            dto.prognose `should be equal to`
-                sykmeldingGrunnlag.prognose?.let {
-                    sykmeldingDtoKonverterer.konverterPrognose(it)
-                }
+            dto.prognose `should be equal to` sykmeldingDtoKonverterer.konverterPrognose(sykmeldingGrunnlag)
             dto.utdypendeOpplysninger `should be equal to`
                 sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
             dto.kontaktMedPasient `should be equal to`
@@ -389,6 +386,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
         val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
         konverterePrognose.erIkkeIArbeid.`should be null`()
         konverterePrognose.erIArbeid?.egetArbeidPaSikt `should be` true
+    }
+
+    @Test
+    fun `burde konvertere ny (digital) prognose`() {
+        val prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = true)
+        val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
+        konverterePrognose.erIkkeIArbeid.`should be null`()
+        konverterePrognose.erIArbeid?.annetArbeidPaSikt `should be` true
     }
 
     @Test
