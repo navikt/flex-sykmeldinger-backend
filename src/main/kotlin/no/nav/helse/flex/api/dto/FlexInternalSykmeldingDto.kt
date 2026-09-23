@@ -1,6 +1,7 @@
 package no.nav.helse.flex.api.dto
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.flex.optin.OptIn
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.utils.toJsonNode
 import java.time.Instant
@@ -33,6 +34,14 @@ data class FlexInternalHendelseDto(
     }
 }
 
+data class FlexInternalOptInDto(
+    val opprettet: Instant,
+) {
+    companion object {
+        fun fra(optIn: OptIn) = FlexInternalOptInDto(opprettet = optIn.opprettet)
+    }
+}
+
 data class FlexInternalSykmeldingDto(
     val id: String,
     val pasient: FlexInternalPasientDto,
@@ -51,11 +60,13 @@ data class FlexInternalSykmeldingDto(
     val merknader: List<MerknadDTO>?,
     val signaturDato: OffsetDateTime?,
     val utenlandskSykmelding: UtenlandskSykmelding?,
+    val optIn: List<FlexInternalOptInDto>,
 ) {
     companion object {
         fun fra(
             sykmeldingDto: SykmeldingDTO,
             hendelser: List<SykmeldingHendelse>,
+            optIn: List<OptIn>,
         ) = FlexInternalSykmeldingDto(
             id = sykmeldingDto.id,
             pasient = FlexInternalPasientDto(fnr = sykmeldingDto.pasient.fnr, overSyttiAar = sykmeldingDto.pasient.overSyttiAar),
@@ -74,6 +85,7 @@ data class FlexInternalSykmeldingDto(
             merknader = sykmeldingDto.merknader,
             signaturDato = sykmeldingDto.signaturDato,
             utenlandskSykmelding = sykmeldingDto.utenlandskSykmelding,
+            optIn = optIn.sortedBy { it.opprettet }.map { FlexInternalOptInDto.fra(it) },
         )
     }
 }

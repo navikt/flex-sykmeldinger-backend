@@ -10,4 +10,10 @@ data class OptInDbRecord(
     val id: Long? = null,
     val sykmeldingId: String,
     val opprettet: Instant,
-)
+) {
+    fun tilOptIn(): OptIn =
+        OptIn(
+            sykmeldingId = sykmeldingId,
+            opprettet = opprettet,
+        )
+}
