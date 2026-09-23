@@ -392,8 +392,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
     fun `burde konvertere ny (digital) prognose`() {
         val prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = true)
         val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
-        konverterePrognose.erIkkeIArbeid.`should be null`()
-        konverterePrognose.erIArbeid?.annetArbeidPaSikt `should be` true
+        konverterePrognose?.erIkkeIArbeid.`should be null`()
+        konverterePrognose?.erIArbeid?.annetArbeidPaSikt `should be` true
     }
 
     @Test

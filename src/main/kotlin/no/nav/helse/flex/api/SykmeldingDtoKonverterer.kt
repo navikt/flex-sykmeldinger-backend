@@ -393,19 +393,22 @@ class SykmeldingDtoKonverterer(
             is UtenlandskSykmeldingGrunnlag -> null
         }
 
-    internal fun konverterPrognose(prognose: DigitalPrognose): PrognoseDTO =
-        PrognoseDTO(
+    internal fun konverterPrognose(prognose: DigitalPrognose): PrognoseDTO? {
+        if (!prognose.friskmeldingTilArbeidsformidling) return null
+
+        return PrognoseDTO(
             arbeidsforEtterPeriode = false,
             hensynArbeidsplassen = null,
             erIkkeIArbeid = null,
             erIArbeid =
                 ErIArbeidDTO(
                     egetArbeidPaSikt = false,
-                    annetArbeidPaSikt = prognose.friskmeldingTilArbeidsformidling,
+                    annetArbeidPaSikt = true,
                     arbeidFOM = null,
                     vurderingsdato = null,
                 ),
         )
+    }
 
     internal fun konverterPrognose(prognose: Prognose): PrognoseDTO {
         val erIArbeidDTO =
