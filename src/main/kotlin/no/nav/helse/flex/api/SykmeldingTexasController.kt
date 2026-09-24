@@ -25,6 +25,7 @@ class SykmeldingTexasController(
     private val identService: IdentService,
     private val auditLogProducer: AuditLogProducer,
     private val sykmeldingKafkaMessageKonverterer: SykmeldingKafkaMessageKonverterer,
+    private val sykmeldingOptInService: SykmeldingOptInService,
 ) {
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
@@ -69,6 +70,7 @@ class SykmeldingTexasController(
 
         val identer = identService.hentFolkeregisterIdenterMedHistorikkForFnr(fnrRequest.fnr)
         val sykmeldinger = sykmeldingLeser.hentAlleSykmeldinger(identer)
+        val optInPerSykmelding = sykmeldingOptInService.hentOptInPerSykmelding(sykmeldinger.map { it.sykmeldingId })
 
         auditLogProducer.lagAuditLog(
             AuditEntry(
@@ -87,7 +89,11 @@ class SykmeldingTexasController(
         return ResponseEntity.ok(
             FlexInternalResponse(
                 sykmeldinger.map {
-                    FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(it), it.hendelser)
+                    FlexInternalSykmeldingDto.fra(
+                        sykmeldingDto = sykmeldingDtoKonverterer.konverter(it),
+                        hendelser = it.hendelser,
+                        optIn = optInPerSykmelding[it.sykmeldingId].orEmpty(),
+                    )
                 },
             ),
         )
@@ -95,7 +101,7 @@ class SykmeldingTexasController(
 
     @GetMapping(value = ["/api/v1/flex/sykmeldinger/{sykmeldingId}"])
     @ResponseBody
-    fun hentSykmeldingerForFlexInternal(
+    fun hentSykmeldingForFlexInternal(
         @PathVariable("sykmeldingId") sykmeldingId: String,
         request: HttpServletRequest,
     ): ResponseEntity<FlexInternalSykmeldingDto> {
@@ -124,7 +130,11 @@ class SykmeldingTexasController(
         )
 
         return ResponseEntity.ok(
-            FlexInternalSykmeldingDto.fra(sykmeldingDtoKonverterer.konverter(sykmelding), sykmelding.hendelser),
+            FlexInternalSykmeldingDto.fra(
+                sykmeldingDto = sykmeldingDtoKonverterer.konverter(sykmelding),
+                hendelser = sykmelding.hendelser,
+                optIn = sykmeldingOptInService.hentOptIn(sykmelding.sykmeldingId),
+            ),
         )
     }
 }

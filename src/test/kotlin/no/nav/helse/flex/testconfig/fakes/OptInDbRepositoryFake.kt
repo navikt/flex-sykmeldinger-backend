@@ -14,4 +14,7 @@ class OptInDbRepositoryFake :
     OptInDbRepository {
     override fun findAllBySykmeldingId(sykmeldingId: String): List<OptInDbRecord> =
         entities.values.filter { it.sykmeldingId == sykmeldingId }
+
+    override fun findAllBySykmeldingIdIn(sykmeldingIder: Collection<String>): List<OptInDbRecord> =
+        entities.values.filter { it.sykmeldingId in sykmeldingIder }
 }

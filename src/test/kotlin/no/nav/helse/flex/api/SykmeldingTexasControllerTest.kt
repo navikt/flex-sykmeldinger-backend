@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.api.dto.RegelStatusDTO
+import no.nav.helse.flex.optin.OptInDbRecord
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.FakesTestOppsett
@@ -21,6 +22,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.time.Instant
 
 class SykmeldingTexasControllerTest : FakesTestOppsett() {
     @Autowired
@@ -288,6 +290,20 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         }
 
         @Test
+        fun `returnerer opt-in per sykmelding`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = fnr))))
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "2", pasient = lagPasient(fnr = fnr))))
+            optInDbRepository.save(OptInDbRecord(sykmeldingId = "1", opprettet = Instant.parse("2025-01-01T12:00:00Z")))
+            optInDbRepository.save(OptInDbRecord(sykmeldingId = "1", opprettet = Instant.parse("2025-01-02T12:00:00Z")))
+
+            val sykmeldinger = postOgParseRespons(FnrRequest(fnr = fnr)).associateBy { it.id }
+
+            sykmeldinger.getValue("1").optIn.map { it.opprettet } `should be equal to`
+                listOf(Instant.parse("2025-01-01T12:00:00Z"), Instant.parse("2025-01-02T12:00:00Z"))
+            sykmeldinger.getValue("2").optIn.size `should be equal to` 0
+        }
+
+        @Test
         fun `produserer audit-logg med riktig navident og fnr`() {
             postOgParseRespons(FnrRequest(fnr = fnr))
 
@@ -388,6 +404,25 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             sykmelding.hendelser.size `should be equal to` 2
             sykmelding.hendelser[0].status `should be equal to` "APEN"
             sykmelding.hendelser[1].status `should be equal to` "SENDT_TIL_ARBEIDSGIVER"
+        }
+
+        @Test
+        fun `returnerer opt-in for sykmeldingen sortert på opprettet`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+            optInDbRepository.save(OptInDbRecord(sykmeldingId = "1", opprettet = Instant.parse("2025-01-02T12:00:00Z")))
+            optInDbRepository.save(OptInDbRecord(sykmeldingId = "1", opprettet = Instant.parse("2025-01-01T12:00:00Z")))
+
+            val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
+
+            sykmelding.optIn.map { it.opprettet } `should be equal to`
+                listOf(Instant.parse("2025-01-01T12:00:00Z"), Instant.parse("2025-01-02T12:00:00Z"))
+        }
+
+        @Test
+        fun `returnerer tom opt-in-liste når sykmeldingen ikke har opt-in`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+
+            hentSykmeldingOgParseRespons(sykmeldingId = "1").optIn.size `should be equal to` 0
         }
 
         private fun hentSykmeldingOgParseRespons(sykmeldingId: String): FlexInternalSykmeldingDto {

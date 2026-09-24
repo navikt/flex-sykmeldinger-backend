@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
+import no.nav.helse.flex.optin.OptIn
 import no.nav.helse.flex.optin.OptInDbRecord
 import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.Sykmelding
@@ -45,6 +46,18 @@ class SykmeldingOptInService(
         )
         sykepengesoknadBackendClient.opprettOptIn(sykmeldingKafkaMessageKonverterer.opprettTilsvarendeSykmeldingKafkaMessage(sykmelding)!!)
         logger.info("Opt-in: Opprettet søknad for sykmelding ${sykmelding.sykmeldingId}")
+    }
+
+    fun hentOptIn(sykmeldingId: String): List<OptIn> = optInDbRepository.findAllBySykmeldingId(sykmeldingId).map { it.tilOptIn() }
+
+    fun hentOptInPerSykmelding(sykmeldingIder: Collection<String>): Map<String, List<OptIn>> {
+        if (sykmeldingIder.isEmpty()) {
+            return emptyMap()
+        }
+        return optInDbRepository
+            .findAllBySykmeldingIdIn(sykmeldingIder)
+            .map { it.tilOptIn() }
+            .groupBy { it.sykmeldingId }
     }
 
     private fun validerOptInKanUtfores(

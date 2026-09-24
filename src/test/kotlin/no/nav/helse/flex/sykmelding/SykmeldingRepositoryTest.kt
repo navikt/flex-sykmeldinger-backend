@@ -381,6 +381,19 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         optInDbRepository.findAllBySykmeldingId("2").shouldNotBeEmpty()
     }
 
+    @Test
+    fun `findAllBySykmeldingIdIn burde hente opt-in for oppgitte sykmeldinger`() {
+        listOf("1", "2", "3").forEach { id ->
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = id)))
+            optInDbRepository.save(OptInDbRecord(sykmeldingId = id, opprettet = Instant.parse("2025-01-01T12:00:00Z")))
+        }
+
+        optInDbRepository
+            .findAllBySykmeldingIdIn(listOf("1", "2"))
+            .map { it.sykmeldingId }
+            .sorted() `should be equal to` listOf("1", "2")
+    }
+
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =
         this.copy(
             databaseId = null,
