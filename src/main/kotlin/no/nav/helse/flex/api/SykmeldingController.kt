@@ -172,6 +172,8 @@ class SykmeldingController(
                 identer = identer,
             )
 
+        logger.info("Sykmelding ${sykmelding.sykmeldingId} er utenfor ventetid: ${erUtenforVentetid.erUtenforVentetid}")
+
         return ResponseEntity.ok(erUtenforVentetid)
     }
 
