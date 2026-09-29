@@ -12,20 +12,6 @@ class SykepengesoknadBackendEksternClient(
     private val sykepengesoknadBackendRestClient: RestClient,
 ) : SykepengesoknadBackendClient {
     @Retryable
-    override fun harSoknad(sykmeldingId: String): Boolean {
-        val response =
-            sykepengesoknadBackendRestClient
-                .get()
-                .uri { uriBuilder ->
-                    uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingId/harSoknad").build()
-                }.retrieve()
-                .toEntity<HarSoknadResponse>()
-
-        return response.body?.harSoknad
-            ?: throw IllegalStateException("harSoknad response inneholdt ikke data for sykmelding $sykmeldingId")
-    }
-
-    @Retryable
     override fun harSoknad(
         sykmeldingId: String,
         arbeidssituasjon: ArbeidssituasjonDTO,

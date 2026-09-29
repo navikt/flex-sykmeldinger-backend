@@ -8,8 +8,6 @@ class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
     val opprettOptInRequests = mutableListOf<SykmeldingKafkaMessage>()
     private var harSoknadResponse: Boolean = false
 
-    override fun harSoknad(sykmeldingId: String): Boolean = harSoknadResponse
-
     override fun harSoknad(
         sykmeldingId: String,
         arbeidssituasjon: ArbeidssituasjonDTO,
