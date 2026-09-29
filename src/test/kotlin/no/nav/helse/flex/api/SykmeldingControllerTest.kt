@@ -1094,7 +1094,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 mockMvc
                     .perform(
                         MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/har-soknad")
+                            .get("/api/v1/sykmeldinger/1/har-soknad/${ArbeidssituasjonDTO.NAERINGSDRIVENDE}")
                             .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
                             .contentType(MediaType.APPLICATION_JSON),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
@@ -1116,7 +1116,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 mockMvc
                     .perform(
                         MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/har-soknad")
+                            .get("/api/v1/sykmeldinger/1/har-soknad/${ArbeidssituasjonDTO.NAERINGSDRIVENDE}")
                             .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
                             .contentType(MediaType.APPLICATION_JSON),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
@@ -1129,11 +1129,15 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
         @Test
         fun `burde returnere 404 om sykmelding ikke finnes`() =
-            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/har-soknad" }
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId ->
+                "/api/v1/sykmeldinger/$sykmeldingId/har-soknad/${ArbeidssituasjonDTO.NAERINGSDRIVENDE}"
+            }
 
         @Test
         fun `burde returnere 403 for feil fnr`() =
-            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/har-soknad" }
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId ->
+                "/api/v1/sykmeldinger/$sykmeldingId/har-soknad/${ArbeidssituasjonDTO.NAERINGSDRIVENDE}"
+            }
 
         @Test
         fun `burde avvise kall fra sykepengesoknad client-id`() {
@@ -1141,7 +1145,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr"))),
             )
             sjekkStatus(
-                url = "/api/v1/sykmeldinger/1/har-soknad",
+                url = "/api/v1/sykmeldinger/1/har-soknad/${ArbeidssituasjonDTO.NAERINGSDRIVENDE}",
                 token = oauth2Server.tokenxToken(fnr = "fnr", clientId = sykepengesoknadClientId),
                 expectedStatus = HttpStatus.FORBIDDEN,
             )

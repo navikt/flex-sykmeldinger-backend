@@ -1,5 +1,6 @@
 package no.nav.helse.flex.testconfig.fakes
 
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 
@@ -8,6 +9,11 @@ class SykepengesoknadBackendClientFake : SykepengesoknadBackendClient {
     private var harSoknadResponse: Boolean = false
 
     override fun harSoknad(sykmeldingId: String): Boolean = harSoknadResponse
+
+    override fun harSoknad(
+        sykmeldingId: String,
+        arbeidssituasjon: ArbeidssituasjonDTO,
+    ): Boolean = harSoknadResponse
 
     fun setHarSoknad(verdi: Boolean) {
         harSoknadResponse = verdi

@@ -1,5 +1,6 @@
 package no.nav.helse.flex.gateways
 
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendEksternClient
@@ -47,7 +48,7 @@ class SykepengesoknadBackendClientTest {
                         .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
                 }
-            val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+            val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
             resultat.`should be true`()
         }
 
@@ -59,7 +60,7 @@ class SykepengesoknadBackendClientTest {
                         .setBody(HarSoknadResponse(harSoknad = false).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
                 }
-            val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+            val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
             resultat.`should be false`()
         }
 
@@ -72,7 +73,7 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                 }
             invoking {
-                sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid")
+                sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
             } `should throw` RestClientException::class
         }
 
@@ -87,10 +88,10 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                 }
 
-            sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id")
+            sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
 
             val request = recordedRequest!!
-            request.path `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad"
+            request.path `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad/NAERINGSDRIVENDE"
         }
 
         @Test
@@ -104,7 +105,7 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                 }
 
-            sykepengesoknadBackendEksternClient.harSoknad("test-id")
+            sykepengesoknadBackendEksternClient.harSoknad("test-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
 
             val request = recordedRequest!!
             request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
@@ -192,7 +193,7 @@ class SykepengesoknadBackendClientTest {
                     .addHeader("Content-Type", "application/json")
             }
 
-        sykepengesoknadBackendEksternClient.harSoknad("test-id")
+        sykepengesoknadBackendEksternClient.harSoknad("test-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
 
         val request = recordedRequest!!
         request.headers["Authorization"]!!.shouldStartWith("Bearer ey")

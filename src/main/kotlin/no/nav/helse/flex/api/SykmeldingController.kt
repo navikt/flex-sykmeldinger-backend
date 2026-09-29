@@ -228,6 +228,23 @@ class SykmeldingController(
         return ResponseEntity.ok(HarSoknadResponse(harSoknad = harSoknad))
     }
 
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/har-soknad/{arbeidssituasjon}")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun getHarSoknad(
+        @PathVariable sykmeldingId: String,
+        @PathVariable arbeidssituasjon: ArbeidssituasjonDTO,
+    ): ResponseEntity<HarSoknadResponse> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+        sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val harSoknad = sykepengesoknadBackendClient.harSoknad(sykmeldingId, arbeidssituasjon)
+        return ResponseEntity.ok(HarSoknadResponse(harSoknad = harSoknad))
+    }
+
     @PostMapping("/api/v1/sykmeldinger/{sykmeldingId}/opt-in")
     @ProtectedWithClaims(
         issuer = TOKENX,
