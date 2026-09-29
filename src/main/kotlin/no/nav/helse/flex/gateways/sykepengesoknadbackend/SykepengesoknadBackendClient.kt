@@ -4,8 +4,6 @@ import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 
 interface SykepengesoknadBackendClient {
-    fun harSoknad(sykmeldingId: String): Boolean
-
     fun harSoknad(
         sykmeldingId: String,
         arbeidssituasjon: ArbeidssituasjonDTO,
