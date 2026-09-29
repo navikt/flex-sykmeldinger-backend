@@ -1,5 +1,6 @@
 package no.nav.helse.flex.gateways.sykepengesoknadbackend
 
+import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -17,6 +18,23 @@ class SykepengesoknadBackendEksternClient(
                 .get()
                 .uri { uriBuilder ->
                     uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingId/harSoknad").build()
+                }.retrieve()
+                .toEntity<HarSoknadResponse>()
+
+        return response.body?.harSoknad
+            ?: throw IllegalStateException("harSoknad response inneholdt ikke data for sykmelding $sykmeldingId")
+    }
+
+    @Retryable
+    override fun harSoknad(
+        sykmeldingId: String,
+        arbeidssituasjon: ArbeidssituasjonDTO,
+    ): Boolean {
+        val response =
+            sykepengesoknadBackendRestClient
+                .get()
+                .uri { uriBuilder ->
+                    uriBuilder.path("/api/v2/soknader/sykmelding/$sykmeldingId/harSoknad/$arbeidssituasjon").build()
                 }.retrieve()
                 .toEntity<HarSoknadResponse>()
 
