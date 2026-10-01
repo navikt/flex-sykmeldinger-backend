@@ -1,6 +1,5 @@
 package no.nav.helse.flex.gateways.aareghendelser
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -15,10 +14,12 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import tools.jackson.module.kotlin.readValue
 import java.util.concurrent.CompletableFuture
 
 class AaregHendelserListenerTest {
@@ -44,6 +45,7 @@ class AaregHendelserListenerTest {
                 mapOf(
                     TopicPartition("topic", 1) to listOf(record),
                 ),
+                emptyMap<TopicPartition, OffsetAndMetadata>(),
             )
         invoking {
             listener.listen(records)

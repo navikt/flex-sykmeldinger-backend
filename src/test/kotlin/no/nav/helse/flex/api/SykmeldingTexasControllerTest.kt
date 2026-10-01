@@ -1,6 +1,5 @@
 package no.nav.helse.flex.api
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.api.dto.RegelStatusDTO
@@ -22,6 +21,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 
 class SykmeldingTexasControllerTest : FakesTestOppsett() {

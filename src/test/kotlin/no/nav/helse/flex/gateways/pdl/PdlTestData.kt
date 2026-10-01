@@ -1,6 +1,6 @@
 package no.nav.helse.flex.gateways.pdl
 
-import okhttp3.mockwebserver.MockResponse
+import mockwebserver3.MockResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
@@ -39,7 +39,9 @@ fun <T : Any> lagGraphQlResponse(
             data = data,
         )
 
-    return MockResponse()
-        .setBody(response.tilJson())
+    return MockResponse
+        .Builder()
+        .body(response.tilJson())
         .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .build()
 }

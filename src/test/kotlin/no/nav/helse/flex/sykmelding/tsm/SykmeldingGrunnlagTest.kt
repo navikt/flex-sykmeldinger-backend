@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding.tsm
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
@@ -9,6 +8,7 @@ import no.nav.helse.flex.utils.serialisertTilString
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 class SykmeldingGrunnlagTest {
     @Test

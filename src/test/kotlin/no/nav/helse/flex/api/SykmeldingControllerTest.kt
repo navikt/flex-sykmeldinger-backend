@@ -1,6 +1,5 @@
 package no.nav.helse.flex.api
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
@@ -43,6 +42,7 @@ import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class SykmeldingControllerTest : FakesTestOppsett() {

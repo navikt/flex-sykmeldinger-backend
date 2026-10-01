@@ -1,5 +1,6 @@
 package no.nav.helse.flex.gateways
 
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
@@ -8,7 +9,6 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldNotBeNull

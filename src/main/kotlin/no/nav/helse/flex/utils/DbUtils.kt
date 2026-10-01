@@ -1,7 +1,7 @@
 package no.nav.helse.flex.utils
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.postgresql.util.PGobject
+import tools.jackson.module.kotlin.readValue
 
 fun Any.tilPsqlJson(): PGobject {
     val pgObject = PGobject()

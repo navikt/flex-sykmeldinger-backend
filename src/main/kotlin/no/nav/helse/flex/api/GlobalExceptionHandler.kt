@@ -40,7 +40,7 @@ class GlobalExceptionHandler {
             is JwtTokenInvalidClaimException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is JwtTokenUnauthorizedException -> skapResponseEntity(HttpStatus.UNAUTHORIZED)
             is HttpMediaTypeNotAcceptableException -> skapResponseEntity(HttpStatus.NOT_ACCEPTABLE)
-            is KunneIkkeFinneTilleggsinfoException -> skapResponseEntity(HttpStatus.UNPROCESSABLE_ENTITY)
+            is KunneIkkeFinneTilleggsinfoException -> skapResponseEntity(HttpStatus.UNPROCESSABLE_CONTENT)
             else -> {
                 log.error("Internal server error - ${ex.message} - ${request.method}: ${request.requestURI}", ex)
                 skapResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
