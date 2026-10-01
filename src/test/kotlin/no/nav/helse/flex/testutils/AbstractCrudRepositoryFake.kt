@@ -20,7 +20,7 @@ abstract class AbstractCrudRepositoryFake<T : Any, ID : Any>(
 ) : CrudRepository<T, ID> {
     val entities: MutableMap<ID, T> = mutableMapOf()
 
-    override fun <S : T?> save(entity: S & Any): S & Any {
+    override fun <S : T> save(entity: S): S {
         val entityWithId =
             if (getEntityId(entity) == null) {
                 setEntityId(entity, lagId())
@@ -30,7 +30,7 @@ abstract class AbstractCrudRepositoryFake<T : Any, ID : Any>(
         checkUniqueConstraints(entityWithId)
         entities[getEntityId(entityWithId)!!] = entityWithId
         @Suppress("UNCHECKED_CAST")
-        return entityWithId as (S & Any)
+        return entityWithId as S
     }
 
     override fun <S : T> saveAll(entities: MutableIterable<S>): MutableIterable<S> = entities.map { save(it) }.toMutableList()

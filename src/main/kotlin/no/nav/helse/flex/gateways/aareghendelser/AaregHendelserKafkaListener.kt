@@ -1,8 +1,5 @@
 package no.nav.helse.flex.gateways.aareghendelser
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingRuterService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
@@ -15,6 +12,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
+import tools.jackson.databind.DatabindException
+import tools.jackson.databind.exc.MismatchedInputException
+import tools.jackson.module.kotlin.readValue
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTimedValue
@@ -118,7 +118,7 @@ class AaregHendelserConsumer(
         }
     }
 
-    private fun JsonMappingException.stringPath(): String = this.path.joinToString(".") { it.fieldName ?: it.index.toString() }
+    private fun DatabindException.stringPath(): String = this.path.joinToString(".") { it.propertyName ?: it.index.toString() }
 
     companion object {
         internal fun avgjorHendelseshandtering(hendelse: ArbeidsforholdHendelse): AaregHendelseHandtering =

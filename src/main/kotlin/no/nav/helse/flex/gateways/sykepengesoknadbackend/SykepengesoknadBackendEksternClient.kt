@@ -2,7 +2,7 @@ package no.nav.helse.flex.gateways.sykepengesoknadbackend
 
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.toEntity

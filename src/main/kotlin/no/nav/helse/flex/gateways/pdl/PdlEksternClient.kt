@@ -1,6 +1,6 @@
 package no.nav.helse.flex.gateways.pdl
 
-import org.springframework.retry.annotation.Retryable
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.time.LocalDate
@@ -19,7 +19,7 @@ class PdlEksternClient(
 ) : PdlClient {
     private val pdlGraphQlCLient = PdlGraphQlClient(pdlRestClient)
 
-    @Retryable(exclude = [FunctionalPdlError::class])
+    @Retryable(excludes = [FunctionalPdlError::class])
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
         val response: GraphQlResponse<HentIdenterResponseData> =
             pdlGraphQlCLient.exchange(
@@ -54,7 +54,7 @@ class PdlEksternClient(
         return identer
     }
 
-    @Retryable(exclude = [FunctionalPdlError::class])
+    @Retryable(excludes = [FunctionalPdlError::class])
     override fun hentFormattertNavn(fnr: String): String {
         val response: GraphQlResponse<GetPersonResponseData> =
             pdlGraphQlCLient.exchange(
@@ -95,7 +95,7 @@ class PdlEksternClient(
         return navn
     }
 
-    @Retryable(exclude = [FunctionalPdlError::class])
+    @Retryable(excludes = [FunctionalPdlError::class])
     override fun hentFoedselsdato(fnr: String): LocalDate {
         val response: GraphQlResponse<GetPersonResponseData> =
             pdlGraphQlCLient.exchange(

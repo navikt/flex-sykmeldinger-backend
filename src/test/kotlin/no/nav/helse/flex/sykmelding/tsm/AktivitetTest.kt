@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmelding.tsm
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -8,6 +7,7 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 class AktivitetTest {

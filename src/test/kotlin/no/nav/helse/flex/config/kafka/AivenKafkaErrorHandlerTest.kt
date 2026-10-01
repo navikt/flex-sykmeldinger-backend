@@ -70,7 +70,7 @@ class AivenKafkaErrorHandlerTest {
                 KafkaErrorHandlerException(errorHandlerLoggingEnabled = false),
             ),
         ).map { ex ->
-            DynamicTest.dynamicTest(ex::class.simpleName) {
+            DynamicTest.dynamicTest(ex::class.simpleName.toString()) {
                 AivenKafkaErrorHandler.loggFeilende(
                     thrownException = ex,
                     records = mutableListOf(Testdata.lagConsumerRecord()),

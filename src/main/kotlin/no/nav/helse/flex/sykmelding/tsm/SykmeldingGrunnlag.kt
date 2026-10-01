@@ -1,12 +1,16 @@
 package no.nav.helse.flex.sykmelding.tsm
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.*
 import no.nav.helse.flex.sykmelding.tsm.values.Behandler
 import no.nav.helse.flex.sykmelding.tsm.values.Pasient
 import no.nav.helse.flex.sykmelding.tsm.values.Sykmelder
+import tools.jackson.core.JsonGenerator
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.ValueSerializer
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
@@ -114,29 +118,27 @@ data class AvsenderSystem(
     val navn: AvsenderSystemNavn,
     val versjon: String,
 ) {
-    internal class AvsenderSystemSerializer : JsonSerializer<AvsenderSystem>() {
+    internal class AvsenderSystemSerializer : ValueSerializer<AvsenderSystem>() {
         override fun serialize(
-            value: AvsenderSystem?,
-            gen: JsonGenerator?,
-            serializers: SerializerProvider?,
+            value: AvsenderSystem,
+            jsonGenerator: JsonGenerator,
+            serializationContext: SerializationContext,
         ) {
-            if (value != null) {
-                gen?.writeStartObject()
-                gen?.writeStringField("navn", value.navn.displayName)
-                gen?.writeStringField("versjon", value.versjon)
-                gen?.writeEndObject()
-            }
+            jsonGenerator.writeStartObject()
+            jsonGenerator.writeStringProperty("navn", value.navn.displayName)
+            jsonGenerator.writeStringProperty("versjon", value.versjon)
+            jsonGenerator.writeEndObject()
         }
     }
 
-    internal class AvsenderSystemDeserializer : JsonDeserializer<AvsenderSystem>() {
+    internal class AvsenderSystemDeserializer : ValueDeserializer<AvsenderSystem>() {
         override fun deserialize(
-            p: JsonParser,
-            ctxt: DeserializationContext,
+            jsonParser: JsonParser,
+            deserializationContext: DeserializationContext,
         ): AvsenderSystem {
-            val node: JsonNode = p.codec.readTree(p)
-            val navnString = node.get("navn")?.asText()
-            val versjon = node.get("versjon")?.asText() ?: ""
+            val node: JsonNode = deserializationContext.readTree(jsonParser)
+            val navnString = node.get("navn")?.asString()
+            val versjon = node.get("versjon")?.asString() ?: ""
 
             val navn = navnString.let { AvsenderSystemNavn.fraDisplayName(it) }
 

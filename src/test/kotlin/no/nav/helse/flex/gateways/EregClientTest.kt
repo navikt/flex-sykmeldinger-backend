@@ -1,6 +1,7 @@
 package no.nav.helse.flex.gateways
 
-import com.fasterxml.jackson.databind.JsonNode
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.ereg.EregClient
 import no.nav.helse.flex.gateways.ereg.EregEksternClient
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
@@ -9,8 +10,6 @@ import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.invoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should throw`
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.web.client.RestClientException
+import tools.jackson.databind.JsonNode
 
 @RestClientOppsett
 @Import(EregEksternClient::class)
@@ -39,10 +39,12 @@ class EregClientTest {
         var path: String? = null
         eregMockWebServer.dispatcher =
             simpleDispatcher { request ->
-                path = request.path
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
+                path = request.url.encodedPath
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         eregEksternClient.hentNokkelinfo("test-orgnummer")
@@ -54,9 +56,11 @@ class EregClientTest {
     fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_RESPONSE_FRA_EREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         eregEksternClient.hentNokkelinfo("_")
@@ -66,10 +70,12 @@ class EregClientTest {
     fun `burde kaste feil ved error response`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_EREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_ERROR_RESPONSE_FRA_EREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
-                    .setResponseCode(404)
+                    .code(404)
+                    .build()
             }
 
         invoking {
@@ -81,8 +87,10 @@ class EregClientTest {
     fun `burde kaste RuntimeException ved tom respons body`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
+                MockResponse
+                    .Builder()
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         invoking {
@@ -96,11 +104,13 @@ class EregClientTest {
         var body: String? = null
         eregMockWebServer.dispatcher =
             simpleDispatcher { request ->
-                path = request.path
-                body = request.body.readUtf8()
-                MockResponse()
-                    .setBody(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
+                path = request.url.encodedPath
+                body = request.body!!.utf8()
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         eregEksternClient.hentOrganisasjoner(listOf("123456789", "987654321"))
@@ -114,9 +124,11 @@ class EregClientTest {
     fun `hentOrganisasjoner burde returnere organisasjoner`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_HENT_ORGANISASJONER_RESPONSE.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         val response = eregEksternClient.hentOrganisasjoner(listOf("990983666"))
@@ -126,13 +138,62 @@ class EregClientTest {
     }
 
     @Test
+    fun `hentOrganisasjoner burde tillate nullverdier i organisasjonskartet`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse
+                    .Builder()
+                    .body(
+                        """
+                        {
+                          "organisasjoner": {
+                            "990983666": {
+                              "navn": {
+                                "sammensattnavn": "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+                              }
+                            },
+                            "123456789": null
+                          }
+                        }
+                        """.trimIndent(),
+                    ).addHeader("Content-Type", "application/json")
+                    .build()
+            }
+
+        val response = eregEksternClient.hentOrganisasjoner(listOf("990983666", "123456789"))
+
+        response.organisasjoner.size `should be equal to` 2
+        response.organisasjoner["990983666"]!!.navn.sammensattnavn `should be equal to` "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+        response.organisasjoner.containsKey("123456789") `should be equal to` true
+        response.organisasjoner["123456789"] `should be equal to` null
+    }
+
+    @Test
+    fun `hentOrganisasjoner burde avvise null som organisasjonskart`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse
+                    .Builder()
+                    .body("""{"organisasjoner": null}""")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+            }
+
+        invoking {
+            eregEksternClient.hentOrganisasjoner(listOf("123456789"))
+        } `should throw` RestClientException::class
+    }
+
+    @Test
     fun `hentOrganisasjoner burde kaste feil ved error response`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_EREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_ERROR_RESPONSE_FRA_EREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
-                    .setResponseCode(500)
+                    .code(500)
+                    .build()
             }
 
         invoking {
@@ -144,8 +205,10 @@ class EregClientTest {
     fun `hentOrganisasjoner burde kaste RuntimeException ved tom respons body`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
+                MockResponse
+                    .Builder()
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         invoking {

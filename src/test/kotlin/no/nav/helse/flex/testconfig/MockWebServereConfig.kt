@@ -1,7 +1,10 @@
 package no.nav.helse.flex.testconfig
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.micrometer.observation.ObservationRegistry
+import mockwebserver3.Dispatcher
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
@@ -16,13 +19,9 @@ import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import kotlin.apply
+import tools.jackson.module.kotlin.readValue
 
 fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatcher =
     object : Dispatcher() {
@@ -31,14 +30,16 @@ fun simpleDispatcher(dispatcherFunc: (RecordedRequest) -> MockResponse): Dispatc
 
 val defaultAaregDispatcher =
     simpleDispatcher {
-        MockResponse()
+        MockResponse
+            .Builder()
             .setHeader("Content-Type", "application/json")
-            .setBody(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+            .body(lagArbeidsforholdOversiktResponse(arbeidsforholdoversikter = emptyList()).serialisertTilString())
+            .build()
     }
 
 val defaultEregDispatcher =
     simpleDispatcher { request ->
-        val body = objectMapper.readValue(request.body.readUtf8(), HentOrganisasjonerRequest::class.java)
+        val body = objectMapper.readValue(request.body!!.utf8(), HentOrganisasjonerRequest::class.java)
         val response =
             HentOrganisasjonerResponse(
                 organisasjoner =
@@ -46,25 +47,28 @@ val defaultEregDispatcher =
                         OrganisasjonInfo(Navn("Org Navn"))
                     },
             )
-        MockResponse()
+        MockResponse
+            .Builder()
             .setHeader("Content-Type", "application/json")
-            .setBody(response.serialisertTilString())
+            .body(response.serialisertTilString())
+            .build()
     }
 
 val defaultSyketilfelleDispatcher =
     simpleDispatcher {
-        MockResponse()
+        MockResponse
+            .Builder()
             .setHeader("Content-Type", "application/json")
-            .setBody(
+            .body(
                 ErUtenforVentetidResponse(
                     erUtenforVentetid = false,
                 ).serialisertTilString(),
-            )
+            ).build()
     }
 
 val defaultPdlDispatcher =
     simpleDispatcher { req ->
-        val parsedReq = objectMapper.readValue<GraphQlRequest>(req.body.readByteArray())
+        val parsedReq = objectMapper.readValue<GraphQlRequest>(req.body!!.toByteArray())
         when (parsedReq.operationName) {
             "HentIdenterMedHistorikk" ->
                 lagGraphQlResponse(
@@ -79,18 +83,22 @@ val defaultPdlDispatcher =
                     lagGetPersonResponseData(),
                 )
             else -> {
-                MockResponse()
-                    .setResponseCode(404)
+                MockResponse
+                    .Builder()
+                    .code(404)
                     .setHeader("Content-Type", "application/json")
+                    .build()
             }
         }
     }
 
 val defaultSykepengesoknadBackendDispatcher =
     simpleDispatcher {
-        MockResponse()
+        MockResponse
+            .Builder()
             .setHeader("Content-Type", "application/json")
-            .setBody(HarSoknadResponse(harSoknad = false).serialisertTilString())
+            .body(HarSoknadResponse(harSoknad = false).serialisertTilString())
+            .build()
     }
 
 @TestConfiguration
@@ -146,6 +154,14 @@ class MockWebServereConfig {
             }
 
         init {
+            listOf(
+                pdlMockWebServer,
+                aaregMockWebServer,
+                eregMockWebServer,
+                syketilfelleMockWebServer,
+                sykepengesoknadBackendMockWebServer,
+            ).forEach { it.start() }
+
             System.setProperty("PDL_BASE_URL", "http://localhost:${pdlMockWebServer.port}")
             System.setProperty("AAREG_URL", "http://localhost:${aaregMockWebServer.port}")
             System.setProperty("EREG_URL", "http://localhost:${eregMockWebServer.port}")

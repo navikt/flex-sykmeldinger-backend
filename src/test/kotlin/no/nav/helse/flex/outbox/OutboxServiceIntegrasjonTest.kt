@@ -1,6 +1,5 @@
 package no.nav.helse.flex.outbox
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.gateways.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.gateways.SYKMELDING_BRUKERNOTIFIKASJON_TOPIC
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -179,7 +179,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         val fnrLastAvTransaksjon2 =
             transactionTemplate.execute {
                 outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr().map { it.fnr }
-            }!!
+            }
 
         slippTransaksjon1.countDown()
         traad.join()
