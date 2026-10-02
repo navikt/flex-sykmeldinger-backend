@@ -138,6 +138,53 @@ class EregClientTest {
     }
 
     @Test
+    fun `hentOrganisasjoner burde tillate nullverdier i organisasjonskartet`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse
+                    .Builder()
+                    .body(
+                        """
+                        {
+                          "organisasjoner": {
+                            "990983666": {
+                              "navn": {
+                                "sammensattnavn": "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+                              }
+                            },
+                            "123456789": null
+                          }
+                        }
+                        """.trimIndent(),
+                    ).addHeader("Content-Type", "application/json")
+                    .build()
+            }
+
+        val response = eregEksternClient.hentOrganisasjoner(listOf("990983666", "123456789"))
+
+        response.organisasjoner.size `should be equal to` 2
+        response.organisasjoner["990983666"]!!.navn.sammensattnavn `should be equal to` "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+        response.organisasjoner.containsKey("123456789") `should be equal to` true
+        response.organisasjoner["123456789"] `should be equal to` null
+    }
+
+    @Test
+    fun `hentOrganisasjoner burde avvise null som organisasjonskart`() {
+        eregMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse
+                    .Builder()
+                    .body("""{"organisasjoner": null}""")
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+            }
+
+        invoking {
+            eregEksternClient.hentOrganisasjoner(listOf("123456789"))
+        } `should throw` RestClientException::class
+    }
+
+    @Test
     fun `hentOrganisasjoner burde kaste feil ved error response`() {
         eregMockWebServer.dispatcher =
             simpleDispatcher {
