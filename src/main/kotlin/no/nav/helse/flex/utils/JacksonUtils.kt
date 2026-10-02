@@ -1,11 +1,10 @@
 package no.nav.helse.flex.utils
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.module.SimpleModule
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
@@ -28,17 +27,17 @@ inline fun <reified T : Any, reified E : Enum<E>> SimpleModule.addPolymorphicDes
 class ClassSwitchDeserializer<T : Any>(
     private val typeField: String = "type",
     private val getClass: (type: String) -> KClass<out T>,
-) : JsonDeserializer<T>() {
+) : ValueDeserializer<T>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
     ): T {
-        val node: ObjectNode = p.codec.readTree(p)
+        val node: JsonNode = ctxt.readTree(p)
         val typeNode: JsonNode? = node.get(typeField)
 
         val type: String =
             if (typeNode != null && !typeNode.isNull) {
-                typeNode.asText()
+                typeNode.asString()
             } else {
                 throw IllegalArgumentException("JSON is missing the required '$typeField' field or its value is null.")
             }
@@ -48,6 +47,6 @@ class ClassSwitchDeserializer<T : Any>(
         }
 
         val clazz = getClass(type)
-        return p.codec.treeToValue(node, clazz.java)
+        return ctxt.readTreeAsValue(node, clazz.java)
     }
 }

@@ -2,7 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.springframework.boot") version "3.5.15"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     kotlin("jvm") version "2.4.10"
@@ -22,7 +22,7 @@ repositories {
 }
 
 val testContainersVersion = "2.0.5"
-val tokenSupportVersion = "5.0.39"
+val tokenSupportVersion = "6.0.12"
 val logstashLogbackEncoderVersion = "9.0"
 val kluentVersion = "1.73"
 val sykepengesoknadKafkaVersion = "2026.07.28-13.22-138bf702"
@@ -31,24 +31,25 @@ val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.66.0"
 val opentelemetryInstrumentationVersion = "2.31.1"
 val unleashVersion = "12.3.0"
+val mockWebServerVersion = "5.5.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("reflect"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.apache.commons:commons-text:$commonsTextVersion")
-    implementation("org.apache.httpcomponents.client5:httpclient5")
+    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.postgresql:postgresql")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.hibernate.validator:hibernate-validator")
-    implementation("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-database-postgresql")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.boot:spring-boot-restclient")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
+    implementation("org.apache.commons:commons-text:$commonsTextVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
@@ -58,19 +59,18 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryInstrumentationVersion")
     implementation("org.aspectj:aspectjweaver")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.kafka:spring-kafka-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-micrometer-metrics-test")
+    testImplementation("org.springframework.boot:spring-boot-micrometer-tracing-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
+    testImplementation("com.squareup.okhttp3:mockwebserver3:$mockWebServerVersion")
     testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-postgresql:$testContainersVersion")
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
-    testImplementation("org.awaitility:awaitility")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
-}
-
-ktlint {
-    version.set("1.5.0")
+    testImplementation("org.awaitility:awaitility")
 }
 
 kotlin {

@@ -1,5 +1,7 @@
 package no.nav.helse.flex.gateways.aareghendelser
 
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerRequest
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
@@ -17,8 +19,6 @@ import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldThrow
@@ -49,15 +49,17 @@ class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
     fun beforeAll() {
         aaregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(
+                MockResponse
+                    .Builder()
+                    .body(
                         lagArbeidsforholdOversiktResponse().serialisertTilString(),
                     ).addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         eregMockWebServer.dispatcher =
             simpleDispatcher { request ->
-                val body = objectMapper.readValue(request.body.readUtf8(), HentOrganisasjonerRequest::class.java)
+                val body = objectMapper.readValue(request.body!!.utf8(), HentOrganisasjonerRequest::class.java)
                 val response =
                     HentOrganisasjonerResponse(
                         organisasjoner =
@@ -65,9 +67,11 @@ class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
                                 OrganisasjonInfo(Navn("Org Navn"))
                             },
                     )
-                MockResponse()
-                    .setBody(response.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(response.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
     }
 

@@ -1,12 +1,11 @@
 package no.nav.helse.flex.gateways.pdl
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldNotBeNull
 import org.amshove.kluent.shouldStartWith
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 @RestClientOppsett
@@ -50,7 +50,7 @@ class PdlClientTest {
             request.headers["Tema"] `should be equal to` "SYK"
             request.headers["Behandlingsnummer"] `should be equal to` "B229"
             request.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query HentIdenterMedHistorikk(${"$"}ident: ID!) {
@@ -121,7 +121,7 @@ class PdlClientTest {
             request.headers["Behandlingsnummer"] `should be equal to` "B229"
             request.headers["Tema"] `should be equal to` "SYK"
             request.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
             query HentPersonNavn(${'$'}ident: ID!) {
@@ -197,7 +197,7 @@ class PdlClientTest {
             request.headers["Behandlingsnummer"] `should be equal to` "B229"
             request.headers["Tema"] `should be equal to` "SYK"
             request.headers["Content-Type"] `should be equal to` "application/json"
-            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body.readUtf8())
+            val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
                 query HentPersonFoedselsdato(${"$"}ident: ID!) {

@@ -1,13 +1,13 @@
 package no.nav.helse.flex.gateways.aareg
 
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -34,9 +34,11 @@ class AaregClientTest {
     fun `burde returnere Arbeidsforholdoversikt fra aareg`() {
         aaregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
         aaregEksternClient.getArbeidsforholdoversikt("_") `should not be` null
     }
@@ -45,10 +47,12 @@ class AaregClientTest {
     fun `burde kaste feil ved error response`() {
         aaregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
-                    .setBody(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_ERROR_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
-                    .setResponseCode(HttpStatus.NOT_FOUND.value())
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .build()
             }
 
         invoking {
@@ -60,8 +64,10 @@ class AaregClientTest {
     fun `burde kaste RuntimeException ved tom respons body`() {
         aaregMockWebServer.dispatcher =
             simpleDispatcher {
-                MockResponse()
+                MockResponse
+                    .Builder()
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
         invoking {
             aaregEksternClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
@@ -74,9 +80,11 @@ class AaregClientTest {
         aaregMockWebServer.dispatcher =
             simpleDispatcher { req ->
                 recordedReq = req
-                MockResponse()
-                    .setBody(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(EKSEMPEL_RESPONSE_FRA_AAREG.serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         aaregEksternClient.getArbeidsforholdoversikt("_")
@@ -90,7 +98,7 @@ class AaregClientTest {
         var requestBody: String? = null
         aaregMockWebServer.dispatcher =
             simpleDispatcher { req ->
-                requestBody = req.body.readUtf8()
+                requestBody = req.body!!.utf8()
                 defaultAaregDispatcher.dispatch(req)
             }
 

@@ -1,6 +1,5 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testdata.lagSporsmalSvar
 import no.nav.helse.flex.utils.objectMapper
 import org.amshove.kluent.`should be equal to`
@@ -9,6 +8,7 @@ import org.amshove.kluent.shouldBeTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import tools.jackson.module.kotlin.readValue
 
 class BrukerSvarTest {
     @Test

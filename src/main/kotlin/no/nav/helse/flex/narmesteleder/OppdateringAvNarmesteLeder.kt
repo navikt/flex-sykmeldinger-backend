@@ -1,6 +1,5 @@
 package no.nav.helse.flex.narmesteleder
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.config.EnvironmentToggles
 import no.nav.helse.flex.gateways.pdl.FunctionalPdlError
 import no.nav.helse.flex.gateways.pdl.PdlClient
@@ -11,6 +10,7 @@ import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 
 @Component
