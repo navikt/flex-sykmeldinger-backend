@@ -34,6 +34,18 @@ class SykmeldingVentetidService(
                 .ventetidPerioder
                 .map { it.ressursId }
 
+        return erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+            sykmelding = sykmelding,
+            arbeidssituasjon = arbeidssituasjon,
+            sykmeldingerMedSammeVentetid = sykmeldingerMedSammeVentetid,
+        )
+    }
+
+    fun erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+        sykmelding: Sykmelding,
+        arbeidssituasjon: Arbeidssituasjon,
+        sykmeldingerMedSammeVentetid: List<String>,
+    ): Boolean {
         logger.info(
             "Fant ${sykmeldingerMedSammeVentetid.size} sykmeldinger med samme ventetid ${sykmelding.sykmeldingId}: $sykmeldingerMedSammeVentetid",
         )
