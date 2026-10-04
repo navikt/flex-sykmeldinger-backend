@@ -9,6 +9,7 @@ import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.VentetidForSykmeldingResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
@@ -155,6 +156,31 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 expectedStatus = HttpStatus.UNAUTHORIZED,
             )
         }
+
+        syketilfelleClient.setVentetidForSykmelding(
+            VentetidForSykmeldingResponse(
+                erUtenforVentetid = false,
+                periodeMedSammeVentetid = listOf(SammeVentetidPeriode("id-1", FomTomPeriode(LocalDate.now(), LocalDate.now()))),
+            ),
+        )
+        "/api/v1/sykmeldinger/id-1/ventetid/FRILANSER".run {
+            sjekkStatus(
+                url = this,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = dittSykefravaerFrontendClientId),
+                expectedStatus = HttpStatus.OK,
+            )
+            sjekkStatus(
+                this,
+                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = "invalid-client-id"),
+                expectedStatus = HttpStatus.FORBIDDEN,
+            )
+            sjekkStatus(
+                this,
+                token = oauth2Server.tokenxToken(fnr = "fnr", acrClaim = "invalid-claim"),
+                expectedStatus = HttpStatus.UNAUTHORIZED,
+            )
+        }
+        syketilfelleClient.reset()
 
         "/api/v1/sykmeldinger/id-1/send".run {
             val content = lagSendSykmeldingRequestDTO()
@@ -1019,6 +1045,171 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         @Test
         fun `burde feile dersom sykmelding har feil fnr`() =
             sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/FRILANSER" }
+    }
+
+    @Nested
+    inner class GetVentetid {
+        @AfterEach
+        fun ryddOpp() {
+            syketilfelleClient.reset()
+        }
+
+        @Test
+        fun `burde returnere kombinert svar for ventetid og første sykmelding`() {
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
+                ).also { sykmeldingRepository.save(it) }
+
+            syketilfelleClient.setVentetidForSykmelding(
+                VentetidForSykmeldingResponse(
+                    erUtenforVentetid = true,
+                    periodeMedSammeVentetid =
+                        listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom))),
+                ),
+            )
+
+            val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
+            response.erUtenforVentetid `should be equal to` true
+            response.erForsteSykmelding `should be equal to` true
+            response.tidligsteFom `should be equal to` null
+        }
+
+        @Test
+        fun `burde returnere false for første sykmelding når en tidligere sykmelding har samme ventetid`() {
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "2",
+                        pasient = lagPasient(fnr = "fnr"),
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2021-01-01"),
+                                    tom = LocalDate.parse("2021-01-10"),
+                                ),
+                            ),
+                    ),
+                hendelser =
+                    listOf(
+                        lagSykmeldingHendelse(
+                            status = HendelseStatus.SENDT_TIL_NAV,
+                            brukerSvar = lagFrilanserBrukerSvar(),
+                        ),
+                    ),
+            ).also { sykmeldingRepository.save(it) }
+
+            lagSykmelding(
+                sykmeldingGrunnlag =
+                    lagSykmeldingGrunnlag(
+                        id = "1",
+                        pasient = lagPasient(fnr = "fnr"),
+                        aktiviteter =
+                            listOf(
+                                lagAktivitetIkkeMulig(
+                                    fom = LocalDate.parse("2021-01-11"),
+                                    tom = LocalDate.parse("2021-01-25"),
+                                ),
+                            ),
+                    ),
+            ).also { sykmeldingRepository.save(it) }
+
+            syketilfelleClient.setVentetidForSykmelding(
+                VentetidForSykmeldingResponse(
+                    erUtenforVentetid = false,
+                    periodeMedSammeVentetid =
+                        listOf(
+                            SammeVentetidPeriode("2", FomTomPeriode(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-16"))),
+                            SammeVentetidPeriode("1", FomTomPeriode(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-01-16"))),
+                        ),
+                ),
+            )
+
+            val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
+            response.erUtenforVentetid `should be equal to` false
+            response.erForsteSykmelding `should be equal to` false
+            response.tidligsteFom `should be equal to` null
+        }
+
+        @Test
+        fun `burde returnere tidligsteFom når det finnes en tidligere sykmelding uten samme ventetid`() {
+            val forrigeSykmelding =
+                sykmeldingRepository.save(
+                    lagSykmelding(
+                        sykmeldingGrunnlag =
+                            lagSykmeldingGrunnlag(
+                                id = "2",
+                                pasient = lagPasient(fnr = "fnr"),
+                                aktiviteter =
+                                    listOf(
+                                        lagAktivitetIkkeMulig(
+                                            fom = LocalDate.parse("2021-01-01"),
+                                            tom = LocalDate.parse("2021-01-10"),
+                                        ),
+                                    ),
+                            ),
+                        hendelser =
+                            listOf(
+                                lagSykmeldingHendelse(
+                                    status = HendelseStatus.SENDT_TIL_NAV,
+                                    brukerSvar = lagFrilanserBrukerSvar(),
+                                ),
+                            ),
+                    ),
+                )
+
+            val sykmelding =
+                lagSykmelding(
+                    sykmeldingGrunnlag =
+                        lagSykmeldingGrunnlag(
+                            id = "1",
+                            pasient = lagPasient(fnr = "fnr"),
+                            aktiviteter =
+                                listOf(
+                                    lagAktivitetIkkeMulig(
+                                        fom = LocalDate.parse("2021-01-20"),
+                                        tom = LocalDate.parse("2021-01-25"),
+                                    ),
+                                ),
+                        ),
+                ).also { sykmeldingRepository.save(it) }
+
+            syketilfelleClient.setVentetidForSykmelding(
+                VentetidForSykmeldingResponse(
+                    erUtenforVentetid = false,
+                    periodeMedSammeVentetid =
+                        listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom))),
+                ),
+            )
+
+            val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
+            response.erUtenforVentetid `should be equal to` false
+            response.erForsteSykmelding `should be equal to` true
+            response.tidligsteFom `should be equal to` forrigeSykmelding.tom.plusDays(1)
+        }
+
+        @Test
+        fun `burde få 404 når sykmeldingen ikke finnes`() =
+            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/ventetid/FRILANSER" }
+
+        @Test
+        fun `burde feile dersom sykmelding har feil fnr`() =
+            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/ventetid/FRILANSER" }
+
+        private fun kallVentetidEndepunkt(arbeidssituasjon: String): VentetidResponse {
+            val result =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get("/api/v1/sykmeldinger/1/ventetid/$arbeidssituasjon")
+                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response.contentAsString
+
+            return objectMapper.readValue(result)
+        }
     }
 
     @Nested

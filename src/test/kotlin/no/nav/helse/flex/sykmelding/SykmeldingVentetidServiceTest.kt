@@ -247,6 +247,89 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
     }
 
     @Nested
+    inner class ErForsteSykmeldingMedOppgitteSykmeldingerMedSammeVentetid {
+        @Test
+        fun `burde returnere true dersom kun sykmeldingen selv har samme ventetid`() {
+            val sykmelding = lagreSykmelding(id = "1", brukerSvar = lagFrilanserBrukerSvar())
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                    sykmeldingerMedSammeVentetid = listOf("1"),
+                )
+
+            result `should be equal to` true
+        }
+
+        @Test
+        fun `burde returnere false dersom en oppgitt sykmelding med samme arbeidssituasjon har tidligere fom`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-10"),
+                brukerSvar = lagFrilanserBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-05"),
+                    tom = LocalDate.parse("2021-01-15"),
+                    brukerSvar = lagFrilanserBrukerSvar(),
+                )
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                    sykmeldingerMedSammeVentetid = listOf("1", "2"),
+                )
+
+            result `should be equal to` false
+        }
+
+        @Test
+        fun `burde ikke kalle flex-syketilfelle for perioder med samme ventetid`() {
+            lagreSykmelding(
+                id = "1",
+                fom = LocalDate.parse("2021-01-01"),
+                tom = LocalDate.parse("2021-01-10"),
+                brukerSvar = lagFrilanserBrukerSvar(),
+            )
+            val sykmelding =
+                lagreSykmelding(
+                    id = "2",
+                    fom = LocalDate.parse("2021-01-05"),
+                    tom = LocalDate.parse("2021-01-15"),
+                    brukerSvar = lagFrilanserBrukerSvar(),
+                )
+            settPerioderMedSammeVentetid("1", "2")
+
+            val result =
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                    sykmeldingerMedSammeVentetid = listOf("2"),
+                )
+
+            result `should be equal to` true
+        }
+
+        @Test
+        fun `burde kaste feil dersom listen med sykmeldinger med samme ventetid er tom`() {
+            val sykmelding = lagreSykmelding(id = "1")
+
+            assertThrows<RuntimeException> {
+                sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = Arbeidssituasjon.FRILANSER,
+                    sykmeldingerMedSammeVentetid = emptyList(),
+                )
+            }
+        }
+    }
+
+    @Nested
     inner class FinnTidligsteFomForMeldingTilNavDager {
         @Test
         fun `burde returnere null når det ikke finnes en tidligere sykmelding`() {

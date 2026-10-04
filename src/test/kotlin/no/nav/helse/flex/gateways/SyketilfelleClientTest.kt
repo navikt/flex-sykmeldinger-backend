@@ -7,6 +7,7 @@ import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleEksternClient
+import no.nav.helse.flex.gateways.syketilfelle.VentetidForSykmeldingResponse
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultSyketilfelleDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
@@ -125,6 +126,58 @@ class SyketilfelleClientTest {
             }
         invoking {
             syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
+        } `should throw` RuntimeException::class
+    }
+
+    @Test
+    fun `burde returnere ventetid for sykmelding`() {
+        var kaltPath: String? = null
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher { request ->
+                kaltPath = request.requestUrl?.encodedPath
+                MockResponse()
+                    .setBody(
+                        VentetidForSykmeldingResponse(
+                            erUtenforVentetid = true,
+                            periodeMedSammeVentetid =
+                                listOf(
+                                    SammeVentetidPeriode(
+                                        ressursId = "sykmelding-1",
+                                        ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
+                                    ),
+                                ),
+                        ).serialisertTilString(),
+                    ).addHeader("Content-Type", "application/json")
+            }
+        val response = syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
+        response.erUtenforVentetid.`should be true`()
+        response.periodeMedSammeVentetid shouldHaveSize 1
+        response.periodeMedSammeVentetid.first().ressursId `should be equal to` "sykmelding-1"
+        kaltPath `should be equal to` "/api/bruker/v2/ventetid/sykmeldingId/ventetidForSykmelding"
+    }
+
+    @Test
+    fun `burde kaste feil ved error ved henting av ventetidForSykmelding`() {
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .addHeader("Content-Type", "application/json")
+            }
+        invoking {
+            syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
+        } `should throw` RestClientException::class
+    }
+
+    @Test
+    fun `burde kaste feil ved tom body for ventetidForSykmelding`() {
+        syketilfelleMockWebServer.dispatcher =
+            simpleDispatcher {
+                MockResponse()
+                    .addHeader("Content-Type", "application/json")
+            }
+        invoking {
+            syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
         } `should throw` RuntimeException::class
     }
 }
