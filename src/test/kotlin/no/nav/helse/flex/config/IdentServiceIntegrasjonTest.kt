@@ -1,20 +1,23 @@
 package no.nav.helse.flex.config
 
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be instance of`
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
 import org.springframework.data.redis.cache.FixedDurationTtlFunction
 import org.springframework.data.redis.cache.RedisCache
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
@@ -26,9 +29,10 @@ class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Autowired
     lateinit var pdlMockWebServer: MockWebServer
 
+    @BeforeAll
     @AfterEach
     fun setup() {
-        cacheManager.getCache("flex-folkeregister-identer-med-historikk")?.clear()
+        cacheManager.getCache("flex-folkeregister-identer-med-historikk")?.invalidate()
         pdlMockWebServer.dispatcher = defaultPdlDispatcher
     }
 
@@ -41,6 +45,12 @@ class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
                 lagGraphQlResponse(lagHentIdenterResponseData())
             }
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
+
+        // Spring Boot Redis 4 skriver til cache asynkront.
+        await().atMost(5, TimeUnit.SECONDS).until {
+            cacheManager.getCache("flex-folkeregister-identer-med-historikk")?.get("ny-ident") != null
+        }
+
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
 

@@ -1,6 +1,5 @@
 package no.nav.helse.flex.gateways
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.lesFraTopics
 import no.nav.helse.flex.utils.objectMapper
@@ -12,6 +11,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tools.jackson.module.kotlin.readValue
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit

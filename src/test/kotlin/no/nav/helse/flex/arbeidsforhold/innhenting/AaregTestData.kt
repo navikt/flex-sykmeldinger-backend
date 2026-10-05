@@ -1,9 +1,9 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.gateways.aareg.ArbeidsforholdOversikt
 import no.nav.helse.flex.gateways.aareg.ArbeidsforholdoversiktResponse
 import no.nav.helse.flex.utils.objectMapper
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
 fun lagArbeidsforholdOversiktResponse(
@@ -77,6 +77,6 @@ fun lagArbeidsforholdOversikt(
           },
           "navArbeidsforholdId": "$navArbeidsforholdId",
           "sistBekreftet": "2020-09-15T08:19:53"
-        },
+        }
         """.trimIndent(),
     )

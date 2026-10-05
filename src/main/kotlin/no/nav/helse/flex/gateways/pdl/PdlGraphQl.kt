@@ -1,7 +1,5 @@
 package no.nav.helse.flex.gateways.pdl
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import org.springframework.http.HttpStatusCode
@@ -32,11 +30,7 @@ class PdlGraphQlClient(
                         httpHeaders.add(key, value)
                     }
                 }.body(
-                    try {
-                        req.serialisertTilString()
-                    } catch (e: JsonProcessingException) {
-                        throw RuntimeException(e)
-                    },
+                    req.serialisertTilString(),
                 ).retrieve()
                 .onStatus(HttpStatusCode::isError) { _, response ->
                     throw RuntimeException("PDL svarer med status: ${response.statusCode}")
@@ -63,8 +57,6 @@ data class GraphQlResponse<out T : Any>(
     val errors: List<ResponseError>?,
 ) {
     companion object {
-        inline fun <reified T : Any> fraJson(json: String): GraphQlResponse<T> = fraJson(json, T::class)
-
         fun <T : Any> fraJson(
             json: String,
             clazz: KClass<T>,
