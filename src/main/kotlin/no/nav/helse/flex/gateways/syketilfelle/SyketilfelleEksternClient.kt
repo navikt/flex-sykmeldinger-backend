@@ -38,6 +38,17 @@ class SyketilfelleEksternClient(
 
         return res ?: throw RuntimeException("Klarte ikke hente perioderMedSammeVentetid for sykmelding $sykmeldingId")
     }
+
+    @Retryable
+    override fun getVentetidForSykmelding(sykmeldingId: String): VentetidForSykmeldingResponse {
+        val uri =
+            syketilfelleRestClient.get().uri { uriBuilder ->
+                uriBuilder.path("/api/bruker/v2/ventetid/$sykmeldingId/ventetidForSykmelding").build()
+            }
+        val res = uri.retrieve().toEntity<VentetidForSykmeldingResponse>().body
+
+        return res ?: throw RuntimeException("Klarte ikke hente ventetidForSykmelding for sykmelding $sykmeldingId")
+    }
 }
 
 data class ErUtenforVentetidResponse(
@@ -56,4 +67,9 @@ data class SammeVentetidResponse(
 data class SammeVentetidPeriode(
     val ressursId: String,
     val ventetid: FomTomPeriode,
+)
+
+data class VentetidForSykmeldingResponse(
+    val erUtenforVentetid: Boolean,
+    val periodeMedSammeVentetid: List<SammeVentetidPeriode>,
 )
