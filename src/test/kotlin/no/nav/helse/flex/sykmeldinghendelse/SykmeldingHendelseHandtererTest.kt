@@ -198,7 +198,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
                     hendelse.brukerSvar.`should not be null`()
                 }
         }

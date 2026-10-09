@@ -582,7 +582,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
         }
 
         @Test
-        fun `arbeidssituasjon FISKER burde bli ARBEIDSTAKER dersom HYRE`() {
+        fun `arbeidssituasjon FISKER burde bli FISKER dersom HYRE`() {
             val sporsmalSvar =
                 lagSykmeldingSporsmalSvarDto(
                     arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.FISKER),
@@ -601,7 +601,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "ARBEIDSTAKER"
+                .svar shouldBeEqualTo "FISKER"
         }
 
         @ParameterizedTest
