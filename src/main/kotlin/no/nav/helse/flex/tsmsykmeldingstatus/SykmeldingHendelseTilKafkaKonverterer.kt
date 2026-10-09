@@ -4,7 +4,6 @@ import no.nav.helse.flex.api.SykmeldingStatusDtoKonverterer
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.sykmeldinghendelse.*
-import no.nav.helse.flex.sykmeldinghendelse.UtdatertFormatBrukerSvar
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.*
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.serialisertTilString
@@ -178,7 +177,7 @@ object SykmeldingHendelseTilKafkaKonverterer {
             when (arbeidssituasjon.svar) {
                 ArbeidssituasjonDTO.FISKER -> {
                     when (fisker?.lottOgHyre?.svar) {
-                        LottOgHyre.HYRE -> ArbeidssituasjonDTO.ARBEIDSTAKER
+                        LottOgHyre.HYRE -> ArbeidssituasjonDTO.FISKER
                         else -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
                     }
                 }
