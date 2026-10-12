@@ -88,49 +88,6 @@ data class FiskerBrukerSvar(
     override val uriktigeOpplysninger: SporsmalSvar<List<UriktigeOpplysning>>? = null,
 ) : BrukerSvar {
     override val type = BrukerSvarType.FISKER
-
-    val erSomArbeidstaker: Boolean
-
-    init {
-        val somArbeidstakerResultat = runCatching { somArbeidstaker() }
-        val somNaringsdrivendeResultat = runCatching { somNaringsdrivende() }
-
-        require(somArbeidstakerResultat.isSuccess || somNaringsdrivendeResultat.isSuccess) {
-            "Fisker må ha besvart spørsmål tilsvarende enten arbeidstaker eller næringsdrivende"
-        }
-
-        this.erSomArbeidstaker = somArbeidstakerResultat.isSuccess
-    }
-
-    fun somArbeidstaker(): ArbeidstakerBrukerSvar {
-        require(lottOgHyre.svar in setOf(FiskerLottOgHyre.HYRE, FiskerLottOgHyre.BEGGE)) {
-            "Fisker som arbeidstaker må ha HYRE (eller BEGGE)"
-        }
-        return ArbeidstakerBrukerSvar(
-            erOpplysningeneRiktige = erOpplysningeneRiktige,
-            arbeidssituasjon = arbeidssituasjon,
-            arbeidsgiverOrgnummer = requireNotNull(arbeidsgiverOrgnummer) { "Fisker som er arbeidstaker må ha satt arbeidsgiverOrgnummer" },
-            riktigNarmesteLeder = riktigNarmesteLeder,
-            harEgenmeldingsdager = harEgenmeldingsdager,
-            egenmeldingsdager = egenmeldingsdager,
-            uriktigeOpplysninger = uriktigeOpplysninger,
-        )
-    }
-
-    fun somNaringsdrivende(): NaringsdrivendeBrukerSvar {
-        require(lottOgHyre.svar in setOf(FiskerLottOgHyre.LOTT, FiskerLottOgHyre.BEGGE)) {
-            "Fisker som naringsdrivende må ha LOTT (eller BEGGE)"
-        }
-        return NaringsdrivendeBrukerSvar(
-            erOpplysningeneRiktige = erOpplysningeneRiktige,
-            arbeidssituasjon = arbeidssituasjon,
-            sykFoerSykmeldingen = sykFoerSykmeldingen,
-            harBruktEgenmelding = harBruktEgenmelding,
-            egenmeldingsperioder = egenmeldingsperioder,
-            harForsikring = harForsikring,
-            uriktigeOpplysninger = uriktigeOpplysninger,
-        )
-    }
 }
 
 data class FrilanserBrukerSvar(

@@ -437,6 +437,37 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             @ParameterizedTest
             @EnumSource(FiskerLottOgHyre::class, names = ["HYRE", "BEGGE"])
+            fun `burde akseptere at arbeidsgiver ikke finnes i brukersvar`(fiskerLottOgHyre: FiskerLottOgHyre) {
+                val sykmelding =
+                    lagSykmelding(
+                        sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
+                    )
+
+                val brukerSvar =
+                    lagFiskerHyreBrukerSvar(
+                        arbeidsgiverOrgnummer = null,
+                        lottOgHyre = lagSporsmalSvar(fiskerLottOgHyre),
+                    )
+
+                val tilleggsinfo =
+                    sammenstillerService.sammenstillTilleggsinfo(
+                        identer = PersonIdenter("fnr"),
+                        sykmelding = sykmelding,
+                        brukerSvar = brukerSvar,
+                    )
+
+                tilleggsinfo
+                    .shouldNotBeNull()
+                    .shouldBeInstanceOf<FiskerTilleggsinfo>()
+                    .run {
+                        type `should be equal to` TilleggsinfoType.FISKER
+                        arbeidsgiver
+                            .`should be null`()
+                    }
+            }
+
+            @ParameterizedTest
+            @EnumSource(FiskerLottOgHyre::class, names = ["HYRE", "BEGGE"])
             fun `burde akseptere at narmeste leder ikke finnes`(fiskerLottOgHyre: FiskerLottOgHyre) {
                 arbeidsforholdRepository.save(
                     lagArbeidsforhold(
