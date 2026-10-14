@@ -12,16 +12,18 @@ import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint
 import org.springframework.test.web.servlet.MockMvc
 
 const val IGNORED_KAFKA_BROKERS = "localhost:1"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@AutoConfigureObservability
+@AutoConfigureMetrics
+@AutoConfigureTracing
 @EnableMockOAuth2Server
 @SpringBootTest(
     classes = [Application::class, FakesTestConfig::class],
@@ -29,9 +31,9 @@ const val IGNORED_KAFKA_BROKERS = "localhost:1"
         "spring.main.allow-bean-definition-overriding=true",
         "spring.data.jdbc.repositories.enabled=false",
         "spring.autoconfigure.exclude=" +
-            "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
-            "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration," +
-            "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
+            "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration," +
+            "org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration," +
+            "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration",
         "spring.flyway.enabled=false",
         "spring.kafka.listener.auto-startup=false",
         "KAFKA_BROKERS=$IGNORED_KAFKA_BROKERS",

@@ -13,7 +13,7 @@ data class HentOrganisasjonerRequest(
 )
 
 data class HentOrganisasjonerResponse(
-    val organisasjoner: Map<String, OrganisasjonInfo>,
+    val organisasjoner: Map<String, OrganisasjonInfo?>,
 )
 
 data class OrganisasjonInfo(

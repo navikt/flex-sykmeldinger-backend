@@ -1,13 +1,13 @@
 package no.nav.helse.flex.api
 
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultSykepengesoknadBackendDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.testdata.*
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.amshove.kluent.AnyException
 import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldBeEmpty
@@ -51,7 +51,7 @@ class SykmeldingOptInServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde lagre opt-in når kall til sykepengesoknad-backend lykkes`() {
         sykepengesoknadBackendMockWebServer.dispatcher =
-            simpleDispatcher { MockResponse().setResponseCode(HttpStatus.OK.value()) }
+            simpleDispatcher { MockResponse.Builder().code(HttpStatus.OK.value()).build() }
 
         sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
 
@@ -61,7 +61,7 @@ class SykmeldingOptInServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
     fun `burde rulle tilbake opt-in når kall til sykepengesoknad-backend feiler`() {
         sykepengesoknadBackendMockWebServer.dispatcher =
-            simpleDispatcher { MockResponse().setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()) }
+            simpleDispatcher { MockResponse.Builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build() }
 
         invoking {
             sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))

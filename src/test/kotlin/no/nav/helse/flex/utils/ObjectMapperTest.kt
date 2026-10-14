@@ -1,9 +1,9 @@
 package no.nav.helse.flex.utils
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.readValue
 
 class ObjectMapperTest {
     data class TestDataClass(

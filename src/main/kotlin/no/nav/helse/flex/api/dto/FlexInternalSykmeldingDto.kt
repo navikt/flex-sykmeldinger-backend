@@ -1,9 +1,9 @@
 package no.nav.helse.flex.api.dto
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.optin.OptIn
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.utils.toJsonNode
+import tools.jackson.databind.JsonNode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime

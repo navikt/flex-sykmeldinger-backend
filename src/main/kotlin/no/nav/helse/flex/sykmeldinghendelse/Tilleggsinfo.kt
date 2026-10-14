@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
-import com.fasterxml.jackson.databind.module.SimpleModule
 import no.nav.helse.flex.utils.addPolymorphicDeserializer
+import tools.jackson.databind.module.SimpleModule
 
 enum class TilleggsinfoType {
     ARBEIDSTAKER,

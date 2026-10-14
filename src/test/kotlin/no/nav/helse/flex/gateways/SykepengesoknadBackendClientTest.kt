@@ -1,5 +1,8 @@
 package no.nav.helse.flex.gateways
 
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
@@ -12,9 +15,6 @@ import no.nav.helse.flex.testdata.lagKafkaMetadataDTO
 import no.nav.helse.flex.testdata.lagSykmeldingDto
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.serialisertTilString
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
@@ -44,9 +44,11 @@ class SykepengesoknadBackendClientTest {
         fun `burde returnere true når søknad finnes`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
-                    MockResponse()
-                        .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                    MockResponse
+                        .Builder()
+                        .body(HarSoknadResponse(harSoknad = true).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
             val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
             resultat.`should be true`()
@@ -56,9 +58,11 @@ class SykepengesoknadBackendClientTest {
         fun `burde returnere false når søknad ikke finnes`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
-                    MockResponse()
-                        .setBody(HarSoknadResponse(harSoknad = false).serialisertTilString())
+                    MockResponse
+                        .Builder()
+                        .body(HarSoknadResponse(harSoknad = false).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
             val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
             resultat.`should be false`()
@@ -68,9 +72,11 @@ class SykepengesoknadBackendClientTest {
         fun `burde kaste feil ved error response`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
-                    MockResponse()
-                        .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    MockResponse
+                        .Builder()
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
             invoking {
                 sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
@@ -83,15 +89,17 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher { request ->
                     recordedRequest = request
-                    MockResponse()
-                        .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                    MockResponse
+                        .Builder()
+                        .body(HarSoknadResponse(harSoknad = true).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
 
             sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
 
             val request = recordedRequest!!
-            request.path `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad/NAERINGSDRIVENDE"
+            request.url.encodedPath `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad/NAERINGSDRIVENDE"
         }
 
         @Test
@@ -100,9 +108,11 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher { request ->
                     recordedRequest = request
-                    MockResponse()
-                        .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                    MockResponse
+                        .Builder()
+                        .body(HarSoknadResponse(harSoknad = true).serialisertTilString())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
 
             sykepengesoknadBackendEksternClient.harSoknad("test-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
@@ -125,9 +135,11 @@ class SykepengesoknadBackendClientTest {
         fun `burde fullføre uten feil ved 200`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
-                    MockResponse()
-                        .setResponseCode(HttpStatus.OK.value())
+                    MockResponse
+                        .Builder()
+                        .code(HttpStatus.OK.value())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
             invoking {
                 sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
@@ -138,9 +150,11 @@ class SykepengesoknadBackendClientTest {
         fun `burde kaste feil ved error response`() {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher {
-                    MockResponse()
-                        .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    MockResponse
+                        .Builder()
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
             invoking {
                 sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
@@ -153,15 +167,17 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher { request ->
                     recordedRequest = request
-                    MockResponse()
-                        .setResponseCode(HttpStatus.OK.value())
+                    MockResponse
+                        .Builder()
+                        .code(HttpStatus.OK.value())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
 
             sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
 
             val request = recordedRequest!!
-            request.path `should be equal to` "/api/v2/soknader/opprett-opt-in"
+            request.url.encodedPath `should be equal to` "/api/v2/soknader/opprett-opt-in"
         }
 
         @Test
@@ -170,9 +186,11 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendMockWebServer.dispatcher =
                 simpleDispatcher { request ->
                     recordedRequest = request
-                    MockResponse()
-                        .setResponseCode(HttpStatus.OK.value())
+                    MockResponse
+                        .Builder()
+                        .code(HttpStatus.OK.value())
                         .addHeader("Content-Type", "application/json")
+                        .build()
                 }
 
             sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
@@ -188,9 +206,11 @@ class SykepengesoknadBackendClientTest {
         sykepengesoknadBackendMockWebServer.dispatcher =
             simpleDispatcher { request ->
                 recordedRequest = request
-                MockResponse()
-                    .setBody(HarSoknadResponse(harSoknad = true).serialisertTilString())
+                MockResponse
+                    .Builder()
+                    .body(HarSoknadResponse(harSoknad = true).serialisertTilString())
                     .addHeader("Content-Type", "application/json")
+                    .build()
             }
 
         sykepengesoknadBackendEksternClient.harSoknad("test-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)

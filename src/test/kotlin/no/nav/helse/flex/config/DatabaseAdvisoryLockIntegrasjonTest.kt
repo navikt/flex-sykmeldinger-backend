@@ -109,17 +109,6 @@ class DatabaseAdvisoryLockIntegrasjonTest : IntegrasjonTestOppsett() {
         tx1Thread.join()
     }
 
-    private fun listAdvisoryLocks(): List<Map<String, Any>> =
-        jdbcTemplate.queryForList(
-            """
-                SELECT *
-                FROM pg_locks 
-                WHERE locktype = 'advisory'
-                    AND granted = true
-                """,
-            mapOf<String, Any>(),
-        )
-
     private fun checkAdvisoryLockGranted(key: Long): Boolean = checkAdvisoryLockGranted(classid = 0, objid = key)
 
     private fun checkAdvisoryLockGranted(
