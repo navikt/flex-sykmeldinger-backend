@@ -41,19 +41,7 @@ class SykmeldingHendelseHandterer(
                 is ArbeidstakerBrukerSvar -> {
                     HendelseStatus.SENDT_TIL_ARBEIDSGIVER
                 }
-                is FiskerBrukerSvar -> {
-                    when (brukerSvar.lottOgHyre.svar) {
-                        FiskerLottOgHyre.HYRE,
-                        -> {
-                            HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                        }
-                        FiskerLottOgHyre.LOTT,
-                        FiskerLottOgHyre.BEGGE,
-                        -> {
-                            HendelseStatus.SENDT_TIL_NAV
-                        }
-                    }
-                }
+                is FiskerBrukerSvar,
                 is ArbeidsledigBrukerSvar,
                 is PermittertBrukerSvar,
                 is FrilanserBrukerSvar,

@@ -141,19 +141,19 @@ class TilleggsinfoSammenstillerService(
             FiskerLottOgHyre.HYRE,
             FiskerLottOgHyre.BEGGE,
             -> {
-                requireNotNull(
-                    brukerSvar.arbeidsgiverOrgnummer,
-                ) { "arbeidsgiverOrgnummer må være satt dersom fisker med LOTT, for sykmelding: ${sykmelding.sykmeldingId}" }
-
-                val arbeidsgiver =
-                    finnArbeidsgiver(
-                        identer = identer,
-                        sykmelding = sykmelding,
-                        arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
+                return if (brukerSvar.arbeidsgiverOrgnummer?.svar != null) {
+                    val arbeidsgiver =
+                        finnArbeidsgiver(
+                            identer = identer,
+                            sykmelding = sykmelding,
+                            arbeidsgiverOrgnummer = brukerSvar.arbeidsgiverOrgnummer.svar,
+                        ) // TODO ta med nærmeste leder eller ikke?
+                    FiskerTilleggsinfo(
+                        arbeidsgiver = arbeidsgiver,
                     )
-                return FiskerTilleggsinfo(
-                    arbeidsgiver = arbeidsgiver,
-                )
+                } else {
+                    FiskerTilleggsinfo()
+                }
             }
             FiskerLottOgHyre.LOTT -> {
                 return FiskerTilleggsinfo()

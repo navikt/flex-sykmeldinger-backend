@@ -59,7 +59,7 @@ fun lagFiskerHyreBrukerSvar(
         lagSporsmalSvar(FiskerLottOgHyre.HYRE),
     blad: SporsmalSvar<FiskerBlad> =
         lagSporsmalSvar(FiskerBlad.A),
-    arbeidsgiverOrgnummer: SporsmalSvar<String> =
+    arbeidsgiverOrgnummer: SporsmalSvar<String>? =
         lagSporsmalSvar("test-orgnummer"),
     riktigNarmesteLeder: SporsmalSvar<Boolean> = lagSporsmalSvar(true),
     harEgenmeldingsdager: SporsmalSvar<Boolean> = lagSporsmalSvar(false),
