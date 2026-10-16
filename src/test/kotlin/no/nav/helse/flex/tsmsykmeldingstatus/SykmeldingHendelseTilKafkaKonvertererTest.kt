@@ -12,8 +12,6 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
 
@@ -604,15 +602,14 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 .svar shouldBeEqualTo "FISKER"
         }
 
-        @ParameterizedTest
-        @EnumSource(LottOgHyre::class, names = ["LOTT", "BEGGE"])
-        fun `arbeidssituasjon FISKER burde bli NAERINGSDRIVENDE dersom`(lottOgHyre: LottOgHyre) {
+        @Test
+        fun `arbeidssituasjon FISKER burde bli NAERINGSDRIVENDE dersom LOTT`() {
             val sporsmalSvar =
                 lagSykmeldingSporsmalSvarDto(
                     arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.FISKER),
                     fisker =
                         lagFiskerSvar(
-                            lottOgHyre = lagFormSporsmalSvar(lottOgHyre),
+                            lottOgHyre = lagFormSporsmalSvar(LottOgHyre.LOTT),
                         ),
                 )
 
@@ -626,6 +623,29 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
                 .svar shouldBeEqualTo "NAERINGSDRIVENDE"
+        }
+
+        @Test
+        fun `arbeidssituasjon FISKER burde bli FISKER dersom LOTT OG HYRE`() {
+            val sporsmalSvar =
+                lagSykmeldingSporsmalSvarDto(
+                    arbeidssituasjon = lagFormSporsmalSvar(ArbeidssituasjonDTO.FISKER),
+                    fisker =
+                        lagFiskerSvar(
+                            lottOgHyre = lagFormSporsmalSvar(LottOgHyre.BEGGE),
+                        ),
+                )
+
+            val sporsmalListe =
+                SykmeldingHendelseTilKafkaKonverterer.konverterTilSporsmalsKafkaDto(
+                    sporsmalSvar,
+                    harAktivtArbeidsforhold = null,
+                )
+
+            sporsmalListe
+                .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
+                .shouldNotBeNull()
+                .svar shouldBeEqualTo "FISKER"
         }
 
         @Test
