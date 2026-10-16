@@ -171,13 +171,13 @@ object SykmeldingHendelseTilKafkaKonverterer {
     }
 
     private fun SykmeldingSporsmalSvarDto.arbeidssituasjonSporsmalBuilder(): SporsmalKafkaDTO {
-        // In the old sporsmal and svar list, fiskere should be mapped to ARBEIDSTAKER or
-        // NAERINGSDRIVENDE, dependening on whether or not they are working on lott or hyre.
         val normalisertSituasjon: ArbeidssituasjonDTO =
             when (arbeidssituasjon.svar) {
                 ArbeidssituasjonDTO.FISKER -> {
                     when (fisker?.lottOgHyre?.svar) {
-                        LottOgHyre.HYRE -> ArbeidssituasjonDTO.FISKER
+                        LottOgHyre.HYRE,
+                        LottOgHyre.BEGGE,
+                        -> ArbeidssituasjonDTO.FISKER
                         else -> ArbeidssituasjonDTO.NAERINGSDRIVENDE
                     }
                 }
