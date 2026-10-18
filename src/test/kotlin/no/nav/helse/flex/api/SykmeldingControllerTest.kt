@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.ResultMatcher
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 
@@ -59,6 +60,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
     @Autowired
     lateinit var sykepengesoknadBackendClient: SykepengesoknadBackendClientFake
+
+    @Autowired
+    lateinit var springJsonMapper: JsonMapper
 
     @Value("\${DITT_SYKEFRAVAER_FRONTEND_CLIENT_ID}")
     lateinit var dittSykefravaerFrontendClientId: String
@@ -579,7 +583,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                                     arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
                                     arbeidsgiverOrgnummer = "orgnummer",
                                     riktigNarmesteLeder = JaEllerNei.JA,
-                                    harEgenmeldingsdager = JaEllerNei.JA,
+                                    harBruktEgenmeldingsdager = JaEllerNei.JA,
                                 ).serialisertTilString(),
                             ),
                     ).andExpect(MockMvcResultMatchers.status().isOk)
@@ -668,6 +672,72 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
             sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+        }
+
+        @Test
+        fun `burde deserialisere json fra frontend med alle felter til SendSykmeldingRequestDTO`() {
+            val json =
+                """
+                {
+                    "erOpplysningeneRiktige": { "sporsmaltekst": "Stemmer opplysningene?", "svar": "NEI" },
+                    "uriktigeOpplysninger": { "sporsmaltekst": "Hvilke opplysninger stemmer ikke?", "svar": ["PERIODE", "DIAGNOSE"] },
+                    "arbeidssituasjon": { "sporsmaltekst": "Jeg er sykmeldt som", "svar": "FISKER" },
+                    "arbeidsgiverOrgnummer": { "sporsmaltekst": "Velg arbeidsgiver", "svar": "123456789" },
+                    "riktigNarmesteLeder": { "sporsmaltekst": "Er dette riktig nærmeste leder?", "svar": "JA" },
+                    "sykFoerSykmeldingen": { "sporsmaltekst": "Var du syk før sykmeldingen?", "svar": "JA" },
+                    "harBruktEgenmelding": { "sporsmaltekst": "Har du brukt egenmelding?", "svar": "JA" },
+                    "egenmeldingsperioder": {
+                        "sporsmaltekst": "Hvilke perioder?",
+                        "svar": [{ "fom": "2025-01-01", "tom": "2025-01-03" }]
+                    },
+                    "harForsikring": { "sporsmaltekst": "Har du forsikring?", "svar": "JA" },
+                    "egenmeldingsdager": { "sporsmaltekst": "Hvilke dager?", "svar": ["2025-01-05", "2025-01-06"] },
+                    "harBruktEgenmeldingsdager": { "sporsmaltekst": "Har du brukt egenmeldingsdager?", "svar": "JA" },
+                    "fisker": {
+                        "blad": { "sporsmaltekst": "Velg blad", "svar": "B" },
+                        "lottOgHyre": { "sporsmaltekst": "Lott eller hyre?", "svar": "BEGGE" }
+                    },
+                    "arbeidsledig": {
+                        "arbeidsledigFraOrgnummer": { "sporsmaltekst": "Arbeidsledig fra?", "svar": "987654321" }
+                    }
+                }
+                """.trimIndent()
+
+            springJsonMapper.readValue(json, SendSykmeldingRequestDTO::class.java) shouldBeEqualTo
+                SendSykmeldingRequestDTO(
+                    erOpplysningeneRiktige = SporsmalSvar("Stemmer opplysningene?", JaEllerNei.NEI),
+                    uriktigeOpplysninger =
+                        SporsmalSvar(
+                            "Hvilke opplysninger stemmer ikke?",
+                            listOf(UriktigeOpplysningDTO.PERIODE, UriktigeOpplysningDTO.DIAGNOSE),
+                        ),
+                    arbeidssituasjon = SporsmalSvar("Jeg er sykmeldt som", Arbeidssituasjon.FISKER),
+                    arbeidsgiverOrgnummer = SporsmalSvar("Velg arbeidsgiver", "123456789"),
+                    riktigNarmesteLeder = SporsmalSvar("Er dette riktig nærmeste leder?", JaEllerNei.JA),
+                    sykFoerSykmeldingen = SporsmalSvar("Var du syk før sykmeldingen?", JaEllerNei.JA),
+                    harBruktEgenmelding = SporsmalSvar("Har du brukt egenmelding?", JaEllerNei.JA),
+                    egenmeldingsperioder =
+                        SporsmalSvar(
+                            "Hvilke perioder?",
+                            listOf(EgenmeldingsperiodeDTO(fom = LocalDate.parse("2025-01-01"), tom = LocalDate.parse("2025-01-03"))),
+                        ),
+                    harForsikring = SporsmalSvar("Har du forsikring?", JaEllerNei.JA),
+                    egenmeldingsdager =
+                        SporsmalSvar(
+                            "Hvilke dager?",
+                            listOf(LocalDate.parse("2025-01-05"), LocalDate.parse("2025-01-06")),
+                        ),
+                    harBruktEgenmeldingsdager = SporsmalSvar("Har du brukt egenmeldingsdager?", JaEllerNei.JA),
+                    fisker =
+                        FiskerDTO(
+                            blad = SporsmalSvar("Velg blad", Blad.B),
+                            lottOgHyre = SporsmalSvar("Lott eller hyre?", LottOgHyre.BEGGE),
+                        ),
+                    arbeidsledig =
+                        ArbeidsledigDTO(
+                            arbeidsledigFraOrgnummer = SporsmalSvar("Arbeidsledig fra?", "987654321"),
+                        ),
+                )
         }
 
         @Test
@@ -1409,7 +1479,7 @@ fun lagSendSykmeldingRequestDTO(
     erOpplysningeneRiktige: JaEllerNei = JaEllerNei.JA,
     arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ANNET,
     arbeidsgiverOrgnummer: String? = null,
-    harEgenmeldingsdager: JaEllerNei? = null,
+    harBruktEgenmeldingsdager: JaEllerNei? = null,
     riktigNarmesteLeder: JaEllerNei? = null,
     arbeidsledig: ArbeidsledigDTO? = null,
     fiskerBladSvar: Blad? = null,
@@ -1442,8 +1512,8 @@ fun lagSendSykmeldingRequestDTO(
                     svar = it,
                 )
             },
-        harEgenmeldingsdager =
-            harEgenmeldingsdager?.let {
+        harBruktEgenmeldingsdager =
+            harBruktEgenmeldingsdager?.let {
                 SporsmalSvar(
                     sporsmaltekst = "Har du egenmeldingsdager?",
                     svar = it,

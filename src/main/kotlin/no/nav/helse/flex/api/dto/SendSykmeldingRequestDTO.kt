@@ -9,7 +9,7 @@ data class SendSykmeldingRequestDTO(
     val erOpplysningeneRiktige: SporsmalSvar<JaEllerNei>,
     val arbeidssituasjon: SporsmalSvar<Arbeidssituasjon>,
     val arbeidsgiverOrgnummer: SporsmalSvar<String>?,
-    val harEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
+    val harBruktEgenmeldingsdager: SporsmalSvar<JaEllerNei>? = null,
     val riktigNarmesteLeder: SporsmalSvar<JaEllerNei>? = null,
     val arbeidsledig: ArbeidsledigDTO? = null,
     val egenmeldingsdager: SporsmalSvar<List<LocalDate>>? = null,
@@ -51,7 +51,7 @@ data class SendSykmeldingRequestDTO(
                             )
                         },
                     harEgenmeldingsdager =
-                        harEgenmeldingsdager?.let {
+                        harBruktEgenmeldingsdager?.let {
                             SporsmalSvar(
                                 it.sporsmaltekst,
                                 it.svar.tilBoolean(),
@@ -166,7 +166,7 @@ data class SendSykmeldingRequestDTO(
                             )
                         },
                     harEgenmeldingsdager =
-                        harEgenmeldingsdager?.let {
+                        harBruktEgenmeldingsdager?.let {
                             SporsmalSvar(
                                 it.sporsmaltekst,
                                 it.svar.tilBoolean(),
