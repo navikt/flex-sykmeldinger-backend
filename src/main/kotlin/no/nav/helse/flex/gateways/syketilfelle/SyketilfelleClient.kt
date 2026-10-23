@@ -9,4 +9,6 @@ interface SyketilfelleClient {
     ): ErUtenforVentetidResponse
 
     fun getPerioderMedSammeVentetid(sykmeldingId: String): SammeVentetidResponse
+
+    fun getVentetidForSykmelding(sykmeldingId: String): VentetidForSykmeldingResponse
 }
