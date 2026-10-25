@@ -25,7 +25,6 @@ val testContainersVersion = "2.0.5"
 val tokenSupportVersion = "6.0.12"
 val logstashLogbackEncoderVersion = "9.0"
 val kluentVersion = "1.73"
-val sykepengesoknadKafkaVersion = "2026.07.28-13.22-138bf702"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.67.0"
@@ -53,7 +52,6 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
-    implementation("no.nav.helse.flex:sykepengesoknad-kafka:$sykepengesoknadKafkaVersion")
     implementation("io.getunleash:unleash-client-java:$unleashVersion")
     implementation("io.opentelemetry:opentelemetry-api:$opentelemetryApiVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$opentelemetryInstrumentationVersion")
