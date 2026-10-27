@@ -9,7 +9,7 @@ import org.testcontainers.utility.DockerImageName
 // TODO: Bytt fra latest til en konkret versjon når det er tilgjengelig i dockerhub
 private class ValkeyContainer : GenericContainer<ValkeyContainer>("bitnamisecure/valkey:latest")
 
-private class PostgreSQLContainer16 : PostgreSQLContainer("postgres:16-alpine")
+private class PostgreSQLContainer18 : PostgreSQLContainer("postgres:18-alpine")
 
 object TestcontainersOppsett {
     private val logger = logger()
@@ -26,7 +26,7 @@ object TestcontainersOppsett {
         }
 
     private val postgresContainer =
-        PostgreSQLContainer16().apply {
+        PostgreSQLContainer18().apply {
             withCommand("postgres", "-c", "wal_level=logical")
             start()
 
