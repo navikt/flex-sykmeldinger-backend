@@ -15,7 +15,7 @@ object TestcontainersOppsett {
     private val logger = logger()
 
     private val kafkaContainer =
-        KafkaContainer(DockerImageName.parse("apache/kafka-native:3.8.1")).apply {
+        KafkaContainer(DockerImageName.parse("apache/kafka-native:4.3.1")).apply {
             start()
             System.setProperty("KAFKA_BROKERS", bootstrapServers)
 
