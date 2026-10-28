@@ -2,11 +2,8 @@ package no.nav.helse.flex.gateways
 
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
-import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
-import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleEksternClient
 import no.nav.helse.flex.gateways.syketilfelle.VentetidForSykmeldingResponse
@@ -39,106 +36,6 @@ class SyketilfelleClientTest {
     @AfterEach
     fun afterEach() {
         syketilfelleMockWebServer.dispatcher = defaultSyketilfelleDispatcher
-    }
-
-    @Test
-    fun `burde returnere svar på om sykmelding er utenfor ventetid`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .body(
-                        ErUtenforVentetidResponse(
-                            erUtenforVentetid = true,
-                        ).serialisertTilString(),
-                    ).addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        val erUtenforVentetidResponse = syketilfelleEksternClient.getErUtenforVentetid(PersonIdenter("fnr"), "sykmeldingId")
-        erUtenforVentetidResponse.erUtenforVentetid.`should be true`()
-    }
-
-    @Test
-    fun `burde kaste feil ved error i flex-syketilfelle`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .body(false.serialisertTilString())
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        invoking {
-            syketilfelleEksternClient.getErUtenforVentetid(PersonIdenter("fnr"), "sykmeldingId")
-        } `should throw` RestClientException::class
-    }
-
-    @Test
-    fun `burde kaste feil ved tom body`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        invoking {
-            syketilfelleEksternClient.getErUtenforVentetid(PersonIdenter("fnr"), "sykmeldingId")
-        } `should throw` RuntimeException::class
-    }
-
-    @Test
-    fun `burde returnere perioder med samme ventetid`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .body(
-                        SammeVentetidResponse(
-                            ventetidPerioder =
-                                listOf(
-                                    SammeVentetidPeriode(
-                                        ressursId = "sykmelding-1",
-                                        ventetid = FomTomPeriode(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-20")),
-                                    ),
-                                ),
-                        ).serialisertTilString(),
-                    ).addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        val response = syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
-        response.ventetidPerioder shouldHaveSize 1
-        response.ventetidPerioder.first().ressursId `should be equal to` "sykmelding-1"
-    }
-
-    @Test
-    fun `burde kaste feil ved error ved henting av perioderMedSammeVentetid`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        invoking {
-            syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
-        } `should throw` RestClientException::class
-    }
-
-    @Test
-    fun `burde kaste feil ved tom body for perioderMedSammeVentetid`() {
-        syketilfelleMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-            }
-        invoking {
-            syketilfelleEksternClient.getPerioderMedSammeVentetid("sykmeldingId")
-        } `should throw` RuntimeException::class
     }
 
     @Test

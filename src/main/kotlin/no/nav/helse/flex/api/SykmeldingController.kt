@@ -9,7 +9,6 @@ import no.nav.helse.flex.config.TOKENX
 import no.nav.helse.flex.config.TokenxValidering
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.SykepengesoknadBackendClient
-import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import no.nav.helse.flex.sykmelding.FinnTidligereArbeidsgivereForArbeidsledigService
@@ -151,65 +150,6 @@ class SykmeldingController(
                     ),
             ),
         )
-    }
-
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/er-utenfor-ventetid")
-    @ProtectedWithClaims(
-        issuer = TOKENX,
-        combineWithOr = true,
-        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
-    )
-    fun getErUtenforVentetid(
-        @PathVariable sykmeldingId: String,
-    ): ResponseEntity<ErUtenforVentetidResponse> {
-        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
-
-        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
-
-        val erUtenforVentetid =
-            syketilfelleClient.getErUtenforVentetid(
-                sykmeldingId = sykmelding.sykmeldingId,
-                identer = identer,
-            )
-
-        logger.info("Sykmelding ${sykmelding.sykmeldingId} er utenfor ventetid: ${erUtenforVentetid.erUtenforVentetid}")
-
-        return ResponseEntity.ok(erUtenforVentetid)
-    }
-
-    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/er-forste-sykmelding/{arbeidssituasjon}")
-    @ProtectedWithClaims(
-        issuer = TOKENX,
-        combineWithOr = true,
-        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
-    )
-    fun getErForsteSykmelding(
-        @PathVariable sykmeldingId: String,
-        @PathVariable arbeidssituasjon: Arbeidssituasjon,
-    ): ResponseEntity<ErForsteSykmeldingResponse> {
-        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
-
-        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
-
-        val erForsteSykmelding =
-            sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
-                sykmelding = sykmelding,
-                arbeidssituasjon = arbeidssituasjon,
-            )
-
-        val tidligsteFom =
-            if (erForsteSykmelding) {
-                sykmeldingVentetidService
-                    .finnTidligsteFomForMeldingTilNavDager(
-                        sykmelding = sykmelding,
-                        arbeidssituasjon = arbeidssituasjon,
-                        identer = identer,
-                    )
-            } else {
-                null
-            }
-
-        return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding, tidligsteFom = tidligsteFom))
     }
 
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/ventetid/{arbeidssituasjon}")
@@ -372,11 +312,6 @@ enum class SykmeldingChangeStatus {
     AVBRYT,
     BEKREFT_AVVIST,
 }
-
-data class ErForsteSykmeldingResponse(
-    val erForsteSykmelding: Boolean,
-    val tidligsteFom: LocalDate? = null,
-)
 
 data class VentetidResponse(
     val erUtenforVentetid: Boolean,

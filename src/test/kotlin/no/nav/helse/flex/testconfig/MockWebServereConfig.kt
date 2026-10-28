@@ -15,7 +15,7 @@ import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
-import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
+import no.nav.helse.flex.gateways.syketilfelle.VentetidForSykmeldingResponse
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
@@ -60,8 +60,9 @@ val defaultSyketilfelleDispatcher =
             .Builder()
             .setHeader("Content-Type", "application/json")
             .body(
-                ErUtenforVentetidResponse(
+                VentetidForSykmeldingResponse(
                     erUtenforVentetid = false,
+                    periodeMedSammeVentetid = emptyList(),
                 ).serialisertTilString(),
             ).build()
     }
