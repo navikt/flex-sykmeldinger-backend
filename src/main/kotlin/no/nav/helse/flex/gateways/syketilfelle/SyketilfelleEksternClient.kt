@@ -1,6 +1,5 @@
 package no.nav.helse.flex.gateways.syketilfelle
 
-import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.utils.logger
 import org.springframework.resilience.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -15,31 +14,6 @@ class SyketilfelleEksternClient(
     val log = logger()
 
     @Retryable
-    override fun getErUtenforVentetid(
-        identer: PersonIdenter,
-        sykmeldingId: String,
-    ): ErUtenforVentetidResponse {
-        val uri =
-            syketilfelleRestClient.get().uri { uriBuilder ->
-                uriBuilder.path("/api/bruker/v2/ventetid/$sykmeldingId/erUtenforVentetid").build()
-            }
-        val res = uri.retrieve().toEntity<ErUtenforVentetidResponse>().body
-
-        return res ?: throw RuntimeException("Klarte ikke hente ventetid for sykmelding $sykmeldingId")
-    }
-
-    @Retryable
-    override fun getPerioderMedSammeVentetid(sykmeldingId: String): SammeVentetidResponse {
-        val uri =
-            syketilfelleRestClient.get().uri { uriBuilder ->
-                uriBuilder.path("/api/bruker/v2/ventetid/$sykmeldingId/perioderMedSammeVentetid").build()
-            }
-        val res = uri.retrieve().toEntity<SammeVentetidResponse>().body
-
-        return res ?: throw RuntimeException("Klarte ikke hente perioderMedSammeVentetid for sykmelding $sykmeldingId")
-    }
-
-    @Retryable
     override fun getVentetidForSykmelding(sykmeldingId: String): VentetidForSykmeldingResponse {
         val uri =
             syketilfelleRestClient.get().uri { uriBuilder ->
@@ -51,17 +25,9 @@ class SyketilfelleEksternClient(
     }
 }
 
-data class ErUtenforVentetidResponse(
-    val erUtenforVentetid: Boolean,
-)
-
 data class FomTomPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
-)
-
-data class SammeVentetidResponse(
-    val ventetidPerioder: List<SammeVentetidPeriode>,
 )
 
 data class SammeVentetidPeriode(

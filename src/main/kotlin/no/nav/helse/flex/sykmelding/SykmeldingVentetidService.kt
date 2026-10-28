@@ -1,7 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.gateways.syketilfelle.SyketilfelleClient
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon.*
 import no.nav.helse.flex.sykmeldinghendelse.FiskerBlad
@@ -20,26 +19,8 @@ const val VENTETID_ANTALL_DAGER = 16L
 @Service
 class SykmeldingVentetidService(
     private val sykmeldingLeser: SykmeldingLeser,
-    private val syketilfelleClient: SyketilfelleClient,
 ) {
     private val logger = logger()
-
-    fun erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
-        sykmelding: Sykmelding,
-        arbeidssituasjon: Arbeidssituasjon,
-    ): Boolean {
-        val sykmeldingerMedSammeVentetid =
-            syketilfelleClient
-                .getPerioderMedSammeVentetid(sykmelding.sykmeldingId)
-                .ventetidPerioder
-                .map { it.ressursId }
-
-        return erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
-            sykmelding = sykmelding,
-            arbeidssituasjon = arbeidssituasjon,
-            sykmeldingerMedSammeVentetid = sykmeldingerMedSammeVentetid,
-        )
-    }
 
     fun erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
         sykmelding: Sykmelding,

@@ -4,10 +4,8 @@ import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.gateways.sykepengesoknadbackend.HarSoknadResponse
-import no.nav.helse.flex.gateways.syketilfelle.ErUtenforVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
 import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidPeriode
-import no.nav.helse.flex.gateways.syketilfelle.SammeVentetidResponse
 import no.nav.helse.flex.gateways.syketilfelle.VentetidForSykmeldingResponse
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.sykmelding.tsm.RuleType
@@ -28,7 +26,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be false`
 import org.amshove.kluent.`should not be`
-import org.amshove.kluent.`should not be null`
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
@@ -126,24 +123,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
         }
 
         "/api/v1/sykmeldinger/id-1/brukerinformasjon".run {
-            sjekkStatus(
-                url = this,
-                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = dittSykefravaerFrontendClientId),
-                expectedStatus = HttpStatus.OK,
-            )
-            sjekkStatus(
-                this,
-                token = oauth2Server.tokenxToken(fnr = "fnr", clientId = "invalid-client-id"),
-                expectedStatus = HttpStatus.FORBIDDEN,
-            )
-            sjekkStatus(
-                this,
-                token = oauth2Server.tokenxToken(fnr = "fnr", acrClaim = "invalid-claim"),
-                expectedStatus = HttpStatus.UNAUTHORIZED,
-            )
-        }
-
-        "/api/v1/sykmeldinger/id-1/er-utenfor-ventetid".run {
             sjekkStatus(
                 url = this,
                 token = oauth2Server.tokenxToken(fnr = "fnr", clientId = dittSykefravaerFrontendClientId),
@@ -910,59 +889,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
     }
 
     @Nested
-    inner class GetErUtenforVentetid {
-        @AfterEach
-        fun ryddOpp() {
-            syketilfelleClient.reset()
-        }
-
-        @Test
-        fun `burde hente svar på om sykmelding er utenfor ventetid`() {
-            sykmeldingRepository.save(
-                lagSykmelding(
-                    sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
-                            id = "1",
-                            pasient = lagPasient(fnr = "fnr"),
-                        ),
-                ),
-            )
-
-            syketilfelleClient.setErUtenforVentetid(
-                ErUtenforVentetidResponse(
-                    erUtenforVentetid = true,
-                ),
-            )
-
-            val result =
-                mockMvc
-                    .perform(
-                        MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/er-utenfor-ventetid")
-                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
-                            .contentType(MediaType.APPLICATION_JSON),
-                    ).andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn()
-                    .response.contentAsString
-
-            val erUtenforVentetidResponse: ErUtenforVentetidResponse = objectMapper.readValue(result)
-            erUtenforVentetidResponse.`should not be null`()
-        }
-
-        @Test
-        fun `burde få 404 når sykmeldingen ikke finnes`() =
-            sjekkFår404NårSykmeldingenIkkeFinnes(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
-            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
-
-        @Test
-        fun `burde feile dersom sykmelding har feil fnr`() =
-            sjekkAtFeilerDersomSykmeldingHarFeilFnr(
-                content = lagSykmeldingGrunnlag().serialisertTilString(),
-            ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-utenfor-ventetid" }
-    }
-
-    @Nested
     inner class GetTidligereArbeidsgivere {
         @Test
         fun `burde returnere dersom sykmelding eksisterer`() {
@@ -1000,121 +926,6 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             sjekkAtFeilerDersomSykmeldingHarFeilFnr(
                 expectStatus = MockMvcResultMatchers.status().isNotFound,
             ) { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/tidligere-arbeidsgivere" }
-    }
-
-    @Nested
-    inner class GetErForsteSykmelding {
-        @AfterEach
-        fun ryddOpp() {
-            syketilfelleClient.reset()
-            fakeUnleash.resetAll()
-        }
-
-        @Test
-        fun `burde returnere true dersom det ikke finnes andre sykmeldinger med samme ventetid`() {
-            val sykmelding =
-                lagSykmelding(
-                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", pasient = lagPasient(fnr = "fnr")),
-                ).also { sykmeldingRepository.save(it) }
-
-            syketilfelleClient.setPerioderMedSammeVentetid(
-                SammeVentetidResponse(listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom)))),
-            )
-
-            val result =
-                mockMvc
-                    .perform(
-                        MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/FRILANSER")
-                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
-                            .contentType(MediaType.APPLICATION_JSON),
-                    ).andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn()
-                    .response.contentAsString
-
-            val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
-            response.erForsteSykmelding `should be equal to` true
-            response.tidligsteFom `should be equal to` null
-        }
-
-        @Test
-        fun `burde returnere true med begrenset tidligsteFom når det finnes en tidligere sykmelding uten samme ventetid`() {
-            val forrigeSykmelding =
-                sykmeldingRepository.save(
-                    lagSykmelding(
-                        sykmeldingGrunnlag =
-                            lagSykmeldingGrunnlag(
-                                id = "2",
-                                pasient = lagPasient(fnr = "fnr"),
-                                aktiviteter =
-                                    listOf(
-                                        lagAktivitetIkkeMulig(
-                                            fom = LocalDate.parse("2021-01-01"),
-                                            tom = LocalDate.parse("2021-01-10"),
-                                        ),
-                                    ),
-                            ),
-                        hendelser =
-                            listOf(
-                                lagSykmeldingHendelse(
-                                    status = HendelseStatus.SENDT_TIL_NAV,
-                                    brukerSvar = lagFrilanserBrukerSvar(),
-                                ),
-                            ),
-                    ),
-                )
-
-            val sykmelding =
-                lagSykmelding(
-                    sykmeldingGrunnlag =
-                        lagSykmeldingGrunnlag(
-                            id = "1",
-                            pasient = lagPasient(fnr = "fnr"),
-                            aktiviteter =
-                                listOf(
-                                    lagAktivitetIkkeMulig(
-                                        fom = LocalDate.parse("2021-01-20"),
-                                        tom = LocalDate.parse("2021-01-25"),
-                                    ),
-                                ),
-                        ),
-                    hendelser =
-                        listOf(
-                            lagSykmeldingHendelse(
-                                status = HendelseStatus.SENDT_TIL_NAV,
-                                brukerSvar = lagFrilanserBrukerSvar(),
-                            ),
-                        ),
-                ).also { sykmeldingRepository.save(it) }
-
-            // Kun sykmelding "1" har samme ventetid, så den er fortsatt første
-            syketilfelleClient.setPerioderMedSammeVentetid(
-                SammeVentetidResponse(listOf(SammeVentetidPeriode(sykmelding.sykmeldingId, FomTomPeriode(sykmelding.fom, sykmelding.tom)))),
-            )
-
-            val result =
-                mockMvc
-                    .perform(
-                        MockMvcRequestBuilders
-                            .get("/api/v1/sykmeldinger/1/er-forste-sykmelding/FRILANSER")
-                            .authorizationHeader(oauth2Server.tokenxToken(fnr = "fnr", clientId = defaultClientId))
-                            .contentType(MediaType.APPLICATION_JSON),
-                    ).andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn()
-                    .response.contentAsString
-
-            val response: ErForsteSykmeldingResponse = objectMapper.readValue(result)
-            response.erForsteSykmelding `should be equal to` true
-            response.tidligsteFom `should be equal to` forrigeSykmelding.tom.plusDays(1)
-        }
-
-        @Test
-        fun `burde få 404 når sykmeldingen ikke finnes`() =
-            sjekkFår404NårSykmeldingenIkkeFinnes { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/FRILANSER" }
-
-        @Test
-        fun `burde feile dersom sykmelding har feil fnr`() =
-            sjekkAtFeilerDersomSykmeldingHarFeilFnr { sykmeldingId -> "/api/v1/sykmeldinger/$sykmeldingId/er-forste-sykmelding/FRILANSER" }
     }
 
     @Nested
