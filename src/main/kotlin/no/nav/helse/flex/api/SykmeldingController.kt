@@ -212,6 +212,51 @@ class SykmeldingController(
         return ResponseEntity.ok(ErForsteSykmeldingResponse(erForsteSykmelding = erForsteSykmelding, tidligsteFom = tidligsteFom))
     }
 
+    @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/ventetid/{arbeidssituasjon}")
+    @ProtectedWithClaims(
+        issuer = TOKENX,
+        combineWithOr = true,
+        claimMap = ["acr=Level4", "acr=idporten-loa-high"],
+    )
+    fun getVentetid(
+        @PathVariable sykmeldingId: String,
+        @PathVariable arbeidssituasjon: Arbeidssituasjon,
+    ): ResponseEntity<VentetidResponse> {
+        val identer = tokenxValidering.hentIdenter(dittSykefravaerFrontendClientId)
+
+        val sykmelding = sykmeldingLeser.hentSykmelding(sykmeldingId = sykmeldingId, identer = identer)
+
+        val ventetidForSykmelding = syketilfelleClient.getVentetidForSykmelding(sykmeldingId = sykmelding.sykmeldingId)
+
+        logger.info("Sykmelding ${sykmelding.sykmeldingId} er utenfor ventetid: ${ventetidForSykmelding.erUtenforVentetid}")
+
+        val erForsteSykmelding =
+            sykmeldingVentetidService.erForsteSykmeldingMedSammeVentetidOgArbeidssituasjon(
+                sykmelding = sykmelding,
+                arbeidssituasjon = arbeidssituasjon,
+                sykmeldingerMedSammeVentetid = ventetidForSykmelding.periodeMedSammeVentetid.map { it.ressursId },
+            )
+
+        val tidligsteFom =
+            if (erForsteSykmelding) {
+                sykmeldingVentetidService.finnTidligsteFomForMeldingTilNavDager(
+                    sykmelding = sykmelding,
+                    arbeidssituasjon = arbeidssituasjon,
+                    identer = identer,
+                )
+            } else {
+                null
+            }
+
+        return ResponseEntity.ok(
+            VentetidResponse(
+                erUtenforVentetid = ventetidForSykmelding.erUtenforVentetid,
+                erForsteSykmelding = erForsteSykmelding,
+                tidligsteFom = tidligsteFom,
+            ),
+        )
+    }
+
     @GetMapping("/api/v1/sykmeldinger/{sykmeldingId}/har-soknad/{arbeidssituasjon}")
     @ProtectedWithClaims(
         issuer = TOKENX,
@@ -329,6 +374,12 @@ enum class SykmeldingChangeStatus {
 }
 
 data class ErForsteSykmeldingResponse(
+    val erForsteSykmelding: Boolean,
+    val tidligsteFom: LocalDate? = null,
+)
+
+data class VentetidResponse(
+    val erUtenforVentetid: Boolean,
     val erForsteSykmelding: Boolean,
     val tidligsteFom: LocalDate? = null,
 )
