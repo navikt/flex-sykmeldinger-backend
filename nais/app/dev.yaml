@@ -5,6 +5,7 @@ replicas_min: 1
 replicas_max: 2
 cpu: 400m
 memory: 1280Mi
+db_type: POSTGRES_16
 db_tier: db-f1-micro
 db_highAvailability: false
 db_pointInTimeRecovery: false

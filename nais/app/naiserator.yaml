@@ -78,7 +78,7 @@ spec:
         - id: elastic
   gcp:
     sqlInstances:
-      - type: POSTGRES_16
+      - type: {{db_type}}
         diskType: SSD
         diskSize: 10
         tier: {{db_tier}}
