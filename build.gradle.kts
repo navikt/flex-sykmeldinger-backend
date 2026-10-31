@@ -28,7 +28,7 @@ val kluentVersion = "1.73"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.67.0"
-val opentelemetryInstrumentationVersion = "2.32.0"
+val opentelemetryInstrumentationVersion = "2.33.1"
 val unleashVersion = "12.3.0"
 val mockWebServerVersion = "5.5.0"
 
