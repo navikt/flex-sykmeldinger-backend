@@ -1,5 +1,7 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.ereg.EregClient
@@ -10,9 +12,6 @@ import no.nav.helse.flex.testconfig.defaultEregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should throw`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,7 +48,7 @@ class EregClientTest {
 
         eregEksternClient.hentNokkelinfo("test-orgnummer")
 
-        path `should be equal to` "/v2/organisasjon/test-orgnummer/noekkelinfo"
+        path shouldBe "/v2/organisasjon/test-orgnummer/noekkelinfo"
     }
 
     @Test
@@ -78,9 +77,9 @@ class EregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RestClientException> {
             eregEksternClient.hentNokkelinfo("_")
-        } `should throw` RestClientException::class
+        }
     }
 
     @Test
@@ -93,9 +92,9 @@ class EregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RuntimeException> {
             eregEksternClient.hentNokkelinfo("suksess_uten_body_orgnummer")
-        } `should throw` RuntimeException::class
+        }
     }
 
     @Test
@@ -115,9 +114,9 @@ class EregClientTest {
 
         eregEksternClient.hentOrganisasjoner(listOf("123456789", "987654321"))
 
-        path `should be equal to` "/v2/organisasjon/hentOrganisasjoner"
+        path shouldBe "/v2/organisasjon/hentOrganisasjoner"
         val requestBody = objectMapper.readValue(body, HentOrganisasjonerRequest::class.java)
-        requestBody.organisasjonsnummere `should be equal to` listOf("123456789", "987654321")
+        requestBody.organisasjonsnummere shouldBe listOf("123456789", "987654321")
     }
 
     @Test
@@ -133,8 +132,8 @@ class EregClientTest {
 
         val response = eregEksternClient.hentOrganisasjoner(listOf("990983666"))
 
-        response.organisasjoner.size `should be equal to` 1
-        response.organisasjoner["990983666"]!!.navn.sammensattnavn `should be equal to` "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+        response.organisasjoner.size shouldBe 1
+        response.organisasjoner["990983666"]!!.navn.sammensattnavn shouldBe "NAV FAMILIE- OG PENSJONSYTELSER OSL"
     }
 
     @Test
@@ -162,10 +161,10 @@ class EregClientTest {
 
         val response = eregEksternClient.hentOrganisasjoner(listOf("990983666", "123456789"))
 
-        response.organisasjoner.size `should be equal to` 2
-        response.organisasjoner["990983666"]!!.navn.sammensattnavn `should be equal to` "NAV FAMILIE- OG PENSJONSYTELSER OSL"
-        response.organisasjoner.containsKey("123456789") `should be equal to` true
-        response.organisasjoner["123456789"] `should be equal to` null
+        response.organisasjoner.size shouldBe 2
+        response.organisasjoner["990983666"]!!.navn.sammensattnavn shouldBe "NAV FAMILIE- OG PENSJONSYTELSER OSL"
+        response.organisasjoner.containsKey("123456789") shouldBe true
+        response.organisasjoner["123456789"] shouldBe null
     }
 
     @Test
@@ -179,9 +178,9 @@ class EregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RestClientException> {
             eregEksternClient.hentOrganisasjoner(listOf("123456789"))
-        } `should throw` RestClientException::class
+        }
     }
 
     @Test
@@ -196,9 +195,9 @@ class EregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RestClientException> {
             eregEksternClient.hentOrganisasjoner(listOf("123"))
-        } `should throw` RestClientException::class
+        }
     }
 
     @Test
@@ -211,9 +210,9 @@ class EregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RuntimeException> {
             eregEksternClient.hentOrganisasjoner(listOf("123"))
-        } `should throw` RuntimeException::class
+        }
     }
 }
 

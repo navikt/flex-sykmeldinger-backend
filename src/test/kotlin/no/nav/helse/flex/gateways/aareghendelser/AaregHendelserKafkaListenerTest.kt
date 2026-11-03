@@ -4,14 +4,13 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingRuterService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdInnhentingService
 import no.nav.helse.flex.arbeidsforhold.innhenting.ArbeidsforholdSynkronisering
 import no.nav.helse.flex.arbeidsforhold.innhenting.RegistrertePersonerForArbeidsforhold
 import no.nav.helse.flex.utils.objectMapper
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
@@ -47,9 +46,9 @@ class AaregHendelserListenerTest {
                 ),
                 emptyMap<TopicPartition, OffsetAndMetadata>(),
             )
-        invoking {
+        shouldThrow<Exception> {
             listener.listen(records)
-        } `should throw` Exception::class
+        }
     }
 
     @Test
@@ -76,7 +75,7 @@ class AaregHendelserListenerTest {
                 entitetsendringer = listOf(Entitetsendring.Permittering),
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.SLETT
+        handtering shouldBe AaregHendelseHandtering.SLETT
     }
 
     @ParameterizedTest
@@ -89,7 +88,7 @@ class AaregHendelserListenerTest {
                 entitetsendringer = entitetsendringer,
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
+        handtering shouldBe AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
     @ParameterizedTest
@@ -102,7 +101,7 @@ class AaregHendelserListenerTest {
                 entitetsendringer = entitetsendringer,
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
+        handtering shouldBe AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
     @Test
@@ -112,7 +111,7 @@ class AaregHendelserListenerTest {
                 endringstype = Endringstype.Sletting,
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.SLETT
+        handtering shouldBe AaregHendelseHandtering.SLETT
     }
 
     @Test
@@ -123,7 +122,7 @@ class AaregHendelserListenerTest {
                 entitetsendringer = listOf(Entitetsendring.Permittering),
             )
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(hendelse)
-        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
+        handtering shouldBe AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 
     @Test
@@ -135,7 +134,7 @@ class AaregHendelserListenerTest {
         val deserialisertUgyldigeVerdier: ArbeidsforholdHendelse = objectMapper.readValue(hendelseMedUgyldigeVerdier)
 
         val handtering = AaregHendelserConsumer.avgjorHendelseshandtering(deserialisertUgyldigeVerdier)
-        handtering `should be equal to` AaregHendelseHandtering.OPPRETT_OPPDATER
+        handtering shouldBe AaregHendelseHandtering.OPPRETT_OPPDATER
     }
 }
 

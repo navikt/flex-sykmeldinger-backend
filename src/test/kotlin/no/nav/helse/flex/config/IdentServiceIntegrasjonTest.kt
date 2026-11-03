@@ -1,13 +1,13 @@
 package no.nav.helse.flex.config
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.gateways.pdl.lagHentIdenterResponseData
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be instance of`
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -54,17 +54,17 @@ class IdentServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
         identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
 
-        pdlCalls `should be equal to` 1
+        pdlCalls shouldBe 1
     }
 
     @Test
     fun `burde sjekke at TTL i cache er satt rikitg`() {
         val cache = cacheManager.getCache("flex-folkeregister-identer-med-historikk") as? RedisCache
-        cache `should be instance of` RedisCache::class
+        cache.shouldBeInstanceOf(RedisCache::class)
 
         val ttlFunction = cache?.cacheConfiguration?.ttlFunction as? FixedDurationTtlFunction
-        ttlFunction `should be instance of` FixedDurationTtlFunction::class
+        ttlFunction.shouldBeInstanceOf(FixedDurationTtlFunction::class)
 
-        ttlFunction?.duration `should be equal to` Duration.ofHours(1)
+        ttlFunction?.duration shouldBe Duration.ofHours(1)
     }
 }

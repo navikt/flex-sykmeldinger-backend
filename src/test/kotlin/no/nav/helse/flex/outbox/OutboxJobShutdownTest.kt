@@ -1,7 +1,7 @@
 package no.nav.helse.flex.outbox
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.support.GenericApplicationContext
@@ -25,11 +25,11 @@ class OutboxJobShutdownTest {
         job.onShutdownEvent(shutdownEvent())
 
         jobbTraad.join(5_000)
-        jobbTraad.isAlive shouldBeEqualTo false
+        jobbTraad.isAlive shouldBe false
 
         val kallVedShutdown = service.antallKall.get()
         Thread.sleep(200)
-        service.antallKall.get() shouldBeEqualTo kallVedShutdown
+        service.antallKall.get() shouldBe kallVedShutdown
     }
 
     @Test
@@ -38,7 +38,7 @@ class OutboxJobShutdownTest {
         val job = OutboxJob(service)
 
         thread { job.kjørJobb() }
-        service.førsteKallStartet.await(5, TimeUnit.SECONDS) shouldBeEqualTo true
+        service.førsteKallStartet.await(5, TimeUnit.SECONDS) shouldBe true
 
         val shutdownFullført = CountDownLatch(1)
         val shutdownTraad =
@@ -47,10 +47,10 @@ class OutboxJobShutdownTest {
                 shutdownFullført.countDown()
             }
 
-        shutdownFullført.await(500, TimeUnit.MILLISECONDS) shouldBeEqualTo false
+        shutdownFullført.await(500, TimeUnit.MILLISECONDS) shouldBe false
 
         service.slippFørsteKall.countDown()
-        shutdownFullført.await(5, TimeUnit.SECONDS) shouldBeEqualTo true
+        shutdownFullført.await(5, TimeUnit.SECONDS) shouldBe true
         shutdownTraad.join(1_000)
     }
 

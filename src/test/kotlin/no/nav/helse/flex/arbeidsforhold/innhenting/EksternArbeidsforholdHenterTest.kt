@@ -1,5 +1,11 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.gateways.aareg.*
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
@@ -11,7 +17,6 @@ import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testutils.LoggLytter
 import no.nav.helse.flex.utils.logger
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,13 +80,13 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
         )
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr")
-        resultat.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            navArbeidsforholdId `should be equal to` "navArbeidsforholdId"
-            arbeidsforholdType `should be equal to` ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
-            orgnummer `should be equal to` "orgnummer"
-            juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
-            fom `should be equal to` LocalDate.parse("2020-01-01")
-            tom `should be equal to` LocalDate.parse("2020-01-02")
+        resultat.eksterneArbeidsforhold.shouldBeSingle().run {
+            navArbeidsforholdId shouldBe "navArbeidsforholdId"
+            arbeidsforholdType shouldBe ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+            orgnummer shouldBe "orgnummer"
+            juridiskOrgnummer shouldBe "juridisk-orgnummer"
+            fom shouldBe LocalDate.parse("2020-01-01")
+            tom shouldBe LocalDate.parse("2020-01-02")
         }
     }
 
@@ -94,7 +99,7 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
         environmentToggles.setEnvironment("dev")
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("fnr")
-        resultat.eksterneArbeidsforhold.`should be empty`()
+        resultat.eksterneArbeidsforhold.shouldBeEmpty()
     }
 
     @Test
@@ -102,11 +107,11 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
         aaregClient.setArbeidsforholdoversikt(failure = ResourceAccessException("feilmelding"))
         val loggLytter = LoggLytter(eksternArbeidsforholdHenter.logger())
 
-        invoking {
+        shouldThrow<ResourceAccessException> {
             eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        }.shouldThrow(ResourceAccessException::class)
+        }
 
-        loggLytter.logEventer().shouldHaveSingleItem().run {
+        loggLytter.logEventer().shouldBeSingle().run {
             message shouldEndWith "feilmelding"
         }
     }
@@ -123,8 +128,8 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
         )
 
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        resultat.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            orgnavn `should be equal to` "Testbedriften AS"
+        resultat.eksterneArbeidsforhold.shouldBeSingle().run {
+            orgnavn shouldBe "Testbedriften AS"
         }
     }
 
@@ -144,8 +149,8 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
             ),
         )
         val result = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        result.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            orgnummer `should be equal to` "orgnummer"
+        result.eksterneArbeidsforhold.shouldBeSingle().run {
+            orgnummer shouldBe "orgnummer"
         }
     }
 
@@ -165,8 +170,8 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
             ),
         )
         val resultat = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        resultat.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            juridiskOrgnummer `should be equal to` "juridisk-orgnummer"
+        resultat.eksterneArbeidsforhold.shouldBeSingle().run {
+            juridiskOrgnummer shouldBe "juridisk-orgnummer"
         }
     }
 
@@ -182,8 +187,8 @@ class EksternArbeidsforholdHenterTest : FakesTestOppsett() {
             ),
         )
         val result = eksternArbeidsforholdHenter.hentEksterneArbeidsforholdForPerson("_")
-        result.eksterneArbeidsforhold.shouldHaveSingleItem().run {
-            arbeidsforholdType `should be equal to` ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
+        result.eksterneArbeidsforhold.shouldBeSingle().run {
+            arbeidsforholdType shouldBe ArbeidsforholdType.FRILANSER_OPPDRAGSTAKER_HONORAR_PERSONER_MM
         }
     }
 

@@ -2,9 +2,12 @@ package no.nav.helse.flex.config.kafka
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import no.nav.helse.flex.utils.LogMarker
 import no.nav.helse.flex.utils.logger
-import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
@@ -35,7 +38,7 @@ class AivenKafkaErrorHandlerTest {
             thrownException = RuntimeException(),
             records = mutableListOf(Testdata.lagConsumerRecord()),
         )
-        logListAppender.eventerUtenMarkers().shouldHaveSingleItem()
+        logListAppender.eventerUtenMarkers().shouldBeSingle()
     }
 
     @Test
@@ -58,7 +61,7 @@ class AivenKafkaErrorHandlerTest {
             thrownException = RuntimeException(),
             records = mutableListOf(Testdata.lagConsumerRecord()),
         )
-        logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).shouldHaveSingleItem()
+        logListAppender.eventerMedMarker(LogMarker.TEAM_LOG).shouldBeSingle()
     }
 
     @TestFactory

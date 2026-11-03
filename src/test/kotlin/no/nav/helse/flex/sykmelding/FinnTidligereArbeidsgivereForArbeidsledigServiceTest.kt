@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.TidligereArbeidsgiver
 import no.nav.helse.flex.testdata.lagAktivitetIkkeMulig
@@ -10,7 +11,6 @@ import no.nav.helse.flex.testdata.lagPermittertTilleggsinfo
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingHendelse
-import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -73,7 +73,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -128,7 +128,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -184,7 +184,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -241,7 +241,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -298,7 +298,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -355,7 +355,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 0
+        tidligereArbeidsgivere.size shouldBe 0
     }
 
     @Test
@@ -441,7 +441,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -561,10 +561,10 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
         tidligereArbeidsgivere.first().let {
-            it.orgNavn `should be equal to` arbeidsgiver1
-            it.orgnummer `should be equal to` arbeidsgiver1Orgnummer
+            it.orgNavn shouldBe arbeidsgiver1
+            it.orgnummer shouldBe arbeidsgiver1Orgnummer
         }
     }
 
@@ -714,7 +714,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 2
+        tidligereArbeidsgivere.size shouldBe 2
     }
 
     @Test
@@ -863,7 +863,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nyArbeidsledigSykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 2
+        tidligereArbeidsgivere.size shouldBe 2
     }
 
     @Test
@@ -919,7 +919,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 0
+        tidligereArbeidsgivere.size shouldBe 0
     }
 
     @Test
@@ -991,7 +991,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 gjeldendeSykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 
     @Test
@@ -1077,7 +1077,7 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 2
+        tidligereArbeidsgivere.size shouldBe 2
     }
 
     @Test
@@ -1163,6 +1163,6 @@ class FinnTidligereArbeidsgivereForArbeidsledigServiceTest {
                 nySykmelding.sykmeldingId,
             )
 
-        tidligereArbeidsgivere.size `should be equal to` 1
+        tidligereArbeidsgivere.size shouldBe 1
     }
 }

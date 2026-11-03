@@ -1,11 +1,17 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContainIgnoringCase
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -65,14 +71,14 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidstakerTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.ARBEIDSTAKER
-                    it.arbeidsgiver.orgnummer `should be equal to` "orgnr"
-                    it.arbeidsgiver.juridiskOrgnummer `should be equal to` "jorgnr"
-                    it.arbeidsgiver.orgnavn `should be equal to` "Orgnavn"
+                    it.type shouldBe TilleggsinfoType.ARBEIDSTAKER
+                    it.arbeidsgiver.orgnummer shouldBe "orgnr"
+                    it.arbeidsgiver.juridiskOrgnummer shouldBe "jorgnr"
+                    it.arbeidsgiver.orgnavn shouldBe "Orgnavn"
                     it.arbeidsgiver.erAktivtArbeidsforhold.shouldBeTrue()
                     it.arbeidsgiver.narmesteLeder
                         .shouldNotBeNull()
-                        .navn `should be equal to` "Navn"
+                        .navn shouldBe "Navn"
                 }
         }
 
@@ -118,17 +124,16 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
 
             val brukerSvar = lagArbeidstakerBrukerSvar(arbeidsgiverOrgnummer = lagSporsmalSvar("orgnr"))
 
-            invoking {
+            shouldThrow<KunneIkkeFinneTilleggsinfoException> {
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
-            }.shouldThrow(KunneIkkeFinneTilleggsinfoException::class)
-                .apply {
-                    exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
-                    exceptionMessage shouldContainIgnoringCase "sykmelding"
-                }
+            }.apply {
+                message.shouldNotBeNull() shouldContainIgnoringCase "arbeidsgiver"
+                message.shouldNotBeNull() shouldContainIgnoringCase "sykmelding"
+            }
         }
     }
 
@@ -193,9 +198,9 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.ARBEIDSLEDIG
-                    it.tidligereArbeidsgiver.`should not be null`()
-                    it.tidligereArbeidsgiver.orgnummer `should be equal to` "orgnr"
+                    it.type shouldBe TilleggsinfoType.ARBEIDSLEDIG
+                    it.tidligereArbeidsgiver.shouldNotBeNull()
+                    it.tidligereArbeidsgiver.orgnummer shouldBe "orgnr"
                 }
         }
 
@@ -224,8 +229,8 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<ArbeidsledigTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.ARBEIDSLEDIG
-                    it.tidligereArbeidsgiver.`should be null`()
+                    it.type shouldBe TilleggsinfoType.ARBEIDSLEDIG
+                    it.tidligereArbeidsgiver.shouldBeNull()
                 }
         }
 
@@ -243,13 +248,13 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
-            invoking {
+            shouldThrow<KunneIkkeFinneTilleggsinfoException> {
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
-            } `should throw` KunneIkkeFinneTilleggsinfoException::class
+            }
         }
     }
 
@@ -314,9 +319,9 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<PermittertTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.PERMITTERT
-                    it.tidligereArbeidsgiver.`should not be null`()
-                    it.tidligereArbeidsgiver.orgnummer `should be equal to` "orgnr"
+                    it.type shouldBe TilleggsinfoType.PERMITTERT
+                    it.tidligereArbeidsgiver.shouldNotBeNull()
+                    it.tidligereArbeidsgiver.orgnummer shouldBe "orgnr"
                 }
         }
 
@@ -345,8 +350,8 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<PermittertTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.PERMITTERT
-                    it.tidligereArbeidsgiver.`should be null`()
+                    it.type shouldBe TilleggsinfoType.PERMITTERT
+                    it.tidligereArbeidsgiver.shouldBeNull()
                 }
         }
 
@@ -364,13 +369,13 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     arbeidsledigFraOrgnummer = lagSporsmalSvar("orgnr"),
                 )
 
-            invoking {
+            shouldThrow<KunneIkkeFinneTilleggsinfoException> {
                 sammenstillerService.sammenstillTilleggsinfo(
                     identer = PersonIdenter("fnr"),
                     sykmelding = sykmelding,
                     brukerSvar = brukerSvar,
                 )
-            } `should throw` KunneIkkeFinneTilleggsinfoException::class
+            }
         }
     }
 
@@ -420,17 +425,17 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldNotBeNull()
                     .shouldBeInstanceOf<FiskerTilleggsinfo>()
                     .run {
-                        type `should be equal to` TilleggsinfoType.FISKER
+                        type shouldBe TilleggsinfoType.FISKER
                         arbeidsgiver
-                            .`should not be null`()
+                            .shouldNotBeNull()
                             .run {
-                                orgnummer `should be equal to` "orgnr"
-                                juridiskOrgnummer `should be equal to` "jorgnr"
-                                orgnavn `should be equal to` "Orgnavn"
-                                erAktivtArbeidsforhold.`should be true`()
+                                orgnummer shouldBe "orgnr"
+                                juridiskOrgnummer shouldBe "jorgnr"
+                                orgnavn shouldBe "Orgnavn"
+                                erAktivtArbeidsforhold.shouldBeTrue()
                                 narmesteLeder
-                                    .`should not be null`()
-                                    .navn `should be equal to` "Navn"
+                                    .shouldNotBeNull()
+                                    .navn shouldBe "Navn"
                             }
                     }
             }
@@ -460,9 +465,9 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldNotBeNull()
                     .shouldBeInstanceOf<FiskerTilleggsinfo>()
                     .run {
-                        type `should be equal to` TilleggsinfoType.FISKER
+                        type shouldBe TilleggsinfoType.FISKER
                         arbeidsgiver
-                            .`should be null`()
+                            .shouldBeNull()
                     }
             }
 
@@ -517,17 +522,16 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                         lottOgHyre = lagSporsmalSvar(fiskerLottOgHyre),
                     )
 
-                invoking {
+                shouldThrow<KunneIkkeFinneTilleggsinfoException> {
                     sammenstillerService.sammenstillTilleggsinfo(
                         identer = PersonIdenter("fnr"),
                         sykmelding = sykmelding,
                         brukerSvar = brukerSvar,
                     )
-                }.shouldThrow(KunneIkkeFinneTilleggsinfoException::class)
-                    .apply {
-                        exceptionMessage shouldContainIgnoringCase "arbeidsgiver"
-                        exceptionMessage shouldContainIgnoringCase "sykmelding"
-                    }
+                }.apply {
+                    message.shouldNotBeNull() shouldContainIgnoringCase "arbeidsgiver"
+                    message.shouldNotBeNull() shouldContainIgnoringCase "sykmelding"
+                }
             }
         }
 
@@ -553,8 +557,8 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                     .shouldNotBeNull()
                     .shouldBeInstanceOf<FiskerTilleggsinfo>()
                     .also {
-                        it.type `should be equal to` TilleggsinfoType.FISKER
-                        it.arbeidsgiver.`should be null`()
+                        it.type shouldBe TilleggsinfoType.FISKER
+                        it.arbeidsgiver.shouldBeNull()
                     }
             }
         }
@@ -583,7 +587,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<FrilanserTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.FRILANSER
+                    it.type shouldBe TilleggsinfoType.FRILANSER
                 }
         }
     }
@@ -611,7 +615,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<NaringsdrivendeTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.NAERINGSDRIVENDE
+                    it.type shouldBe TilleggsinfoType.NAERINGSDRIVENDE
                 }
         }
     }
@@ -639,7 +643,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<JordbrukerTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.JORDBRUKER
+                    it.type shouldBe TilleggsinfoType.JORDBRUKER
                 }
         }
     }
@@ -667,7 +671,7 @@ class TilleggsinfoSammenstillerServiceTest : FakesTestOppsett() {
                 .shouldNotBeNull()
                 .shouldBeInstanceOf<AnnetArbeidssituasjonTilleggsinfo>()
                 .also {
-                    it.type `should be equal to` TilleggsinfoType.ANNET
+                    it.type shouldBe TilleggsinfoType.ANNET
                 }
         }
     }

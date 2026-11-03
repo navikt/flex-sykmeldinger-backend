@@ -1,5 +1,12 @@
 package no.nav.helse.flex.sykmelding
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.optin.OptInDbRecord
 import no.nav.helse.flex.sykmeldinghendelse.FiskerBrukerSvar
@@ -7,7 +14,6 @@ import no.nav.helse.flex.sykmeldinghendelse.HendelseStatus
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
@@ -30,22 +36,22 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         val sykmelding = lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1"))
 
         sykmeldingRepository.save(sykmelding)
-        sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
+        sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
     }
 
     @Test
     fun `burde finne sykmelding uten dato`() {
         val sykmeldinger = opprettSykmeldinger()
 
-        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, null).size `should be equal to` 3
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, null).size shouldBe 3
     }
 
     @Test
     fun `burde finne sykmelding på eller etter dato`() {
         val sykmeldinger = opprettSykmeldinger()
 
-        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom).size `should be equal to` 3
-        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom.minusDays(1)).size `should be equal to`
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom).size shouldBe 3
+        sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom.minusDays(1)).size shouldBe
             3
     }
 
@@ -55,8 +61,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         val resultat =
             sykmeldingRepository.findAllInFom(sykmeldinger.map { it.sykmeldingId }, sykmeldinger[0].tom.plusDays(1))
-        resultat.size `should be equal to` 2
-        resultat.none { it.sykmeldingId == sykmeldinger[0].sykmeldingId } `should be equal to` true
+        resultat.size shouldBe 2
+        resultat.none { it.sykmeldingId == sykmeldinger[0].sykmeldingId } shouldBe true
     }
 
     @Test
@@ -80,11 +86,11 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
             )
 
         val lagretSykmelding = sykmeldingRepository.save(sykmelding)
-        lagretSykmelding.databaseId.`should not be null`()
-        lagretSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
+        lagretSykmelding.databaseId.shouldNotBeNull()
+        lagretSykmelding.setDatabaseIdsToNull() shouldBe sykmelding
 
-        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
-        hentetSykmelding.setDatabaseIdsToNull() `should be equal to` sykmelding
+        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
+        hentetSykmelding.setDatabaseIdsToNull() shouldBe sykmelding
     }
 
     @Test
@@ -94,7 +100,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.save(sykmelding)
 
-        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
+        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
         val oppdatertSykmelding =
             hentetSykmelding.copy(
                 sykmeldingGrunnlag =
@@ -107,8 +113,8 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository.save(oppdatertSykmelding)
 
         sykmeldingRepository.findBySykmeldingId("1").let {
-            it.`should not be null`()
-            it.sykmeldingGrunnlag.pasient.fnr `should be equal to` "nyttFnr"
+            it.shouldNotBeNull()
+            it.sykmeldingGrunnlag.pasient.fnr shouldBe "nyttFnr"
         }
     }
 
@@ -119,11 +125,11 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         sykmeldingRepository.save(sykmelding)
 
         val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1")
-        val oppdatertSykmelding = hentetSykmelding.`should not be null`()
+        val oppdatertSykmelding = hentetSykmelding.shouldNotBeNull()
 
         sykmeldingRepository.save(oppdatertSykmelding)
 
-        sykmeldingRepository.findAll().size `should be equal to` 1
+        sykmeldingRepository.findAll().size shouldBe 1
     }
 
     @Test
@@ -132,7 +138,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository.save(sykmelding)
 
-        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").`should not be null`()
+        val hentetSykmelding = sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull()
         val oppdatertSykmelding =
             hentetSykmelding
                 .leggTilHendelse(
@@ -148,15 +154,15 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
 
         sykmeldingRepository
             .findBySykmeldingId("1")
-            .`should not be null`()
+            .shouldNotBeNull()
             .hendelser
             .shouldHaveSize(2)
             .last()
             .run {
-                status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                source `should be equal to` "TEST_SOURCE"
-                hendelseOpprettet `should be equal to` Instant.parse("2021-01-01T00:00:00.00Z")
-                lokaltOpprettet `should be equal to` Instant.parse("2022-01-01T00:00:00.00Z")
+                status shouldBe HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                source shouldBe "TEST_SOURCE"
+                hendelseOpprettet shouldBe Instant.parse("2021-01-01T00:00:00.00Z")
+                lokaltOpprettet shouldBe Instant.parse("2022-01-01T00:00:00.00Z")
             }
     }
 
@@ -187,7 +193,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 sykmeldingRepository.save(sykmelding)
                 val lagretSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
                 val lagretTilleggsinfo = lagretSykmelding.sisteHendelse().tilleggsinfo
-                lagretTilleggsinfo `should be equal to` tilleggsinfo
+                lagretTilleggsinfo shouldBe tilleggsinfo
             }
         }
 
@@ -226,7 +232,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
                 sykmeldingRepository.save(sykmelding)
                 val lagretSykmelding = sykmeldingRepository.findBySykmeldingId(sykmeldingId).shouldNotBeNull()
                 val lagretBrukerSvar = lagretSykmelding.sisteHendelse().brukerSvar
-                lagretBrukerSvar `should be equal to` brukerSvar
+                lagretBrukerSvar shouldBe brukerSvar
             }
         }
 
@@ -391,7 +397,7 @@ class SykmeldingRepositoryTest : IntegrasjonTestOppsett() {
         optInDbRepository
             .findAllBySykmeldingIdIn(listOf("1", "2"))
             .map { it.sykmeldingId }
-            .sorted() `should be equal to` listOf("1", "2")
+            .sorted() shouldBe listOf("1", "2")
     }
 
     private fun Sykmelding.setDatabaseIdsToNull(): Sykmelding =

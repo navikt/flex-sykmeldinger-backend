@@ -1,9 +1,9 @@
 package no.nav.helse.flex.config
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,8 +26,8 @@ class IdentServiceTest : FakesTestOppsett() {
         pdlClientFake.setIdentMedHistorikk(listOf(PdlIdent(gruppe = "FOLKEREGISTERIDENT", ident = "pdl-ident")))
 
         val responseData = identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
-        responseData.andreIdenter `should be equal to` listOf("pdl-ident")
-        responseData.originalIdent `should be equal to` "ny-ident"
+        responseData.andreIdenter shouldBe listOf("pdl-ident")
+        responseData.originalIdent shouldBe "ny-ident"
     }
 
     @Test
@@ -40,8 +40,8 @@ class IdentServiceTest : FakesTestOppsett() {
         )
 
         val responseData = identService.hentFolkeregisterIdenterMedHistorikkForFnr("ny-ident")
-        responseData.andreIdenter `should be equal to` listOf("pdl-ident")
-        responseData.originalIdent `should be equal to` "ny-ident"
+        responseData.andreIdenter shouldBe listOf("pdl-ident")
+        responseData.originalIdent shouldBe "ny-ident"
     }
 
     @Test
@@ -49,6 +49,6 @@ class IdentServiceTest : FakesTestOppsett() {
         pdlClientFake.setFoedselsdato(LocalDate.parse("2000-01-01"), "pdl-ident")
 
         val responseData = identService.hentFoedselsdato("pdl-ident")
-        responseData `should be equal to` LocalDate.parse("2000-01-01")
+        responseData shouldBe LocalDate.parse("2000-01-01")
     }
 }

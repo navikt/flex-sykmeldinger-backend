@@ -1,13 +1,13 @@
 package no.nav.helse.flex.api
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.api.dto.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykmeldinghendelse.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                     )
 
                 val konvertertStatus = sykmeldingStatusDtoKonverterer.konverterSykmeldingStatus(originalHendelse)
-                konvertertStatus.statusEvent `should be equal to` forventetStatusEvent
+                konvertertStatus.statusEvent shouldBe forventetStatusEvent
             }
         }
 
@@ -106,7 +106,7 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val (tilleggsinfo, forventetArbeidsgiver) = testData
             DynamicTest.dynamicTest(testNavn) {
                 val konvertertArbeidsgiver = sykmeldingStatusDtoKonverterer.konverterArbeidsgiver(tilleggsinfo)
-                konvertertArbeidsgiver `should be equal to` forventetArbeidsgiver
+                konvertertArbeidsgiver shouldBe forventetArbeidsgiver
             }
         }
 
@@ -169,32 +169,32 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSTAKER
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.ARBEIDSTAKER
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hva er arbeidsgiverens orgnummer?"
-                    svar `should be equal to` "123456789"
+                    sporsmaltekst shouldBe "Hva er arbeidsgiverens orgnummer?"
+                    svar shouldBe "123456789"
                 }
                 riktigNarmesteLeder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Er dette riktig nærmeste leder?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er dette riktig nærmeste leder?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmeldingsdager.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmeldingsdager?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmeldingsdager?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsdager.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsdager"
-                    svar `should be equal to` listOf(dato("01.01.2025"))
+                    sporsmaltekst shouldBe "Egenmeldingsdager"
+                    svar shouldBe listOf(dato("01.01.2025"))
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsledig.shouldBeNull()
                 sykFoerSykmeldingen.shouldBeNull()
@@ -221,11 +221,11 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSTAKER
-                arbeidsgiverOrgnummer.shouldNotBeNull().svar `should be equal to` "orgnr"
-                riktigNarmesteLeder.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
-                harBruktEgenmeldingsdager.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.ARBEIDSTAKER
+                arbeidsgiverOrgnummer.shouldNotBeNull().svar shouldBe "orgnr"
+                riktigNarmesteLeder.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
+                harBruktEgenmeldingsdager.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsdager.shouldBeNull()
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsledig.shouldBeNull()
@@ -267,20 +267,20 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSLEDIG
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.ARBEIDSLEDIG
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hva er orgnummeret du er arbeidsledig fra?"
-                    svar `should be equal to` "987654321"
+                    sporsmaltekst shouldBe "Hva er orgnummeret du er arbeidsledig fra?"
+                    svar shouldBe "987654321"
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
@@ -304,8 +304,8 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ARBEIDSLEDIG
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.ARBEIDSLEDIG
                 arbeidsgiverOrgnummer.shouldBeNull()
                 uriktigeOpplysninger.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -349,20 +349,20 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.PERMITTERT
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.PERMITTERT
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hva er orgnummeret du er permittert fra?"
-                    svar `should be equal to` "123456789"
+                    sporsmaltekst shouldBe "Hva er orgnummeret du er permittert fra?"
+                    svar shouldBe "123456789"
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 riktigNarmesteLeder.shouldBeNull()
                 harBruktEgenmeldingsdager.shouldBeNull()
@@ -386,8 +386,8 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.PERMITTERT
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.PERMITTERT
                 arbeidsgiverOrgnummer.shouldBeNull()
                 uriktigeOpplysninger.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -481,58 +481,58 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.FISKER
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.FISKER
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hva er arbeidsgiverens orgnummer?"
-                    svar `should be equal to` "123456789"
+                    sporsmaltekst shouldBe "Hva er arbeidsgiverens orgnummer?"
+                    svar shouldBe "123456789"
                 }
                 riktigNarmesteLeder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Er dette riktig nærmeste leder?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er dette riktig nærmeste leder?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmeldingsdager.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmeldingsdager?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmeldingsdager?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsdager.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsdager"
-                    svar `should be equal to` listOf(dato("01.01.2025"))
+                    sporsmaltekst shouldBe "Egenmeldingsdager"
+                    svar shouldBe listOf(dato("01.01.2025"))
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 sykFoerSykmeldingen.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Var du syk før sykmeldingen?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmelding?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsperioder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
-                    svar `should be equal to`
+                    sporsmaltekst shouldBe "Egenmeldingsperioder"
+                    svar shouldBe
                         listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
                 }
                 harForsikring.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du forsikring?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du forsikring?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 fisker.shouldNotBeNull().run {
                     blad.run {
-                        sporsmaltekst `should be equal to` "Blad?"
-                        svar `should be equal to` Blad.A
+                        sporsmaltekst shouldBe "Blad?"
+                        svar shouldBe Blad.A
                     }
                     lottOgHyre.run {
-                        sporsmaltekst `should be equal to` "Lott og hyre?"
-                        svar `should be equal to` LottOgHyre.HYRE
+                        sporsmaltekst shouldBe "Lott og hyre?"
+                        svar shouldBe LottOgHyre.HYRE
                     }
                 }
                 arbeidsledig.shouldBeNull()
@@ -561,20 +561,20 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FISKER
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.FISKER
                 arbeidsgiverOrgnummer.shouldBeNull()
-                riktigNarmesteLeder.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
-                harBruktEgenmeldingsdager.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                riktigNarmesteLeder.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
+                harBruktEgenmeldingsdager.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsdager.shouldBeNull()
-                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
-                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                sykFoerSykmeldingen.shouldNotBeNull().svar shouldBe JaEllerNei.JA
+                harBruktEgenmelding.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
-                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harForsikring.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
                 fisker.shouldNotBeNull().run {
-                    blad.svar `should be equal to` Blad.B
-                    lottOgHyre.svar `should be equal to` LottOgHyre.LOTT
+                    blad.svar shouldBe Blad.B
+                    lottOgHyre.svar shouldBe LottOgHyre.LOTT
                 }
                 arbeidsledig.shouldBeNull()
             }
@@ -630,32 +630,32 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.FRILANSER
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 sykFoerSykmeldingen.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Var du syk før sykmeldingen?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmelding?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsperioder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
-                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                    sporsmaltekst shouldBe "Egenmeldingsperioder"
+                    svar shouldBe listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
                 }
                 harForsikring.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du forsikring?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du forsikring?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -682,12 +682,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.FRILANSER
-                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
-                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.FRILANSER
+                sykFoerSykmeldingen.shouldNotBeNull().svar shouldBe JaEllerNei.JA
+                harBruktEgenmelding.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
-                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harForsikring.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -748,32 +748,32 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.JORDBRUKER
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 sykFoerSykmeldingen.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Var du syk før sykmeldingen?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmelding?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsperioder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
-                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                    sporsmaltekst shouldBe "Egenmeldingsperioder"
+                    svar shouldBe listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
                 }
                 harForsikring.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du forsikring?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du forsikring?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -800,12 +800,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.JORDBRUKER
-                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
-                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.JORDBRUKER
+                sykFoerSykmeldingen.shouldNotBeNull().svar shouldBe JaEllerNei.JA
+                harBruktEgenmelding.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
-                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harForsikring.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -866,32 +866,32 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 sykFoerSykmeldingen.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Var du syk før sykmeldingen?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 harBruktEgenmelding.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du brukt egenmelding?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du brukt egenmelding?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 egenmeldingsperioder.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Egenmeldingsperioder"
-                    svar `should be equal to` listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
+                    sporsmaltekst shouldBe "Egenmeldingsperioder"
+                    svar shouldBe listOf(EgenmeldingsperiodeFormDTO(dato("01.01.2025") to dato("02.01.2025")))
                 }
                 harForsikring.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Har du forsikring?"
-                    svar `should be equal to` JaEllerNei.JA
+                    sporsmaltekst shouldBe "Har du forsikring?"
+                    svar shouldBe JaEllerNei.JA
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -918,12 +918,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
-                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.JA
-                harBruktEgenmelding.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                sykFoerSykmeldingen.shouldNotBeNull().svar shouldBe JaEllerNei.JA
+                harBruktEgenmelding.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 egenmeldingsperioder.shouldBeNull()
-                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harForsikring.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -950,12 +950,12 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.NAERINGSDRIVENDE
-                sykFoerSykmeldingen.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.NAERINGSDRIVENDE
+                sykFoerSykmeldingen.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 harBruktEgenmelding.shouldBeNull()
                 egenmeldingsperioder.shouldBeNull()
-                harForsikring.shouldNotBeNull().svar `should be equal to` JaEllerNei.NEI
+                harForsikring.shouldNotBeNull().svar shouldBe JaEllerNei.NEI
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -991,16 +991,16 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
                 erOpplysningeneRiktige.run {
-                    svar `should be equal to` JaEllerNei.JA
-                    sporsmaltekst `should be equal to` "Er opplysningene riktige?"
+                    svar shouldBe JaEllerNei.JA
+                    sporsmaltekst shouldBe "Er opplysningene riktige?"
                 }
                 arbeidssituasjon.run {
-                    svar `should be equal to` ArbeidssituasjonDTO.ANNET
-                    sporsmaltekst `should be equal to` "Hvilken arbeidssituasjon?"
+                    svar shouldBe ArbeidssituasjonDTO.ANNET
+                    sporsmaltekst shouldBe "Hvilken arbeidssituasjon?"
                 }
                 uriktigeOpplysninger.shouldNotBeNull().run {
-                    sporsmaltekst `should be equal to` "Hvilke opplysninger er uriktige?"
-                    svar `should be equal to` listOf(UriktigeOpplysningerType.PERIODE)
+                    sporsmaltekst shouldBe "Hvilke opplysninger er uriktige?"
+                    svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
                 }
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()
@@ -1027,8 +1027,8 @@ class SykmeldingStatusDtoKonvertererTest : FakesTestOppsett() {
             val konvertertStatus: SykmeldingSporsmalSvarDto =
                 sykmeldingStatusDtoKonverterer.konverterSykmeldingSporsmalSvar(brukerSvar)
             konvertertStatus.run {
-                erOpplysningeneRiktige.svar `should be equal to` JaEllerNei.NEI
-                arbeidssituasjon.svar `should be equal to` ArbeidssituasjonDTO.ANNET
+                erOpplysningeneRiktige.svar shouldBe JaEllerNei.NEI
+                arbeidssituasjon.svar shouldBe ArbeidssituasjonDTO.ANNET
                 uriktigeOpplysninger.shouldBeNull()
                 arbeidsgiverOrgnummer.shouldBeNull()
                 riktigNarmesteLeder.shouldBeNull()

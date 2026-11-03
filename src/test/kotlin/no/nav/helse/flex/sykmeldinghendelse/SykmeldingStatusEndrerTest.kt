@@ -1,13 +1,13 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.string.shouldContainIgnoringCase
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystem
 import no.nav.helse.flex.sykmelding.tsm.AvsenderSystemNavn
 import no.nav.helse.flex.sykmelding.tsm.RuleType
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.invoking
-import org.amshove.kluent.shouldContainIgnoringCase
-import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -88,13 +88,13 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                                 sykmeldingGrunnlag = lagSykmeldingGrunnlag(id = "1", lagPasient(fnr = "fnr")),
                                 hendelser = listOf(lagSykmeldingHendelse(status = sisteStatus)),
                             )
-                        invoking {
+                        shouldThrow<UgyldigSykmeldingStatusException> {
                             sykmeldingStatusEndrer.sjekkStatusEndring(
                                 sykmelding,
                                 nyStatus = tilStatus,
                             )
-                        }.shouldThrow(UgyldigSykmeldingStatusException::class)
-                            .exceptionMessage
+                        }.message
+                            .shouldNotBeNull()
                             .shouldContainIgnoringCase(tilStatus.name)
                             .shouldContainIgnoringCase(sisteStatus.name)
                     }
@@ -116,13 +116,13 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                         validation = lagValidation(status = RuleType.INVALID),
                         hendelser = listOf(lagSykmeldingHendelse(status = HendelseStatus.APEN)),
                     )
-                invoking {
+                shouldThrow<UgyldigSykmeldingStatusException> {
                     sykmeldingStatusEndrer.sjekkStatusEndring(
                         sykmelding,
                         nyStatus = nyStatus,
                     )
-                }.shouldThrow(UgyldigSykmeldingStatusException::class)
-                    .exceptionMessage
+                }.message
+                    .shouldNotBeNull()
                     .shouldContainIgnoringCase(nyStatus.name)
                     .shouldContainIgnoringCase("avvist")
             }
@@ -165,10 +165,10 @@ class SykmeldingStatusEndrerTest : FakesTestOppsett() {
                                 ),
                         ),
                 )
-            invoking {
+            shouldThrow<UgyldigSykmeldingStatusException> {
                 sykmeldingStatusEndrer.sjekkStatusEndring(sykmelding, nyStatus = tilStatus)
-            }.shouldThrow(UgyldigSykmeldingStatusException::class)
-                .exceptionMessage
+            }.message
+                .shouldNotBeNull()
                 .shouldContainIgnoringCase("egenmeldt")
         }
     }

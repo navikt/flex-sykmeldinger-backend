@@ -1,8 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import io.kotest.matchers.collections.shouldHaveSize
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.lagEksterntArbeidsforhold
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate

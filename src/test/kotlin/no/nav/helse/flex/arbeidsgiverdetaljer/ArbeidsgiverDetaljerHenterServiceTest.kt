@@ -1,12 +1,16 @@
 package no.nav.helse.flex.arbeidsgiverdetaljer
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.Arbeidsforhold
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService.Companion.filtrerInnenPeriode
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
-import org.amshove.kluent.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -34,14 +38,14 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            alleArbeidsgiverDetaljer.size `should be equal to` 1
+            alleArbeidsgiverDetaljer.size shouldBe 1
 
             val arbeidsgiverDetaljer = alleArbeidsgiverDetaljer.first()
-            arbeidsgiverDetaljer.orgnummer `should be equal to` "orgnr"
-            arbeidsgiverDetaljer.juridiskOrgnummer `should be equal to` "jurorgnr"
-            arbeidsgiverDetaljer.navn `should be equal to` "Orgnavn"
-            arbeidsgiverDetaljer.fom `should be equal to` LocalDate.parse("2020-01-01")
-            arbeidsgiverDetaljer.tom `should be equal to` LocalDate.parse("2020-01-02")
+            arbeidsgiverDetaljer.orgnummer shouldBe "orgnr"
+            arbeidsgiverDetaljer.juridiskOrgnummer shouldBe "jurorgnr"
+            arbeidsgiverDetaljer.navn shouldBe "Orgnavn"
+            arbeidsgiverDetaljer.fom shouldBe LocalDate.parse("2020-01-01")
+            arbeidsgiverDetaljer.tom shouldBe LocalDate.parse("2020-01-02")
         }
 
         @Test
@@ -57,7 +61,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 2
+            arbeidsgiverDetaljer.size shouldBe 2
         }
 
         @Test
@@ -69,7 +73,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer `should be equal to` emptyList()
+            arbeidsgiverDetaljer shouldBe emptyList()
         }
 
         @Test
@@ -84,7 +88,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer `should be equal to` emptyList()
+            arbeidsgiverDetaljer shouldBe emptyList()
         }
 
         @Test
@@ -100,7 +104,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
         }
 
         @Test
@@ -117,7 +121,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer.first().navn == "nyere"
         }
 
@@ -138,7 +142,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                 sammenstillArbeidsgiverDetaljerProxy(
                     arbeidsforhold = lagArbeidsforhold(fom = LocalDate.parse("2019-12-31"), tom = null),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be true`()
+                ).first().aktivtArbeidsforhold.shouldBeTrue()
             }
 
             @Test
@@ -150,7 +154,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                             tom = LocalDate.parse("2020-01-01"),
                         ),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be true`()
+                ).first().aktivtArbeidsforhold.shouldBeTrue()
             }
 
             @Test
@@ -159,7 +163,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     arbeidsforhold =
                         lagArbeidsforhold(fom = LocalDate.parse("2020-01-01"), tom = null),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be true`()
+                ).first().aktivtArbeidsforhold.shouldBeTrue()
             }
 
             @Test
@@ -171,7 +175,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                             tom = LocalDate.parse("2020-01-01"),
                         ),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be true`()
+                ).first().aktivtArbeidsforhold.shouldBeTrue()
             }
 
             @Test
@@ -183,7 +187,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                             tom = LocalDate.parse("2020-01-02"),
                         ),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be true`()
+                ).first().aktivtArbeidsforhold.shouldBeTrue()
             }
 
             @Test
@@ -195,7 +199,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                             tom = LocalDate.parse("2019-12-31"),
                         ),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be false`()
+                ).first().aktivtArbeidsforhold.shouldBeFalse()
             }
 
             @Test
@@ -204,7 +208,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     arbeidsforhold =
                         lagArbeidsforhold(fom = LocalDate.parse("2020-01-02"), tom = null),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be false`()
+                ).first().aktivtArbeidsforhold.shouldBeFalse()
             }
 
             @Test
@@ -216,7 +220,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                             tom = LocalDate.parse("2020-01-02"),
                         ),
                     idag = LocalDate.parse("2020-01-01"),
-                ).first().aktivtArbeidsforhold.`should be false`()
+                ).first().aktivtArbeidsforhold.shouldBeFalse()
             }
         }
 
@@ -239,7 +243,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { idag },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer.first().navn == "aktivt"
         }
 
@@ -253,12 +257,12 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer
                 .first()
                 .naermesteLeder
                 .shouldNotBeNull()
-                .`should be equal to`(narmesteLeder)
+                .shouldBe(narmesteLeder)
         }
 
         @Test
@@ -272,7 +276,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer
                 .first()
                 .naermesteLeder
@@ -289,12 +293,12 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer
                 .first()
                 .naermesteLeder
                 .shouldNotBeNull()
-                .`should be equal to`(narmesteLeder)
+                .shouldBe(narmesteLeder)
         }
 
         @Test
@@ -315,12 +319,12 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     idagProvider = { HVILKENSOMHELST_DAG },
                 )
 
-            arbeidsgiverDetaljer.size `should be equal to` 1
+            arbeidsgiverDetaljer.size shouldBe 1
             arbeidsgiverDetaljer
                 .first()
                 .naermesteLeder
                 .shouldNotBeNull()
-                .`should be equal to`(narmesteLederSeneste)
+                .shouldBe(narmesteLederSeneste)
         }
     }
 
@@ -336,7 +340,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     lagArbeidsforhold(fom = LocalDate.parse("2020-01-03"), tom = null),
                 )
             val periode = LocalDate.parse("2020-01-02") to LocalDate.parse("2020-01-03")
-            arbeidsforhold.filtrerInnenPeriode(periode).size `should be equal to` 4
+            arbeidsforhold.filtrerInnenPeriode(periode).size shouldBe 4
         }
 
         @Test
@@ -348,7 +352,7 @@ class ArbeidsgiverDetaljerHenterServiceTest {
                     lagArbeidsforhold(fom = LocalDate.parse("2020-01-05"), tom = null),
                 )
             val periode = LocalDate.parse("2020-01-02") to LocalDate.parse("2020-01-03")
-            arbeidsforhold.filtrerInnenPeriode(periode).size `should be equal to` 0
+            arbeidsforhold.filtrerInnenPeriode(periode).size shouldBe 0
         }
     }
 }

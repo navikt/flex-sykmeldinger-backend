@@ -1,5 +1,7 @@
 package no.nav.helse.flex.api
 
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
 import no.nav.helse.flex.api.dto.MerknadtypeDTO
 import no.nav.helse.flex.api.dto.RegelStatusDTO
@@ -11,8 +13,6 @@ import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should contain`
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
@@ -74,15 +74,15 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
                 .run {
-                    this.sykmelding.id `should be equal to` "1"
-                    this.sykmelding.merknader!!.size `should be equal to` 1
+                    this.sykmelding.id shouldBe "1"
+                    this.sykmelding.merknader!!.size shouldBe 1
                     this.sykmelding.merknader
                         .first()
-                        .type `should be equal to` MerknadtypeDTO.UNDER_BEHANDLING
+                        .type shouldBe MerknadtypeDTO.UNDER_BEHANDLING
                 }
         }
 
@@ -97,16 +97,16 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
                 .run {
-                    this.sykmelding.id `should be equal to` "1"
-                    this.sykmelding.behandlingsutfall.status `should be equal to` RegelStatusDTO.INVALID
-                    this.sykmelding.merknader!!.size `should be equal to` 1
+                    this.sykmelding.id shouldBe "1"
+                    this.sykmelding.behandlingsutfall.status shouldBe RegelStatusDTO.INVALID
+                    this.sykmelding.merknader!!.size shouldBe 1
                     this.sykmelding.merknader
                         .first()
-                        .type `should be equal to` MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
+                        .type shouldBe MerknadtypeDTO.TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER
                 }
         }
 
@@ -121,12 +121,12 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId)),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
                 .run {
-                    this.sykmelding.id `should be equal to` "1"
-                    this.sykmelding.merknader `should be equal to` null
+                    this.sykmelding.id shouldBe "1"
+                    this.sykmelding.merknader shouldBe null
                 }
         }
 
@@ -141,10 +141,10 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                     content = SykmeldingerKafkaMessageRequest(listOf(sykmelding.sykmeldingId), sykmelding.tom),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
-                .sykmelding.id `should be equal to` "1"
+                .sykmelding.id shouldBe "1"
         }
 
         @Test
@@ -162,7 +162,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                         ),
                 )
 
-            respons.sykmeldinger `should be equal to` emptyList()
+            respons.sykmeldinger shouldBe emptyList()
         }
 
         @Test
@@ -195,10 +195,10 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                         ),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
-                .sykmelding.id `should be equal to` gyldigSykmelding.sykmeldingId
+                .sykmelding.id shouldBe gyldigSykmelding.sykmeldingId
         }
 
         @Test
@@ -232,10 +232,10 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                         ),
                 )
 
-            respons.sykmeldinger.size `should be equal to` 1
+            respons.sykmeldinger.size shouldBe 1
             respons.sykmeldinger
                 .first()
-                .sykmelding.id `should be equal to` gyldigSykmelding.sykmeldingId
+                .sykmelding.id shouldBe gyldigSykmelding.sykmeldingId
         }
     }
 
@@ -269,13 +269,13 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
             val sykmeldinger = postOgParseRespons(FnrRequest(fnr = fnr))
 
-            sykmeldinger.size `should be equal to` 1
-            sykmeldinger.map { it.id } `should contain` "1"
+            sykmeldinger.size shouldBe 1
+            sykmeldinger.map { it.id } shouldContain "1"
         }
 
         @Test
         fun `returnerer tom liste når ingen sykmeldinger finnes`() {
-            postOgParseRespons(FnrRequest(fnr = fnr)).size `should be equal to` 0
+            postOgParseRespons(FnrRequest(fnr = fnr)).size shouldBe 0
         }
 
         @Test
@@ -286,7 +286,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
                 )
             }
 
-            postOgParseRespons(FnrRequest(fnr = fnr)).size `should be equal to` 3
+            postOgParseRespons(FnrRequest(fnr = fnr)).size shouldBe 3
         }
 
         @Test
@@ -298,9 +298,9 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
             val sykmeldinger = postOgParseRespons(FnrRequest(fnr = fnr)).associateBy { it.id }
 
-            sykmeldinger.getValue("1").optIn.map { it.opprettet } `should be equal to`
+            sykmeldinger.getValue("1").optIn.map { it.opprettet } shouldBe
                 listOf(Instant.parse("2025-01-01T12:00:00Z"), Instant.parse("2025-01-02T12:00:00Z"))
-            sykmeldinger.getValue("2").optIn.size `should be equal to` 0
+            sykmeldinger.getValue("2").optIn.size shouldBe 0
         }
 
         @Test
@@ -308,9 +308,9 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             postOgParseRespons(FnrRequest(fnr = fnr))
 
             val entries = auditLogProducer.hentAuditEntries()
-            entries.size `should be equal to` 1
-            entries.first().utførtAv `should be equal to` "A123456"
-            entries.first().oppslagPå `should be equal to` fnr
+            entries.size shouldBe 1
+            entries.first().utførtAv shouldBe "A123456"
+            entries.first().oppslagPå shouldBe fnr
         }
 
         private fun postOgParseRespons(body: FnrRequest): List<FlexInternalSykmeldingDto> {
@@ -358,7 +358,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
             val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
 
-            sykmelding.id `should be equal to` "1"
+            sykmelding.id shouldBe "1"
         }
 
         @Test
@@ -378,9 +378,9 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
             hentSykmeldingOgParseRespons(sykmeldingId = "1")
 
             val entries = auditLogProducer.hentAuditEntries()
-            entries.size `should be equal to` 1
-            entries.first().utførtAv `should be equal to` "A123456"
-            entries.first().oppslagPå `should be equal to` fnr
+            entries.size shouldBe 1
+            entries.first().utførtAv shouldBe "A123456"
+            entries.first().oppslagPå shouldBe fnr
         }
 
         @Test
@@ -401,9 +401,9 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
             val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
 
-            sykmelding.hendelser.size `should be equal to` 2
-            sykmelding.hendelser[0].status `should be equal to` "APEN"
-            sykmelding.hendelser[1].status `should be equal to` "SENDT_TIL_ARBEIDSGIVER"
+            sykmelding.hendelser.size shouldBe 2
+            sykmelding.hendelser[0].status shouldBe "APEN"
+            sykmelding.hendelser[1].status shouldBe "SENDT_TIL_ARBEIDSGIVER"
         }
 
         @Test
@@ -414,7 +414,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
 
             val sykmelding = hentSykmeldingOgParseRespons(sykmeldingId = "1")
 
-            sykmelding.optIn.map { it.opprettet } `should be equal to`
+            sykmelding.optIn.map { it.opprettet } shouldBe
                 listOf(Instant.parse("2025-01-01T12:00:00Z"), Instant.parse("2025-01-02T12:00:00Z"))
         }
 
@@ -422,7 +422,7 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         fun `returnerer tom opt-in-liste når sykmeldingen ikke har opt-in`() {
             sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
 
-            hentSykmeldingOgParseRespons(sykmeldingId = "1").optIn.size `should be equal to` 0
+            hentSykmeldingOgParseRespons(sykmeldingId = "1").optIn.size shouldBe 0
         }
 
         private fun hentSykmeldingOgParseRespons(sykmeldingId: String): FlexInternalSykmeldingDto {

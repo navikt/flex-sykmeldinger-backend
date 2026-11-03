@@ -2,7 +2,7 @@ package no.nav.helse.flex.arbeidsforhold.innhenting
 
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import org.amshove.kluent.`should be`
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class ArbeidsforholdInnhentingRuterServiceTest {
@@ -13,7 +13,7 @@ class ArbeidsforholdInnhentingRuterServiceTest {
                 on { erPersonRegistrert("fnr_med_sykmelding") } doReturn true
             }
         val service = ArbeidsforholdInnhentingRuterService(registrertePersonerForArbeidsforhold, mock())
-        service.skalSynkroniseres("fnr_med_sykmelding") `should be` true
+        service.skalSynkroniseres("fnr_med_sykmelding") shouldBe true
     }
 
     @Test
@@ -23,6 +23,6 @@ class ArbeidsforholdInnhentingRuterServiceTest {
                 on { erPersonRegistrert("fnr_uten_sykmelding") } doReturn false
             }
         val service = ArbeidsforholdInnhentingRuterService(registrertePersonerForArbeidsforhold, mock())
-        service.skalSynkroniseres("fnr_uten_sykmelding") `should be` false
+        service.skalSynkroniseres("fnr_uten_sykmelding") shouldBe false
     }
 }

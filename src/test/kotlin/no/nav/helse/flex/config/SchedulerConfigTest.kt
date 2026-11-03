@@ -1,8 +1,8 @@
 package no.nav.helse.flex.config
 
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.helse.flex.testconfig.ScheduledTasks
-import org.amshove.kluent.`should be instance of`
-import org.amshove.kluent.`should be true`
 import org.awaitility.Awaitility.await
 import org.awaitility.Durations
 import org.junit.jupiter.api.Test
@@ -25,7 +25,7 @@ class SchedulerConfigTest {
 
     @Test
     fun `planlegger bean finnes og er ThreadPoolTaskScheduler`() {
-        oppgavePlanlegger `should be instance of` ThreadPoolTaskScheduler::class
+        oppgavePlanlegger.shouldBeInstanceOf(ThreadPoolTaskScheduler::class)
     }
 
     @Test
@@ -42,7 +42,7 @@ class SchedulerConfigTest {
             .atMost(Durations.TWO_HUNDRED_MILLISECONDS)
             .until { oppgaveUtfort.get() }
 
-        oppgaveUtfort.get().`should be true`()
+        oppgaveUtfort.get().shouldBeTrue()
     }
 
     @Test
@@ -51,7 +51,7 @@ class SchedulerConfigTest {
             .atMost(Durations.TWO_HUNDRED_MILLISECONDS)
             .until { planlagteOppgaver.oppgaveUtfort.get() }
 
-        planlagteOppgaver.oppgaveUtfort.get().`should be true`()
+        planlagteOppgaver.oppgaveUtfort.get().shouldBeTrue()
     }
 
     @Test
@@ -61,6 +61,6 @@ class SchedulerConfigTest {
 
         planlagteOppgaver.forberedKonkurrerendeOppgaver(antallOppgaver)
         planlagteOppgaver.ventPaAlleKonkurrerendeOppgaver(timeoutMillis)
-        planlagteOppgaver.alleKonkurrerendeOppgaverUtfort().`should be true`()
+        planlagteOppgaver.alleKonkurrerendeOppgaverUtfort().shouldBeTrue()
     }
 }

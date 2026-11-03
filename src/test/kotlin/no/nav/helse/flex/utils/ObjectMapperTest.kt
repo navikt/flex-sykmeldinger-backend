@@ -1,7 +1,7 @@
 package no.nav.helse.flex.utils
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
-import org.amshove.kluent.`should be equal to`
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.readValue
 
@@ -19,14 +19,14 @@ class ObjectMapperTest {
     fun `burde bruke default verdier ved manglende felt`() {
         objectMapper
             .readValue<TestDataClass>("{}")
-            .defaultStringField `should be equal to` ""
+            .defaultStringField shouldBe ""
     }
 
     @Test
     fun `burde ikke konvertere snake-case`() {
         objectMapper
             .readValue<TestDataClass>("{\"default_string_field\": \"value\"}")
-            .defaultStringField `should be equal to` ""
+            .defaultStringField shouldBe ""
     }
 
     enum class TestEnum {
@@ -39,18 +39,18 @@ class ObjectMapperTest {
     @Test
     fun `burde mappe enum verdier`() {
         val value: TestEnum = objectMapper.readValue("\"A\"")
-        value `should be equal to` TestEnum.A
+        value shouldBe TestEnum.A
     }
 
     @Test
     fun `burde konvertere enum lower case`() {
         val value: TestEnum = objectMapper.readValue("\"a\"")
-        value `should be equal to` TestEnum.A
+        value shouldBe TestEnum.A
     }
 
     @Test
     fun `burde håndtere default enum verdi ved annotasjon`() {
         val value: TestEnum = objectMapper.readValue("\"SOMETHING_ELSE\"")
-        value `should be equal to` TestEnum.DEFAULT
+        value shouldBe TestEnum.DEFAULT
     }
 }

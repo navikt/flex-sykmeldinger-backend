@@ -1,8 +1,8 @@
 package no.nav.helse.flex.narmesteleder
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.Test
 
 class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
@@ -16,6 +16,6 @@ class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
         alleNarmesteLedere shouldHaveSize 2
 
         val lagretNarmesteLeder = alleNarmesteLedere.first()
-        narmesteLeder `should be equal to` lagretNarmesteLeder
+        narmesteLeder shouldBe lagretNarmesteLeder
     }
 }

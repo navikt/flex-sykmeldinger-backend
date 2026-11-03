@@ -1,12 +1,12 @@
 package no.nav.helse.flex.sykmelding.tsm
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.helse.flex.testdata.lagDigitalSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagUtenlandskSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagXMLSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.readValue
 
@@ -17,8 +17,8 @@ class SykmeldingGrunnlagTest {
         val sykmeldingSerialisert = opprinneligSykmelding.serialisertTilString()
 
         val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(sykmeldingSerialisert)
-        sykmelding `should be instance of` XMLSykmeldingGrunnlag::class
-        sykmelding `should be equal to` opprinneligSykmelding
+        sykmelding.shouldBeInstanceOf(XMLSykmeldingGrunnlag::class)
+        sykmelding shouldBe opprinneligSykmelding
     }
 
     @Test
@@ -27,8 +27,8 @@ class SykmeldingGrunnlagTest {
         val utenlandskSykmeldingSerialisert = opprinneligUtenlandskSykmelding.serialisertTilString()
 
         val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(utenlandskSykmeldingSerialisert)
-        sykmelding `should be instance of` UtenlandskSykmeldingGrunnlag::class
-        sykmelding `should be equal to` opprinneligUtenlandskSykmelding
+        sykmelding.shouldBeInstanceOf(UtenlandskSykmeldingGrunnlag::class)
+        sykmelding shouldBe opprinneligUtenlandskSykmelding
     }
 
     @Test
@@ -37,7 +37,7 @@ class SykmeldingGrunnlagTest {
         val digitalSykmeldingSerialisert = opprinneligDigitalSykmelding.serialisertTilString()
 
         val sykmelding: SykmeldingGrunnlag = objectMapper.readValue(digitalSykmeldingSerialisert)
-        sykmelding `should be instance of` DigitalSykmeldingGrunnlag::class
-        sykmelding `should be equal to` opprinneligDigitalSykmelding
+        sykmelding.shouldBeInstanceOf(DigitalSykmeldingGrunnlag::class)
+        sykmelding shouldBe opprinneligDigitalSykmelding
     }
 }

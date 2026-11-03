@@ -1,5 +1,8 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.tsm.RuleType
@@ -7,10 +10,6 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.StatusEventKafkaDTO
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -96,8 +95,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -121,8 +120,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -146,8 +145,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -171,8 +170,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -198,8 +197,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -229,8 +228,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .run {
-                    status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    brukerSvar.`should not be null`()
+                    status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -254,8 +253,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -279,8 +278,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -304,8 +303,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
 
@@ -329,8 +328,8 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
             sykmelding
                 .sisteHendelse()
                 .let { hendelse ->
-                    hendelse.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
-                    hendelse.brukerSvar.`should not be null`()
+                    hendelse.status shouldBe HendelseStatus.SENDT_TIL_NAV
+                    hendelse.brukerSvar.shouldNotBeNull()
                 }
         }
     }
@@ -354,7 +353,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
                 .also { it.hendelser shouldHaveSize 2 }
-                .also { it.sisteHendelse().status `should be equal to` HendelseStatus.AVBRUTT }
+                .also { it.sisteHendelse().status shouldBe HendelseStatus.AVBRUTT }
         }
 
         @Test
@@ -374,7 +373,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldingStatuser()
                 .shouldHaveSize(1)
                 .first()
-                .event.statusEvent `should be equal to` StatusEventKafkaDTO.AVBRUTT
+                .event.statusEvent shouldBe StatusEventKafkaDTO.AVBRUTT
         }
     }
 
@@ -398,7 +397,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
                 .findBySykmeldingId("1")
                 .shouldNotBeNull()
                 .also { it.hendelser shouldHaveSize 2 }
-                .also { it.sisteHendelse().status `should be equal to` HendelseStatus.BEKREFTET_AVVIST }
+                .also { it.sisteHendelse().status shouldBe HendelseStatus.BEKREFTET_AVVIST }
         }
 
         @Test
@@ -419,7 +418,7 @@ class SykmeldingHendelseHandtererTest : FakesTestOppsett() {
                 .sendteSykmeldingStatuser()
                 .shouldHaveSize(1)
                 .first()
-                .event.statusEvent `should be equal to` StatusEventKafkaDTO.BEKREFTET
+                .event.statusEvent shouldBe StatusEventKafkaDTO.BEKREFTET
         }
     }
 }

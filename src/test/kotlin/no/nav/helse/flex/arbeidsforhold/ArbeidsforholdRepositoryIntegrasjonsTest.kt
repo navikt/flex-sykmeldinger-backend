@@ -1,8 +1,8 @@
 package no.nav.helse.flex.arbeidsforhold
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -27,7 +27,7 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : IntegrasjonTestOppsett() {
         alleLagredeArbeidsforhold shouldHaveSize 1
 
         val lagretArbeidsforhold = alleLagredeArbeidsforhold.first()
-        opprettetArbeidsforhold `should be equal to` lagretArbeidsforhold
+        opprettetArbeidsforhold shouldBe lagretArbeidsforhold
     }
 
     @Test
@@ -51,7 +51,7 @@ class ArbeidsforholdRepositoryIntegrasjonsTest : IntegrasjonTestOppsett() {
         val alleLagredeArbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("1", "2"))
         alleLagredeArbeidsforhold shouldHaveSize 2
 
-        alleLagredeArbeidsforhold.first() `should be equal to` opprettetArbeidsforhold
-        alleLagredeArbeidsforhold.last() `should be equal to` opprettetArbeidsforhold2
+        alleLagredeArbeidsforhold.first() shouldBe opprettetArbeidsforhold
+        alleLagredeArbeidsforhold.last() shouldBe opprettetArbeidsforhold2
     }
 }

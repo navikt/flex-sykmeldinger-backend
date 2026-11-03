@@ -1,5 +1,10 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.gateways.ereg.HentOrganisasjonerResponse
@@ -11,7 +16,6 @@ import no.nav.helse.flex.testconfig.fakes.AaregClientFake
 import no.nav.helse.flex.testconfig.fakes.EregClientFake
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -88,7 +92,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             .shouldHaveSize(1)
             .first()
             .run {
-                orgnummer shouldBeEqualTo "org-2"
+                orgnummer shouldBe "org-2"
             }
     }
 
@@ -120,13 +124,13 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             .findByNavArbeidsforholdId("1")
             .shouldNotBeNull()
             .run {
-                fnr shouldBeEqualTo "fnr"
-                orgnummer shouldBeEqualTo "orgnummer"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer"
-                orgnavn shouldBeEqualTo "Testbedriften AS"
-                arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
-                fom shouldBeEqualTo LocalDate.parse("2020-01-01")
-                tom shouldBeEqualTo null
+                fnr shouldBe "fnr"
+                orgnummer shouldBe "orgnummer"
+                juridiskOrgnummer shouldBe "juridiskOrgnummer"
+                orgnavn shouldBe "Testbedriften AS"
+                arbeidsforholdType shouldBe ArbeidsforholdType.MARITIMT_ARBEIDSFORHOLD
+                fom shouldBe LocalDate.parse("2020-01-01")
+                tom shouldBe null
             }
     }
 
@@ -170,13 +174,13 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
             .findByNavArbeidsforholdId("1")
             .shouldNotBeNull()
             .run {
-                fnr shouldBeEqualTo "fnr"
-                orgnummer shouldBeEqualTo "orgnummer-2"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnummer-2"
-                orgnavn shouldBeEqualTo "Oppdatert Bedrift AS"
-                arbeidsforholdType shouldBeEqualTo ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
-                fom shouldBeEqualTo LocalDate.parse("2020-01-02")
-                tom shouldBeEqualTo null
+                fnr shouldBe "fnr"
+                orgnummer shouldBe "orgnummer-2"
+                juridiskOrgnummer shouldBe "juridiskOrgnummer-2"
+                orgnavn shouldBe "Oppdatert Bedrift AS"
+                arbeidsforholdType shouldBe ArbeidsforholdType.ORDINAERT_ARBEIDSFORHOLD
+                fom shouldBe LocalDate.parse("2020-01-02")
+                tom shouldBe null
             }
     }
 
@@ -203,10 +207,10 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("ny-ident")
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("første-ident", "ny-ident"))
-        arbeidsforhold.size `should be equal to` 2
+        arbeidsforhold.size shouldBe 2
 
-        arbeidsforhold.first().fnr `should be equal to` "første-ident"
-        arbeidsforhold.last().fnr `should be equal to` "ny-ident"
+        arbeidsforhold.first().fnr shouldBe "første-ident"
+        arbeidsforhold.last().fnr shouldBe "ny-ident"
     }
 
     @Test
@@ -231,9 +235,9 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         arbeidsforholdInnhentingService.synkroniserArbeidsforholdForPerson("ny-ident")
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("første-ident", "ny-ident"))
-        arbeidsforhold.size `should be equal to` 1
+        arbeidsforhold.size shouldBe 1
 
-        arbeidsforhold.first().fnr `should be equal to` "første-ident"
+        arbeidsforhold.first().fnr shouldBe "første-ident"
     }
 
     @Test
@@ -297,7 +301,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
         arbeidsforholdRepository
             .findByNavArbeidsforholdId("1")
             .shouldNotBeNull()
-            .oppdatert shouldBeEqualTo oppdatert
+            .oppdatert shouldBe oppdatert
     }
 
     @Nested
@@ -309,7 +313,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                     now = Instant.parse("2025-04-01T00:00:00Z"),
                     sluttDato = LocalDate.parse("2025-01-01"),
                 )
-            resultat.`should be true`()
+            resultat.shouldBeTrue()
         }
 
         @Test
@@ -319,7 +323,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                     now = Instant.parse("2025-05-01T00:00:00Z"),
                     sluttDato = LocalDate.parse("2025-05-02"),
                 )
-            resultat.`should be true`()
+            resultat.shouldBeTrue()
         }
 
         @Test
@@ -329,7 +333,7 @@ class ArbeidsforholdInnhentingServiceFakeTest : FakesTestOppsett() {
                     now = Instant.parse("2025-05-01T00:00:00Z"),
                     sluttDato = LocalDate.parse("2025-01-01"),
                 )
-            resultat.`should be false`()
+            resultat.shouldBeFalse()
         }
     }
 }

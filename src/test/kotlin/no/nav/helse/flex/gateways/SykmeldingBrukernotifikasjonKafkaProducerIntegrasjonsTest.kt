@@ -1,11 +1,11 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.lesFraTopics
 import no.nav.helse.flex.utils.objectMapper
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSingleItem
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.awaitility.Awaitility.await
@@ -36,7 +36,7 @@ class SykmeldingBrukernotifikasjonKafkaProducerIntegrasjonsTest : IntegrasjonTes
         )
         await().atMost(2, TimeUnit.SECONDS).untilAsserted {
             val eventer = kafkaConsumer.lesFraTopics(SYKMELDING_BRUKERNOTIFIKASJON_TOPIC, ventetid = Duration.ofSeconds(1))
-            eventer.shouldHaveSingleItem()
+            eventer.shouldBeSingle()
         }
     }
 
@@ -62,10 +62,10 @@ class SykmeldingBrukernotifikasjonKafkaProducerIntegrasjonsTest : IntegrasjonTes
             .shouldNotBeNull()
             .let { objectMapper.readValue<SykmeldingNotifikasjon>(it.value()) }
             .run {
-                sykmeldingId shouldBeEqualTo "1"
-                status shouldBeEqualTo SykmeldingNotifikasjonStatus.INVALID
-                mottattDato shouldBeEqualTo LocalDateTime.parse("2024-06-01T12:00:00")
-                fnr shouldBeEqualTo "fnr"
+                sykmeldingId shouldBe "1"
+                status shouldBe SykmeldingNotifikasjonStatus.INVALID
+                mottattDato shouldBe LocalDateTime.parse("2024-06-01T12:00:00")
+                fnr shouldBe "fnr"
             }
     }
 }

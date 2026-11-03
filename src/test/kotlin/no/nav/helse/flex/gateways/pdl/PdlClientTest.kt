@@ -1,14 +1,14 @@
 package no.nav.helse.flex.gateways.pdl
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
 import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldNotBeNull
-import org.amshove.kluent.shouldStartWith
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -47,9 +47,9 @@ class PdlClientTest {
 
             val request = recordedRequest.shouldNotBeNull()
             request.shouldNotBeNull()
-            request.headers["Tema"] `should be equal to` "SYK"
-            request.headers["Behandlingsnummer"] `should be equal to` "B229"
-            request.headers["Content-Type"] `should be equal to` "application/json"
+            request.headers["Tema"] shouldBe "SYK"
+            request.headers["Behandlingsnummer"] shouldBe "B229"
+            request.headers["Content-Type"] shouldBe "application/json"
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
@@ -62,7 +62,7 @@ class PdlClientTest {
                     }
                 }
                 """
-            parsedBody.variables `should be equal to` mapOf("ident" to "ident")
+            parsedBody.variables shouldBe mapOf("ident" to "ident")
 
             request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
@@ -83,7 +83,7 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentIdenterMedHistorikk("ident")
-            responseData `should be equal to` listOf(PdlIdent(gruppe = "g1", ident = "i1"), PdlIdent(gruppe = "g2", ident = "i2"))
+            responseData shouldBe listOf(PdlIdent(gruppe = "g1", ident = "i1"), PdlIdent(gruppe = "g2", ident = "i2"))
         }
 
         @Test
@@ -98,8 +98,8 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentIdenterMedHistorikk("ident")
-            responseData.size `should be equal to` 1
-            responseData.first().ident `should be equal to` "ident"
+            responseData.size shouldBe 1
+            responseData.first().ident shouldBe "ident"
         }
     }
 
@@ -118,9 +118,9 @@ class PdlClientTest {
             pdlClient.hentFormattertNavn("fnr")
 
             val request = recordedRequest.shouldNotBeNull()
-            request.headers["Behandlingsnummer"] `should be equal to` "B229"
-            request.headers["Tema"] `should be equal to` "SYK"
-            request.headers["Content-Type"] `should be equal to` "application/json"
+            request.headers["Behandlingsnummer"] shouldBe "B229"
+            request.headers["Tema"] shouldBe "SYK"
+            request.headers["Content-Type"] shouldBe "application/json"
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
@@ -134,7 +134,7 @@ class PdlClientTest {
                 }
             }
             """
-            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
+            parsedBody.variables shouldBe mapOf("ident" to "fnr")
 
             request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
@@ -153,7 +153,7 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentFormattertNavn("fnr")
-            responseData `should be equal to` "Navn Mellom Navnesen"
+            responseData shouldBe "Navn Mellom Navnesen"
         }
 
         @Test
@@ -164,7 +164,7 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentFormattertNavn("00888888821")
-            responseData `should be equal to` "Tor-Henry Roarsen"
+            responseData shouldBe "Tor-Henry Roarsen"
         }
 
         @Test
@@ -175,7 +175,7 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentFormattertNavn("00333888821")
-            responseData `should be equal to` "Åge Roger Åæøå"
+            responseData shouldBe "Åge Roger Åæøå"
         }
     }
 
@@ -194,9 +194,9 @@ class PdlClientTest {
             pdlClient.hentFoedselsdato("fnr")
 
             val request = recordedRequest.shouldNotBeNull()
-            request.headers["Behandlingsnummer"] `should be equal to` "B229"
-            request.headers["Tema"] `should be equal to` "SYK"
-            request.headers["Content-Type"] `should be equal to` "application/json"
+            request.headers["Behandlingsnummer"] shouldBe "B229"
+            request.headers["Tema"] shouldBe "SYK"
+            request.headers["Content-Type"] shouldBe "application/json"
             val parsedBody: GraphQlRequest = objectMapper.readValue(request.body!!.utf8())
             parsedBody.query shouldBeGraphQlQueryEqualTo
                 """
@@ -208,7 +208,7 @@ class PdlClientTest {
                   }
                 }
             """
-            parsedBody.variables `should be equal to` mapOf("ident" to "fnr")
+            parsedBody.variables shouldBe mapOf("ident" to "fnr")
 
             request.headers["Authorization"]!!.shouldStartWith("Bearer ey")
         }
@@ -225,13 +225,13 @@ class PdlClientTest {
                 }
 
             val responseData = pdlClient.hentFoedselsdato("fnr")
-            responseData `should be equal to` LocalDate.parse("2000-01-01")
+            responseData shouldBe LocalDate.parse("2000-01-01")
         }
     }
 }
 
 private infix fun String.shouldBeGraphQlQueryEqualTo(expected: String) {
-    this.standariserGraphQlQuery() `should be equal to` expected.standariserGraphQlQuery()
+    this.standariserGraphQlQuery() shouldBe expected.standariserGraphQlQuery()
 }
 
 private fun String.standariserGraphQlQuery() =

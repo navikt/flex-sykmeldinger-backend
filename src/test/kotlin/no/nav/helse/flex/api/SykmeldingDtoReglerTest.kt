@@ -1,13 +1,13 @@
 package no.nav.helse.flex.api
 
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.maps.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.helse.flex.api.dto.MedisinskVurderingDTO
 import no.nav.helse.flex.api.dto.MeldingTilNavDTO
 import no.nav.helse.flex.api.dto.SporsmalSvarDTO
 import no.nav.helse.flex.testdata.lagSykmeldingDto
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeEmpty
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.Test
 
 class SykmeldingDtoReglerTest {
