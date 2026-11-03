@@ -1,5 +1,8 @@
 package no.nav.helse.flex.api
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.config.PersonIdenter
@@ -8,11 +11,6 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultSykepengesoknadBackendDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.AnyException
-import org.amshove.kluent.invoking
-import org.amshove.kluent.shouldBeEmpty
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -63,9 +61,9 @@ class SykmeldingOptInServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         sykepengesoknadBackendMockWebServer.dispatcher =
             simpleDispatcher { MockResponse.Builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).build() }
 
-        invoking {
+        shouldThrow<Exception> {
             sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
-        } shouldThrow AnyException
+        }
 
         optInDbRepository.findAllBySykmeldingId("1").shouldBeEmpty()
     }

@@ -1,5 +1,9 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.syketilfelle.FomTomPeriode
@@ -11,11 +15,6 @@ import no.nav.helse.flex.testconfig.RestClientOppsett
 import no.nav.helse.flex.testconfig.defaultSyketilfelleDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be true`
-import org.amshove.kluent.`should throw`
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,10 +60,10 @@ class SyketilfelleClientTest {
                     .build()
             }
         val response = syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
-        response.erUtenforVentetid.`should be true`()
+        response.erUtenforVentetid.shouldBeTrue()
         response.periodeMedSammeVentetid shouldHaveSize 1
-        response.periodeMedSammeVentetid.first().ressursId `should be equal to` "sykmelding-1"
-        kaltPath `should be equal to` "/api/bruker/v2/ventetid/sykmeldingId/ventetidForSykmelding"
+        response.periodeMedSammeVentetid.first().ressursId shouldBe "sykmelding-1"
+        kaltPath shouldBe "/api/bruker/v2/ventetid/sykmeldingId/ventetidForSykmelding"
     }
 
     @Test
@@ -77,9 +76,9 @@ class SyketilfelleClientTest {
                     .addHeader("Content-Type", "application/json")
                     .build()
             }
-        invoking {
+        shouldThrow<RestClientException> {
             syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
-        } `should throw` RestClientException::class
+        }
     }
 
     @Test
@@ -91,8 +90,8 @@ class SyketilfelleClientTest {
                     .addHeader("Content-Type", "application/json")
                     .build()
             }
-        invoking {
+        shouldThrow<RuntimeException> {
             syketilfelleEksternClient.getVentetidForSykmelding("sykmeldingId")
-        } `should throw` RuntimeException::class
+        }
     }
 }

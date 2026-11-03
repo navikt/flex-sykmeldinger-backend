@@ -1,5 +1,10 @@
 package no.nav.helse.flex.outbox
 
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.gateways.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.gateways.SYKMELDING_BRUKERNOTIFIKASJON_TOPIC
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
@@ -13,7 +18,6 @@ import no.nav.helse.flex.testdata.lagSykmeldingHendelsePayload
 import no.nav.helse.flex.testdata.lagSykmeldingNotifikasjon
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.tilPsqlJson
-import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -69,7 +73,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         outboxDbRepository.findAll().toList().also { usendte ->
             usendte shouldHaveSize 1
-            usendte.first().type shouldBeEqualTo OutboxType.SYKMELDING_HENDELSE
+            usendte.first().type shouldBe OutboxType.SYKMELDING_HENDELSE
             usendte.first().sendtTimestamp.shouldBeNull()
         }
 
@@ -82,9 +86,9 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         sykmeldingStatusConsumer
             .ventPåRecords(antall = 1)
-            .shouldHaveSingleItem()
+            .shouldBeSingle()
             .run {
-                key() shouldBeEqualTo "sykmelding-1"
+                key() shouldBe "sykmelding-1"
                 value().shouldNotBeNull()
             }
     }
@@ -100,8 +104,8 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         outboxDbRepository.findAll().toList().also { usendte ->
             usendte shouldHaveSize 1
-            usendte.first().type shouldBeEqualTo OutboxType.SYKMELDING_BRUKERNOTIFIKASJON
-            usendte.first().fnr shouldBeEqualTo fnr
+            usendte.first().type shouldBe OutboxType.SYKMELDING_BRUKERNOTIFIKASJON
+            usendte.first().fnr shouldBe fnr
             usendte.first().sendtTimestamp.shouldBeNull()
         }
 
@@ -114,10 +118,10 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         sykmeldingStatusConsumer
             .ventPåRecords(antall = 1)
-            .shouldHaveSingleItem()
+            .shouldBeSingle()
             .run {
-                key() shouldBeEqualTo "sykmelding-1"
-                objectMapper.readValue<SykmeldingNotifikasjon>(value()) shouldBeEqualTo notifikasjon
+                key() shouldBe "sykmelding-1"
+                objectMapper.readValue<SykmeldingNotifikasjon>(value()) shouldBe notifikasjon
             }
     }
 
@@ -131,7 +135,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
 
-        bleProsessert shouldBeEqualTo true
+        bleProsessert shouldBe true
         sykmeldingStatusConsumer.ventPåRecords(antall = 1)
     }
 
@@ -139,7 +143,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `sendUsendteForEldsteLedigeFnr returnerer false når det ikke er noe å sende`() {
         val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
 
-        bleProsessert shouldBeEqualTo false
+        bleProsessert shouldBe false
     }
 
     @Test
@@ -150,8 +154,8 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val rader = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
 
-        rader.map { it.fnr }.distinct() shouldBeEqualTo listOf("fnr-eldst")
-        rader.map { it.id } shouldBeEqualTo listOf(eldste.id, nestEldste.id)
+        rader.map { it.fnr }.distinct() shouldBe listOf("fnr-eldst")
+        rader.map { it.id } shouldBe listOf(eldste.id, nestEldste.id)
     }
 
     @Test
@@ -174,7 +178,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
                 }
             }
 
-        transaksjon1HarLast.await(3, TimeUnit.SECONDS) shouldBeEqualTo true
+        transaksjon1HarLast.await(3, TimeUnit.SECONDS) shouldBe true
 
         val fnrLastAvTransaksjon2 =
             transactionTemplate.execute {
@@ -184,8 +188,8 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         slippTransaksjon1.countDown()
         traad.join()
 
-        fnrLastAvTransaksjon1.distinct() shouldBeEqualTo listOf("fnr-eldst")
-        fnrLastAvTransaksjon2.distinct() shouldBeEqualTo listOf("fnr-nyest")
+        fnrLastAvTransaksjon1.distinct() shouldBe listOf("fnr-eldst")
+        fnrLastAvTransaksjon2.distinct() shouldBe listOf("fnr-nyest")
     }
 
     private fun lagreUsendtOutboxRad(

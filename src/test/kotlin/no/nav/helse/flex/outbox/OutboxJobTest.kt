@@ -1,5 +1,8 @@
 package no.nav.helse.flex.outbox
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.gateways.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.gateways.SYKMELDING_BRUKERNOTIFIKASJON_TOPIC
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
@@ -8,9 +11,6 @@ import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingNotifikasjon
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -46,14 +46,14 @@ class OutboxJobTest : IntegrasjonTestOppsett() {
 
         outboxDbRepository.findAll().toList().also { usendte ->
             usendte shouldHaveSize 4
-            usendte.all { it.sendtTimestamp == null } shouldBeEqualTo true
+            usendte.all { it.sendtTimestamp == null } shouldBe true
         }
 
         outboxJob.kjørJobb()
 
         outboxDbRepository.findAll().toList().also { sendte ->
             sendte shouldHaveSize 4
-            sendte.all { it.sendtTimestamp != null } shouldBeEqualTo true
+            sendte.all { it.sendtTimestamp != null } shouldBe true
         }
 
         sykmeldingStatusConsumer.ventPåRecords(antall = 4) shouldHaveSize 4

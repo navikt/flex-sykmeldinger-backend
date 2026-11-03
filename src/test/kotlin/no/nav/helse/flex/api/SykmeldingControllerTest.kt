@@ -1,5 +1,9 @@
 package no.nav.helse.flex.api
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
@@ -23,11 +27,6 @@ import no.nav.helse.flex.testutils.tokenxToken
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should not be`
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -264,7 +263,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
 
             val sykmelding: SykmeldingDTO = objectMapper.readValue(result)
 
-            sykmelding.id `should be equal to` "1"
+            sykmelding.id shouldBe "1"
         }
 
         @Test
@@ -306,10 +305,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
-            sykmeldinger.size `should be equal to` 1
+            sykmeldinger.size shouldBe 1
             val sykmelding = sykmeldinger[0]
-            sykmelding.id `should be equal to` "1"
-            sykmelding.pasient.fnr `should be equal to` "fnr"
+            sykmelding.id shouldBe "1"
+            sykmelding.pasient.fnr shouldBe "fnr"
         }
 
         @Test
@@ -346,10 +345,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
-            sykmeldinger.size `should be equal to` 1
+            sykmeldinger.size shouldBe 1
             val sykmelding = sykmeldinger[0]
-            sykmelding.id `should be equal to` "1"
-            sykmelding.pasient.fnr `should be equal to` "fnr"
+            sykmelding.id shouldBe "1"
+            sykmelding.pasient.fnr shouldBe "fnr"
         }
 
         @Test
@@ -366,7 +365,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
-            sykmeldinger.size `should be equal to` 0
+            sykmeldinger.size shouldBe 0
         }
 
         @Test
@@ -392,7 +391,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val sykmeldinger: List<SykmeldingDTO> = objectMapper.readValue(result)
-            sykmeldinger.size `should be equal to` 0
+            sykmeldinger.size shouldBe 0
         }
     }
 
@@ -436,7 +435,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
-            brukerinformasjon.arbeidsgivere.size `should be equal to` 1
+            brukerinformasjon.arbeidsgivere.size shouldBe 1
         }
 
         @Test
@@ -479,7 +478,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
-            brukerinformasjon.arbeidsgivere.size `should be equal to` 0
+            brukerinformasjon.arbeidsgivere.size shouldBe 0
         }
 
         @Test
@@ -522,7 +521,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val brukerinformasjon: BrukerinformasjonDTO = objectMapper.readValue(result)
-            brukerinformasjon.erOverSyttiAar.`should be false`()
+            brukerinformasjon.erOverSyttiAar.shouldBeFalse()
         }
 
         @Test
@@ -596,10 +595,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
-            returnertSykmelding `should not be` null
+            returnertSykmelding shouldNotBe null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.SENDT_TIL_ARBEIDSGIVER
+            sykmelding?.sisteHendelse()?.status shouldBe HendelseStatus.SENDT_TIL_ARBEIDSGIVER
         }
 
         @Test
@@ -633,7 +632,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
-            returnertSykmelding.arbeidsgiver `should be equal to`
+            returnertSykmelding.arbeidsgiver shouldBe
                 ArbeidsgiverDTO(
                     navn = "Arbeidsgivernavn",
                     stillingsprosent = 99,
@@ -673,10 +672,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val returnertSykmelding: SykmeldingDTO = objectMapper.readValue(result)
-            returnertSykmelding `should not be` null
+            returnertSykmelding shouldNotBe null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.SENDT_TIL_NAV
+            sykmelding?.sisteHendelse()?.status shouldBe HendelseStatus.SENDT_TIL_NAV
         }
 
         @Test
@@ -708,7 +707,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 }
                 """.trimIndent()
 
-            springJsonMapper.readValue(json, SendSykmeldingRequestDTO::class.java) shouldBeEqualTo
+            springJsonMapper.readValue(json, SendSykmeldingRequestDTO::class.java) shouldBe
                 SendSykmeldingRequestDTO(
                     erOpplysningeneRiktige = SporsmalSvar("Stemmer opplysningene?", JaEllerNei.NEI),
                     uriktigeOpplysninger =
@@ -800,10 +799,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             )
 
             val returnertSykmelding: SykmeldingDTO = kallChangeStatusEndepunkt(fnr = "fnr", content = SykmeldingChangeStatus.AVBRYT)
-            returnertSykmelding `should not be` null
+            returnertSykmelding shouldNotBe null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.AVBRUTT
+            sykmelding?.sisteHendelse()?.status shouldBe HendelseStatus.AVBRUTT
         }
 
         @Test
@@ -820,10 +819,10 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             )
 
             val returnertSykmelding: SykmeldingDTO = kallChangeStatusEndepunkt(fnr = "fnr", content = SykmeldingChangeStatus.BEKREFT_AVVIST)
-            returnertSykmelding `should not be` null
+            returnertSykmelding shouldNotBe null
 
             val sykmelding = sykmeldingRepository.findBySykmeldingId("1")
-            sykmelding?.sisteHendelse()?.status `should be equal to` HendelseStatus.BEKREFTET_AVVIST
+            sykmelding?.sisteHendelse()?.status shouldBe HendelseStatus.BEKREFTET_AVVIST
         }
 
         @Test
@@ -951,9 +950,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             )
 
             val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
-            response.erUtenforVentetid `should be equal to` true
-            response.erForsteSykmelding `should be equal to` true
-            response.tidligsteFom `should be equal to` null
+            response.erUtenforVentetid shouldBe true
+            response.erForsteSykmelding shouldBe true
+            response.tidligsteFom shouldBe null
         }
 
         @Test
@@ -1007,9 +1006,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             )
 
             val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
-            response.erUtenforVentetid `should be equal to` false
-            response.erForsteSykmelding `should be equal to` false
-            response.tidligsteFom `should be equal to` null
+            response.erUtenforVentetid shouldBe false
+            response.erForsteSykmelding shouldBe false
+            response.tidligsteFom shouldBe null
         }
 
         @Test
@@ -1064,9 +1063,9 @@ class SykmeldingControllerTest : FakesTestOppsett() {
             )
 
             val response = kallVentetidEndepunkt(arbeidssituasjon = "FRILANSER")
-            response.erUtenforVentetid `should be equal to` false
-            response.erForsteSykmelding `should be equal to` true
-            response.tidligsteFom `should be equal to` forrigeSykmelding.tom.plusDays(1)
+            response.erUtenforVentetid shouldBe false
+            response.erForsteSykmelding shouldBe true
+            response.tidligsteFom shouldBe forrigeSykmelding.tom.plusDays(1)
         }
 
         @Test
@@ -1108,7 +1107,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     naermesteLeder = null,
                 )
             val arbeidsgiverDetaljerDTO = arbeidsgiverDetaljer.konverterTilDto()
-            arbeidsgiverDetaljerDTO `should be equal to`
+            arbeidsgiverDetaljerDTO shouldBe
                 ArbeidsgiverDetaljerDTO(
                     orgnummer = "orgnr",
                     juridiskOrgnummer = "jurorgnr",
@@ -1126,7 +1125,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     orgnummer = "orgnr",
                 )
             val narmesteLederDTO = narmesteLeder.konverterTilDto()
-            narmesteLederDTO `should be equal to`
+            narmesteLederDTO shouldBe
                 NarmesteLederDTO(
                     navn = "Navn",
                     orgnummer = "orgnr",
@@ -1142,8 +1141,8 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 )
             val tidligereArbeidsgiverDTO = tidligereArbeidsgiver.konverterTilDto()
             tidligereArbeidsgiverDTO.run {
-                orgnummer shouldBeEqualTo "orgnr"
-                orgNavn shouldBeEqualTo "Navn"
+                orgnummer shouldBe "orgnr"
+                orgNavn shouldBe "Navn"
             }
         }
     }
@@ -1174,7 +1173,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val response: HarSoknadResponse = objectMapper.readValue(result)
-            response.harSoknad `should be equal to` true
+            response.harSoknad shouldBe true
         }
 
         @Test
@@ -1196,7 +1195,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                     .response.contentAsString
 
             val response: HarSoknadResponse = objectMapper.readValue(result)
-            response.harSoknad `should be equal to` false
+            response.harSoknad shouldBe false
         }
 
         @Test
@@ -1262,7 +1261,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isNoContent)
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 1
         }
 
         @Test
@@ -1277,7 +1276,7 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                         .contentType(MediaType.APPLICATION_JSON),
                 ).andExpect(MockMvcResultMatchers.status().isNoContent)
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 1
         }
 
         @Test
@@ -1293,8 +1292,8 @@ class SykmeldingControllerTest : FakesTestOppsett() {
                 ).andExpect(MockMvcResultMatchers.status().isNoContent)
 
             val request = sykepengesoknadBackendClient.opprettOptInRequests.first()
-            request.kafkaMetadata.sykmeldingId `should be equal to` "1"
-            request.kafkaMetadata.fnr `should be equal to` "fnr"
+            request.kafkaMetadata.sykmeldingId shouldBe "1"
+            request.kafkaMetadata.fnr shouldBe "fnr"
         }
 
         @Test

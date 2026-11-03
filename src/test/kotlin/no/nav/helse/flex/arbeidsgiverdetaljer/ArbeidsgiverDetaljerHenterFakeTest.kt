@@ -1,12 +1,12 @@
 package no.nav.helse.flex.arbeidsgiverdetaljer
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.FakesTestOppsett
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +32,7 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
 
         val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
 
-        arbeidsgiverDetaljer.size `should be equal to` 1
+        arbeidsgiverDetaljer.size shouldBe 1
         arbeidsgiverDetaljer.first().naermesteLeder.shouldNotBeNull()
     }
 
@@ -44,7 +44,7 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
 
         val arbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
 
-        arbeidsgiverDetaljer.size `should be equal to` 1
+        arbeidsgiverDetaljer.size shouldBe 1
         arbeidsgiverDetaljer.first().naermesteLeder.shouldBeNull()
     }
 
@@ -65,12 +65,12 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
 
         val alleArbeidsgiverDetaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
 
-        alleArbeidsgiverDetaljer.size `should be equal to` 1
+        alleArbeidsgiverDetaljer.size shouldBe 1
         val arbeidsgiverDetaljer = alleArbeidsgiverDetaljer.first()
-        arbeidsgiverDetaljer.orgnummer `should be equal to` "org1"
+        arbeidsgiverDetaljer.orgnummer shouldBe "org1"
         arbeidsgiverDetaljer.naermesteLeder
             .shouldNotBeNull()
-            .orgnummer `should be equal to` "org1"
+            .orgnummer shouldBe "org1"
     }
 
     @Test
@@ -86,7 +86,7 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
                     LocalDate.parse("2021-01-01") to LocalDate.parse("2021-02-01"),
             )
 
-        arbeidsgiverDetaljer.size `should be equal to` 1
+        arbeidsgiverDetaljer.size shouldBe 1
     }
 
     @Test
@@ -102,6 +102,6 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
                     LocalDate.parse("2021-03-01") to LocalDate.parse("2021-04-01"),
             )
 
-        arbeidsgiverDetaljer.size `should be equal to` 0
+        arbeidsgiverDetaljer.size shouldBe 0
     }
 }

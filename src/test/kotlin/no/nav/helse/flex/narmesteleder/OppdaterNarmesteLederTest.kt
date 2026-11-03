@@ -1,11 +1,11 @@
 package no.nav.helse.flex.narmesteleder
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,8 +37,8 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
 
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
         narmesteLeder.shouldNotBeNull()
-        narmesteLeder.orgnummer `should be equal to` narmesteLederLeesah.orgnummer
-        narmesteLeder.narmesteLederNavn `should be equal to` "Supreme Leader"
+        narmesteLeder.orgnummer shouldBe narmesteLederLeesah.orgnummer
+        narmesteLeder.narmesteLederNavn shouldBe "Supreme Leader"
     }
 
     @Test
@@ -65,7 +65,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
         )
 
         val oppdatertNl = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
-        oppdatertNl.orgnummer `should be equal to` "888888"
+        oppdatertNl.orgnummer shouldBe "888888"
     }
 
     @Test

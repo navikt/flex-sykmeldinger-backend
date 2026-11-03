@@ -1,5 +1,9 @@
 package no.nav.helse.flex.sykmelding
 
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversikt
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
@@ -13,7 +17,6 @@ import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.*
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.*
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.*
@@ -57,7 +60,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         )
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
-            opprettet shouldBeEqualTo Instant.parse("2024-01-01T00:00:00Z")
+            opprettet shouldBe Instant.parse("2024-01-01T00:00:00Z")
         }
     }
 
@@ -80,8 +83,8 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         )
 
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
-            pasientFnr shouldBeEqualTo "fnr-2"
-            sykmeldingGrunnlagOppdatert `should be equal to` Instant.parse("2024-01-01T00:00:00Z")
+            pasientFnr shouldBe "fnr-2"
+            sykmeldingGrunnlagOppdatert shouldBe Instant.parse("2024-01-01T00:00:00Z")
         }
     }
 
@@ -112,8 +115,8 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             .findBySykmeldingId("1")
             .shouldNotBeNull()
             .run {
-                sykmeldingGrunnlagOppdatert `should be equal to` originaltOpprettet
-                validationOppdatert `should be equal to` originaltOpprettet
+                sykmeldingGrunnlagOppdatert shouldBe originaltOpprettet
+                validationOppdatert shouldBe originaltOpprettet
             }
     }
 
@@ -137,8 +140,8 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                 ),
         )
         sykmeldingRepository.findBySykmeldingId("1").shouldNotBeNull().run {
-            validation.status `should be equal to` RuleType.OK
-            validationOppdatert `should be equal to` Instant.parse("2024-01-01T00:00:00Z")
+            validation.status shouldBe RuleType.OK
+            validationOppdatert shouldBe Instant.parse("2024-01-01T00:00:00Z")
         }
     }
 
@@ -158,10 +161,10 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             .findBySykmeldingId("1")
             .shouldNotBeNull()
             .hendelser
-            .shouldHaveSingleItem()
+            .shouldBeSingle()
             .run {
-                status shouldBeEqualTo HendelseStatus.APEN
-                lokaltOpprettet shouldBeEqualTo Instant.parse("2024-01-01T00:00:00Z")
+                status shouldBe HendelseStatus.APEN
+                lokaltOpprettet shouldBe Instant.parse("2024-01-01T00:00:00Z")
             }
     }
 
@@ -191,8 +194,8 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
 
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(listOf("fnr"))
-        arbeidsforhold.size `should be equal to` 1
-        arbeidsforhold.first().orgnavn `should be equal to` "Testbedriften AS"
+        arbeidsforhold.size shouldBe 1
+        arbeidsforhold.first().orgnavn shouldBe "Testbedriften AS"
     }
 
     @Test
@@ -201,7 +204,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
 
         eksternSykmeldingHandterer.lagreSykmeldingFraKafka(sykmeldingId = "_", sykmeldingMedBehandlingsutfall)
 
-        sykmeldingBrukernotifikasjonProducer.hentSykmeldingBrukernotifikasjoner().shouldHaveSingleItem()
+        sykmeldingBrukernotifikasjonProducer.hentSykmeldingBrukernotifikasjoner().shouldBeSingle()
     }
 
     @Test
@@ -224,8 +227,8 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             lagEksternSykmeldingMelding(sykmelding = lagSykmeldingGrunnlag(id = "1")),
         )
 
-        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSingleItem().run {
-            event.statusEvent shouldBeEqualTo "APEN"
+        sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldBeSingle().run {
+            event.statusEvent shouldBe "APEN"
         }
     }
 
@@ -244,20 +247,20 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                 )
 
             nySykmelding.run {
-                sykmeldingGrunnlag `should be equal to` eksternSykmeldingMelding.sykmelding
-                validation `should be equal to` eksternSykmeldingMelding.validation
-                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
-                hendelseOppdatert `should be equal to` tidspunkt
-                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
-                validationOppdatert `should be equal to` tidspunkt
+                sykmeldingGrunnlag shouldBe eksternSykmeldingMelding.sykmelding
+                validation shouldBe eksternSykmeldingMelding.validation
+                sykmeldingGrunnlagOppdatert shouldBe tidspunkt
+                hendelseOppdatert shouldBe tidspunkt
+                sykmeldingGrunnlagOppdatert shouldBe tidspunkt
+                validationOppdatert shouldBe tidspunkt
             }
-            nySykmelding.hendelser.shouldHaveSingleItem().run {
-                status `should be equal to` HendelseStatus.APEN
-                hendelseOpprettet `should be equal to`
+            nySykmelding.hendelser.shouldBeSingle().run {
+                status shouldBe HendelseStatus.APEN
+                hendelseOpprettet shouldBe
                     eksternSykmeldingMelding.sykmelding.metadata.mottattDato
                         .toInstant()
-                lokaltOpprettet `should be equal to` tidspunkt
-                source `should be equal to` SykmeldingHendelse.LOKAL_SOURCE
+                lokaltOpprettet shouldBe tidspunkt
+                source shouldBe SykmeldingHendelse.LOKAL_SOURCE
             }
         }
 
@@ -281,15 +284,15 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
                     tidspunkt = tidspunkt,
                 )
             oppdatertSykmelding.run {
-                sykmeldingId `should be equal to` eksternSykmeldingMelding.sykmelding.id
-                sykmeldingGrunnlag `should be equal to` eksternSykmeldingMelding.sykmelding
-                validation `should be equal to` eksternSykmeldingMelding.validation
-                sykmeldingGrunnlagOppdatert `should be equal to` tidspunkt
-                validationOppdatert `should be equal to` tidspunkt
+                sykmeldingId shouldBe eksternSykmeldingMelding.sykmelding.id
+                sykmeldingGrunnlag shouldBe eksternSykmeldingMelding.sykmelding
+                validation shouldBe eksternSykmeldingMelding.validation
+                sykmeldingGrunnlagOppdatert shouldBe tidspunkt
+                validationOppdatert shouldBe tidspunkt
 
-                databaseId `should be equal to` eksisterendeSykmelding.databaseId
-                hendelser shouldBeEqualTo eksisterendeSykmelding.hendelser
-                hendelseOppdatert `should be equal to` eksisterendeSykmelding.hendelseOppdatert
+                databaseId shouldBe eksisterendeSykmelding.databaseId
+                hendelser shouldBe eksisterendeSykmelding.hendelser
+                hendelseOppdatert shouldBe eksisterendeSykmelding.hendelseOppdatert
             }
         }
 
@@ -335,7 +338,7 @@ class EksternSykmeldingHandtererTest : FakesTestOppsett() {
             ).mapIndexed { index, (sykmelding, forventetNotifikasjon) ->
                 DynamicTest.dynamicTest("Punkt $index") {
                     val notifikasjon = EksternSykmeldingHandterer.lagSykemldingNotifikasjon(sykmelding)
-                    notifikasjon shouldBeEqualTo forventetNotifikasjon
+                    notifikasjon shouldBe forventetNotifikasjon
                 }
             }
     }

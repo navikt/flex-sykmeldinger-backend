@@ -1,5 +1,7 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.api.SykmeldingOptInService
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmelding.SykmeldingErIkkeDinException
@@ -8,8 +10,6 @@ import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.NowFactoryFake
 import no.nav.helse.flex.testconfig.fakes.SykepengesoknadBackendClientFake
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -52,7 +52,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 1
         }
 
         @Test
@@ -72,7 +72,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 1
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 1
         }
 
         @Test
@@ -94,7 +94,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             sykepengesoknadBackendClient.opprettOptInRequests
                 .first()
-                .kafkaMetadata.sykmeldingId `should be equal to` "1"
+                .kafkaMetadata.sykmeldingId shouldBe "1"
         }
 
         @Test
@@ -116,8 +116,8 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
             sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr"))
 
             val optIns = optInDbRepository.findAllBySykmeldingId("1")
-            optIns.size `should be equal to` 1
-            optIns.first().opprettet `should be equal to` Instant.parse("2025-01-01T12:00:00Z")
+            optIns.size shouldBe 1
+            optIns.first().opprettet shouldBe Instant.parse("2025-01-01T12:00:00Z")
         }
     }
 
@@ -134,7 +134,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             val kall = { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr")) }
 
-            kall shouldThrow UgyldigOptinException::class
+            shouldThrow<UgyldigOptinException>(kall)
         }
 
         @Test
@@ -148,7 +148,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             val kall = { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr")) }
 
-            kall shouldThrow UgyldigOptinException::class
+            shouldThrow<UgyldigOptinException>(kall)
         }
     }
 
@@ -171,7 +171,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             val kall = { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("feil-fnr")) }
 
-            kall shouldThrow SykmeldingErIkkeDinException::class
+            shouldThrow<SykmeldingErIkkeDinException>(kall)
         }
 
         @Test
@@ -191,7 +191,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             runCatching { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("feil-fnr")) }
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 0
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 0
         }
     }
 
@@ -214,7 +214,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             val kall = { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr")) }
 
-            kall shouldThrow UgyldigOptinException::class
+            shouldThrow<UgyldigOptinException>(kall)
         }
 
         @Test
@@ -234,7 +234,7 @@ class SykmeldingOptInServiceTest : FakesTestOppsett() {
 
             runCatching { sykmeldingOptInService.behandleOptIn(sykmeldingId = "1", identer = PersonIdenter("fnr")) }
 
-            sykepengesoknadBackendClient.antallOpprettOptInKall() `should be equal to` 0
+            sykepengesoknadBackendClient.antallOpprettOptInKall() shouldBe 0
         }
     }
 }

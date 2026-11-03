@@ -1,5 +1,7 @@
 package no.nav.helse.flex.gateways.aareghendelser
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.arbeidsforhold.innhenting.lagArbeidsforholdOversiktResponse
@@ -19,9 +21,6 @@ import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.invoking
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldThrow
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
@@ -161,19 +160,19 @@ class AaregHendelserKafkaListenerIntegrasjonsTest : IntegrasjonTestOppsett() {
             ),
         )
 
-        arbeidsforholdRepository.count() `shouldBeEqualTo` 0
+        arbeidsforholdRepository.count() shouldBe 0
     }
 
     @Test
     fun `burde kaste feil ved annen deserialisering feil, pga midlertidig Aareg bug`() {
         val aaregHendelseUtenArbeidstaker = "{}"
 
-        invoking {
+        shouldThrow<RuntimeException> {
             aaregHendelserConsumer.handterHendelser(
                 listOf(
                     RawHendelse(value = aaregHendelseUtenArbeidstaker),
                 ),
             )
-        }.shouldThrow(RuntimeException::class)
+        }
     }
 }

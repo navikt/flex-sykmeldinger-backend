@@ -1,5 +1,7 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import no.nav.helse.flex.sykmelding.EksternSykmeldingMelding
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.AaregClientFake
@@ -7,9 +9,6 @@ import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagValidation
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should not throw`
-import org.amshove.kluent.`should throw`
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -43,7 +42,7 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
                 validation = lagValidation(),
             )
 
-        invoking {
+        shouldNotThrow<Exception> {
             sykmeldingListener.listen(
                 cr =
                     ConsumerRecord(
@@ -55,7 +54,7 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
                     ),
                 acknowledgment = { },
             )
-        }.`should not throw`(Exception::class)
+        }
     }
 
     @Test
@@ -69,7 +68,7 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
                 validation = lagValidation(),
             )
 
-        invoking {
+        shouldThrow<Exception> {
             sykmeldingListener.listen(
                 cr =
                     ConsumerRecord(
@@ -81,6 +80,6 @@ class SykmeldingKafkaListenerFakeTest : FakesTestOppsett() {
                     ),
                 acknowledgment = { },
             )
-        }.`should throw`(Exception::class)
+        }
     }
 }

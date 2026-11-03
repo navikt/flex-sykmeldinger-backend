@@ -1,5 +1,10 @@
 package no.nav.helse.flex.tsmsykmeldingstatus
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.config.tilNorgeOffsetDateTime
 import no.nav.helse.flex.sykmeldinghendelse.*
@@ -7,7 +12,6 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.ShortNameKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SporsmalKafkaDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SvartypeKafkaDTO
-import org.amshove.kluent.*
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -45,7 +49,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         sykmeldingId = "_",
                         sykmeldingHendelse = lagSykmeldingHendelse(hendelseOpprettet = hendelseOpprettet),
                     ).run {
-                        this.timestamp shouldBeEqualTo kafkaTimestamp
+                        this.timestamp shouldBe kafkaTimestamp
                     }
             }
         }
@@ -61,7 +65,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 sykmeldingId = "_",
                 sykmeldingHendelse = hendelse,
             )
-        sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+        sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
         sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
         sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
     }
@@ -80,7 +84,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             lagSykmeldingHendelse(status = status),
                     )
 
-                sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo kafkaStatus
+                sykmeldingStatusKafkaDTO.statusEvent shouldBe kafkaStatus
                 sykmeldingStatusKafkaDTO.sporsmals.shouldBeNull()
                 sykmeldingStatusKafkaDTO.brukerSvar.shouldBeNull()
             }
@@ -109,13 +113,13 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "SENDT"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "SENDT"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
+                orgnummer shouldBe "orgnr"
+                juridiskOrgnummer shouldBe "juridiskOrgnr"
+                orgNavn shouldBe "orgnavn"
             }
         }
 
@@ -140,13 +144,13 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "SENDT"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "SENDT"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
+                orgnummer shouldBe "orgnr"
+                juridiskOrgnummer shouldBe "juridiskOrgnr"
+                orgNavn shouldBe "orgnavn"
             }
         }
 
@@ -163,7 +167,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
@@ -191,13 +195,13 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                juridiskOrgnummer shouldBeEqualTo "juridiskOrgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
+                orgnummer shouldBe "orgnr"
+                juridiskOrgnummer shouldBe "juridiskOrgnr"
+                orgNavn shouldBe "orgnavn"
             }
         }
 
@@ -222,13 +226,13 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
             sykmeldingStatusKafkaDTO.tidligereArbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
+                orgnummer shouldBe "orgnr"
+                orgNavn shouldBe "orgnavn"
             }
         }
 
@@ -252,13 +256,13 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                         ),
                 )
 
-            sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+            sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
             sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
             sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
             sykmeldingStatusKafkaDTO.tidligereArbeidsgiver.shouldNotBeNull().run {
-                orgnummer shouldBeEqualTo "orgnr"
-                orgNavn shouldBeEqualTo "orgnavn"
+                orgnummer shouldBe "orgnr"
+                orgNavn shouldBe "orgnavn"
             }
         }
 
@@ -297,7 +301,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             sykmeldingHendelse = hendelse,
                         )
 
-                    sykmeldingStatusKafkaDTO.statusEvent shouldBeEqualTo "BEKREFTET"
+                    sykmeldingStatusKafkaDTO.statusEvent shouldBe "BEKREFTET"
                     sykmeldingStatusKafkaDTO.sporsmals.shouldNotBeNull()
                     sykmeldingStatusKafkaDTO.brukerSvar.shouldNotBeNull()
                     sykmeldingStatusKafkaDTO.arbeidsgiver.shouldBeNull()
@@ -307,7 +311,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
 
         @Test
         fun `Burde ikke godta hendelser med UtdatertFormatTilleggsinfo`() {
-            invoking {
+            shouldThrow<IllegalArgumentException> {
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "1",
                     sykmeldingHendelse =
@@ -318,12 +322,12 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             tilleggsinfo = lagUtdatertFormatTilleggsinfo(),
                         ),
                 )
-            } shouldThrow IllegalArgumentException::class
+            }
         }
 
         @Test
         fun `Burde ikke godta hendelser med UtdatertFormatBrukerSvar`() {
-            invoking {
+            shouldThrow<IllegalArgumentException> {
                 SykmeldingHendelseTilKafkaKonverterer.konverterSykmeldingHendelseTilKafkaDTO(
                     sykmeldingId = "1",
                     sykmeldingHendelse =
@@ -333,7 +337,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                             brukerSvar = lagUtdatertFormatBrukerSvar(),
                         ),
                 )
-            } shouldThrow IllegalArgumentException::class
+            }
         }
     }
 
@@ -423,41 +427,41 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                 )
 
             brukerSvar.erOpplysningeneRiktige.run {
-                sporsmaltekst shouldBeEqualTo "Er opplysningene riktige?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Er opplysningene riktige?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.uriktigeOpplysninger.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Er det noen uriktige opplysninger?"
-                svar shouldBeEqualTo listOf(UriktigeOpplysningerType.PERIODE)
+                sporsmaltekst shouldBe "Er det noen uriktige opplysninger?"
+                svar shouldBe listOf(UriktigeOpplysningerType.PERIODE)
             }
 
             brukerSvar.erOpplysningeneRiktige.run {
-                sporsmaltekst shouldBeEqualTo "Er opplysningene riktige?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Er opplysningene riktige?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.arbeidssituasjon.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Hva er din arbeidssituasjon?"
-                svar shouldBeEqualTo ArbeidssituasjonDTO.ARBEIDSTAKER
+                sporsmaltekst shouldBe "Hva er din arbeidssituasjon?"
+                svar shouldBe ArbeidssituasjonDTO.ARBEIDSTAKER
             }
             brukerSvar.arbeidsgiverOrgnummer.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Hva er arbeidsgiverens organisasjonsnummer?"
-                svar shouldBeEqualTo "123456789"
+                sporsmaltekst shouldBe "Hva er arbeidsgiverens organisasjonsnummer?"
+                svar shouldBe "123456789"
             }
             brukerSvar.riktigNarmesteLeder.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Er dette riktig nærmeste leder?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Er dette riktig nærmeste leder?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.sykFoerSykmeldingen.shouldNotBeNull().run {
-                sporsmaltekst `should be equal to` "Var du syk før sykmeldingen?"
-                svar `should be equal to` JaEllerNei.JA
+                sporsmaltekst shouldBe "Var du syk før sykmeldingen?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.harBruktEgenmelding.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Har du brukt egenmelding?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Har du brukt egenmelding?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.egenmeldingsperioder.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Hvilke egenmeldingsperioder har du hatt?"
-                svar shouldBeEqualTo
+                sporsmaltekst shouldBe "Hvilke egenmeldingsperioder har du hatt?"
+                svar shouldBe
                     listOf(
                         EgenmeldingsperiodeFormDTO(
                             fom = LocalDate.parse("2025-01-01"),
@@ -470,25 +474,25 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
                     )
             }
             brukerSvar.harForsikring.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Har du forsikring?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Har du forsikring?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.egenmeldingsdager.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Hvilke egenmeldingsdager har du hatt?"
-                svar shouldBeEqualTo listOf(LocalDate.parse("2021-01-01"))
+                sporsmaltekst shouldBe "Hvilke egenmeldingsdager har du hatt?"
+                svar shouldBe listOf(LocalDate.parse("2021-01-01"))
             }
             brukerSvar.harBruktEgenmeldingsdager.shouldNotBeNull().run {
-                sporsmaltekst shouldBeEqualTo "Har du brukt egenmeldingsdager?"
-                svar shouldBeEqualTo JaEllerNei.JA
+                sporsmaltekst shouldBe "Har du brukt egenmeldingsdager?"
+                svar shouldBe JaEllerNei.JA
             }
             brukerSvar.fisker.shouldNotBeNull().run {
                 blad.run {
-                    sporsmaltekst shouldBeEqualTo "Hvilket blad?"
-                    svar shouldBeEqualTo Blad.A
+                    sporsmaltekst shouldBe "Hvilket blad?"
+                    svar shouldBe Blad.A
                 }
                 lottOgHyre.run {
-                    sporsmaltekst shouldBeEqualTo "Lott eller Hyre?"
-                    svar shouldBeEqualTo LottOgHyre.LOTT
+                    sporsmaltekst shouldBe "Lott eller Hyre?"
+                    svar shouldBe LottOgHyre.LOTT
                 }
             }
         }
@@ -553,29 +557,29 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmals shouldHaveSize 6
 
             sporsmals.finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON).shouldNotBeNull().run {
-                tekst shouldBeEqualTo "Hva er din arbeidssituasjon?"
-                svartype shouldBeEqualTo SvartypeKafkaDTO.ARBEIDSSITUASJON
-                svar shouldBeEqualTo "ARBEIDSTAKER"
+                tekst shouldBe "Hva er din arbeidssituasjon?"
+                svartype shouldBe SvartypeKafkaDTO.ARBEIDSSITUASJON
+                svar shouldBe "ARBEIDSTAKER"
             }
             sporsmals.finnSporsmal(ShortNameKafkaDTO.FRAVAER).shouldNotBeNull().run {
-                tekst shouldBeEqualTo "Har du brukt egenmelding?"
-                svartype shouldBeEqualTo SvartypeKafkaDTO.JA_NEI
-                svar shouldBeEqualTo "JA"
+                tekst shouldBe "Har du brukt egenmelding?"
+                svartype shouldBe SvartypeKafkaDTO.JA_NEI
+                svar shouldBe "JA"
             }
             sporsmals.finnSporsmal(ShortNameKafkaDTO.PERIODE).shouldNotBeNull().run {
-                tekst shouldBeEqualTo "Hvilke egenmeldingsperioder har du hatt?"
-                svartype shouldBeEqualTo SvartypeKafkaDTO.PERIODER
-                svar shouldBeEqualTo """[{"fom":"2025-01-01","tom":"2025-01-05"}]"""
+                tekst shouldBe "Hvilke egenmeldingsperioder har du hatt?"
+                svartype shouldBe SvartypeKafkaDTO.PERIODER
+                svar shouldBe """[{"fom":"2025-01-01","tom":"2025-01-05"}]"""
             }
             sporsmals.finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER).shouldNotBeNull().run {
-                tekst shouldBeEqualTo "Er dette riktig nærmeste leder?"
-                svartype shouldBeEqualTo SvartypeKafkaDTO.JA_NEI
-                svar shouldBeEqualTo "NEI"
+                tekst shouldBe "Er dette riktig nærmeste leder?"
+                svartype shouldBe SvartypeKafkaDTO.JA_NEI
+                svar shouldBe "NEI"
             }
             sporsmals.finnSporsmal(ShortNameKafkaDTO.FORSIKRING).shouldNotBeNull().run {
-                tekst shouldBeEqualTo "Har du forsikring?"
-                svartype shouldBeEqualTo SvartypeKafkaDTO.JA_NEI
-                svar shouldBeEqualTo "JA"
+                tekst shouldBe "Har du forsikring?"
+                svartype shouldBe SvartypeKafkaDTO.JA_NEI
+                svar shouldBe "JA"
             }
         }
 
@@ -599,7 +603,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "FISKER"
+                .svar shouldBe "FISKER"
         }
 
         @Test
@@ -622,7 +626,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "NAERINGSDRIVENDE"
+                .svar shouldBe "NAERINGSDRIVENDE"
         }
 
         @Test
@@ -645,7 +649,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "FISKER"
+                .svar shouldBe "FISKER"
         }
 
         @Test
@@ -664,7 +668,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.ARBEIDSSITUASJON)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "NAERINGSDRIVENDE"
+                .svar shouldBe "NAERINGSDRIVENDE"
         }
 
         @Test
@@ -687,7 +691,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "NEI"
+                .svar shouldBe "NEI"
         }
 
         @Test
@@ -710,7 +714,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "NEI"
+                .svar shouldBe "NEI"
         }
 
         @Test
@@ -733,7 +737,7 @@ class SykmeldingHendelseTilKafkaKonvertererTest {
             sporsmalListe
                 .finnSporsmal(ShortNameKafkaDTO.NY_NARMESTE_LEDER)
                 .shouldNotBeNull()
-                .svar shouldBeEqualTo "NEI"
+                .svar shouldBe "NEI"
         }
 
         private fun List<SporsmalKafkaDTO>.finnSporsmal(shortName: ShortNameKafkaDTO): SporsmalKafkaDTO? =

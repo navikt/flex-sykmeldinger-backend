@@ -1,13 +1,13 @@
 package no.nav.helse.flex.arbeidsforhold.innhenting
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.helse.flex.gateways.pdl.PdlIdent
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.testdata.lagPasient
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
-import org.amshove.kluent.`should be false`
-import org.amshove.kluent.`should be true`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,13 +30,13 @@ class RegistrertePersonerForArbeidsforholdTest : FakesTestOppsett() {
         sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = "fnr"))))
 
         val result = registrertePersonerForArbeidsforhold.erPersonRegistrert("fnr")
-        result.`should be true`()
+        result.shouldBeTrue()
     }
 
     @Test
     fun `burde returnere false når en person ikke har sykmelding`() {
         val result = registrertePersonerForArbeidsforhold.erPersonRegistrert("fnr")
-        result.`should be false`()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -45,6 +45,6 @@ class RegistrertePersonerForArbeidsforholdTest : FakesTestOppsett() {
         pdlClientFake.setIdentMedHistorikk(listOf(PdlIdent(gruppe = "FOLKEREGISTERIDENT", ident = "gammel-fnr")))
 
         val result = registrertePersonerForArbeidsforhold.erPersonRegistrert("ny-ident")
-        result.`should be true`()
+        result.shouldBeTrue()
     }
 }

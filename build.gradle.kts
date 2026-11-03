@@ -24,7 +24,7 @@ repositories {
 val testContainersVersion = "2.0.5"
 val tokenSupportVersion = "6.0.12"
 val logstashLogbackEncoderVersion = "9.0"
-val kluentVersion = "1.73"
+val kotestVersion = "6.2.6"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.67.0"
@@ -67,7 +67,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-kafka:$testContainersVersion")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("no.nav.security:token-validation-spring-test:$tokenSupportVersion")
-    testImplementation("org.amshove.kluent:kluent:$kluentVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("org.awaitility:awaitility")
 }
 

@@ -1,5 +1,9 @@
 package no.nav.helse.flex.gateways.aareg
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
@@ -8,7 +12,6 @@ import no.nav.helse.flex.testconfig.defaultAaregDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,7 +43,7 @@ class AaregClientTest {
                     .addHeader("Content-Type", "application/json")
                     .build()
             }
-        aaregEksternClient.getArbeidsforholdoversikt("_") `should not be` null
+        aaregEksternClient.getArbeidsforholdoversikt("_") shouldNotBe null
     }
 
     @Test
@@ -55,9 +58,9 @@ class AaregClientTest {
                     .build()
             }
 
-        invoking {
+        shouldThrow<RestClientException> {
             aaregEksternClient.getArbeidsforholdoversikt("_")
-        } `should throw` RestClientException::class
+        }
     }
 
     @Test
@@ -69,9 +72,9 @@ class AaregClientTest {
                     .addHeader("Content-Type", "application/json")
                     .build()
             }
-        invoking {
+        shouldThrow<RuntimeException> {
             aaregEksternClient.getArbeidsforholdoversikt("suksess_uten_body_fnr")
-        } `should throw` RuntimeException::class
+        }
     }
 
     @Test
@@ -89,7 +92,7 @@ class AaregClientTest {
 
         aaregEksternClient.getArbeidsforholdoversikt("_")
         recordedReq.shouldNotBeNull().run {
-            headers["Content-Type"] `should be equal to` "application/json"
+            headers["Content-Type"] shouldBe "application/json"
         }
     }
 
@@ -106,7 +109,7 @@ class AaregClientTest {
 
         requestBody.shouldNotBeNull()
         val parsedRequest = objectMapper.readValue(requestBody, ArbeidsforholdRequest::class.java)
-        parsedRequest `should be equal to`
+        parsedRequest shouldBe
             ArbeidsforholdRequest(
                 arbeidstakerId = "fnr",
                 arbeidsforholdtyper = listOf("ordinaertArbeidsforhold", "maritimtArbeidsforhold", "forenkletOppgjoersordning"),

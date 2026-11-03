@@ -1,5 +1,11 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
@@ -15,7 +21,6 @@ import no.nav.helse.flex.testdata.lagKafkaMetadataDTO
 import no.nav.helse.flex.testdata.lagSykmeldingDto
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,7 +56,7 @@ class SykepengesoknadBackendClientTest {
                         .build()
                 }
             val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
-            resultat.`should be true`()
+            resultat.shouldBeTrue()
         }
 
         @Test
@@ -65,7 +70,7 @@ class SykepengesoknadBackendClientTest {
                         .build()
                 }
             val resultat = sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
-            resultat.`should be false`()
+            resultat.shouldBeFalse()
         }
 
         @Test
@@ -78,9 +83,9 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                         .build()
                 }
-            invoking {
+            shouldThrow<RestClientException> {
                 sykepengesoknadBackendEksternClient.harSoknad("sykmelding-uuid", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
-            } `should throw` RestClientException::class
+            }
         }
 
         @Test
@@ -99,7 +104,7 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendEksternClient.harSoknad("min-sykmelding-id", ArbeidssituasjonDTO.NAERINGSDRIVENDE)
 
             val request = recordedRequest!!
-            request.url.encodedPath `should be equal to` "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad/NAERINGSDRIVENDE"
+            request.url.encodedPath shouldBe "/api/v2/soknader/sykmelding/min-sykmelding-id/harSoknad/NAERINGSDRIVENDE"
         }
 
         @Test
@@ -141,9 +146,9 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                         .build()
                 }
-            invoking {
+            shouldNotThrowAny {
                 sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
-            } `should not throw` AnyException
+            }
         }
 
         @Test
@@ -156,9 +161,9 @@ class SykepengesoknadBackendClientTest {
                         .addHeader("Content-Type", "application/json")
                         .build()
                 }
-            invoking {
+            shouldThrow<RestClientException> {
                 sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
-            } `should throw` RestClientException::class
+            }
         }
 
         @Test
@@ -177,7 +182,7 @@ class SykepengesoknadBackendClientTest {
             sykepengesoknadBackendEksternClient.opprettOptIn(testMelding)
 
             val request = recordedRequest!!
-            request.url.encodedPath `should be equal to` "/api/v2/soknader/opprett-opt-in"
+            request.url.encodedPath shouldBe "/api/v2/soknader/opprett-opt-in"
         }
 
         @Test

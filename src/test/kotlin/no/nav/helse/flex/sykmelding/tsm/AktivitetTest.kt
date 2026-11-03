@@ -1,10 +1,10 @@
 package no.nav.helse.flex.sykmelding.tsm
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.`should be instance of`
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import tools.jackson.module.kotlin.readValue
@@ -19,8 +19,8 @@ class AktivitetTest {
 
         val serialisertAktivitet = aktivitet.serialisertTilString()
         val deserialisertAktivitet: Aktivitet = objectMapper.readValue(serialisertAktivitet)
-        deserialisertAktivitet.type `should be equal to` aktivitetType
-        deserialisertAktivitet `should be instance of` aktivitet::class
+        deserialisertAktivitet.type shouldBe aktivitetType
+        deserialisertAktivitet.shouldBeInstanceOf(aktivitet::class)
     }
 
     enum class AktivitetMedAktivitetstype(

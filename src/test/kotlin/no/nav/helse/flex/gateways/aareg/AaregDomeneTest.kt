@@ -1,9 +1,8 @@
 package no.nav.helse.flex.gateways.aareg
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.gateways.aareg.*
-import org.amshove.kluent.invoking
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldThrow
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -23,7 +22,7 @@ class AaregDomeneTest {
                             ),
                         ),
                 )
-            arbeidssted.finnOrgnummer() `should be equal to` "orgnummer"
+            arbeidssted.finnOrgnummer() shouldBe "orgnummer"
         }
 
         @Test
@@ -39,9 +38,9 @@ class AaregDomeneTest {
                             ),
                         ),
                 )
-            invoking {
-                arbeidssted.finnOrgnummer() `should be equal to` "orgnummer"
-            } shouldThrow (Exception::class)
+            shouldThrow<Exception> {
+                arbeidssted.finnOrgnummer() shouldBe "orgnummer"
+            }
         }
     }
 
@@ -60,7 +59,7 @@ class AaregDomeneTest {
                             ),
                         ),
                 )
-            opplysningspliktig.finnOrgnummer() `should be equal to` "orgnummer"
+            opplysningspliktig.finnOrgnummer() shouldBe "orgnummer"
         }
 
         @Test
@@ -76,9 +75,9 @@ class AaregDomeneTest {
                             ),
                         ),
                 )
-            invoking {
-                opplysningspliktig.finnOrgnummer() `should be equal to` "orgnummer"
-            } shouldThrow (Exception::class)
+            shouldThrow<Exception> {
+                opplysningspliktig.finnOrgnummer() shouldBe "orgnummer"
+            }
         }
     }
 }

@@ -1,12 +1,16 @@
 package no.nav.helse.flex.api
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.helse.flex.api.dto.*
 import no.nav.helse.flex.sykmelding.tsm.*
 import no.nav.helse.flex.sykmelding.tsm.values.*
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.testdata.*
-import org.amshove.kluent.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -47,20 +51,20 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
             val dto = sykmeldingDtoKonverterer.konverterTilSykmeldingDTO(sykmelding)
 
-            dto.pasient `should be equal to`
+            dto.pasient shouldBe
                 sykmeldingDtoKonverterer.konverterPasient(
                     sykmelding.sykmeldingGrunnlag.pasient,
                     sykmeldingsperioderDto.minBy { it.fom }.fom,
                 )
-            dto.medisinskVurdering `should be equal to` medisinskVurderingDto
-            dto.sykmeldingsperioder `should be equal to` sykmeldingsperioderDto
-            dto.behandlingsutfall `should be equal to` sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
-            dto.merknader `should be equal to` sykmeldingDtoKonverterer.konverterMerknader(sykmelding.validation)
+            dto.medisinskVurdering shouldBe medisinskVurderingDto
+            dto.sykmeldingsperioder shouldBe sykmeldingsperioderDto
+            dto.behandlingsutfall shouldBe sykmeldingDtoKonverterer.konverterBehandlingsutfall(sykmelding.validation)
+            dto.merknader shouldBe sykmeldingDtoKonverterer.konverterMerknader(sykmelding.validation)
 
-            dto.arbeidsgiver `should be equal to` ArbeidsgiverDTO(null, null)
-            dto.prognose.`should be null`()
-            dto.behandler.`should be null`()
-            dto.utenlandskSykmelding.`should be null`()
+            dto.arbeidsgiver shouldBe ArbeidsgiverDTO(null, null)
+            dto.prognose.shouldBeNull()
+            dto.behandler.shouldBeNull()
+            dto.utenlandskSykmelding.shouldBeNull()
         }
 
         @Test
@@ -80,35 +84,35 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
             val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
 
-            dto.pasient `should be equal to`
+            dto.pasient shouldBe
                 sykmeldingDtoKonverterer.konverterPasient(
                     sykmeldingGrunnlag.pasient,
                     dto.sykmeldingsperioder.minBy { it.fom }.fom,
                 )
-            dto.medisinskVurdering `should be equal to`
+            dto.medisinskVurdering shouldBe
                 sykmeldingDtoKonverterer.konverterMedisinskVurdering(
                     sykmeldingGrunnlag.medisinskVurdering,
                 )
-            dto.arbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
-            dto.prognose `should be equal to` sykmeldingDtoKonverterer.konverterPrognose(sykmeldingGrunnlag)
-            dto.utdypendeOpplysninger `should be equal to`
+            dto.arbeidsgiver shouldBe sykmeldingGrunnlag.arbeidsgiver.tilArbeidsgiverDTO()
+            dto.prognose shouldBe sykmeldingDtoKonverterer.konverterPrognose(sykmeldingGrunnlag)
+            dto.utdypendeOpplysninger shouldBe
                 sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(sykmeldingGrunnlag.utdypendeOpplysninger)
-            dto.kontaktMedPasient `should be equal to`
-                sykmeldingGrunnlag.tilbakedatering.`should not be null`().let {
+            dto.kontaktMedPasient shouldBe
+                sykmeldingGrunnlag.tilbakedatering.shouldNotBeNull().let {
                     sykmeldingDtoKonverterer.konverterKontaktMedPasient(it)
                 }
-            dto.behandler `should be equal to` sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
+            dto.behandler shouldBe sykmeldingDtoKonverterer.konverterBehandler(sykmeldingGrunnlag.behandler)
 
-            dto.tiltakArbeidsplassen `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
-            dto.tiltakNAV `should be equal to` sykmeldingGrunnlag.tiltak?.tiltakNav
-            dto.andreTiltak `should be equal to` sykmeldingGrunnlag.tiltak?.andreTiltak
-            dto.meldingTilNAV `should be equal to`
+            dto.tiltakArbeidsplassen shouldBe sykmeldingGrunnlag.arbeidsgiver.getTiltakArbeidsplassen()
+            dto.tiltakNAV shouldBe sykmeldingGrunnlag.tiltak?.tiltakNav
+            dto.andreTiltak shouldBe sykmeldingGrunnlag.tiltak?.andreTiltak
+            dto.meldingTilNAV shouldBe
                 sykmeldingGrunnlag.bistandNav!!.let {
                     sykmeldingDtoKonverterer.konverterMeldingTilNAV(it)
                 }
-            dto.meldingTilArbeidsgiver `should be equal to` sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
+            dto.meldingTilArbeidsgiver shouldBe sykmeldingGrunnlag.arbeidsgiver.getMeldingTilArbeidsgiver()
 
-            dto.utenlandskSykmelding.`should be null`()
+            dto.utenlandskSykmelding.shouldBeNull()
         }
 
         @Test
@@ -118,23 +122,23 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
             val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
 
-            dto.pasient `should be equal to`
+            dto.pasient shouldBe
                 sykmeldingDtoKonverterer.konverterPasient(
                     sykmelding.sykmeldingGrunnlag.pasient,
                     dto.sykmeldingsperioder.minBy { it.fom }.fom,
                 )
-            dto.medisinskVurdering `should be equal to`
+            dto.medisinskVurdering shouldBe
                 sykmeldingDtoKonverterer.konverterMedisinskVurdering(
                     sykmelding.sykmeldingGrunnlag.medisinskVurdering,
                 )
-            dto.utenlandskSykmelding!!.land `should be equal to` sykmeldingGrunnlag.utenlandskInfo.land
+            dto.utenlandskSykmelding!!.land shouldBe sykmeldingGrunnlag.utenlandskInfo.land
 
-            dto.arbeidsgiver `should be equal to` ArbeidsgiverDTO(null, null)
-            dto.prognose.`should be null`()
-            dto.behandler.`should be null`()
-            dto.meldingTilNAV.`should be null`()
-            dto.meldingTilArbeidsgiver.`should be null`()
-            dto.kontaktMedPasient `should be equal to` KontaktMedPasientDTO(null, null)
+            dto.arbeidsgiver shouldBe ArbeidsgiverDTO(null, null)
+            dto.prognose.shouldBeNull()
+            dto.behandler.shouldBeNull()
+            dto.meldingTilNAV.shouldBeNull()
+            dto.meldingTilArbeidsgiver.shouldBeNull()
+            dto.kontaktMedPasient shouldBe KontaktMedPasientDTO(null, null)
         }
     }
 
@@ -157,7 +161,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     fom = LocalDate.parse("2025-01-01"),
                 )
 
-            pasientDto `should be equal to`
+            pasientDto shouldBe
                 PasientDTO(fnr = "fnr", fornavn = "fornavn", mellomnavn = "mellomnavn", etternavn = "etternavn", overSyttiAar = false)
         }
 
@@ -168,24 +172,24 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
             val pasientDto = sykmeldingDtoKonverterer.konverterPasient(pasient, LocalDate.parse("2025-01-01"))
 
-            pasientDto.overSyttiAar `should be` true
+            pasientDto.overSyttiAar shouldBe true
         }
     }
 
     @Nested
     inner class ArbeidsgiverTest {
         @Test fun `burde konvertere arbeidsgiver, en arbeidsgiver`() {
-            EnArbeidsgiver("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBeEqualTo
+            EnArbeidsgiver("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBe
                 ArbeidsgiverDTO("Navn", 50)
         }
 
         @Test fun `burde konvertere arbeidsgiver, flere arbeidsgiver`() {
-            FlereArbeidsgivere("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBeEqualTo
+            FlereArbeidsgivere("Navn", "_", 50, "_", "_").tilArbeidsgiverDTO() shouldBe
                 ArbeidsgiverDTO("Navn", 50)
         }
 
         @Test fun `burde konvertere arbeidsgiver, ingen arbeidsgiver`() {
-            IngenArbeidsgiver().tilArbeidsgiverDTO() `should be equal to` ArbeidsgiverDTO(null, null)
+            IngenArbeidsgiver().tilArbeidsgiverDTO() shouldBe ArbeidsgiverDTO(null, null)
         }
     }
 
@@ -205,7 +209,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
         val dto = sykmeldingDtoKonverterer.konverter(sykmelding)
 
-        dto.behandletTidspunkt `should be equal to` OffsetDateTime.parse("2025-01-01T00:00:00Z")
+        dto.behandletTidspunkt shouldBe OffsetDateTime.parse("2025-01-01T00:00:00Z")
     }
 
     @Test
@@ -227,15 +231,15 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
 
         val periode = sykmeldingDtoKonverterer.konverterSykmeldingsperiode(aktivitet)
-        periode.fom `should be equal to` LocalDate.parse("2021-01-01")
-        periode.tom `should be equal to` LocalDate.parse("2021-01-21")
+        periode.fom shouldBe LocalDate.parse("2021-01-01")
+        periode.tom shouldBe LocalDate.parse("2021-01-21")
         periode.aktivitetIkkeMulig?.let {
-            it.medisinskArsak `should be equal to`
+            it.medisinskArsak shouldBe
                 MedisinskArsakDTO(
                     beskrivelse = "",
                     arsak = listOf(MedisinskArsakTypeDTO.AKTIVITET_FORHINDRER_BEDRING),
                 )
-            it.arbeidsrelatertArsak `should be equal to`
+            it.arbeidsrelatertArsak shouldBe
                 ArbeidsrelatertArsakDTO(
                     beskrivelse = "",
                     arsak = listOf(ArbeidsrelatertArsakTypeDTO.MANGLENDE_TILRETTELEGGING),
@@ -275,7 +279,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
             )
 
-        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) shouldBe
             MedisinskVurderingDTO(
                 hovedDiagnose =
                     DiagnoseDTO(
@@ -330,7 +334,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 annenFravarsgrunn = AnnenFravarArsakType.GODKJENT_HELSEINSTITUSJON,
             )
 
-        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) `should be equal to`
+        sykmeldingDtoKonverterer.konverterMedisinskVurdering(medisinskVurdering) shouldBe
             MedisinskVurderingDTO(
                 hovedDiagnose =
                     DiagnoseDTO(
@@ -366,7 +370,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
 
         val konvertertArsak = sykmeldingDtoKonverterer.konverterAnnenFraversArsak(annenFraverArsak)
-        konvertertArsak?.grunn `should be equal to` emptyList()
+        konvertertArsak?.grunn shouldBe emptyList()
     }
 
     @Test
@@ -384,23 +388,23 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                     ),
             )
         val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
-        konverterePrognose.erIkkeIArbeid.`should be null`()
-        konverterePrognose.erIArbeid?.egetArbeidPaSikt `should be` true
+        konverterePrognose.erIkkeIArbeid.shouldBeNull()
+        konverterePrognose.erIArbeid?.egetArbeidPaSikt shouldBe true
     }
 
     @Test
     fun `burde konvertere ny (digital) prognose`() {
         val prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = true)
         val konverterePrognose = sykmeldingDtoKonverterer.konverterPrognose(prognose)
-        konverterePrognose.`should not be null`()
-        konverterePrognose.erIkkeIArbeid.`should be null`()
-        konverterePrognose.erIArbeid?.annetArbeidPaSikt `should be` true
+        konverterePrognose.shouldNotBeNull()
+        konverterePrognose.erIkkeIArbeid.shouldBeNull()
+        konverterePrognose.erIArbeid?.annetArbeidPaSikt shouldBe true
     }
 
     @Test
     fun `burde gi null prognose når digital prognose ikke har friskmelding til arbeidsformidling`() {
         val prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = false)
-        sykmeldingDtoKonverterer.konverterPrognose(prognose).`should be null`()
+        sykmeldingDtoKonverterer.konverterPrognose(prognose).shouldBeNull()
     }
 
     @Test
@@ -411,7 +415,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                 beskrivBistand = "",
             )
         val konvertertTilMelding = sykmeldingDtoKonverterer.konverterMeldingTilNAV(bistandNav)
-        konvertertTilMelding.bistandUmiddelbart `should be` true
+        konvertertTilMelding.bistandUmiddelbart shouldBe true
     }
 
     @Test
@@ -442,7 +446,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             )
 
         val konvertereBehandler = sykmeldingDtoKonverterer.konverterBehandler(behandler)
-        konvertereBehandler.fornavn `should be equal to` "behandler"
+        konvertereBehandler.fornavn shouldBe "behandler"
     }
 
     @Test
@@ -453,7 +457,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             stillingsprosent = 0,
             meldingTilArbeidsgiver = "_",
             tiltakArbeidsplassen = "tiltak",
-        ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
+        ).getTiltakArbeidsplassen() shouldBe "tiltak"
 
         FlereArbeidsgivere(
             meldingTilArbeidsgiver = "_",
@@ -461,9 +465,9 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             navn = "_",
             yrkesbetegnelse = "_",
             stillingsprosent = 0,
-        ).getTiltakArbeidsplassen() `should be equal to` "tiltak"
+        ).getTiltakArbeidsplassen() shouldBe "tiltak"
 
-        IngenArbeidsgiver().getTiltakArbeidsplassen().`should be null`()
+        IngenArbeidsgiver().getTiltakArbeidsplassen().shouldBeNull()
     }
 
     @Test
@@ -474,7 +478,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             navn = "_",
             yrkesbetegnelse = "_",
             stillingsprosent = 0,
-        ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
+        ).getMeldingTilArbeidsgiver() shouldBe "Melding"
 
         FlereArbeidsgivere(
             meldingTilArbeidsgiver = "Melding",
@@ -482,14 +486,14 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             navn = "_",
             yrkesbetegnelse = "_",
             stillingsprosent = 0,
-        ).getMeldingTilArbeidsgiver() `should be equal to` "Melding"
+        ).getMeldingTilArbeidsgiver() shouldBe "Melding"
 
-        IngenArbeidsgiver().getMeldingTilArbeidsgiver().`should be null`()
+        IngenArbeidsgiver().getMeldingTilArbeidsgiver().shouldBeNull()
     }
 
     @Test
     fun `burde konvertere kontakt med pasient`() {
-        sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagTilbakedatering()).`should not be null`()
+        sykmeldingDtoKonverterer.konverterKontaktMedPasient(lagTilbakedatering()).shouldNotBeNull()
     }
 
     @Test
@@ -517,7 +521,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
         val konvertertBehandlingsutfall =
             sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
-        konvertertBehandlingsutfall `should be equal to`
+        konvertertBehandlingsutfall shouldBe
             BehandlingsutfallDTO(
                 status = RegelStatusDTO.INVALID,
                 ruleHits =
@@ -546,7 +550,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
         val konvertertBehandlingsutfall =
             sykmeldingDtoKonverterer.konverterBehandlingsutfall(validationResult)
-        konvertertBehandlingsutfall `should be equal to`
+        konvertertBehandlingsutfall shouldBe
             BehandlingsutfallDTO(
                 status = RegelStatusDTO.OK,
                 ruleHits = emptyList(),
@@ -578,8 +582,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
             .shouldHaveSize(1)
             .first()
             .run {
-                this.type `should be equal to` MerknadtypeDTO.DELVIS_GODKJENT
-                this.beskrivelse `should be equal to` "Sykmeldingen er delvis godkjent"
+                this.type shouldBe MerknadtypeDTO.DELVIS_GODKJENT
+                this.beskrivelse shouldBe "Sykmeldingen er delvis godkjent"
             }
     }
 
@@ -599,7 +603,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                 ),
                         ),
                 ),
-            ) `should be equal to`
+            ) shouldBe
                 mapOf(
                     "a" to
                         mapOf(
@@ -632,7 +636,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                 ),
                         ),
                 ),
-            ) `should be equal to`
+            ) shouldBe
                 mapOf(
                     "a" to
                         mapOf(
@@ -653,8 +657,8 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
 
         @Test
         fun `burde håndtere ingen opplysning`() {
-            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(null) `should be equal to` emptyMap()
-            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(emptyMap()) `should be equal to` emptyMap()
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(null) shouldBe emptyMap()
+            sykmeldingDtoKonverterer.konverterUtdypendeOpplysninger(emptyMap()) shouldBe emptyMap()
         }
 
         @Test
@@ -680,7 +684,7 @@ class SykmeldingDtoKonvertererTest : FakesTestOppsett() {
                                 ),
                         ),
                 ),
-            ) `should be equal to`
+            ) shouldBe
                 mapOf(
                     "a" to
                         mapOf(

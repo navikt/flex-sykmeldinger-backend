@@ -1,14 +1,14 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.SykmeldingStatusKafkaProducerFake
 import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
 import no.nav.helse.flex.tsmsykmeldingstatus.dto.SykmeldingStatusKafkaDTO
-import org.amshove.kluent.`should not be null`
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ class SykmeldingHendelsePublisererTest : FakesTestOppsett() {
         sykmeldingHendelsePubliserer.publiserSisteHendelse(sykmelding)
 
         sykmeldingStatusKafkaProducer.sendteSykmeldingStatuser().shouldHaveSize(1).first().run {
-            event.sykmeldingId shouldBeEqualTo "1"
+            event.sykmeldingId shouldBe "1"
         }
     }
 
@@ -47,8 +47,8 @@ class SykmeldingHendelsePublisererTest : FakesTestOppsett() {
                     fnr = "fnr",
                     sykmeldingStatusKafkaDTO = sykmeldingStatusKafkaDTO,
                 )
-            sammenstillSykmeldingStatusKafkaMessageDTO.kafkaMetadata.`should not be null`()
-            sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.`should not be null`()
+            sammenstillSykmeldingStatusKafkaMessageDTO.kafkaMetadata.shouldNotBeNull()
+            sammenstillSykmeldingStatusKafkaMessageDTO.event.brukerSvar.shouldNotBeNull()
         }
     }
 }

@@ -1,11 +1,11 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.helse.flex.sykmelding.tsm.SykmeldingType
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach

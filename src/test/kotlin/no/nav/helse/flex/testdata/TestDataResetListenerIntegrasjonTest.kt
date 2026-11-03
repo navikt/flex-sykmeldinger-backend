@@ -1,11 +1,11 @@
 package no.nav.helse.flex.testdata
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeEmpty
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
@@ -38,9 +38,9 @@ class TestDataResetListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         arbeidsforholdRepository.getAllByFnrIn(listOf(fnr)).shouldBeEmpty()
         sykmeldingRepository.findAllByPersonIdenter(PersonIdenter(fnr)).shouldBeEmpty()
 
-        narmesteLederRepository.findAllByBrukerFnrIn(listOf(annetFnr)).size `should be equal to` 1
-        arbeidsforholdRepository.getAllByFnrIn(listOf(annetFnr)).size `should be equal to` 1
-        sykmeldingRepository.findAllByPersonIdenter(PersonIdenter(annetFnr)).size `should be equal to` 1
+        narmesteLederRepository.findAllByBrukerFnrIn(listOf(annetFnr)).size shouldBe 1
+        arbeidsforholdRepository.getAllByFnrIn(listOf(annetFnr)).size shouldBe 1
+        sykmeldingRepository.findAllByPersonIdenter(PersonIdenter(annetFnr)).size shouldBe 1
     }
 
     private fun lagreTestdata(fnr: String) {

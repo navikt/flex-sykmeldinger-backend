@@ -1,5 +1,8 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
@@ -9,9 +12,6 @@ import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
-import org.amshove.kluent.`should be equal to`
-import org.amshove.kluent.shouldBeNull
-import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
@@ -46,8 +46,8 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
         narmesteLeder.shouldNotBeNull()
-        narmesteLeder.orgnummer `should be equal to` narmesteLederLeesah.orgnummer
-        narmesteLeder.narmesteLederNavn `should be equal to` "Supreme Leader"
+        narmesteLeder.orgnummer shouldBe narmesteLederLeesah.orgnummer
+        narmesteLeder.narmesteLederNavn shouldBe "Supreme Leader"
     }
 
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {

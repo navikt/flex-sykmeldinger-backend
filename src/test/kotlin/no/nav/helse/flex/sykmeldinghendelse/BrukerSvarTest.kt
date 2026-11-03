@@ -1,7 +1,7 @@
 package no.nav.helse.flex.sykmeldinghendelse
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.utils.objectMapper
-import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.readValue
 
@@ -15,6 +15,6 @@ class BrukerSvarTest {
             )
         val json = objectMapper.writeValueAsString(sporsmalSvar)
         val deserialisert: SporsmalSvar<String> = objectMapper.readValue(json)
-        sporsmalSvar `should be equal to` deserialisert
+        sporsmalSvar shouldBe deserialisert
     }
 }

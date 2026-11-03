@@ -1,5 +1,6 @@
 package no.nav.helse.flex.sykmelding
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.sykmeldinghendelse.Arbeidssituasjon
 import no.nav.helse.flex.sykmeldinghendelse.BrukerSvar
@@ -9,7 +10,6 @@ import no.nav.helse.flex.testdata.*
 import no.nav.helse.flex.testdata.lagFiskerHyreBrukerSvar
 import no.nav.helse.flex.testdata.lagFiskerLottBrukerSvar
 import no.nav.helse.flex.testdata.lagNaringsdrivendeBrukerSvar
-import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,7 +51,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` true
+            result shouldBe true
         }
 
         @Test
@@ -77,7 +77,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` true
+            result shouldBe true
         }
 
         @Test
@@ -103,7 +103,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` false
+            result shouldBe false
         }
 
         @Test
@@ -129,7 +129,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` false
+            result shouldBe false
         }
 
         @Test
@@ -155,7 +155,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` true
+            result shouldBe true
         }
 
         @Test
@@ -181,7 +181,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` true
+            result shouldBe true
         }
 
         @Test
@@ -195,7 +195,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1"),
                 )
 
-            result `should be equal to` true
+            result shouldBe true
         }
 
         @Test
@@ -221,7 +221,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     sykmeldingerMedSammeVentetid = listOf("1", "2"),
                 )
 
-            result `should be equal to` false
+            result shouldBe false
         }
 
         @Test
@@ -257,7 +257,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` null
+            result shouldBe null
         }
 
         @Test
@@ -283,7 +283,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` LocalDate.parse("2021-01-06")
+            result shouldBe LocalDate.parse("2021-01-06")
         }
 
         @Test
@@ -326,7 +326,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` null
+            result shouldBe null
         }
 
         @Test
@@ -352,7 +352,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` null
+            result shouldBe null
         }
 
         @Test
@@ -378,7 +378,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` LocalDate.parse("2021-01-10")
+            result shouldBe LocalDate.parse("2021-01-10")
         }
 
         @Test
@@ -404,7 +404,7 @@ class SykmeldingVentetidServiceTest : FakesTestOppsett() {
                     identer = PersonIdenter(originalIdent = "fnr"),
                 )
 
-            result `should be equal to` null
+            result shouldBe null
         }
     }
 

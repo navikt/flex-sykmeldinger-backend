@@ -1,8 +1,8 @@
 package no.nav.helse.flex.sykmelding.tsm
 
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldHaveKey
-import org.amshove.kluent.shouldNotBeNull
+import io.kotest.matchers.maps.shouldContainKey
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -46,38 +46,38 @@ class DigitalSykmeldingHjelpereTest {
         DigitalSykmeldingHjelpere.tilBakoverkompatibelUtdypendeOpplysninger(utdypendeSporsmal).run {
             this["6.3"].shouldNotBeNull().run {
                 this["6.3.2"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.3.2"
-                    svar shouldBeEqualTo "svar 6.3.2"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.3.2"
+                    svar shouldBe "svar 6.3.2"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
                 this["6.3.3"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.3.3"
-                    svar shouldBeEqualTo "svar 6.3.3"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.3.3"
+                    svar shouldBe "svar 6.3.3"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
             }
             this["6.4"].shouldNotBeNull().run {
                 this["6.4.3"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.4.3"
-                    svar shouldBeEqualTo "svar 6.4.3"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.4.3"
+                    svar shouldBe "svar 6.4.3"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
                 this["6.4.4"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.4.4"
-                    svar shouldBeEqualTo "svar 6.4.4"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.4.4"
+                    svar shouldBe "svar 6.4.4"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
             }
             this["6.5"].shouldNotBeNull().run {
                 this["6.5.3"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.5.3"
-                    svar shouldBeEqualTo "svar 6.5.3"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.5.3"
+                    svar shouldBe "svar 6.5.3"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
                 this["6.5.4"].shouldNotBeNull().run {
-                    sporsmal shouldBeEqualTo "sporsmal 6.5.4"
-                    svar shouldBeEqualTo "svar 6.5.4"
-                    restriksjoner shouldBeEqualTo listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
+                    sporsmal shouldBe "sporsmal 6.5.4"
+                    svar shouldBe "svar 6.5.4"
+                    restriksjoner shouldBe listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER)
                 }
             }
         }
@@ -106,15 +106,15 @@ class DigitalSykmeldingHjelpereTest {
                 utdypendeOpplysninger[hovedSporsmalNotasjon]
                     .shouldNotBeNull()[sporsmalNotasjon]
                     .shouldNotBeNull()
-                    .shouldBeEqualTo(
+                    .shouldBe(
                         SporsmalSvar(
                             sporsmal = "sporsmal 1",
                             svar = "svar 1",
                             restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
                         ),
                     )
-                utdypendeOpplysninger.shouldHaveKey(hovedSporsmalNotasjon)
-                utdypendeOpplysninger[hovedSporsmalNotasjon]!!.shouldHaveKey(sporsmalNotasjon)
+                utdypendeOpplysninger.shouldContainKey(hovedSporsmalNotasjon)
+                utdypendeOpplysninger[hovedSporsmalNotasjon]!!.shouldContainKey(sporsmalNotasjon)
             }
         }
 
@@ -134,8 +134,8 @@ class DigitalSykmeldingHjelpereTest {
                 val utdypendeOpplysninger = DigitalSykmeldingHjelpere.tilBakoverkompatibelUtdypendeOpplysninger(sporsmals)
 
                 val (hovedSporsmalNotasjon, sporsmalNotasjon) = forventetNotasjoner
-                utdypendeOpplysninger.shouldHaveKey(hovedSporsmalNotasjon)
-                utdypendeOpplysninger[hovedSporsmalNotasjon]!!.shouldHaveKey(sporsmalNotasjon)
+                utdypendeOpplysninger.shouldContainKey(hovedSporsmalNotasjon)
+                utdypendeOpplysninger[hovedSporsmalNotasjon]!!.shouldContainKey(sporsmalNotasjon)
             }
         }
 }

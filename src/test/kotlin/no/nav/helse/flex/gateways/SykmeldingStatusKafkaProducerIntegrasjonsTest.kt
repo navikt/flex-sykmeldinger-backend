@@ -1,10 +1,13 @@
 package no.nav.helse.flex.gateways
 
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeSingle
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.lesFraTopics
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaDTO
 import no.nav.helse.flex.testdata.lagSykmeldingStatusKafkaMessageDTO
-import org.amshove.kluent.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -43,16 +46,16 @@ class SykmeldingStatusKafkaProducerIntegrasjonsTest : IntegrasjonTestOppsett() {
                                 sykmeldingId = "1",
                             ),
                     ),
-            ).`should be true`()
+            ).shouldBeTrue()
 
         val consumerRecords =
             sykmeldingStatusConsumer
                 .poll(Duration.ofSeconds(1))
 
         consumerRecords
-            .shouldHaveSingleItem()
+            .shouldBeSingle()
             .run {
-                key() shouldBeEqualTo "1"
+                key() shouldBe "1"
                 value().shouldNotBeNull()
             }
     }
