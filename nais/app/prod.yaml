@@ -1,8 +1,8 @@
 azureTenant: nav.no
 kafkaPool: nav-prod
 environment: prod
-replicas_min: 2
-replicas_max: 3
+replicas_min: 0
+replicas_max: 0
 cpu: 500m
 memory: 2250Mi
 db_type: POSTGRES_16
