@@ -10,3 +10,4 @@ out/
 
 bin/
 .cplt.toml
+/.opencode/
