@@ -50,6 +50,60 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         narmesteLeder.narmesteLederNavn shouldBe "Supreme Leader"
     }
 
+    @Test
+    fun `tombstone som tidligere ble retryet hindrer ikke ukjent status og påfølgende melding`() {
+        pdlMockWebServer.dispatcher =
+            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
+
+        val lederMedUkjentStatus = lagNarmesteLederLeesah(UUID.randomUUID())
+        val nesteLeder = lagNarmesteLederLeesah(UUID.randomUUID())
+        val meldingMedUkjentStatus = lederMedUkjentStatus.serialisertTilString().dropLast(1) + ",\"status\":\"NOE_NYTT\"}"
+
+        listOf(
+            UUID.randomUUID().toString() to null,
+            lederMedUkjentStatus.narmesteLederId.toString() to meldingMedUkjentStatus,
+            nesteLeder.narmesteLederId.toString() to nesteLeder.serialisertTilString(),
+        ).forEach { (key, value) ->
+            kafkaProducer.send(ProducerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, key, value)).get()
+        }
+
+        await().atMost(10, TimeUnit.SECONDS).until {
+            narmesteLederRepository.findByNarmesteLederId(nesteLeder.narmesteLederId) != null
+        }
+        narmesteLederRepository.findByNarmesteLederId(lederMedUkjentStatus.narmesteLederId).shouldNotBeNull()
+        narmesteLederRepository.findByNarmesteLederId(nesteLeder.narmesteLederId).shouldNotBeNull()
+    }
+
+    @Test
+    fun `gammel consumer forblir på gammel tabell mens ny consumer er avslått`() {
+        pdlMockWebServer.dispatcher =
+            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
+
+        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
+        val eldreMelding = melding.copy(timestamp = melding.timestamp.minusDays(1), orgnummer = "888888")
+        val markor = lagNarmesteLederLeesah(UUID.randomUUID())
+
+        kafkaProducer
+            .send(
+                ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, melding.narmesteLederId.toString(), melding.serialisertTilString()),
+            ).get()
+        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
+
+        listOf(melding, eldreMelding, markor).forEach {
+            kafkaProducer
+                .send(
+                    ProducerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, it.narmesteLederId.toString(), it.serialisertTilString()),
+                ).get()
+        }
+        await().atMost(10, TimeUnit.SECONDS).until {
+            narmesteLederRepository.findByNarmesteLederId(markor.narmesteLederId) != null
+        }
+
+        narmesteLederRepository.findAll().count { it.narmesteLederId == melding.narmesteLederId } shouldBe 1
+        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId)?.orgnummer shouldBe eldreMelding.orgnummer
+        narmesteLederEsyfoRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
+    }
+
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
         kafkaProducer
             .send(

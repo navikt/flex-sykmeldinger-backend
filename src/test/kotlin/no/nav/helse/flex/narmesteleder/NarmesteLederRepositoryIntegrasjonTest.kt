@@ -1,11 +1,30 @@
 package no.nav.helse.flex.narmesteleder
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testdata.TESTDATA_RESET_TOPIC
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 
 class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
+    @Test
+    fun `repository oppdaterer etter id uavhengig av timestamp`() {
+        val opprinnelig = lagNarmesteLeder()
+        val lagret = narmesteLederRepository.save(opprinnelig)
+        lagret.id.shouldNotBeNull()
+        val eldre = lagret.copy(orgnummer = "888888", timestamp = lagret.timestamp.minusSeconds(1))
+        narmesteLederRepository.save(eldre)
+        narmesteLederRepository.findByNarmesteLederId(lagret.narmesteLederId) shouldBe eldre
+        narmesteLederRepository.delete(eldre)
+        narmesteLederRepository.findByNarmesteLederId(lagret.narmesteLederId) shouldBe null
+    }
+
     @Test
     fun `burde hente arbeidsforhold ved bruker fnr`() {
         val narmesteLeder = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1"))
@@ -17,5 +36,36 @@ class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val lagretNarmesteLeder = alleNarmesteLedere.first()
         narmesteLeder shouldBe lagretNarmesteLeder
+    }
+
+    @Test
+    fun `henter bare aktive nærmeste ledere for oppgitte identer`() {
+        val aktiv = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "aktiv-test"))
+        val inaktiv =
+            narmesteLederRepository.save(
+                lagNarmesteLeder(brukerFnr = "aktiv-test").copy(aktivTom = LocalDate.parse("2024-01-01")),
+            )
+        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "annen-ident"))
+
+        narmesteLederRepository.findAllByBrukerFnrInAndAktivTomIsNull(listOf("aktiv-test")) shouldBe listOf(aktiv)
+        narmesteLederRepository.findByNarmesteLederId(inaktiv.narmesteLederId) shouldBe inaktiv
+        narmesteLederRepository.findAllByBrukerFnrInAndAktivTomIsNull(listOf("ukjent-ident")).shouldBeEmpty()
+    }
+
+    @Test
+    fun `testdata reset sletter aktive og inaktive nærmeste ledere for oppgitt ident`() {
+        val fnr = "reset-test"
+        val annetFnr = "reset-annen"
+        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = fnr))
+        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = fnr).copy(aktivTom = LocalDate.parse("2024-01-01")))
+        val annen = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = annetFnr).copy(aktivTom = LocalDate.parse("2024-01-01")))
+
+        narmesteLederRepository.findAllByBrukerFnrIn(listOf(fnr)) shouldHaveSize 2
+        kafkaProducer.send(ProducerRecord(TESTDATA_RESET_TOPIC, null, fnr, fnr)).get()
+
+        await().atMost(10, TimeUnit.SECONDS).until {
+            narmesteLederRepository.findAllByBrukerFnrIn(listOf(fnr)).isEmpty()
+        }
+        narmesteLederRepository.findAllByBrukerFnrIn(listOf(annetFnr)) shouldBe listOf(annen)
     }
 }

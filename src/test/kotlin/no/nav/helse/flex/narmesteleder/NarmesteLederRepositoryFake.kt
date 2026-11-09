@@ -16,4 +16,7 @@ class NarmesteLederRepositoryFake :
         entities.values.find { it.narmesteLederId == narmesteLederId }
 
     override fun findAllByBrukerFnrIn(identer: List<String>): List<NarmesteLeder> = entities.values.filter { it.brukerFnr in identer }
+
+    override fun findAllByBrukerFnrInAndAktivTomIsNull(identer: List<String>): List<NarmesteLeder> =
+        entities.values.filter { it.brukerFnr in identer && it.aktivTom == null }
 }

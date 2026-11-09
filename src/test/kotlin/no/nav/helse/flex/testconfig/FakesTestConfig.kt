@@ -2,6 +2,8 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
+import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
+import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.optin.OptInDbRepository
@@ -10,11 +12,13 @@ import no.nav.helse.flex.sykmelding.SykmeldingHendelseDbRepository
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
 import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelsePubliserer
 import no.nav.helse.flex.testconfig.fakes.*
+import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.support.NoOpCacheManager
 import org.springframework.context.annotation.Bean
+import org.springframework.jdbc.core.JdbcTemplate
 
 @TestConfiguration
 class FakesTestConfig {
@@ -35,6 +39,12 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
+
+    @Bean
+    fun narmesteLederEsyfoRepository(): NarmesteLederEsyfoRepository = NarmesteLederEsyfoRepositoryFake()
+
+    @Bean
+    fun jdbcTemplate(): JdbcTemplate = mock(JdbcTemplate::class.java)
 
     @Bean
     fun optInDbRepository(): OptInDbRepository = OptInDbRepositoryFake()

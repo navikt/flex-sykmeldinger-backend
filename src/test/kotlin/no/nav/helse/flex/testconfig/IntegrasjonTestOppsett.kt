@@ -3,6 +3,7 @@ package no.nav.helse.flex.testconfig
 import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.outbox.OutboxDbRepository
@@ -52,6 +53,9 @@ abstract class IntegrasjonTestOppsett {
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
     @Autowired
+    lateinit var narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository
+
+    @Autowired
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     @Autowired
@@ -80,6 +84,8 @@ abstract class IntegrasjonTestOppsett {
 
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
+        // Checkpoint tilhører Kafka-partisjonen og beholdes. Ikke replay en ny gruppe mot ikke-tom projeksjon.
+        narmesteLederEsyfoRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         outboxDbRepository.deleteAll()
@@ -88,7 +94,7 @@ abstract class IntegrasjonTestOppsett {
 
     private fun ventPaConsumers() {
         kafkaListenerEndpointRegistry.listenerContainers.forEach { container ->
-            ContainerTestUtils.waitForAssignment(container, 1)
+            if (container.isRunning) ContainerTestUtils.waitForAssignment(container, 1)
         }
     }
 }

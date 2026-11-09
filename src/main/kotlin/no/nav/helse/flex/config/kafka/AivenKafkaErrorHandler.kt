@@ -1,5 +1,7 @@
 package no.nav.helse.flex.config.kafka
 
+import no.nav.helse.flex.gateways.NARMESTELEDER_ESYFO_LEESAH_TOPIC
+import no.nav.helse.flex.gateways.NARMESTELEDER_LEESAH_TOPIC
 import no.nav.helse.flex.utils.errorSecure
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -84,7 +86,13 @@ class AivenKafkaErrorHandler :
                             "topic" to records.map { it.topic() }.distinct().nullOrSingleOrList(),
                             "exceptionType" to thrownException::class.simpleName,
                             "antall" to records.count(),
-                            "key" to records.map { it.key() }.limitWithEllipsis(4).nullOrSingleOrList(),
+                            "key" to
+                                records
+                                    .filterNot {
+                                        it.topic() == NARMESTELEDER_LEESAH_TOPIC || it.topic() == NARMESTELEDER_ESYFO_LEESAH_TOPIC
+                                    }.map { it.key() }
+                                    .limitWithEllipsis(4)
+                                    .nullOrSingleOrList(),
                             "offset" to records.firstOrNull()?.offset(),
                             "partition" to records.map { it.partition() }.distinct().nullOrSingleOrList(),
                             "listenerId" to listenerId,

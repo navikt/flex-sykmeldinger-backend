@@ -3,6 +3,7 @@ package no.nav.helse.flex.testconfig
 import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
+import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
@@ -48,6 +49,9 @@ abstract class FakesTestOppsett {
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
     @Autowired
+    lateinit var narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository
+
+    @Autowired
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     @Autowired
@@ -73,6 +77,7 @@ abstract class FakesTestOppsett {
 
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
+        narmesteLederEsyfoRepository.deleteAll()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         optInDbRepository.deleteAll()

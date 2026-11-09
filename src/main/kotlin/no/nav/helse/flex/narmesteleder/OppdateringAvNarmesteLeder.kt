@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.module.kotlin.readValue
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Component
 class OppdateringAvNarmesteLeder(
@@ -23,42 +24,43 @@ class OppdateringAvNarmesteLeder(
 
     @Transactional(rollbackFor = [Exception::class])
     fun behandleMeldingFraKafka(meldingString: String) {
-        val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
+        val narmesteLederLeesah =
+            meldingString.tilNarmesteLederLeesah().let {
+                it.copy(
+                    timestamp = it.timestamp.truncatedTo(ChronoUnit.MICROS),
+                )
+            }
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
+
+        if (narmesteLederLeesah.aktivTom != null) {
+            if (narmesteLeder != null) {
+                narmesteLederRepository.delete(narmesteLeder)
+                log.info("Slettet narmesteleder")
+            } else {
+                log.info("Ignorerer ny inaktiv narmesteleder")
+            }
+            return
+        }
 
         val narmestelederNavn =
             if (environmentToggles.isDevelopment()) {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
                 } catch (_: FunctionalPdlError) {
-                    log.warn("Fant ikke navn for FNR ${narmesteLederLeesah.narmesteLederFnr} i PDL. Bruker 'Navn Navnesen'.")
+                    log.warn("Fant ikke navn for narmesteleder i PDL. Bruker standardnavn.")
                     "Navn Navnesen"
                 }
             } else {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
                 } catch (_: PdlManglerNavnError) {
-                    log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL'.")
+                    log.warn("Fant ikke navn for leder i nærmeste leder kobling i PDL.")
                     null
                 }
             }
 
-        if (narmesteLeder != null) {
-            if (narmesteLederLeesah.aktivTom == null) {
-                narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = narmesteLeder.id, navn = narmestelederNavn))
-                log.info("Oppdatert narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            } else {
-                narmesteLederRepository.delete(narmesteLeder)
-                log.info("Slettet narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            }
-        } else {
-            if (narmesteLederLeesah.aktivTom == null) {
-                narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = null, navn = narmestelederNavn))
-                log.info("Lagret narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            } else {
-                log.info("Ignorerer ny inaktiv narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            }
-        }
+        narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = narmesteLeder?.id, navn = narmestelederNavn))
+        log.info("Lagret narmesteleder")
     }
 
     fun String.tilNarmesteLederLeesah(): NarmesteLederLeesah = objectMapper.readValue(this)
@@ -75,6 +77,7 @@ private fun NarmesteLederLeesah.tilNarmesteLeder(
         orgnummer = orgnummer,
         narmesteLederFnr = narmesteLederFnr,
         aktivFom = aktivFom,
+        aktivTom = aktivTom,
         timestamp = timestamp.toInstant(),
         oppdatert = Instant.now(),
         narmesteLederNavn = navn,
