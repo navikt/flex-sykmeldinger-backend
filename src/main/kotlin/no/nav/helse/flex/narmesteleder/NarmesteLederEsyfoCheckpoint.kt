@@ -7,27 +7,6 @@ import org.springframework.stereotype.Repository
 class NarmesteLederEsyfoCheckpoint(
     private val jdbcTemplate: JdbcTemplate,
 ) {
-    fun hentPartisjoner(topic: String): List<Int> =
-        jdbcTemplate
-            .query(
-                "SELECT partition FROM narmeste_leder_esyfo_checkpoint WHERE topic = ?",
-                { rs, _ -> rs.getInt(1) },
-                topic,
-            ).orEmpty()
-
-    fun hentOffset(
-        topic: String,
-        partition: Int,
-    ): Long? =
-        jdbcTemplate
-            .query(
-                """SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint
-                   WHERE topic = ? AND partition = ?""",
-                { rs, _ -> rs.getLong(1) },
-                topic,
-                partition,
-            ).singleOrNull()
-
     // INSERT låser også den første raden ved samtidig oppstart. SELECT låser raden frem til commit.
     fun lasOgHentOffset(
         topic: String,

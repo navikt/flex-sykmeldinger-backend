@@ -16,14 +16,17 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OppdaterNarmesteLederTest : FakesTestOppsett() {
-    @Autowired lateinit var oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder
+    @Autowired
+    lateinit var oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder
 
-    @Autowired lateinit var pdlClient: PdlClientFake
+    @Autowired
+    lateinit var pdlClient: PdlClientFake
 
-    @Autowired lateinit var arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService
+    @Autowired
+    lateinit var arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService
 
     @AfterEach
-    fun rydd() {
+    fun afterEach() {
         slettDatabase()
         pdlClient.reset()
     }
@@ -98,7 +101,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `avkrefting fjerner leder fra gammel lesebane`() {
+    fun `avkrefting fjerner lederen fra eksisterende ledertabell og arbeidsgiverdetaljene`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         arbeidsforholdRepository.save(lagArbeidsforhold(fnr = melding.fnr, orgnummer = melding.orgnummer))
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())

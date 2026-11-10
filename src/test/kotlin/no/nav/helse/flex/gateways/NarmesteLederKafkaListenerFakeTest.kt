@@ -17,7 +17,7 @@ class NarmesteLederKafkaListenerFakeTest : FakesTestOppsett() {
     lateinit var listener: NarmestelederListener
 
     @AfterEach
-    fun rydd() {
+    fun afterEach() {
         slettDatabase()
     }
 
@@ -51,7 +51,7 @@ class NarmesteLederKafkaListenerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `gammel lytter oppdaterer aktiv rad også når meldingen har eldre timestamp`() {
+    fun `meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val eldreMelding = melding.copy(timestamp = melding.timestamp.minusDays(1), orgnummer = "888888")
         var kvitteringer = 0

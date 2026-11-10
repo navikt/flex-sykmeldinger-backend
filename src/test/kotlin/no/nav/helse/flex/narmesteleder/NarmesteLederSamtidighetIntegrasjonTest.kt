@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.utils.serialisertTilString
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
@@ -17,8 +18,13 @@ class NarmesteLederSamtidighetIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired lateinit var transactionManager: PlatformTransactionManager
 
+    @AfterEach
+    fun afterEach() {
+        narmesteLederRepository.deleteAll()
+    }
+
     @Test
-    fun `gammel writer sletter avkreftet rad i PostgreSQL uten timestamp-vakt`() {
+    fun `meldinger fra team sykmelding sletter avkreftet rad uten tidsstempelfiltrering`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val transaksjon = TransactionTemplate(transactionManager)
         transaksjon.executeWithoutResult { oppdatering.behandleMeldingFraKafka(melding.serialisertTilString()) }
@@ -34,7 +40,7 @@ class NarmesteLederSamtidighetIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `gammel writer oppdaterer aktiv rad selv om timestamp er eldre`() {
+    fun `meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val transaksjon = TransactionTemplate(transactionManager)
         transaksjon.executeWithoutResult { oppdatering.behandleMeldingFraKafka(melding.serialisertTilString()) }

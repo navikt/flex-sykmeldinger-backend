@@ -75,7 +75,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `gammel consumer forblir på gammel tabell mens ny consumer er avslått`() {
+    fun `meldinger fra team sykmelding lagres i eksisterende tabell mens eSyfo-consumeren er avslått`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
 

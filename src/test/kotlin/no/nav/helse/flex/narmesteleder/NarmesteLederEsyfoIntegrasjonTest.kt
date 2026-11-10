@@ -3,7 +3,6 @@ package no.nav.helse.flex.narmesteleder
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.micrometer.core.instrument.MeterRegistry
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.NARMESTELEDER_ESYFO_LEESAH_TOPIC
@@ -33,15 +32,13 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired lateinit var jdbcTemplate: JdbcTemplate
 
-    @Autowired lateinit var meterRegistry: MeterRegistry
-
     @Autowired lateinit var pdlMockWebServer: MockWebServer
 
     @Autowired lateinit var environmentToggles: EnvironmentTogglesFake
 
     @AfterEach
-    fun rydd() {
-        // Kun i integrasjonstesten: ny consumer er avslått, så tabell og checkpoint kan resettes sammen.
+    fun afterEach() {
+        // eSyfo-consumeren er avslått, så både testdata og checkpoint kan slettes mellom testene.
         narmesteLederEsyfoRepository.deleteAll()
         jdbcTemplate.update("DELETE FROM narmeste_leder_esyfo_checkpoint")
         pdlMockWebServer.dispatcher = defaultPdlDispatcher
@@ -108,7 +105,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `gammel consumer sletter avkrefting mens ny beholder inaktiv rad for samme UUID`() {
+    fun `avkrefting sletter fra eksisterende ledertabell og lagres som inaktiv i eSyfo-tabellen`() {
         val id = UUID.randomUUID()
         val aktiv = melding(id)
         val inaktiv = aktiv.copy(aktivTom = LocalDate.parse("2025-01-01"))
@@ -147,27 +144,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         kvitteringer shouldBe 0
         jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
-    }
-
-    @Test
-    fun `DB-måler følger checkpoint etter endring fra annen forbindelse og flere nøkler`() {
-        val første = UUID.randomUUID()
-        val andre = UUID.randomUUID()
-        val førsteMelding = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
-        val andreMelding = melding(andre).copy(aktivTom = LocalDate.parse("2025-01-01"))
-        listener.listenEsyfo(record(3, første, førsteMelding.serialisertTilString())) { }
-        listener.listenEsyfo(record(5, andre, andreMelding.serialisertTilString())) { }
-        val maler =
-            meterRegistry
-                .find("narmeste_leder_esyfo_db_checkpoint_offset")
-                .tags("topic", NARMESTELEDER_ESYFO_LEESAH_TOPIC, "partition", "0")
-                .gauge()
-                .shouldNotBeNull()
-        maler.value() shouldBe 5.0
-        jdbcTemplate.update("UPDATE narmeste_leder_esyfo_checkpoint SET offset_sist_pafort = 8 WHERE partition = 0")
-        maler.value() shouldBe 8.0
-        narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldNotBeNull()
-        narmesteLederEsyfoRepository.findByNarmesteLederId(andre).shouldNotBeNull()
     }
 
     @Test

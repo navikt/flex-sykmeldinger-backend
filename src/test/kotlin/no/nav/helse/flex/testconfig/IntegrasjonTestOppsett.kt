@@ -94,7 +94,8 @@ abstract class IntegrasjonTestOppsett {
 
     private fun ventPaConsumers() {
         kafkaListenerEndpointRegistry.listenerContainers.forEach { container ->
-            if (container.isRunning) ContainerTestUtils.waitForAssignment(container, 1)
+            // Ikke vent på consumers som er avslått med vilje, men kontroller dem som skal ha startet.
+            if (container.isAutoStartup || container.isRunning) ContainerTestUtils.waitForAssignment(container, 1)
         }
     }
 }
