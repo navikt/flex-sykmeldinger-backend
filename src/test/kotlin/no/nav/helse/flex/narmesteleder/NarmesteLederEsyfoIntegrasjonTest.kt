@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -54,6 +55,72 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
 
     private fun melding(id: UUID) = lagNarmesteLederLeesah(id, orgnummer = "123456789")
 
+    private fun behandleEnMelding(
+        record: ConsumerRecord<String, String?>,
+        acknowledgment: Acknowledgment,
+    ) = listener.listenEsyfo(listOf(record), acknowledgment)
+
+    @Test
+    fun `batch bevarer rekkefølge og tombstones og kvitteres én gang etter commit`() {
+        val første = UUID.randomUUID()
+        val andre = UUID.randomUUID()
+        val inaktiv = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
+        val annen = melding(andre).copy(aktivTom = LocalDate.parse("2025-01-01"))
+        val batch =
+            listOf(
+                record(0, første, inaktiv.serialisertTilString(), partition = 1),
+                record(0, andre, annen.serialisertTilString()),
+                record(1, første, null, partition = 1),
+            )
+        var kvitteringer = 0
+
+        listener.listenEsyfo(batch) {
+            narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldBeNull()
+            narmesteLederEsyfoRepository.findByNarmesteLederId(andre).shouldNotBeNull()
+            kvitteringer++
+        }
+        kvitteringer shouldBe 1
+        val lagret = narmesteLederEsyfoRepository.findByNarmesteLederId(andre)
+        listener.listenEsyfo(batch) { kvitteringer++ }
+        kvitteringer shouldBe 2
+        narmesteLederEsyfoRepository.findByNarmesteLederId(andre) shouldBe lagret
+    }
+
+    @Test
+    fun `feil i en batch ruller tilbake alle partisjoner uten kvittering og kan forsøkes igjen`() {
+        val første = UUID.randomUUID()
+        val andre = UUID.randomUUID()
+        val inaktiv = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
+        val annen = melding(andre).copy(aktivTom = LocalDate.parse("2025-01-01"))
+        var kvitteringer = 0
+        val feil =
+            runCatching {
+                listener.listenEsyfo(
+                    listOf(record(0, andre, "{", partition = 1), record(0, første, inaktiv.serialisertTilString())),
+                ) { kvitteringer++ }
+            }.exceptionOrNull().shouldNotBeNull()
+        feil.message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
+        feil.cause.shouldBeNull()
+        kvitteringer shouldBe 0
+        narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldBeNull()
+        jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
+
+        listener.listenEsyfo(
+            listOf(record(0, andre, annen.serialisertTilString(), partition = 1), record(0, første, inaktiv.serialisertTilString())),
+        ) { kvitteringer++ }
+        kvitteringer shouldBe 1
+        narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldNotBeNull()
+        narmesteLederEsyfoRepository.findByNarmesteLederId(andre).shouldNotBeNull()
+    }
+
+    @Test
+    fun `tom batch endrer ikke databasen og kvitteres ikke`() {
+        var kvitteringer = 0
+        listener.listenEsyfo(emptyList()) { kvitteringer++ }
+        kvitteringer shouldBe 0
+        jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
+    }
+
     @Test
     fun `funksjonell PDL-feil lagrer nullable navn og lar tombstone og annen nøkkel passere`() {
         pdlMockWebServer.dispatcher =
@@ -68,15 +135,15 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val andre = UUID.randomUUID()
         var kvitteringer = 0
 
-        listener.listenEsyfo(record(0, første, melding(første).serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(0, første, melding(første).serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository
             .findByNarmesteLederId(første)
             .shouldNotBeNull()
             .narmesteLederNavn
             .shouldBeNull()
         pdlMockWebServer.dispatcher = defaultPdlDispatcher
-        listener.listenEsyfo(record(1, første, null)) { kvitteringer++ }
-        listener.listenEsyfo(record(2, andre, melding(andre).serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(1, første, null)) { kvitteringer++ }
+        behandleEnMelding(record(2, andre, melding(andre).serialisertTilString())) { kvitteringer++ }
 
         kvitteringer shouldBe 3
         narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldBeNull()
@@ -89,16 +156,16 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         pdlMockWebServer.dispatcher = simpleDispatcher { MockResponse.Builder().code(503).build() }
         val id = UUID.randomUUID()
         var kvitteringer = 0
-        runCatching { listener.listenEsyfo(record(0, id, melding(id).serialisertTilString())) { kvitteringer++ } }
+        runCatching { behandleEnMelding(record(0, id, melding(id).serialisertTilString())) { kvitteringer++ } }
             .exceptionOrNull()
             .shouldNotBeNull()
-            .message shouldBe "ESYFO-projeksjon feilet; record blir forsøkt igjen"
+            .message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
         kvitteringer shouldBe 0
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
         jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
 
         pdlMockWebServer.dispatcher = defaultPdlDispatcher
-        listener.listenEsyfo(record(0, id, melding(id).serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(0, id, melding(id).serialisertTilString())) { kvitteringer++ }
         kvitteringer shouldBe 1
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull()
         jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 0L
@@ -118,7 +185,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         }
         narmesteLederRepository.findByNarmesteLederId(id).shouldNotBeNull()
 
-        listener.listenEsyfo(record(0, id, inaktiv.serialisertTilString())) { nyKvittering++ }
+        behandleEnMelding(record(0, id, inaktiv.serialisertTilString())) { nyKvittering++ }
         listener.listen(
             ConsumerRecord(no.nav.helse.flex.gateways.NARMESTELEDER_LEESAH_TOPIC, 0, 1, id.toString(), inaktiv.serialisertTilString()),
         ) {
@@ -136,10 +203,10 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val id = UUID.randomUUID()
         var kvitteringer = 0
         for (record in listOf(record(-1, id, null), record(0, id, null, partition = -1))) {
-            runCatching { listener.listenEsyfo(record) { kvitteringer++ } }
+            runCatching { behandleEnMelding(record) { kvitteringer++ } }
                 .exceptionOrNull()
                 .shouldNotBeNull()
-                .message shouldBe "ESYFO-projeksjon feilet; record blir forsøkt igjen"
+                .message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
         }
         kvitteringer shouldBe 0
         jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
@@ -153,10 +220,10 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val inaktivFørste = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
         val inaktivAndre = melding(andre).copy(aktivTom = LocalDate.parse("2025-01-01"))
         var kvitteringer = 0
-        runCatching { listener.listenEsyfo(record(0, første, "{")) { kvitteringer++ } }.isFailure shouldBe true
+        runCatching { behandleEnMelding(record(0, første, "{")) { kvitteringer++ } }.isFailure shouldBe true
         jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
-        listener.listenEsyfo(record(0, første, inaktivFørste.serialisertTilString())) { kvitteringer++ }
-        listener.listenEsyfo(record(1, andre, inaktivAndre.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(0, første, inaktivFørste.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(1, andre, inaktivAndre.serialisertTilString())) { kvitteringer++ }
         kvitteringer shouldBe 2
         jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 1L
         narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldNotBeNull()
@@ -170,18 +237,18 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val id = UUID.randomUUID()
         val aktiv = melding(id)
         var kvitteringer = 0
-        listener.listenEsyfo(record(10, id, aktiv.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(10, id, aktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederRepository.findByNarmesteLederId(id).shouldBeNull()
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull().narmesteLederNavn shouldBe "Test Leder"
 
         val inaktiv = aktiv.copy(aktivTom = LocalDate.parse("2026-01-02"), timestamp = aktiv.timestamp.minusDays(1))
-        listener.listenEsyfo(record(12, id, inaktiv.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(12, id, inaktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull().aktivTom shouldBe inaktiv.aktivTom
         narmesteLederEsyfoRepository.findAllByBrukerFnrInAndAktivTomIsNull(listOf(aktiv.fnr)) shouldBe emptyList()
-        listener.listenEsyfo(record(13, id, null)) { kvitteringer++ }
-        listener.listenEsyfo(record(12, id, aktiv.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(13, id, null)) { kvitteringer++ }
+        behandleEnMelding(record(12, id, aktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
-        listener.listenEsyfo(record(15, id, aktiv.serialisertTilString())) { kvitteringer++ }
+        behandleEnMelding(record(15, id, aktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository
             .findByNarmesteLederId(id)
             .shouldNotBeNull()
@@ -195,13 +262,13 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `ugyldig melding rulles tilbake uten kvittering og neste record kan behandles`() {
         val id = UUID.randomUUID()
         var kvitteringer = 0
-        runCatching { listener.listenEsyfo(record(0, id, melding(UUID.randomUUID()).serialisertTilString())) { kvitteringer++ } }
+        runCatching { behandleEnMelding(record(0, id, melding(UUID.randomUUID()).serialisertTilString())) { kvitteringer++ } }
             .isFailure shouldBe true
         kvitteringer shouldBe 0
         jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
 
         val inaktiv = melding(id).copy(aktivTom = LocalDate.parse("2025-01-01"))
-        listener.listenEsyfo(record(0, id, inaktiv.serialisertTilString().dropLast(1) + ",\"status\":\"NY\",\"ekstra\":true}")) {
+        behandleEnMelding(record(0, id, inaktiv.serialisertTilString().dropLast(1) + ",\"status\":\"NY\",\"ekstra\":true}")) {
             kvitteringer++
         }
         kvitteringer shouldBe 1
@@ -216,10 +283,10 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     fun `kvitteringsfeil etter commit gir ufarlig ny levering`() {
         val id = UUID.randomUUID()
         val inaktiv = melding(id).copy(aktivTom = LocalDate.parse("2025-01-01"))
-        runCatching { listener.listenEsyfo(record(2, id, inaktiv.serialisertTilString())) { error("Kvittering feilet") } }
+        runCatching { behandleEnMelding(record(2, id, inaktiv.serialisertTilString())) { error("Kvittering feilet") } }
             .isFailure shouldBe true
         val lagret = narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull()
-        listener.listenEsyfo(record(2, id, null)) { }
+        behandleEnMelding(record(2, id, null)) { }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id) shouldBe lagret
         jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 2L
     }
@@ -233,7 +300,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         )
         try {
             var kvitteringer = 0
-            runCatching { listener.listenEsyfo(record(1, id, inaktiv.serialisertTilString())) { kvitteringer++ } }
+            runCatching { behandleEnMelding(record(1, id, inaktiv.serialisertTilString())) { kvitteringer++ } }
                 .isFailure shouldBe true
             kvitteringer shouldBe 0
             narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
@@ -241,7 +308,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         } finally {
             jdbcTemplate.execute("ALTER TABLE narmeste_leder_esyfo_checkpoint DROP CONSTRAINT test_offset_grense")
         }
-        listener.listenEsyfo(record(1, id, inaktiv.serialisertTilString())) { }
+        behandleEnMelding(record(1, id, inaktiv.serialisertTilString())) { }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull()
     }
 
@@ -253,7 +320,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
                 lagGraphQlResponse(data.copy(hentPerson = data.hentPerson?.copy(navn = emptyList())))
             }
         val id = UUID.randomUUID()
-        listener.listenEsyfo(record(0, id, melding(id).serialisertTilString())) { }
+        behandleEnMelding(record(0, id, melding(id).serialisertTilString())) { }
         narmesteLederEsyfoRepository
             .findByNarmesteLederId(id)
             .shouldNotBeNull()
@@ -261,7 +328,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
             .shouldBeNull()
         environmentToggles.setEnvironment("dev")
         val nesteId = UUID.randomUUID()
-        listener.listenEsyfo(record(1, nesteId, melding(nesteId).serialisertTilString())) { }
+        behandleEnMelding(record(1, nesteId, melding(nesteId).serialisertTilString())) { }
         narmesteLederEsyfoRepository.findByNarmesteLederId(nesteId).shouldNotBeNull().narmesteLederNavn shouldBe "Navn Navnesen"
     }
 

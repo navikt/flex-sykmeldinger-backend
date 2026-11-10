@@ -25,6 +25,12 @@ class OppdateringAvNarmesteLederEsyfo(
     private val log = logger()
 
     @Transactional(rollbackFor = [Exception::class])
+    fun behandleBatch(records: List<ConsumerRecord<String, String?>>) {
+        // Fast låserekkefølge mellom partisjoner; sorteringen bevarer record-rekkefølgen innen hver partisjon.
+        records.sortedBy { it.partition() }.forEach { behandle(it) }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
     fun behandle(record: ConsumerRecord<String, String?>): Boolean {
         require(record.topic() == NARMESTELEDER_ESYFO_LEESAH_TOPIC) { "Feil topic for ESYFO-projeksjon" }
         require(record.partition() >= 0) { "Ugyldig partisjon i ESYFO-record" }

@@ -37,15 +37,16 @@ class NarmestelederListener(
         autoStartup = "\${narmeste-leder.esyfo-consumer-aktiv:false}",
     )
     fun listenEsyfo(
-        cr: ConsumerRecord<String, String?>,
+        records: List<ConsumerRecord<String, String?>>,
         acknowledgment: Acknowledgment,
     ) {
+        if (records.isEmpty()) return
         try {
-            oppdateringAvNarmesteLederEsyfo.behandle(cr)
+            oppdateringAvNarmesteLederEsyfo.behandleBatch(records)
             acknowledgment.acknowledge()
         } catch (_: Exception) {
             throw KafkaErrorHandlerException(
-                message = "ESYFO-projeksjon feilet; record blir forsøkt igjen",
+                message = "ESYFO-projeksjon feilet; batchen blir forsøkt igjen",
                 errorHandlerLoggingEnabled = false,
             )
         }
