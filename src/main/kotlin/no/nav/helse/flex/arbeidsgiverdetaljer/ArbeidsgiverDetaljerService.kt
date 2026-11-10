@@ -6,8 +6,6 @@ import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdType
 import no.nav.helse.flex.arbeidsgiverdetaljer.domain.ArbeidsgiverDetaljer
 import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.config.tilNorgeLocalDate
-import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
-import no.nav.helse.flex.narmesteleder.NarmesteLederLesemodus
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLeder
 import org.springframework.stereotype.Service
@@ -19,8 +17,6 @@ import java.util.function.Supplier
 class ArbeidsgiverDetaljerService(
     private val arbeidsforholdRepository: ArbeidsforholdRepository,
     private val narmeseteLederRepository: NarmesteLederRepository,
-    private val narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository,
-    private val lesemodus: NarmesteLederLesemodus,
     private val nowFactory: Supplier<Instant>,
 ) {
     fun hentArbeidsgiverDetaljerForPerson(
@@ -30,12 +26,7 @@ class ArbeidsgiverDetaljerService(
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
         val filtrerteArbeidsforhold = periode?.let { arbeidsforhold.filtrerInnenPeriode(it) } ?: arbeidsforhold
 
-        val narmesteLedere =
-            if (lesemodus.modus == "ESYFO") {
-                narmesteLederEsyfoRepository.findAllByBrukerFnrInAndAktivTomIsNull(identer.alle()).map { it.tilNarmesteLeder() }
-            } else {
-                narmeseteLederRepository.findAllByBrukerFnrInAndAktivTomIsNull(identer.alle())
-            }
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrInAndAktivTomIsNull(identer.alle())
 
         return sammenstillArbeidsgiverDetaljer(
             arbeidsforhold = filtrerteArbeidsforhold,

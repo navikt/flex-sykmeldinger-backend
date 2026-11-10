@@ -27,7 +27,6 @@ aiven-kafka:
   auto-offset-reset: none
 
 narmeste-leder:
-  lesemodus: ${NARMESTE_LEDER_LESEMODUS:GAMMEL}
   esyfo-consumer-aktiv: ${NARMESTE_LEDER_ESYFO_CONSUMER_AKTIV:false}
 
 

@@ -9,7 +9,5 @@ interface NarmesteLederEsyfoRepository : CrudRepository<NarmesteLederEsyfo, Stri
 
     fun findAllByBrukerFnrIn(identer: List<String>): List<NarmesteLederEsyfo>
 
-    fun findAllByBrukerFnrInAndAktivTomIsNull(identer: List<String>): List<NarmesteLederEsyfo>
-
     fun deleteByNarmesteLederId(narmesteLederId: UUID)
 }

@@ -244,7 +244,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val inaktiv = aktiv.copy(aktivTom = LocalDate.parse("2026-01-02"), timestamp = aktiv.timestamp.minusDays(1))
         behandleEnMelding(record(12, id, inaktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull().aktivTom shouldBe inaktiv.aktivTom
-        narmesteLederEsyfoRepository.findAllByBrukerFnrInAndAktivTomIsNull(listOf(aktiv.fnr)) shouldBe emptyList()
         behandleEnMelding(record(13, id, null)) { kvitteringer++ }
         behandleEnMelding(record(12, id, aktiv.serialisertTilString())) { kvitteringer++ }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()

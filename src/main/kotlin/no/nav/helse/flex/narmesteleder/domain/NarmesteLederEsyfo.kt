@@ -18,18 +18,4 @@ data class NarmesteLederEsyfo(
     val aktivFom: LocalDate,
     val narmesteLederNavn: String?,
     val aktivTom: LocalDate? = null,
-) {
-    fun tilNarmesteLeder() =
-        NarmesteLeder(
-            id,
-            oppdatert,
-            timestamp,
-            narmesteLederId,
-            orgnummer,
-            brukerFnr,
-            narmesteLederFnr,
-            aktivFom,
-            narmesteLederNavn,
-            aktivTom,
-        )
-}
+)

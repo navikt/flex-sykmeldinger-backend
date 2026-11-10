@@ -21,7 +21,6 @@ db_flags:
   pgaudit.log_relation: "on"
 flex_group_id: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
 env:
-  NARMESTE_LEDER_LESEMODUS: GAMMEL
   NARMESTE_LEDER_ESYFO_CONSUMER_AKTIV: "false"
   SPRING_PROFILES_ACTIVE: default
   PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io

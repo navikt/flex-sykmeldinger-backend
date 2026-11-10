@@ -16,9 +16,6 @@ class NarmesteLederEsyfoRepositoryFake :
 
     override fun findAllByBrukerFnrIn(identer: List<String>) = entities.values.filter { it.brukerFnr in identer }
 
-    override fun findAllByBrukerFnrInAndAktivTomIsNull(identer: List<String>) =
-        entities.values.filter { it.brukerFnr in identer && it.aktivTom == null }
-
     override fun deleteByNarmesteLederId(narmesteLederId: UUID) {
         findByNarmesteLederId(narmesteLederId)?.let { delete(it) }
     }

@@ -35,7 +35,7 @@ tsm.sykmeldinger (Kafka)
 | Topic                                       | Retning | Formål                          |
 |---------------------------------------------|---------|---------------------------------|
 | `teamsykmelding.syfo-narmesteleder-leesah`  | inn     | Oppdaterer nærmeste leder       |
-| `team-esyfo.syfo-narmesteleder-leesah`      | inn     | Oppdaterer nærmeste leder       |
+| `team-esyfo.syfo-narmesteleder-leesah`      | inn     | Bygger separat eSyfo-tabell uten å endre oppslag |
 | `arbeidsforhold.aapen-aareg-arbeidsforholdhendelse-v1` | inn | Oppdaterer arbeidsforhold fra Aareg |
 | `teamsykmelding.sykmeldingnotifikasjon`     | ut      | Brukernotifikasjoner            |
 

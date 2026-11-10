@@ -5,16 +5,13 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.narmesteleder.NarmesteLederLesemodus
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederEsyfo
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.Instant
 import java.time.LocalDate
-import java.util.function.Supplier
 
 class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     @Autowired
@@ -41,28 +38,10 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `lesemodus velger kun én tabell og filtrerer inaktive ESYFO-ledere`() {
+    fun `arbeidsgiverdetaljer bruker eksisterende tabell selv om eSyfo har en annen leder`() {
         arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "1", orgnummer = "org1"))
-        narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1"))
-        val gammel = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-        gammel.single().naermesteLeder.shouldNotBeNull()
-
-        val nyTjeneste =
-            ArbeidsgiverDetaljerService(
-                arbeidsforholdRepository,
-                narmesteLederRepository,
-                narmesteLederEsyfoRepository,
-                NarmesteLederLesemodus("ESYFO", true),
-                Supplier { Instant.now() },
-            )
-        nyTjeneste
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-            .single()
-            .naermesteLeder
-            .shouldBeNull()
-
-        val gammelLeder = lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1")
-        val ny =
+        val gammelLeder = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1"))
+        narmesteLederEsyfoRepository.save(
             NarmesteLederEsyfo(
                 oppdatert = gammelLeder.oppdatert,
                 timestamp = gammelLeder.timestamp,
@@ -71,27 +50,21 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
                 brukerFnr = gammelLeder.brukerFnr,
                 narmesteLederFnr = gammelLeder.narmesteLederFnr,
                 aktivFom = gammelLeder.aktivFom,
-                narmesteLederNavn = null,
-            )
-        narmesteLederEsyfoRepository.save(ny)
-        nyTjeneste
+                narmesteLederNavn = "Leder fra eSyfo",
+            ),
+        )
+
+        arbeidsgiverDetaljerService
+            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
+            .single()
+            .naermesteLeder shouldBe gammelLeder
+
+        narmesteLederRepository.delete(gammelLeder)
+        arbeidsgiverDetaljerService
             .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
             .single()
             .naermesteLeder
             .shouldBeNull()
-        narmesteLederEsyfoRepository.deleteAll()
-        val inaktiv = narmesteLederEsyfoRepository.save(ny.copy(narmesteLederNavn = "Ny leder", aktivTom = LocalDate.now()))
-        nyTjeneste
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-            .single()
-            .naermesteLeder
-            .shouldBeNull()
-        narmesteLederEsyfoRepository.save(inaktiv.copy(aktivTom = null))
-        nyTjeneste
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-            .single()
-            .naermesteLeder
-            .shouldNotBeNull()
     }
 
     @Test
