@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.module.kotlin.readValue
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @Component
 class OppdateringAvNarmesteLeder(
@@ -24,12 +23,7 @@ class OppdateringAvNarmesteLeder(
 
     @Transactional(rollbackFor = [Exception::class])
     fun behandleMeldingFraKafka(meldingString: String) {
-        val narmesteLederLeesah =
-            meldingString.tilNarmesteLederLeesah().let {
-                it.copy(
-                    timestamp = it.timestamp.truncatedTo(ChronoUnit.MICROS),
-                )
-            }
+        val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
 
         if (narmesteLederLeesah.aktivTom != null) {

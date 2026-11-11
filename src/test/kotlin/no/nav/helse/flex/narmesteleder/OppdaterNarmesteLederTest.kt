@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.util.UUID
 
 class OppdaterNarmesteLederTest : FakesTestOppsett() {
@@ -32,8 +33,11 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `Aktiv melding oppretter leder med PDL-navn`() {
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
+    fun `Aktiv melding oppretter leder med PDL-navn og uendret tidsstempel`() {
+        val melding =
+            lagNarmesteLederLeesah(UUID.randomUUID()).copy(
+                timestamp = OffsetDateTime.parse("2025-01-02T12:00:00.123456789Z"),
+            )
         pdlClient.setFormatertNavn("Leder Navnesen")
 
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
@@ -42,11 +46,15 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
         lagret.narmesteLederNavn shouldBe "Leder Navnesen"
         lagret.aktivTom.shouldBeNull()
         lagret.brukerFnr shouldBe melding.fnr
+        lagret.timestamp shouldBe melding.timestamp.toInstant()
     }
 
     @Test
     fun `Aktiv melding oppdaterer samme rad også ved eldre timestamp eller duplikat`() {
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
+        val melding =
+            lagNarmesteLederLeesah(UUID.randomUUID()).copy(
+                timestamp = OffsetDateTime.parse("2025-01-02T12:00:00.123456Z"),
+            )
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
         val lagret = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
         val eldre = melding.copy(orgnummer = "888888", timestamp = melding.timestamp.minusSeconds(1))
@@ -55,7 +63,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
         val oppdatert = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
         oppdatert.id shouldBe lagret.id
         oppdatert.orgnummer shouldBe "888888"
-        oppdatert.timestamp shouldBe eldre.timestamp.toInstant().truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+        oppdatert.timestamp shouldBe eldre.timestamp.toInstant()
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(eldre.serialisertTilString())
         narmesteLederRepository.count() shouldBe 1
     }
