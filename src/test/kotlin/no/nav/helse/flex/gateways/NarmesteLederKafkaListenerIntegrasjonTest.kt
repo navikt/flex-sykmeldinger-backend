@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
@@ -91,33 +92,72 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `Meldinger fra team sykmelding lagres i eksisterende tabell mens eSyfo-consumeren er avslått`() {
+    fun `Begge consumers oppdaterer bare sin egen tabell for samme relasjon`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
+        val container =
+            kafkaListenerEndpointRegistry.listenerContainers.single {
+                it.containerProperties.topics?.contains(NARMESTELEDER_ESYFO_LEESAH_TOPIC) == true
+            }
+        val gammel = lagNarmesteLederLeesah(UUID.randomUUID(), orgnummer = "123456789")
+        val ny = gammel.copy(orgnummer = "987654321")
+        try {
+            container.start()
+            publiserTilBeggeTabeller(gammel, ny)
+            kontrollerGammelOppdateringMedAktivEsyfoConsumer(gammel, ny)
+            kontrollerEsyfoOppdateringMedAktivGammelConsumer(gammel, ny)
+        } finally {
+            val stoppet = CountDownLatch(1)
+            container.stop { stoppet.countDown() }
+            check(stoppet.await(20, TimeUnit.SECONDS))
+            narmesteLederEsyfoRepository.deleteByNarmesteLederId(gammel.narmesteLederId)
+        }
+    }
 
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID(), orgnummer = "123456789")
-        val eldreMelding = melding.copy(timestamp = melding.timestamp.minusDays(1), orgnummer = "888888")
-        val markor = lagNarmesteLederLeesah(UUID.randomUUID())
+    private fun publiserTilBeggeTabeller(
+        gammel: NarmesteLederLeesah,
+        ny: NarmesteLederLeesah,
+    ) {
+        sendNarmesteLederLeesah(gammel)
+        sendEsyfoMelding(ny)
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted {
+            narmesteLederRepository.findByNarmesteLederId(gammel.narmesteLederId)?.orgnummer shouldBe gammel.orgnummer
+            narmesteLederEsyfoRepository.findByNarmesteLederId(ny.narmesteLederId)?.orgnummer shouldBe ny.orgnummer
+        }
+    }
 
+    private fun kontrollerGammelOppdateringMedAktivEsyfoConsumer(
+        gammel: NarmesteLederLeesah,
+        ny: NarmesteLederLeesah,
+    ) {
+        val lagretEsyfo = narmesteLederEsyfoRepository.findByNarmesteLederId(ny.narmesteLederId).shouldNotBeNull()
+        val eldre = gammel.copy(timestamp = gammel.timestamp.minusDays(1), orgnummer = "888888888")
+        sendNarmesteLederLeesah(eldre)
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted {
+            narmesteLederRepository.findByNarmesteLederId(gammel.narmesteLederId)?.orgnummer shouldBe eldre.orgnummer
+        }
+        narmesteLederRepository.findAll().count { it.narmesteLederId == gammel.narmesteLederId } shouldBe 1
+        narmesteLederEsyfoRepository.findByNarmesteLederId(ny.narmesteLederId) shouldBe lagretEsyfo
+    }
+
+    private fun kontrollerEsyfoOppdateringMedAktivGammelConsumer(
+        gammel: NarmesteLederLeesah,
+        ny: NarmesteLederLeesah,
+    ) {
+        val lagretGammel = narmesteLederRepository.findByNarmesteLederId(gammel.narmesteLederId).shouldNotBeNull()
+        val oppdatert = ny.copy(orgnummer = "777777777")
+        sendEsyfoMelding(oppdatert)
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted {
+            narmesteLederEsyfoRepository.findByNarmesteLederId(ny.narmesteLederId)?.orgnummer shouldBe oppdatert.orgnummer
+        }
+        narmesteLederRepository.findByNarmesteLederId(gammel.narmesteLederId) shouldBe lagretGammel
+    }
+
+    private fun sendEsyfoMelding(melding: NarmesteLederLeesah) {
         kafkaProducer
             .send(
                 ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, melding.narmesteLederId.toString(), melding.serialisertTilString()),
             ).get()
-        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
-
-        listOf(melding, eldreMelding, markor).forEach {
-            kafkaProducer
-                .send(
-                    ProducerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, it.narmesteLederId.toString(), it.serialisertTilString()),
-                ).get()
-        }
-        await().atMost(10, TimeUnit.SECONDS).until {
-            narmesteLederRepository.findByNarmesteLederId(markor.narmesteLederId) != null
-        }
-
-        narmesteLederRepository.findAll().count { it.narmesteLederId == melding.narmesteLederId } shouldBe 1
-        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId)?.orgnummer shouldBe eldreMelding.orgnummer
-        narmesteLederEsyfoRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
     }
 
     @Test
