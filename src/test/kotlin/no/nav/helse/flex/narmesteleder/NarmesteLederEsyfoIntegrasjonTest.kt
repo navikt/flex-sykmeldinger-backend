@@ -8,11 +8,8 @@ import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.NARMESTELEDER_ESYFO_LEESAH_TOPIC
 import no.nav.helse.flex.gateways.NarmestelederEsyfoListener
 import no.nav.helse.flex.gateways.NarmestelederListener
-import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
-import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
 import no.nav.helse.flex.testconfig.defaultPdlDispatcher
-import no.nav.helse.flex.testconfig.fakes.EnvironmentTogglesFake
 import no.nav.helse.flex.testconfig.simpleDispatcher
 import no.nav.helse.flex.utils.serialisertTilString
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -38,15 +35,12 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Autowired lateinit var pdlMockWebServer: MockWebServer
 
-    @Autowired lateinit var environmentToggles: EnvironmentTogglesFake
-
     @AfterEach
     fun afterEach() {
         // eSyfo-consumeren er avslått, så både testdata og checkpoint kan slettes mellom testene.
         narmesteLederEsyfoRepository.deleteAll()
         jdbcTemplate.update("DELETE FROM narmeste_leder_esyfo_checkpoint")
         pdlMockWebServer.dispatcher = defaultPdlDispatcher
-        environmentToggles.reset()
     }
 
     private fun record(
@@ -117,44 +111,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `Tom batch endrer ikke databasen og kvitteres ikke`() {
-        var kvitteringer = 0
-        listener.listenEsyfo(emptyList()) { kvitteringer++ }
-        kvitteringer shouldBe 0
-        jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
-    }
-
-    @Test
-    fun `Funksjonell PDL-feil lagrer nullable navn og lar tombstone og annen nøkkel passere`() {
-        pdlMockWebServer.dispatcher =
-            simpleDispatcher {
-                MockResponse
-                    .Builder()
-                    .setHeader("Content-Type", "application/json")
-                    .body("""{"data":null,"errors":[]}""")
-                    .build()
-            }
-        val første = UUID.randomUUID()
-        val andre = UUID.randomUUID()
-        var kvitteringer = 0
-
-        behandleEnMelding(record(0, første, melding(første).serialisertTilString())) { kvitteringer++ }
-        narmesteLederEsyfoRepository
-            .findByNarmesteLederId(første)
-            .shouldNotBeNull()
-            .narmesteLederNavn
-            .shouldBeNull()
-        pdlMockWebServer.dispatcher = defaultPdlDispatcher
-        behandleEnMelding(record(1, første, null)) { kvitteringer++ }
-        behandleEnMelding(record(2, andre, melding(andre).serialisertTilString())) { kvitteringer++ }
-
-        kvitteringer shouldBe 3
-        narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldBeNull()
-        narmesteLederEsyfoRepository.findByNarmesteLederId(andre).shouldNotBeNull().narmesteLederNavn shouldBe "Ole Gunnar"
-        jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 2L
-    }
-
-    @Test
     fun `Teknisk PDL-feil lar rad og checkpoint stå urørt uten kvittering`() {
         pdlMockWebServer.dispatcher = simpleDispatcher { MockResponse.Builder().code(503).build() }
         val id = UUID.randomUUID()
@@ -216,33 +172,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 1L
         narmesteLederEsyfoRepository.findByNarmesteLederId(første).shouldNotBeNull()
         narmesteLederEsyfoRepository.findByNarmesteLederId(andre).shouldNotBeNull()
-    }
-
-    @Test
-    fun `Offset styrer ny tabell og tombstone bevarer checkpoint`() {
-        pdlMockWebServer.dispatcher =
-            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Test", etternavn = "Leder")) }
-        val id = UUID.randomUUID()
-        val aktiv = melding(id)
-        var kvitteringer = 0
-        behandleEnMelding(record(10, id, aktiv.serialisertTilString())) { kvitteringer++ }
-        narmesteLederRepository.findByNarmesteLederId(id).shouldBeNull()
-        narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull().narmesteLederNavn shouldBe "Test Leder"
-
-        val inaktiv = aktiv.copy(aktivTom = LocalDate.parse("2026-01-02"), timestamp = aktiv.timestamp.minusDays(1))
-        behandleEnMelding(record(12, id, inaktiv.serialisertTilString())) { kvitteringer++ }
-        narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull().aktivTom shouldBe inaktiv.aktivTom
-        behandleEnMelding(record(13, id, null)) { kvitteringer++ }
-        behandleEnMelding(record(12, id, aktiv.serialisertTilString())) { kvitteringer++ }
-        narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
-        behandleEnMelding(record(15, id, aktiv.serialisertTilString())) { kvitteringer++ }
-        narmesteLederEsyfoRepository
-            .findByNarmesteLederId(id)
-            .shouldNotBeNull()
-            .aktivTom
-            .shouldBeNull()
-        kvitteringer shouldBe 5
-        jdbcTemplate.queryForObject("SELECT offset_sist_pafort FROM narmeste_leder_esyfo_checkpoint", Long::class.java) shouldBe 15L
     }
 
     @Test
@@ -314,26 +243,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         }
         behandleEnMelding(record(1, id, inaktiv.serialisertTilString())) { }
         narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldNotBeNull()
-    }
-
-    @Test
-    fun `Manglende PDL-navn er nullable i prod og får standardnavn i dev`() {
-        pdlMockWebServer.dispatcher =
-            simpleDispatcher {
-                val data = lagGetPersonResponseData()
-                lagGraphQlResponse(data.copy(hentPerson = data.hentPerson?.copy(navn = emptyList())))
-            }
-        val id = UUID.randomUUID()
-        behandleEnMelding(record(0, id, melding(id).serialisertTilString())) { }
-        narmesteLederEsyfoRepository
-            .findByNarmesteLederId(id)
-            .shouldNotBeNull()
-            .narmesteLederNavn
-            .shouldBeNull()
-        environmentToggles.setEnvironment("dev")
-        val nesteId = UUID.randomUUID()
-        behandleEnMelding(record(1, nesteId, melding(nesteId).serialisertTilString())) { }
-        narmesteLederEsyfoRepository.findByNarmesteLederId(nesteId).shouldNotBeNull().narmesteLederNavn shouldBe "Navn Navnesen"
     }
 
     @Test

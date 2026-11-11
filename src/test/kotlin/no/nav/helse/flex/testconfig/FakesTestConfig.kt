@@ -42,6 +42,9 @@ class FakesTestConfig {
     fun narmesteLederEsyfoRepository(): NarmesteLederEsyfoRepository = NarmesteLederEsyfoRepositoryFake()
 
     @Bean
+    fun narmesteLederEsyfoCheckpoint(): NarmesteLederEsyfoCheckpointFake = NarmesteLederEsyfoCheckpointFake()
+
+    @Bean
     fun optInDbRepository(): OptInDbRepository = OptInDbRepositoryFake()
 
     @Bean

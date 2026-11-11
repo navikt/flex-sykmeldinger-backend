@@ -8,7 +8,6 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.module.kotlin.readValue
@@ -16,7 +15,6 @@ import java.time.Instant
 import java.util.UUID
 
 @Component
-@Profile("!fakes")
 class OppdateringAvNarmesteLederEsyfo(
     private val repository: NarmesteLederEsyfoRepository,
     private val checkpoint: NarmesteLederEsyfoCheckpoint,

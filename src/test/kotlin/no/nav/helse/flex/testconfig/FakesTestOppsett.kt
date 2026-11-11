@@ -9,6 +9,7 @@ import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testconfig.fakes.AuditLogProducerFake
+import no.nav.helse.flex.testconfig.fakes.NarmesteLederEsyfoCheckpointFake
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -18,13 +19,11 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 
 const val IGNORED_KAFKA_BROKERS = "localhost:1"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test", "fakeunleash", "fakes")
 @AutoConfigureMetrics
 @AutoConfigureTracing
 @EnableMockOAuth2Server
@@ -54,6 +53,9 @@ abstract class FakesTestOppsett {
     lateinit var narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository
 
     @Autowired
+    lateinit var narmesteLederEsyfoCheckpoint: NarmesteLederEsyfoCheckpointFake
+
+    @Autowired
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     @Autowired
@@ -80,6 +82,7 @@ abstract class FakesTestOppsett {
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
         narmesteLederEsyfoRepository.deleteAll()
+        narmesteLederEsyfoCheckpoint.reset()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         optInDbRepository.deleteAll()

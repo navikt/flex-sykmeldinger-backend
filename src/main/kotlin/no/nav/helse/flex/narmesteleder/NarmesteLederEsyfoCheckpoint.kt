@@ -1,16 +1,27 @@
 package no.nav.helse.flex.narmesteleder
 
-import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 
-@Repository
-@Profile("!fakes")
-class NarmesteLederEsyfoCheckpoint(
-    private val jdbcTemplate: JdbcTemplate,
-) {
-    // INSERT låser også den første raden ved samtidig oppstart. SELECT låser raden frem til commit.
+interface NarmesteLederEsyfoCheckpoint {
     fun lasOgHentOffset(
+        topic: String,
+        partition: Int,
+    ): Long
+
+    fun lagreOffset(
+        topic: String,
+        partition: Int,
+        offset: Long,
+    )
+}
+
+@Repository("narmesteLederEsyfoCheckpoint")
+class DatabaseNarmesteLederEsyfoCheckpoint(
+    private val jdbcTemplate: JdbcTemplate,
+) : NarmesteLederEsyfoCheckpoint {
+    // INSERT låser også den første raden ved samtidig oppstart. SELECT låser raden frem til commit.
+    override fun lasOgHentOffset(
         topic: String,
         partition: Int,
     ): Long {
@@ -29,7 +40,7 @@ class NarmesteLederEsyfoCheckpoint(
         ) ?: error("Mangler checkpoint")
     }
 
-    fun lagreOffset(
+    override fun lagreOffset(
         topic: String,
         partition: Int,
         offset: Long,
