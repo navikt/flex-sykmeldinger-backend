@@ -32,7 +32,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `aktiv melding oppretter leder med PDL-navn`() {
+    fun `Aktiv melding oppretter leder med PDL-navn`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         pdlClient.setFormatertNavn("Leder Navnesen")
 
@@ -45,7 +45,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `aktiv melding oppdaterer samme rad også ved eldre timestamp eller duplikat`() {
+    fun `Aktiv melding oppdaterer samme rad også ved eldre timestamp eller duplikat`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
         val lagret = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
@@ -61,7 +61,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `inaktiv melding sletter eksisterende rad uten PDL-oppslag`() {
+    fun `Inaktiv melding sletter eksisterende rad uten PDL-oppslag`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
         pdlClient.setFormatertNavn(IllegalStateException("PDL skal ikke kalles ved avkrefting"))
@@ -75,7 +75,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `inaktiv melding uten eksisterende rad ignoreres uten PDL`() {
+    fun `Inaktiv melding uten eksisterende rad ignoreres uten PDL`() {
         pdlClient.setFormatertNavn(IllegalStateException("PDL skal ikke kalles for ukjent inaktiv leder"))
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(
             lagNarmesteLederLeesah(UUID.randomUUID(), aktivTom = LocalDate.now()).serialisertTilString(),
@@ -84,7 +84,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `ny aktiv melding etter avkrefting oppretter leder på nytt`() {
+    fun `Ny aktiv melding etter avkrefting oppretter leder på nytt`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.copy(aktivTom = LocalDate.now()).serialisertTilString())
@@ -101,7 +101,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `avkrefting fjerner lederen fra eksisterende ledertabell og arbeidsgiverdetaljene`() {
+    fun `Avkrefting fjerner lederen fra eksisterende ledertabell og arbeidsgiverdetaljene`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         arbeidsforholdRepository.save(lagArbeidsforhold(fnr = melding.fnr, orgnummer = melding.orgnummer))
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())

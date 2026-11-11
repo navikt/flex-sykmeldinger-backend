@@ -22,7 +22,7 @@ class NarmesteLederKafkaListenerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `tombstone kvitteres uten oppdatering og ukjent status hindrer ikke neste melding`() {
+    fun `Tombstone kvitteres uten oppdatering og ukjent status hindrer ikke neste melding`() {
         val tombstoneId = UUID.randomUUID()
         val lederMedUkjentStatus = lagNarmesteLederLeesah(UUID.randomUUID())
         val nesteLeder = lagNarmesteLederLeesah(UUID.randomUUID())
@@ -51,7 +51,7 @@ class NarmesteLederKafkaListenerFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
+    fun `Meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val eldreMelding = melding.copy(timestamp = melding.timestamp.minusDays(1), orgnummer = "888888")
         var kvitteringer = 0

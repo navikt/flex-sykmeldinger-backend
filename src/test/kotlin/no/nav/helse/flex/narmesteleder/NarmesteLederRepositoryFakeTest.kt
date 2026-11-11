@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class NarmesteLederRepositoryFakeTest {
     @Test
-    fun `fake repository lagrer oppdatering og sletter aktiv rad`() {
+    fun `Fake-repository lagrer oppdatering og sletter aktiv rad`() {
         val repository = NarmesteLederRepositoryFake()
         val opprinnelig = lagNarmesteLeder()
         repository.save(opprinnelig)

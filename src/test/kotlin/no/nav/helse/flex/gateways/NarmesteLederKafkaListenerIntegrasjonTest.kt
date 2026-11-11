@@ -67,7 +67,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `tombstone som tidligere ble retryet hindrer ikke ukjent status og påfølgende melding`() {
+    fun `Tombstone som tidligere ble retryet hindrer ikke ukjent status og påfølgende melding`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
 
@@ -91,7 +91,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `meldinger fra team sykmelding lagres i eksisterende tabell mens eSyfo-consumeren er avslått`() {
+    fun `Meldinger fra team sykmelding lagres i eksisterende tabell mens eSyfo-consumeren er avslått`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
 
@@ -121,7 +121,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `eSyfo-consumeren leser historikk som batch uten å endre eksisterende consumer`() {
+    fun `Consumeren for eSyfo leser historikk som batch uten å endre eksisterende consumer`() {
         esyfoFactory.isBatchListener shouldBe true
         checkNotNull(esyfoFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
         (eksisterendeFactory.isBatchListener == true) shouldBe false

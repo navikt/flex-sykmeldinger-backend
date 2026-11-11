@@ -38,7 +38,7 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `arbeidsgiverdetaljer bruker eksisterende tabell selv om eSyfo har en annen leder`() {
+    fun `Arbeidsgiverdetaljer bruker eksisterende tabell selv om eSyfo har en annen leder`() {
         arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "1", orgnummer = "org1"))
         val gammelLeder = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1"))
         narmesteLederEsyfoRepository.save(
@@ -80,7 +80,7 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `henter aktiv leder selv om en nyere leder er inaktiv`() {
+    fun `Henter aktiv leder selv om en nyere leder er inaktiv`() {
         arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "1", orgnummer = "org1"))
         val aktiv =
             narmesteLederRepository.save(

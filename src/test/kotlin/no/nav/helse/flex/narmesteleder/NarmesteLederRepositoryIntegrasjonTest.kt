@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
     @Test
-    fun `repository oppdaterer etter id uavhengig av timestamp`() {
+    fun `Repository oppdaterer etter id uavhengig av timestamp`() {
         val opprinnelig = lagNarmesteLeder()
         val lagret = narmesteLederRepository.save(opprinnelig)
         lagret.id.shouldNotBeNull()
@@ -39,7 +39,7 @@ class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `henter bare aktive nærmeste ledere for oppgitte identer`() {
+    fun `Henter bare aktive nærmeste ledere for oppgitte identer`() {
         val aktiv = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "aktiv-test"))
         val inaktiv =
             narmesteLederRepository.save(
@@ -53,7 +53,7 @@ class NarmesteLederRepositoryIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `testdata reset sletter aktive og inaktive nærmeste ledere for oppgitt ident`() {
+    fun `Testdata-reset sletter aktive og inaktive nærmeste ledere for oppgitt ident`() {
         val fnr = "reset-test"
         val annetFnr = "reset-annen"
         narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = fnr))

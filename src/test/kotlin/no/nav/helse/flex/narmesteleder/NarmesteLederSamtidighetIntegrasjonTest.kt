@@ -24,7 +24,7 @@ class NarmesteLederSamtidighetIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `meldinger fra team sykmelding sletter avkreftet rad uten tidsstempelfiltrering`() {
+    fun `Meldinger fra team sykmelding sletter avkreftet rad uten tidsstempelfiltrering`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val transaksjon = TransactionTemplate(transactionManager)
         transaksjon.executeWithoutResult { oppdatering.behandleMeldingFraKafka(melding.serialisertTilString()) }
@@ -40,7 +40,7 @@ class NarmesteLederSamtidighetIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
+    fun `Meldinger fra team sykmelding oppdaterer aktiv rad også ved eldre tidsstempel`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         val transaksjon = TransactionTemplate(transactionManager)
         transaksjon.executeWithoutResult { oppdatering.behandleMeldingFraKafka(melding.serialisertTilString()) }

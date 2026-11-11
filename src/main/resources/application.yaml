@@ -29,7 +29,6 @@ aiven-kafka:
 narmeste-leder:
   esyfo-consumer-aktiv: ${NARMESTE_LEDER_ESYFO_CONSUMER_AKTIV:false}
 
-
 management:
   endpoint:
     health.probes.enabled: true
