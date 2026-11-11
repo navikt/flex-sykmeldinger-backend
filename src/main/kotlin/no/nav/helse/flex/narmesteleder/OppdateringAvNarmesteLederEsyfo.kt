@@ -25,50 +25,54 @@ class OppdateringAvNarmesteLederEsyfo(
 
     @Transactional(rollbackFor = [Exception::class])
     fun behandleBatch(records: List<ConsumerRecord<String, String?>>) {
-        // Fast låserekkefølge mellom partisjoner; sorteringen bevarer record-rekkefølgen innen hver partisjon.
         records.sortedBy { it.partition() }.forEach { behandle(it) }
     }
 
     @Transactional(rollbackFor = [Exception::class])
     fun behandle(record: ConsumerRecord<String, String?>): Boolean {
-        val sistPafort = checkpoint.lasOgHentOffset(record.topic(), record.partition())
-        if (record.offset() <= sistPafort) return false
+        val sistBehandlet = checkpoint.lasOgHentOffset(record.topic(), record.partition())
+        if (record.offset() <= sistBehandlet) return false
 
         val id = UUID.fromString(record.key())
-        if (record.value() == null) {
+        val verdi = record.value()
+        if (verdi == null) {
             repository.deleteByNarmesteLederId(id)
         } else {
-            val melding: NarmesteLederLeesah = objectMapper.readValue(record.value()!!)
+            val melding = objectMapper.readValue<NarmesteLederLeesah>(verdi)
             require(melding.narmesteLederId == id) { "Nøkkel stemmer ikke med ESYFO-payload" }
-            require(melding.orgnummer.matches(Regex("[0-9]{9}"))) { "Ugyldig orgnummer i ESYFO-payload" }
-            val navn =
-                if (melding.aktivTom != null) {
-                    null
-                } else {
-                    try {
-                        pdlClient.hentFormattertNavn(melding.narmesteLederFnr)
-                    } catch (_: FunctionalPdlError) {
-                        log.warn("Funksjonell PDL-feil ved navneoppslag for ESYFO-projeksjon")
-                        if (environmentToggles.isDevelopment()) "Navn Navnesen" else null
-                    }
-                }
-            val eksisterende = repository.findByNarmesteLederId(id)
-            repository.save(
-                NarmesteLederEsyfo(
-                    id = eksisterende?.id,
-                    oppdatert = Instant.now(),
-                    timestamp = melding.timestamp.toInstant(),
-                    narmesteLederId = id,
-                    orgnummer = melding.orgnummer,
-                    brukerFnr = melding.fnr,
-                    narmesteLederFnr = melding.narmesteLederFnr,
-                    aktivFom = melding.aktivFom,
-                    aktivTom = melding.aktivTom,
-                    narmesteLederNavn = navn,
-                ),
-            )
+            lagre(melding)
         }
         checkpoint.lagreOffset(record.topic(), record.partition(), record.offset())
         return true
+    }
+
+    private fun lagre(melding: NarmesteLederLeesah) {
+        require(melding.orgnummer.matches(Regex("[0-9]{9}"))) { "Ugyldig orgnummer i ESYFO-payload" }
+        val navn =
+            if (melding.aktivTom != null) {
+                null
+            } else {
+                try {
+                    pdlClient.hentFormattertNavn(melding.narmesteLederFnr)
+                } catch (_: FunctionalPdlError) {
+                    log.warn("Funksjonell PDL-feil ved navneoppslag for ESYFO-projeksjon")
+                    if (environmentToggles.isDevelopment()) "Navn Navnesen" else null
+                }
+            }
+        val eksisterende = repository.findByNarmesteLederId(melding.narmesteLederId)
+        repository.save(
+            NarmesteLederEsyfo(
+                id = eksisterende?.id,
+                oppdatert = Instant.now(),
+                timestamp = melding.timestamp.toInstant(),
+                narmesteLederId = melding.narmesteLederId,
+                orgnummer = melding.orgnummer,
+                brukerFnr = melding.fnr,
+                narmesteLederFnr = melding.narmesteLederFnr,
+                aktivFom = melding.aktivFom,
+                aktivTom = melding.aktivTom,
+                narmesteLederNavn = navn,
+            ),
+        )
     }
 }
