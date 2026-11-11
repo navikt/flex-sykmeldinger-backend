@@ -122,10 +122,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @Test
     fun `Consumeren for eSyfo leser historikk som batch uten å endre eksisterende consumer`() {
-        esyfoFactory.isBatchListener shouldBe true
-        checkNotNull(esyfoFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
-        (eksisterendeFactory.isBatchListener == true) shouldBe false
-        checkNotNull(eksisterendeFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
+        kontrollerBatchKonfigurasjon()
         val container =
             kafkaListenerEndpointRegistry.listenerContainers.single {
                 it.containerProperties.topics?.contains(NARMESTELEDER_ESYFO_LEESAH_TOPIC) == true
@@ -133,16 +130,7 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         container.isRunning shouldBe false
         val melding = lagNarmesteLederLeesah(UUID.randomUUID(), orgnummer = "123456789", aktivTom = LocalDate.now())
         val siste = melding.copy(orgnummer = "987654321", timestamp = melding.timestamp.minusDays(1))
-        kafkaProducer
-            .send(
-                ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, melding.narmesteLederId.toString(), melding.serialisertTilString()),
-            ).get()
-        val offset =
-            kafkaProducer
-                .send(
-                    ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, melding.narmesteLederId.toString(), siste.serialisertTilString()),
-                ).get()
-                .offset()
+        val offset = publiserHistorikk(melding, siste)
         narmesteLederEsyfoRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
         try {
             container.start()
@@ -160,6 +148,28 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
             narmesteLederEsyfoRepository.deleteAll()
             jdbcTemplate.update("DELETE FROM narmeste_leder_esyfo_checkpoint WHERE topic = ?", NARMESTELEDER_ESYFO_LEESAH_TOPIC)
         }
+    }
+
+    private fun kontrollerBatchKonfigurasjon() {
+        esyfoFactory.isBatchListener shouldBe true
+        checkNotNull(esyfoFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
+        (eksisterendeFactory.isBatchListener == true) shouldBe false
+        checkNotNull(eksisterendeFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
+    }
+
+    private fun publiserHistorikk(
+        første: NarmesteLederLeesah,
+        siste: NarmesteLederLeesah,
+    ): Long {
+        kafkaProducer
+            .send(
+                ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, første.narmesteLederId.toString(), første.serialisertTilString()),
+            ).get()
+        return kafkaProducer
+            .send(
+                ProducerRecord(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, siste.narmesteLederId.toString(), siste.serialisertTilString()),
+            ).get()
+            .offset()
     }
 
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
