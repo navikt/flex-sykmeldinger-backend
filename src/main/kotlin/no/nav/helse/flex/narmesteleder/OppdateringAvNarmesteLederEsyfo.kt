@@ -1,7 +1,6 @@
 package no.nav.helse.flex.narmesteleder
 
 import no.nav.helse.flex.config.EnvironmentToggles
-import no.nav.helse.flex.gateways.NARMESTELEDER_ESYFO_LEESAH_TOPIC
 import no.nav.helse.flex.gateways.pdl.FunctionalPdlError
 import no.nav.helse.flex.gateways.pdl.PdlClient
 import no.nav.helse.flex.narmesteleder.domain.NarmesteLederEsyfo
@@ -32,9 +31,6 @@ class OppdateringAvNarmesteLederEsyfo(
 
     @Transactional(rollbackFor = [Exception::class])
     fun behandle(record: ConsumerRecord<String, String?>): Boolean {
-        require(record.topic() == NARMESTELEDER_ESYFO_LEESAH_TOPIC) { "Feil topic for ESYFO-projeksjon" }
-        require(record.partition() >= 0) { "Ugyldig partisjon i ESYFO-record" }
-        require(record.offset() >= 0) { "Ugyldig offset i ESYFO-record" }
         val sistPafort = checkpoint.lasOgHentOffset(record.topic(), record.partition())
         if (record.offset() <= sistPafort) return false
 

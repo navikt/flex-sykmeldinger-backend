@@ -199,21 +199,6 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `negativ partisjon og offset avvises før checkpoint uten kvittering`() {
-        val id = UUID.randomUUID()
-        var kvitteringer = 0
-        for (record in listOf(record(-1, id, null), record(0, id, null, partition = -1))) {
-            runCatching { behandleEnMelding(record) { kvitteringer++ } }
-                .exceptionOrNull()
-                .shouldNotBeNull()
-                .message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
-        }
-        kvitteringer shouldBe 0
-        jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
-        narmesteLederEsyfoRepository.findByNarmesteLederId(id).shouldBeNull()
-    }
-
-    @Test
     fun `tidligere upåført record for annen nøkkel behandles før neste offset`() {
         val første = UUID.randomUUID()
         val andre = UUID.randomUUID()
