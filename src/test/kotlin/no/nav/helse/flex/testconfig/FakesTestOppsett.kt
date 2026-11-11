@@ -18,11 +18,13 @@ import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfig
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 
 const val IGNORED_KAFKA_BROKERS = "localhost:1"
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test", "fakeunleash", "fakes")
 @AutoConfigureMetrics
 @AutoConfigureTracing
 @EnableMockOAuth2Server

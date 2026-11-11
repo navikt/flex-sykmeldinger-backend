@@ -1,9 +1,11 @@
 package no.nav.helse.flex.narmesteleder
 
+import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 
 @Repository
+@Profile("!fakes")
 class NarmesteLederEsyfoCheckpoint(
     private val jdbcTemplate: JdbcTemplate,
 ) {

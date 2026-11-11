@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import no.nav.helse.flex.gateways.NARMESTELEDER_ESYFO_LEESAH_TOPIC
+import no.nav.helse.flex.gateways.NarmestelederEsyfoListener
 import no.nav.helse.flex.gateways.NarmestelederListener
 import no.nav.helse.flex.gateways.pdl.lagGetPersonResponseData
 import no.nav.helse.flex.gateways.pdl.lagGraphQlResponse
@@ -27,7 +28,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
-    @Autowired lateinit var listener: NarmestelederListener
+    @Autowired lateinit var listener: NarmestelederEsyfoListener
+
+    @Autowired lateinit var gammelListener: NarmestelederListener
 
     @Autowired lateinit var oppdatering: OppdateringAvNarmesteLederEsyfo
 
@@ -61,7 +64,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     ) = listener.listenEsyfo(listOf(record), acknowledgment)
 
     @Test
-    fun `batch bevarer rekkefølge og tombstones og kvitteres én gang etter commit`() {
+    fun `Batch bevarer rekkefølge og tombstones og kvitteres én gang etter commit`() {
         val første = UUID.randomUUID()
         val andre = UUID.randomUUID()
         val inaktiv = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
@@ -87,7 +90,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `feil i en batch ruller tilbake alle partisjoner uten kvittering og kan forsøkes igjen`() {
+    fun `Feil i en batch ruller tilbake alle partisjoner uten kvittering og kan forsøkes igjen`() {
         val første = UUID.randomUUID()
         val andre = UUID.randomUUID()
         val inaktiv = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
@@ -114,7 +117,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `tom batch endrer ikke databasen og kvitteres ikke`() {
+    fun `Tom batch endrer ikke databasen og kvitteres ikke`() {
         var kvitteringer = 0
         listener.listenEsyfo(emptyList()) { kvitteringer++ }
         kvitteringer shouldBe 0
@@ -122,7 +125,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `funksjonell PDL-feil lagrer nullable navn og lar tombstone og annen nøkkel passere`() {
+    fun `Funksjonell PDL-feil lagrer nullable navn og lar tombstone og annen nøkkel passere`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher {
                 MockResponse
@@ -152,7 +155,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `teknisk PDL-feil lar rad og checkpoint stå urørt uten kvittering`() {
+    fun `Teknisk PDL-feil lar rad og checkpoint stå urørt uten kvittering`() {
         pdlMockWebServer.dispatcher = simpleDispatcher { MockResponse.Builder().code(503).build() }
         val id = UUID.randomUUID()
         var kvitteringer = 0
@@ -172,13 +175,13 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `avkrefting sletter fra eksisterende ledertabell og lagres som inaktiv i eSyfo-tabellen`() {
+    fun `Avkrefting sletter fra eksisterende ledertabell og lagres som inaktiv i eSyfo-tabellen`() {
         val id = UUID.randomUUID()
         val aktiv = melding(id)
         val inaktiv = aktiv.copy(aktivTom = LocalDate.parse("2025-01-01"))
         var gammelKvittering = 0
         var nyKvittering = 0
-        listener.listen(
+        gammelListener.listen(
             ConsumerRecord(no.nav.helse.flex.gateways.NARMESTELEDER_LEESAH_TOPIC, 0, 0, id.toString(), aktiv.serialisertTilString()),
         ) {
             gammelKvittering++
@@ -186,7 +189,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         narmesteLederRepository.findByNarmesteLederId(id).shouldNotBeNull()
 
         behandleEnMelding(record(0, id, inaktiv.serialisertTilString())) { nyKvittering++ }
-        listener.listen(
+        gammelListener.listen(
             ConsumerRecord(no.nav.helse.flex.gateways.NARMESTELEDER_LEESAH_TOPIC, 0, 1, id.toString(), inaktiv.serialisertTilString()),
         ) {
             gammelKvittering++
@@ -199,7 +202,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `tidligere upåført record for annen nøkkel behandles før neste offset`() {
+    fun `Tidligere upåført record for annen nøkkel behandles før neste offset`() {
         val første = UUID.randomUUID()
         val andre = UUID.randomUUID()
         val inaktivFørste = melding(første).copy(aktivTom = LocalDate.parse("2025-01-01"))
@@ -216,7 +219,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `offset styrer ny tabell og tombstone bevarer checkpoint`() {
+    fun `Offset styrer ny tabell og tombstone bevarer checkpoint`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Test", etternavn = "Leder")) }
         val id = UUID.randomUUID()
@@ -243,7 +246,24 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `ugyldig melding rulles tilbake uten kvittering og neste record kan behandles`() {
+    fun `Ugyldig eller manglende UUID-nøkkel gir sanitert feil uten kvittering`() {
+        var kvitteringer = 0
+        listOf(null, "ugyldig-uuid").forEach { key ->
+            val feil =
+                runCatching {
+                    listener.listenEsyfo(
+                        listOf(ConsumerRecord<String, String?>(NARMESTELEDER_ESYFO_LEESAH_TOPIC, 0, 0L, key, null)),
+                    ) { kvitteringer++ }
+                }.exceptionOrNull().shouldNotBeNull()
+            feil.message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
+            feil.cause.shouldBeNull()
+        }
+        kvitteringer shouldBe 0
+        jdbcTemplate.queryForObject("SELECT count(*) FROM narmeste_leder_esyfo_checkpoint", Int::class.java) shouldBe 0
+    }
+
+    @Test
+    fun `Ugyldig melding rulles tilbake uten kvittering og neste record kan behandles`() {
         val id = UUID.randomUUID()
         var kvitteringer = 0
         runCatching { behandleEnMelding(record(0, id, melding(UUID.randomUUID()).serialisertTilString())) { kvitteringer++ } }
@@ -264,7 +284,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `kvitteringsfeil etter commit gir ufarlig ny levering`() {
+    fun `Kvitteringsfeil etter commit gir ufarlig ny levering`() {
         val id = UUID.randomUUID()
         val inaktiv = melding(id).copy(aktivTom = LocalDate.parse("2025-01-01"))
         runCatching { behandleEnMelding(record(2, id, inaktiv.serialisertTilString())) { error("Kvittering feilet") } }
@@ -276,7 +296,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `databasefeil etter domeneskriving ruller tilbake både rad og checkpoint`() {
+    fun `Databasefeil etter domeneskriving ruller tilbake både rad og checkpoint`() {
         val id = UUID.randomUUID()
         val inaktiv = melding(id).copy(aktivTom = LocalDate.parse("2025-01-01"))
         jdbcTemplate.execute(
@@ -297,7 +317,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `manglende PDL-navn er nullable i prod og får standardnavn i dev`() {
+    fun `Manglende PDL-navn er nullable i prod og får standardnavn i dev`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher {
                 val data = lagGetPersonResponseData()
@@ -317,7 +337,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `parallell første checkpoint-innsetting serialiseres per partisjon`() {
+    fun `Parallell første checkpoint-innsetting serialiseres per partisjon`() {
         val id = UUID.randomUUID()
         val inaktiv = melding(id).copy(aktivTom = LocalDate.parse("2025-01-01"))
         val start = CountDownLatch(1)

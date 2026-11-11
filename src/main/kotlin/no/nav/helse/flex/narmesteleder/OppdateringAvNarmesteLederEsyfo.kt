@@ -8,6 +8,7 @@ import no.nav.helse.flex.narmesteleder.domain.NarmesteLederLeesah
 import no.nav.helse.flex.utils.logger
 import no.nav.helse.flex.utils.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.module.kotlin.readValue
@@ -15,6 +16,7 @@ import java.time.Instant
 import java.util.UUID
 
 @Component
+@Profile("!fakes")
 class OppdateringAvNarmesteLederEsyfo(
     private val repository: NarmesteLederEsyfoRepository,
     private val checkpoint: NarmesteLederEsyfoCheckpoint,
@@ -34,10 +36,7 @@ class OppdateringAvNarmesteLederEsyfo(
         val sistPafort = checkpoint.lasOgHentOffset(record.topic(), record.partition())
         if (record.offset() <= sistPafort) return false
 
-        val id =
-            runCatching { UUID.fromString(record.key()) }.getOrNull()
-                ?: throw IllegalArgumentException("Ugyldig nøkkel i ESYFO-record")
-        require(record.key().equals(id.toString(), ignoreCase = true)) { "Ugyldig UUID-format i ESYFO-record" }
+        val id = UUID.fromString(record.key())
         if (record.value() == null) {
             repository.deleteByNarmesteLederId(id)
         } else {

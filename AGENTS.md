@@ -18,8 +18,9 @@ Ikke bruk IntelliJs terminalverktøy til å omgå begrensninger i shell-sandkass
 
 ## 2) Testing
 
+Følg [testreglene for Kotlin og Spring](AGENTS-testing.md).
+
 - Prioriter tester for endret domenelogikk
-- Foretrekk fakes der det ikke trengs integrasjonstester
 - Fake-tester arver fra `FakesTestOppsett` (uten database)
 - Integrasjonstester arver fra `IntegrasjonTestOppsett` (Testcontainers + Kafka)
 - Fakes for alle eksterne klienter ligger i `testconfig/fakes/`
