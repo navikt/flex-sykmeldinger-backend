@@ -51,7 +51,8 @@ utils/                  Felles hjelpere (Jackson, Kafka, logging)
 ## 4) Kodestil
 
 - All kode, kommentarer og UI-tekst på **norsk bokmål**
-- Bruk eksisterende mønstre i koden fremfor nye varianter
+- Les tilsvarende produksjonskode og tester før du velger løsning. Følg mønsteret i hvert repo, ikke kopier ukritisk mellom repoer.
+- Implementer bare avtalt omfang og migreringsfase. Unngå ekstra funksjoner, opprydding og formateringsstøy.
 
 ## 5) Git-workflow
 
