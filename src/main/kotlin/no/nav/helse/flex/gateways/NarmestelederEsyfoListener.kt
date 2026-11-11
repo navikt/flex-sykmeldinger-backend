@@ -16,7 +16,7 @@ class NarmestelederEsyfoListener(
     @KafkaListener(
         topics = [NARMESTELEDER_ESYFO_LEESAH_TOPIC],
         containerFactory = "narmesteLederEsyfoKafkaListenerContainerFactory",
-        autoStartup = "\${narmeste-leder.esyfo-consumer-aktiv:false}",
+        autoStartup = "\${spring.kafka.listener.auto-startup:true}",
     )
     fun listenEsyfo(
         records: List<ConsumerRecord<String, String?>>,

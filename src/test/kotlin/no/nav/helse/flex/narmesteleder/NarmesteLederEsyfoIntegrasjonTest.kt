@@ -37,7 +37,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
 
     @AfterEach
     fun afterEach() {
-        // eSyfo-consumeren er avslått, så både testdata og checkpoint kan slettes mellom testene.
+        // Consumeren er stoppet i testoppsettet, så både testdata og checkpoint kan slettes mellom testene.
         narmesteLederEsyfoRepository.deleteAll()
         jdbcTemplate.update("DELETE FROM narmeste_leder_esyfo_checkpoint")
         pdlMockWebServer.dispatcher = defaultPdlDispatcher

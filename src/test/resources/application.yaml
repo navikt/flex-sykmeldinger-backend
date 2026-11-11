@@ -9,6 +9,9 @@ aiven-kafka:
   auto-offset-reset: latest
 
 spring:
+  kafka:
+    listener:
+      auto-startup: false
   profiles:
     active: test,fakeunleash
   flyway:
