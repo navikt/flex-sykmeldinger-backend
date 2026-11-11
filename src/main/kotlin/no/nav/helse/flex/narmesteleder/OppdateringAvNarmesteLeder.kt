@@ -35,9 +35,9 @@ class OppdateringAvNarmesteLeder(
         if (narmesteLederLeesah.aktivTom != null) {
             if (narmesteLeder != null) {
                 narmesteLederRepository.delete(narmesteLeder)
-                log.info("Slettet narmesteleder")
+                log.info("Slettet narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
             } else {
-                log.info("Ignorerer ny inaktiv narmesteleder")
+                log.info("Ignorerer ny inaktiv narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
             }
             return
         }
@@ -54,13 +54,17 @@ class OppdateringAvNarmesteLeder(
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
                 } catch (_: PdlManglerNavnError) {
-                    log.warn("Fant ikke navn for leder i nærmeste leder kobling i PDL.")
+                    log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL.")
                     null
                 }
             }
 
         narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = narmesteLeder?.id, navn = narmestelederNavn))
-        log.info("Lagret narmesteleder")
+        if (narmesteLeder != null) {
+            log.info("Oppdatert narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+        } else {
+            log.info("Lagret narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+        }
     }
 
     fun String.tilNarmesteLederLeesah(): NarmesteLederLeesah = objectMapper.readValue(this)
