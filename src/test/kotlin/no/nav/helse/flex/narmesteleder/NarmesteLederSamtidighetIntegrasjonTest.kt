@@ -52,6 +52,5 @@ class NarmesteLederSamtidighetIntegrasjonTest : IntegrasjonTestOppsett() {
         val oppdatert = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
         oppdatert.id shouldBe opprinnelig.id
         oppdatert.orgnummer shouldBe "888888"
-        oppdatert.aktivTom.shouldBeNull()
     }
 }

@@ -75,7 +75,6 @@ private fun NarmesteLederLeesah.tilNarmesteLeder(
         orgnummer = orgnummer,
         narmesteLederFnr = narmesteLederFnr,
         aktivFom = aktivFom,
-        aktivTom = aktivTom,
         timestamp = timestamp.toInstant(),
         oppdatert = Instant.now(),
         narmesteLederNavn = navn,

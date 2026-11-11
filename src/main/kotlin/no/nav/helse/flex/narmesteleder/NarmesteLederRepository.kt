@@ -8,6 +8,4 @@ interface NarmesteLederRepository : CrudRepository<NarmesteLeder, String> {
     fun findByNarmesteLederId(narmesteLederId: UUID): NarmesteLeder?
 
     fun findAllByBrukerFnrIn(identer: List<String>): List<NarmesteLeder>
-
-    fun findAllByBrukerFnrInAndAktivTomIsNull(identer: List<String>): List<NarmesteLeder>
 }

@@ -80,25 +80,6 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `Henter aktiv leder selv om en nyere leder er inaktiv`() {
-        arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "1", orgnummer = "org1"))
-        val aktiv =
-            narmesteLederRepository.save(
-                lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1", aktivFom = LocalDate.parse("2022-01-01")),
-            )
-        val inaktiv =
-            narmesteLederRepository.save(
-                lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1", aktivFom = LocalDate.parse("2023-01-01"))
-                    .copy(aktivTom = LocalDate.parse("2024-01-01")),
-            )
-
-        val detaljer = arbeidsgiverDetaljerService.hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-
-        detaljer.single().naermesteLeder shouldBe aktiv
-        narmesteLederRepository.findAllByBrukerFnrIn(listOf("1")).toSet() shouldBe setOf(aktiv, inaktiv)
-    }
-
-    @Test
     fun `burde hente riktig arbeidsgiverDetaljer for person`() {
         arbeidsforholdRepository.saveAll(
             listOf(

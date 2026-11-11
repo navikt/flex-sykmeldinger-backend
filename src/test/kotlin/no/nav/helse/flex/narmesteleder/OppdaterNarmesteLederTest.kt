@@ -44,7 +44,6 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
 
         val lagret = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
         lagret.narmesteLederNavn shouldBe "Leder Navnesen"
-        lagret.aktivTom.shouldBeNull()
         lagret.brukerFnr shouldBe melding.fnr
         lagret.timestamp shouldBe melding.timestamp.toInstant()
     }
@@ -103,8 +102,6 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
         narmesteLederRepository
             .findByNarmesteLederId(melding.narmesteLederId)
             .shouldNotBeNull()
-            .aktivTom
-            .shouldBeNull()
         narmesteLederRepository.count() shouldBe 1
     }
 

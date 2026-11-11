@@ -26,7 +26,7 @@ class ArbeidsgiverDetaljerService(
         val arbeidsforhold = arbeidsforholdRepository.getAllByFnrIn(identer.alle())
         val filtrerteArbeidsforhold = periode?.let { arbeidsforhold.filtrerInnenPeriode(it) } ?: arbeidsforhold
 
-        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrInAndAktivTomIsNull(identer.alle())
+        val narmesteLedere = narmeseteLederRepository.findAllByBrukerFnrIn(identer.alle())
 
         return sammenstillArbeidsgiverDetaljer(
             arbeidsforhold = filtrerteArbeidsforhold,
