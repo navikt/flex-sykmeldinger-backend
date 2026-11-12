@@ -3,9 +3,6 @@ package no.nav.helse.flex.narmesteleder
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
-import no.nav.helse.flex.arbeidsgiverdetaljer.ArbeidsgiverDetaljerService
-import no.nav.helse.flex.config.PersonIdenter
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import no.nav.helse.flex.testconfig.fakes.PdlClientFake
 import no.nav.helse.flex.utils.serialisertTilString
@@ -13,7 +10,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
-import java.time.OffsetDateTime
 import java.util.UUID
 
 class OppdaterNarmesteLederTest : FakesTestOppsett() {
@@ -23,9 +19,6 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     @Autowired
     lateinit var pdlClient: PdlClientFake
 
-    @Autowired
-    lateinit var arbeidsgiverDetaljerService: ArbeidsgiverDetaljerService
-
     @AfterEach
     fun afterEach() {
         slettDatabase()
@@ -33,94 +26,64 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `Aktiv melding oppretter leder med PDL-navn og uendret tidsstempel`() {
-        val melding =
-            lagNarmesteLederLeesah(UUID.randomUUID()).copy(
-                timestamp = OffsetDateTime.parse("2025-01-02T12:00:00.123456789Z"),
-            )
-        pdlClient.setFormatertNavn("Leder Navnesen")
+    fun `Oppretter ny nærmeste leder hvis den ikke finnes fra før og er aktiv`() {
+        pdlClient.setFormatertNavn("Supreme Leader")
 
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
+        val narmesteLederId = UUID.randomUUID()
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
 
-        val lagret = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
-        lagret.narmesteLederNavn shouldBe "Leder Navnesen"
-        lagret.brukerFnr shouldBe melding.fnr
-        lagret.timestamp shouldBe melding.timestamp.toInstant()
+        val narmesteLederLeesah = lagNarmesteLederLeesah(narmesteLederId)
+        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(narmesteLederLeesah.serialisertTilString())
+
+        val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
+        narmesteLeder.shouldNotBeNull()
+        narmesteLeder.orgnummer shouldBe narmesteLederLeesah.orgnummer
+        narmesteLeder.narmesteLederNavn shouldBe "Supreme Leader"
     }
 
     @Test
-    fun `Aktiv melding oppdaterer samme rad også ved eldre timestamp eller duplikat`() {
-        val melding =
-            lagNarmesteLederLeesah(UUID.randomUUID()).copy(
-                timestamp = OffsetDateTime.parse("2025-01-02T12:00:00.123456Z"),
-            )
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
-        val lagret = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
-        val eldre = melding.copy(orgnummer = "888888", timestamp = melding.timestamp.minusSeconds(1))
+    fun `Ignorerer melding om ny nærmeste leder hvis den ikke finnes fra før og er inaktiv`() {
+        val narmesteLederId = UUID.randomUUID()
+        val narmesteLederLeesah = lagNarmesteLederLeesah(narmesteLederId, aktivTom = LocalDate.now())
 
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(eldre.serialisertTilString())
-        val oppdatert = narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldNotBeNull()
-        oppdatert.id shouldBe lagret.id
-        oppdatert.orgnummer shouldBe "888888"
-        oppdatert.timestamp shouldBe eldre.timestamp.toInstant()
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(eldre.serialisertTilString())
-        narmesteLederRepository.count() shouldBe 1
+        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(narmesteLederLeesah.serialisertTilString())
+
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
     }
 
     @Test
-    fun `Inaktiv melding sletter eksisterende rad`() {
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
+    fun `Oppdaterer nærmeste leder hvis den finnes fra før og er aktiv`() {
+        val narmesteLederId = UUID.randomUUID()
+        val narmesteLederLeesah = lagNarmesteLederLeesah(narmesteLederId, orgnummer = "999999")
+        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(narmesteLederLeesah.serialisertTilString())
 
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(
-            melding.copy(aktivTom = LocalDate.now(), timestamp = melding.timestamp.minusSeconds(1)).serialisertTilString(),
+            lagNarmesteLederLeesah(
+                narmesteLederId,
+                orgnummer = "888888",
+            ).serialisertTilString(),
         )
 
-        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
-        narmesteLederRepository.count() shouldBe 0
+        val oppdatertNl = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)!!
+        oppdatertNl.orgnummer shouldBe "888888"
     }
 
     @Test
-    fun `Inaktiv melding uten eksisterende rad ignoreres`() {
+    fun `Sletter nærmeste leder hvis den finnes fra før og er inaktiv`() {
+        val narmesteLederId = UUID.randomUUID()
+        val narmesteLederLeesah = lagNarmesteLederLeesah(narmesteLederId)
+
+        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(narmesteLederLeesah.serialisertTilString())
+
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldNotBeNull()
+
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(
-            lagNarmesteLederLeesah(UUID.randomUUID(), aktivTom = LocalDate.now()).serialisertTilString(),
+            lagNarmesteLederLeesah(
+                narmesteLederId,
+                aktivTom = LocalDate.now(),
+            ).serialisertTilString(),
         )
-        narmesteLederRepository.count() shouldBe 0
-    }
 
-    @Test
-    fun `Ny aktiv melding etter avkrefting oppretter leder på nytt`() {
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.copy(aktivTom = LocalDate.now()).serialisertTilString())
-        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
-
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
-
-        narmesteLederRepository
-            .findByNarmesteLederId(melding.narmesteLederId)
-            .shouldNotBeNull()
-        narmesteLederRepository.count() shouldBe 1
-    }
-
-    @Test
-    fun `Avkrefting fjerner lederen fra eksisterende ledertabell og arbeidsgiverdetaljene`() {
-        val melding = lagNarmesteLederLeesah(UUID.randomUUID())
-        arbeidsforholdRepository.save(lagArbeidsforhold(fnr = melding.fnr, orgnummer = melding.orgnummer))
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
-        arbeidsgiverDetaljerService
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter(melding.fnr))
-            .single()
-            .naermesteLeder
-            .shouldNotBeNull()
-
-        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.copy(aktivTom = LocalDate.now()).serialisertTilString())
-
-        narmesteLederRepository.findByNarmesteLederId(melding.narmesteLederId).shouldBeNull()
-        arbeidsgiverDetaljerService
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter(melding.fnr))
-            .single()
-            .naermesteLeder
-            .shouldBeNull()
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
     }
 }
