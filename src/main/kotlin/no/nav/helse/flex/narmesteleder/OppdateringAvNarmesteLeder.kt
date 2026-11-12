@@ -26,38 +26,38 @@ class OppdateringAvNarmesteLeder(
         val narmesteLederLeesah = meldingString.tilNarmesteLederLeesah()
         val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederLeesah.narmesteLederId)
 
-        if (narmesteLederLeesah.aktivTom != null) {
-            if (narmesteLeder != null) {
-                narmesteLederRepository.delete(narmesteLeder)
-                log.info("Slettet narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            } else {
-                log.info("Ignorerer ny inaktiv narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
-            }
-            return
-        }
-
         val narmestelederNavn =
             if (environmentToggles.isDevelopment()) {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
                 } catch (_: FunctionalPdlError) {
-                    log.warn("Fant ikke navn for narmesteleder i PDL. Bruker standardnavn.")
+                    log.warn("Fant ikke navn for narmesteleder i PDL. Bruker 'Navn Navnesen'.")
                     "Navn Navnesen"
                 }
             } else {
                 try {
                     pdlClient.hentFormattertNavn(narmesteLederLeesah.narmesteLederFnr)
                 } catch (_: PdlManglerNavnError) {
-                    log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL.")
+                    log.warn("Fant ikke navn for leder i nærmeste leder kobling ${narmesteLederLeesah.narmesteLederId} i PDL'.")
                     null
                 }
             }
 
-        narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = narmesteLeder?.id, navn = narmestelederNavn))
         if (narmesteLeder != null) {
-            log.info("Oppdatert narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            if (narmesteLederLeesah.aktivTom == null) {
+                narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = narmesteLeder.id, navn = narmestelederNavn))
+                log.info("Oppdatert narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            } else {
+                narmesteLederRepository.delete(narmesteLeder)
+                log.info("Slettet narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            }
         } else {
-            log.info("Lagret narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            if (narmesteLederLeesah.aktivTom == null) {
+                narmesteLederRepository.save(narmesteLederLeesah.tilNarmesteLeder(id = null, navn = narmestelederNavn))
+                log.info("Lagret narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            } else {
+                log.info("Ignorerer ny inaktiv narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
+            }
         }
     }
 

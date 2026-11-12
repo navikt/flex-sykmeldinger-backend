@@ -3,6 +3,7 @@ package no.nav.helse.flex.gateways
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
 import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
+import no.nav.helse.flex.utils.KafkaKonsumerUtils
 import no.nav.helse.flex.utils.errorSecure
 import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -24,29 +25,23 @@ class NarmestelederListener(
         properties = ["auto.offset.reset = latest"],
     )
     fun listen(
-        cr: ConsumerRecord<String, String?>,
+        cr: ConsumerRecord<String, String>,
         acknowledgment: Acknowledgment,
-    ) {
-        val melding = cr.value()
-        if (melding == null) {
-            log.info("Ignorerer tombstone for nærmeste leder")
-        } else {
-            try {
-                oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding)
-            } catch (e: Exception) {
-                log.errorSecure(
-                    message = "Feil ved håndtering av nærmeste leder hendelse, exception: ${e::class.simpleName}. Dette vil bli retryet",
-                    secureThrowable = e,
-                )
-                throw KafkaErrorHandlerException(
-                    errorHandlerLoggingEnabled = false,
-                    cause = e,
-                )
-            }
+    ) = KafkaKonsumerUtils.medMdcMetadata(cr) {
+        try {
+            oppdateringAvNarmesteLeder.behandleMeldingFraKafka(cr.value())
+        } catch (e: Exception) {
+            log.errorSecure(
+                message = "Feil ved håndtering av nærmeste leder hendelse, exception: ${e::class.simpleName}. Dette vil bli retryet",
+                secureThrowable = e,
+            )
+            throw KafkaErrorHandlerException(
+                errorHandlerLoggingEnabled = false,
+                cause = e,
+            )
         }
         acknowledgment.acknowledge()
     }
 }
 
 const val NARMESTELEDER_LEESAH_TOPIC = "teamsykmelding.syfo-narmesteleder-leesah"
-const val NARMESTELEDER_ESYFO_LEESAH_TOPIC = "team-esyfo.syfo-narmesteleder-leesah"

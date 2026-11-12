@@ -68,30 +68,6 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `Tombstone som tidligere ble retryet hindrer ikke ukjent status og påfølgende melding`() {
-        pdlMockWebServer.dispatcher =
-            simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }
-
-        val lederMedUkjentStatus = lagNarmesteLederLeesah(UUID.randomUUID())
-        val nesteLeder = lagNarmesteLederLeesah(UUID.randomUUID())
-        val meldingMedUkjentStatus = lederMedUkjentStatus.serialisertTilString().dropLast(1) + ",\"status\":\"NOE_NYTT\"}"
-
-        listOf(
-            UUID.randomUUID().toString() to null,
-            lederMedUkjentStatus.narmesteLederId.toString() to meldingMedUkjentStatus,
-            nesteLeder.narmesteLederId.toString() to nesteLeder.serialisertTilString(),
-        ).forEach { (key, value) ->
-            kafkaProducer.send(ProducerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, key, value)).get()
-        }
-
-        await().atMost(10, TimeUnit.SECONDS).until {
-            narmesteLederRepository.findByNarmesteLederId(nesteLeder.narmesteLederId) != null
-        }
-        narmesteLederRepository.findByNarmesteLederId(lederMedUkjentStatus.narmesteLederId).shouldNotBeNull()
-        narmesteLederRepository.findByNarmesteLederId(nesteLeder.narmesteLederId).shouldNotBeNull()
-    }
-
-    @Test
     fun `Begge consumers oppdaterer bare sin egen tabell for samme relasjon`() {
         pdlMockWebServer.dispatcher =
             simpleDispatcher { lagGraphQlResponse(lagGetPersonResponseData(fornavn = "Supreme", etternavn = "Leader")) }

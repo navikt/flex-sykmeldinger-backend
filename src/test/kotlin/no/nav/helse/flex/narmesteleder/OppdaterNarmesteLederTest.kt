@@ -68,10 +68,9 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `Inaktiv melding sletter eksisterende rad uten PDL-oppslag`() {
+    fun `Inaktiv melding sletter eksisterende rad`() {
         val melding = lagNarmesteLederLeesah(UUID.randomUUID())
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(melding.serialisertTilString())
-        pdlClient.setFormatertNavn(IllegalStateException("PDL skal ikke kalles ved avkrefting"))
 
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(
             melding.copy(aktivTom = LocalDate.now(), timestamp = melding.timestamp.minusSeconds(1)).serialisertTilString(),
@@ -82,8 +81,7 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
     }
 
     @Test
-    fun `Inaktiv melding uten eksisterende rad ignoreres uten PDL`() {
-        pdlClient.setFormatertNavn(IllegalStateException("PDL skal ikke kalles for ukjent inaktiv leder"))
+    fun `Inaktiv melding uten eksisterende rad ignoreres`() {
         oppdateringAvNarmesteLeder.behandleMeldingFraKafka(
             lagNarmesteLederLeesah(UUID.randomUUID(), aktivTom = LocalDate.now()).serialisertTilString(),
         )

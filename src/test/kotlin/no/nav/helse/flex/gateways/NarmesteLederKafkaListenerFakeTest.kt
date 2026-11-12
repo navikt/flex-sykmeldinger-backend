@@ -1,6 +1,5 @@
 package no.nav.helse.flex.gateways
 
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.narmesteleder.lagNarmesteLederLeesah
@@ -19,35 +18,6 @@ class NarmesteLederKafkaListenerFakeTest : FakesTestOppsett() {
     @AfterEach
     fun afterEach() {
         slettDatabase()
-    }
-
-    @Test
-    fun `Tombstone kvitteres uten oppdatering og ukjent status hindrer ikke neste melding`() {
-        val tombstoneId = UUID.randomUUID()
-        val lederMedUkjentStatus = lagNarmesteLederLeesah(UUID.randomUUID())
-        val nesteLeder = lagNarmesteLederLeesah(UUID.randomUUID())
-        val meldingMedUkjentStatus = lederMedUkjentStatus.serialisertTilString().dropLast(1) + ",\"status\":\"NOE_NYTT\"}"
-        var kvitteringer = 0
-
-        listener.listen(ConsumerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, 0, tombstoneId.toString(), null)) { kvitteringer++ }
-        kvitteringer shouldBe 1
-        narmesteLederRepository.findByNarmesteLederId(tombstoneId).shouldBeNull()
-
-        listener.listen(
-            ConsumerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, 1, lederMedUkjentStatus.narmesteLederId.toString(), meldingMedUkjentStatus),
-        ) {
-            kvitteringer++
-        }
-        kvitteringer shouldBe 2
-        narmesteLederRepository.findByNarmesteLederId(lederMedUkjentStatus.narmesteLederId).shouldNotBeNull()
-
-        listener.listen(
-            ConsumerRecord(NARMESTELEDER_LEESAH_TOPIC, 0, 2, nesteLeder.narmesteLederId.toString(), nesteLeder.serialisertTilString()),
-        ) {
-            kvitteringer++
-        }
-        kvitteringer shouldBe 3
-        narmesteLederRepository.findByNarmesteLederId(nesteLeder.narmesteLederId).shouldNotBeNull()
     }
 
     @Test
