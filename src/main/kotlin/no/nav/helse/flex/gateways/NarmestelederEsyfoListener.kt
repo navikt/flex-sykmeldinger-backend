@@ -16,7 +16,7 @@ class NarmestelederEsyfoListener(
     @KafkaListener(
         topics = [NARMESTELEDER_ESYFO_LEESAH_TOPIC],
         containerFactory = "narmesteLederEsyfoKafkaListenerContainerFactory",
-        autoStartup = "\${spring.kafka.listener.auto-startup:true}",
+        autoStartup = "\${narmeste-leder.esyfo-auto-startup:true}",
         concurrency = "\${ESYFO_KAFKA_CONCURRENCY:1}",
     )
     fun listenEsyfo(

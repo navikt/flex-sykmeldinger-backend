@@ -167,6 +167,9 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     private fun kontrollerBatchKonfigurasjon() {
+        kafkaListenerEndpointRegistry.listenerContainers
+            .single { it.containerProperties.topics?.contains(NARMESTELEDER_LEESAH_TOPIC) == true }
+            .isRunning shouldBe true
         esyfoFactory.isBatchListener shouldBe true
         checkNotNull(esyfoFactory.consumerFactory).configurationProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] shouldBe "500"
         (eksisterendeFactory.isBatchListener == true) shouldBe false
