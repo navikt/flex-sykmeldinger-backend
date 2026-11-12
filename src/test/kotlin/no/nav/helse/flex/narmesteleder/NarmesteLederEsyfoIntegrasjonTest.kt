@@ -93,7 +93,7 @@ class NarmesteLederEsyfoIntegrasjonTest : IntegrasjonTestOppsett() {
         val feil =
             runCatching {
                 listener.listenEsyfo(
-                    listOf(record(0, andre, "{", partition = 1), record(0, første, inaktiv.serialisertTilString())),
+                    listOf(record(0, første, inaktiv.serialisertTilString()), record(0, andre, "{", partition = 1)),
                 ) { kvitteringer++ }
             }.exceptionOrNull().shouldNotBeNull()
         feil.message shouldBe "ESYFO-projeksjon feilet; batchen blir forsøkt igjen"
