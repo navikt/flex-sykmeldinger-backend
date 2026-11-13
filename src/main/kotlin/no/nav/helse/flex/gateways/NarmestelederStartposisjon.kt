@@ -17,7 +17,7 @@ const val NARMESTELEDER_STARTPOSISJON = "narmestelederStartposisjon"
 class NarmestelederStartposisjon : ContainerPostProcessor<String, String, AbstractMessageListenerContainer<String, String>> {
     override fun postProcess(container: AbstractMessageListenerContainer<String, String>) {
         container.containerProperties.assignmentCommitOption = ContainerProperties.AssignmentCommitOption.NEVER
-        container.containerProperties.setConsumerRebalanceListener(SeekTilTidspunktUtenCommittedOffset(Duration.ofDays(1)))
+        container.containerProperties.setConsumerRebalanceListener(SeekTilTidspunktUtenCommittedOffset(Duration.ofDays(7)))
     }
 }
 
