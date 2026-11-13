@@ -21,8 +21,8 @@ class NarmestelederListener(
     @KafkaListener(
         topics = [NARMESTELEDER_LEESAH_TOPIC],
         containerFactory = "aivenKafkaListenerContainerFactory",
-        // TODO: Hvordan offset?
         properties = ["auto.offset.reset = latest"],
+        autoStartup = "\${narmeste-leder.teamsykmelding-listener-aktiv:false}",
     )
     fun listen(
         cr: ConsumerRecord<String, String>,

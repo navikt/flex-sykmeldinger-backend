@@ -50,11 +50,28 @@ class NarmesteLederKafkaListenerIntegrasjonTest : IntegrasjonTestOppsett() {
         narmesteLeder.narmesteLederNavn shouldBe "Supreme Leader"
     }
 
+    @Test
+    fun `Tombstone sletter nærmeste leder`() {
+        val narmesteLederId = UUID.randomUUID()
+        sendNarmesteLederLeesah(lagNarmesteLederLeesah(narmesteLederId))
+        await().atMost(10, TimeUnit.SECONDS).until {
+            narmesteLederRepository.findByNarmesteLederId(narmesteLederId) != null
+        }
+
+        kafkaProducer
+            .send(ProducerRecord<String, String>(NARMESTELEDER_ESYFO_LEESAH_TOPIC, null, narmesteLederId.toString(), null))
+            .get()
+
+        await().atMost(10, TimeUnit.SECONDS).until {
+            narmesteLederRepository.findByNarmesteLederId(narmesteLederId) == null
+        }
+    }
+
     fun sendNarmesteLederLeesah(nl: NarmesteLederLeesah) {
         kafkaProducer
             .send(
                 ProducerRecord(
-                    NARMESTELEDER_LEESAH_TOPIC,
+                    NARMESTELEDER_ESYFO_LEESAH_TOPIC,
                     null,
                     nl.narmesteLederId.toString(),
                     nl.serialisertTilString(),

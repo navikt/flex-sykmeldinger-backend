@@ -8,6 +8,10 @@ NAIS_CLUSTER_NAME: test
 aiven-kafka:
   auto-offset-reset: latest
 
+narmeste-leder:
+  teamsykmelding-listener-aktiv: true
+  esyfo-listener-aktiv: true
+
 spring:
   profiles:
     active: test,fakeunleash

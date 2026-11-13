@@ -2,15 +2,23 @@
 Repoet er en Spring Boot backend for håndtering av sykmeldinger i Flex. 
 Den tilbyr API-endepunkter for å hente, opprette og oppdatere sykmeldinger.
 
-## 1) Kommandoer (må kjøres før commit)
+## 1) Formatering, bygg og tester
 
-```sh
-./gradlew ktlintFormat # formater kode med Ktlint
-./gradlew test # kjør tester
-./gradlew build # bygg for produksjon
-```
+Bruk IntelliJ MCP og run configurations for Gradle-oppgaver, ikke shell. Kjør formatering og relevante tester før commit.
+
+`build` kjører også tester. Bruk `classes` for kompilering uten tester.
+
+### Opprette en Gradle-konfigurasjon
+
+1. Finn run configurations med `get_run_configurations`. Gradle-oppgaver kan finnes selv om de ikke er listet som run configurations.
+2. Mangler konfigurasjonen og MCP ikke kan opprette den, kopier en Gradle-konfigurasjon under `RunManager` i `.idea/workspace.xml`. Gi kopien et nytt navn, sett `taskNames` til ønsket oppgave og fjern uvedkommende `scriptParameters`. Behold eksisterende konfigurasjoner.
+3. Åpne `workspace.xml` i IntelliJ og kontroller med `get_run_configurations` at konfigurasjonen er lastet inn. Kjør den med `execute_run_configuration`. Ikke commit lokale IDE-innstillinger.
+
+Ikke bruk IntelliJs terminalverktøy til å omgå begrensninger i shell-sandkassen.
 
 ## 2) Testing
+
+Følg [testreglene for Kotlin og Spring](AGENTS-testing.md).
 
 - Prioriter tester for endret domenelogikk
 - Foretrekk fakes der det ikke trengs integrasjonstester
@@ -43,7 +51,8 @@ utils/                  Felles hjelpere (Jackson, Kafka, logging)
 ## 4) Kodestil
 
 - All kode, kommentarer og UI-tekst på **norsk bokmål**
-- Bruk eksisterende mønstre i koden fremfor nye varianter
+- Les tilsvarende produksjonskode og tester før du velger løsning. Følg mønsteret i hvert repo, ikke kopier ukritisk mellom repoer.
+- Implementer bare avtalt omfang og migreringsfase. Unngå ekstra funksjoner, opprydding og formateringsstøy.
 
 ## 5) Git-workflow
 
@@ -55,9 +64,7 @@ Standard flyt:
 
 ```sh
 git checkout -b kort-beskrivende-navn
-./gradlew ktlintFormat # formater kode med Ktlint
-./gradlew test # kjør tester
-./gradlew build # bygg for produksjon
+# Kjør formatering, relevante tester og bygg via IntelliJ
 git commit -m "Kort beskrivelse"
 git push origin <branch>
 gh pr create --fill
@@ -86,4 +93,3 @@ gh pr create --fill
 - [ ] Endringen følger eksisterende mønster i berørte filer
 - [ ] Tester er oppdatert der domenelogikk er endret
 - [ ] format, build og test er grønn
-
