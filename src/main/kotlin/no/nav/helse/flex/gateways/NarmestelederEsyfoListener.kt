@@ -10,7 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class NarmestelederEsyfoListener(
@@ -24,7 +24,7 @@ class NarmestelederEsyfoListener(
         containerFactory = "aivenKafkaListenerContainerFactory",
         properties = ["auto.offset.reset = latest"],
         containerPostProcessor = NARMESTELEDER_STARTPOSISJON,
-        autoStartup = "\${narmeste-leder.esyfo-listener-aktiv:false}",
+        autoStartup = "\${narmeste-leder.esyfo-listener-aktiv:true}",
     )
     fun listen(
         cr: ConsumerRecord<String, String?>,
