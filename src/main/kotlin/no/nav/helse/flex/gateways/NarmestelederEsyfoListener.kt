@@ -2,37 +2,52 @@ package no.nav.helse.flex.gateways
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.config.kafka.KafkaErrorHandlerException
-import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLederEsyfo
+import no.nav.helse.flex.narmesteleder.OppdateringAvNarmesteLeder
+import no.nav.helse.flex.utils.KafkaKonsumerUtils
+import no.nav.helse.flex.utils.errorSecure
+import no.nav.helse.flex.utils.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class NarmestelederEsyfoListener(
-    private val oppdateringAvNarmesteLederEsyfo: OppdateringAvNarmesteLederEsyfo,
+    private val oppdateringAvNarmesteLeder: OppdateringAvNarmesteLeder,
 ) {
+    private val log = logger()
+
     @WithSpan
     @KafkaListener(
         topics = [NARMESTELEDER_ESYFO_LEESAH_TOPIC],
-        containerFactory = "narmesteLederEsyfoKafkaListenerContainerFactory",
-        autoStartup = "\${narmeste-leder.esyfo-auto-startup:true}",
-        concurrency = "\${ESYFO_KAFKA_CONCURRENCY:1}",
+        containerFactory = "aivenKafkaListenerContainerFactory",
+        properties = ["auto.offset.reset = latest"],
+        containerPostProcessor = NARMESTELEDER_STARTPOSISJON,
+        autoStartup = "\${narmeste-leder.esyfo-listener-aktiv:false}",
     )
-    fun listenEsyfo(
-        records: List<ConsumerRecord<String, String?>>,
+    fun listen(
+        cr: ConsumerRecord<String, String?>,
         acknowledgment: Acknowledgment,
-    ) {
-        if (records.isEmpty()) return
+    ) = KafkaKonsumerUtils.medMdcMetadata(cr) {
         try {
-            oppdateringAvNarmesteLederEsyfo.behandleBatch(records)
-            acknowledgment.acknowledge()
-        } catch (_: Exception) {
+            val verdi = cr.value()
+            if (verdi == null) {
+                oppdateringAvNarmesteLeder.behandleTombstone(UUID.fromString(cr.key()))
+            } else {
+                oppdateringAvNarmesteLeder.behandleMeldingFraKafka(verdi)
+            }
+        } catch (e: Exception) {
+            log.errorSecure(
+                message = "Feil ved håndtering av nærmeste leder hendelse fra eSyfo, exception: ${e::class.simpleName}. Blir retryet",
+                secureThrowable = e,
+            )
             throw KafkaErrorHandlerException(
-                message = "ESYFO-projeksjon feilet; batchen blir forsøkt igjen",
                 errorHandlerLoggingEnabled = false,
+                cause = e,
             )
         }
+        acknowledgment.acknowledge()
     }
 }
 

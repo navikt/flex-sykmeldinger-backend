@@ -2,8 +2,6 @@ package no.nav.helse.flex.testconfig
 
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepositoryFake
-import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
-import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepositoryFake
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepositoryFake
 import no.nav.helse.flex.optin.OptInDbRepository
@@ -37,12 +35,6 @@ class FakesTestConfig {
 
     @Bean
     fun narmesteLederRepository(): NarmesteLederRepository = NarmesteLederRepositoryFake()
-
-    @Bean
-    fun narmesteLederEsyfoRepository(): NarmesteLederEsyfoRepository = NarmesteLederEsyfoRepositoryFake()
-
-    @Bean
-    fun narmesteLederEsyfoCheckpoint(): NarmesteLederEsyfoCheckpointFake = NarmesteLederEsyfoCheckpointFake()
 
     @Bean
     fun optInDbRepository(): OptInDbRepository = OptInDbRepositoryFake()

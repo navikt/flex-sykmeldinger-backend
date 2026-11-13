@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import tools.jackson.module.kotlin.readValue
 import java.time.Instant
+import java.util.UUID
 
 @Component
 class OppdateringAvNarmesteLeder(
@@ -58,6 +59,17 @@ class OppdateringAvNarmesteLeder(
             } else {
                 log.info("Ignorerer ny inaktiv narmesteleder med id ${narmesteLederLeesah.narmesteLederId}")
             }
+        }
+    }
+
+    @Transactional(rollbackFor = [Exception::class])
+    fun behandleTombstone(narmesteLederId: UUID) {
+        val narmesteLeder = narmesteLederRepository.findByNarmesteLederId(narmesteLederId)
+        if (narmesteLeder != null) {
+            narmesteLederRepository.delete(narmesteLeder)
+            log.info("Slettet narmesteleder med id $narmesteLederId etter tombstone")
+        } else {
+            log.info("Ignorerer tombstone for ukjent narmesteleder med id $narmesteLederId")
         }
     }
 

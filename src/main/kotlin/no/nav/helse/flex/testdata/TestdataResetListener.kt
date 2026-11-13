@@ -3,7 +3,6 @@ package no.nav.helse.flex.testdata
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.sykmelding.SykmeldingRepository
 import no.nav.helse.flex.utils.logger
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component
 @Profile("test", "testdatareset")
 class TestdataResetListener(
     val narmesteLederRepository: NarmesteLederRepository,
-    val narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository,
     val arbeidsforholdRepository: ArbeidsforholdRepository,
     val sykmeldingRepository: SykmeldingRepository,
 ) {
@@ -41,8 +39,6 @@ class TestdataResetListener(
     }
 
     private fun slettTestdata(fnr: String) {
-        // Personbasert sletting i testmiljø skal ikke nullstille checkpoint for hele partisjonen.
-        narmesteLederEsyfoRepository.deleteAll(narmesteLederEsyfoRepository.findAllByBrukerFnrIn(listOf(fnr)))
         narmesteLederRepository.deleteAll(narmesteLederRepository.findAllByBrukerFnrIn(listOf(fnr)))
         arbeidsforholdRepository.deleteAll(arbeidsforholdRepository.getAllByFnrIn(listOf(fnr)))
         sykmeldingRepository.findAllByPersonIdenter(PersonIdenter(originalIdent = fnr)).forEach {

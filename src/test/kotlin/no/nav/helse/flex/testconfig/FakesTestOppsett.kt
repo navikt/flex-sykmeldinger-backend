@@ -3,13 +3,11 @@ package no.nav.helse.flex.testconfig
 import io.getunleash.FakeUnleash
 import no.nav.helse.flex.Application
 import no.nav.helse.flex.arbeidsforhold.ArbeidsforholdRepository
-import no.nav.helse.flex.narmesteleder.NarmesteLederEsyfoRepository
 import no.nav.helse.flex.narmesteleder.NarmesteLederRepository
 import no.nav.helse.flex.optin.OptInDbRepository
 import no.nav.helse.flex.sykmelding.ISykmeldingRepository
 import no.nav.helse.flex.testconfig.fakes.AdvisoryLockFake
 import no.nav.helse.flex.testconfig.fakes.AuditLogProducerFake
-import no.nav.helse.flex.testconfig.fakes.NarmesteLederEsyfoCheckpointFake
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
@@ -50,12 +48,6 @@ abstract class FakesTestOppsett {
     lateinit var narmesteLederRepository: NarmesteLederRepository
 
     @Autowired
-    lateinit var narmesteLederEsyfoRepository: NarmesteLederEsyfoRepository
-
-    @Autowired
-    lateinit var narmesteLederEsyfoCheckpoint: NarmesteLederEsyfoCheckpointFake
-
-    @Autowired
     lateinit var arbeidsforholdRepository: ArbeidsforholdRepository
 
     @Autowired
@@ -81,8 +73,6 @@ abstract class FakesTestOppsett {
 
     fun slettDatabase() {
         narmesteLederRepository.deleteAll()
-        narmesteLederEsyfoRepository.deleteAll()
-        narmesteLederEsyfoCheckpoint.reset()
         arbeidsforholdRepository.deleteAll()
         sykmeldingRepository.deleteAll()
         optInDbRepository.deleteAll()

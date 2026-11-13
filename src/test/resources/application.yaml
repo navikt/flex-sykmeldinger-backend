@@ -9,7 +9,8 @@ aiven-kafka:
   auto-offset-reset: latest
 
 narmeste-leder:
-  esyfo-auto-startup: false
+  teamsykmelding-listener-aktiv: true
+  esyfo-listener-aktiv: true
 
 spring:
   profiles:

@@ -86,4 +86,22 @@ class OppdaterNarmesteLederTest : FakesTestOppsett() {
 
         narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
     }
+
+    @Test
+    fun `Sletter nærmeste leder ved tombstone`() {
+        val narmesteLederId = UUID.randomUUID()
+        oppdateringAvNarmesteLeder.behandleMeldingFraKafka(lagNarmesteLederLeesah(narmesteLederId).serialisertTilString())
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldNotBeNull()
+
+        oppdateringAvNarmesteLeder.behandleTombstone(narmesteLederId)
+
+        narmesteLederRepository.findByNarmesteLederId(narmesteLederId).shouldBeNull()
+    }
+
+    @Test
+    fun `Ignorerer tombstone for ukjent nærmeste leder`() {
+        oppdateringAvNarmesteLeder.behandleTombstone(UUID.randomUUID())
+
+        narmesteLederRepository.findAll().count() shouldBe 0
+    }
 }

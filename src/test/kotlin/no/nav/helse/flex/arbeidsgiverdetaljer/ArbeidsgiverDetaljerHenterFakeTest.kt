@@ -5,7 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.arbeidsforhold.lagArbeidsforhold
 import no.nav.helse.flex.config.PersonIdenter
-import no.nav.helse.flex.narmesteleder.domain.NarmesteLederEsyfo
 import no.nav.helse.flex.narmesteleder.lagNarmesteLeder
 import no.nav.helse.flex.testconfig.FakesTestOppsett
 import org.junit.jupiter.api.AfterEach
@@ -35,36 +34,6 @@ class ArbeidsgiverDetaljerHenterFakeTest : FakesTestOppsett() {
 
         arbeidsgiverDetaljer.size shouldBe 1
         arbeidsgiverDetaljer.first().naermesteLeder.shouldNotBeNull()
-    }
-
-    @Test
-    fun `Arbeidsgiverdetaljer bruker eksisterende tabell selv om eSyfo har en annen leder`() {
-        arbeidsforholdRepository.save(lagArbeidsforhold(fnr = "1", orgnummer = "org1"))
-        val gammelLeder = narmesteLederRepository.save(lagNarmesteLeder(brukerFnr = "1", orgnummer = "org1"))
-        narmesteLederEsyfoRepository.save(
-            NarmesteLederEsyfo(
-                oppdatert = gammelLeder.oppdatert,
-                timestamp = gammelLeder.timestamp,
-                narmesteLederId = gammelLeder.narmesteLederId,
-                orgnummer = gammelLeder.orgnummer,
-                brukerFnr = gammelLeder.brukerFnr,
-                narmesteLederFnr = gammelLeder.narmesteLederFnr,
-                aktivFom = gammelLeder.aktivFom,
-                narmesteLederNavn = "Leder fra eSyfo",
-            ),
-        )
-
-        arbeidsgiverDetaljerService
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-            .single()
-            .naermesteLeder shouldBe gammelLeder
-
-        narmesteLederRepository.delete(gammelLeder)
-        arbeidsgiverDetaljerService
-            .hentArbeidsgiverDetaljerForPerson(PersonIdenter("1"))
-            .single()
-            .naermesteLeder
-            .shouldBeNull()
     }
 
     @Test
