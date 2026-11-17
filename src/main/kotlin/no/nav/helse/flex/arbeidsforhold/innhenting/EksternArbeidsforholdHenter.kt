@@ -66,11 +66,16 @@ class EksternArbeidsforholdHenter(
             }
 
         val eksterneArbeidsforhold =
-            arbeidsforholdUnderenheter.map { arbeidsforholdOversikt ->
+            arbeidsforholdUnderenheter.mapNotNull { arbeidsforholdOversikt ->
                 val orgnummer = arbeidsforholdOversikt.arbeidssted.finnOrgnummer()
                 val orgnavn =
                     organisasjoner[orgnummer]?.navn?.sammensattnavn
-                        ?: throw RuntimeException("Fant ikke organisasjonsnavn for $orgnummer")
+                if (orgnavn == null && environmentToggles.isDevelopment()) {
+                    log.warn("Fant ikke organisasjonsnavn for $orgnummer i dev, ignorerer arbeidsforholdet.")
+                    return@mapNotNull null
+                } else if (orgnavn == null) {
+                    throw RuntimeException("Fant ikke organisasjonsnavn for $orgnummer")
+                }
                 EksterntArbeidsforhold(
                     navArbeidsforholdId = arbeidsforholdOversikt.navArbeidsforholdId,
                     orgnummer = orgnummer,
