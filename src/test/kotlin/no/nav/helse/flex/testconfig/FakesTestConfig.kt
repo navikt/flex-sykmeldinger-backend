@@ -69,7 +69,8 @@ class FakesTestConfig {
     @Bean
     fun texasClient(
         @Value($$"${flex.group.id}") flexGroupId: String,
-    ): TexasClientFake = TexasClientFake(flexGroupId)
+        @Value($$"${speil.lesetilgang.group.id}") speilLesetilgangGruppe: String,
+    ): TexasClientFake = TexasClientFake(flexGroupId, speilLesetilgangGruppe)
 
     @Bean
     fun outboxServiceImpl(

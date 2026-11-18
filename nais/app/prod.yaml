@@ -20,6 +20,7 @@ db_flags:
   pgaudit.log_parameter: "on"
   pgaudit.log_relation: "on"
 flex_group_id: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+speil_lesetilgang_group_id: "c5f26254-c6fa-4942-b81b-5cdff847d3df" # 0000-CA-Speil_Lesetilgang
 env:
   SPRING_PROFILES_ACTIVE: default
   PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
@@ -35,4 +36,5 @@ env:
   SYKEPENGESOKNAD_BACKEND_URL: http://sykepengesoknad-backend
   SYKEPENGESOKNAD_BACKEND_TOKENX_CLIENT_ID: prod-gcp:flex:sykepengesoknad-backend
   FLEX_GROUP_ID: "5206a646-a99e-4cd5-90e4-758cf7948cc8"
+  SPEIL_LESETILGANG_GROUP_ID: "c5f26254-c6fa-4942-b81b-5cdff847d3df"
   MAX_DB_CONNECTIONS: 50

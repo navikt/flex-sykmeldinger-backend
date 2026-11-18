@@ -440,6 +440,93 @@ class SykmeldingTexasControllerTest : FakesTestOppsett() {
         }
     }
 
+    @Nested
+    inner class HentSykmeldingFullstendig {
+        private val url = "/api/v1/flex/sykmeldinger/1/fullstendig"
+        private val fnr = "01010112345"
+
+        @TestFactory
+        fun tilgangskontroll(): List<DynamicTest> {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+            return listOf(
+                Triple("gyldig-token-speil-lesetilgang-gruppe", HttpStatus.OK, "godtar riktig speilgruppe"),
+                Triple("gyldig-token-flex-gruppe", HttpStatus.FORBIDDEN, "avviser token med bare flex-gruppe"),
+                Triple("gyldig-token-uten-gruppe", HttpStatus.FORBIDDEN, "avviser token uten gruppe"),
+                Triple("gyldig-token-annen-gruppe", HttpStatus.FORBIDDEN, "avviser token med annen gruppe"),
+                Triple(
+                    "gyldig-token-role-sykepengesoknad-backend",
+                    HttpStatus.FORBIDDEN,
+                    "avviser sykepengesoknad-backend-rolle",
+                ),
+                Triple("ikke-gyldig-token", HttpStatus.UNAUTHORIZED, "avviser ugyldig token"),
+                Triple(null, HttpStatus.UNAUTHORIZED, "avviser manglende token"),
+            ).map { (token, forventetStatus, navn) ->
+                DynamicTest.dynamicTest(navn) {
+                    sjekkStatus(url = url, token = token, expectedStatus = forventetStatus, httpMethod = HttpMethod.GET)
+                }
+            }
+        }
+
+        @Test
+        fun `returnerer sykmelding med tilhørende hendelser`() {
+            sykmeldingRepository.save(
+                lagSykmelding(
+                    sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr)),
+                    hendelser =
+                        listOf(
+                            lagSykmeldingHendelse(status = HendelseStatus.APEN),
+                            lagSykmeldingHendelse(
+                                status = HendelseStatus.SENDT_TIL_ARBEIDSGIVER,
+                                brukerSvar = lagArbeidstakerBrukerSvar(),
+                            ),
+                        ),
+                ),
+            )
+
+            val respons = hentFullstendigSykmeldingOgParseRespons()
+
+            respons.sykmelding.id shouldBe "1"
+            respons.hendelser.map { it.status } shouldBe
+                listOf(HendelseStatus.APEN, HendelseStatus.SENDT_TIL_ARBEIDSGIVER)
+        }
+
+        @Test
+        fun `returnerer 404 når sykmelding ikke finnes`() {
+            sjekkStatus(
+                url = "/api/v1/flex/sykmeldinger/finnes-ikke/fullstendig",
+                httpMethod = HttpMethod.GET,
+                token = "gyldig-token-speil-lesetilgang-gruppe",
+                expectedStatus = HttpStatus.NOT_FOUND,
+            )
+        }
+
+        @Test
+        fun `produserer audit-logg med riktig navident og fnr`() {
+            sykmeldingRepository.save(lagSykmelding(sykmeldingGrunnlag = lagSykmeldingGrunnlag(pasient = lagPasient(fnr = fnr))))
+
+            hentFullstendigSykmeldingOgParseRespons()
+
+            val entries = auditLogProducer.hentAuditEntries()
+            entries.size shouldBe 1
+            entries.first().utførtAv shouldBe "A123456"
+            entries.first().oppslagPå shouldBe fnr
+        }
+
+        private fun hentFullstendigSykmeldingOgParseRespons(): FullstendigSykmeldingResponse {
+            val respons =
+                mockMvc
+                    .perform(
+                        MockMvcRequestBuilders
+                            .get(url)
+                            .authorizationHeader("gyldig-token-speil-lesetilgang-gruppe"),
+                    ).andExpect(MockMvcResultMatchers.status().isOk)
+                    .andReturn()
+                    .response
+                    .contentAsString
+            return objectMapper.readValue(respons)
+        }
+    }
+
     fun sjekkStatus(
         url: String,
         httpMethod: HttpMethod = HttpMethod.POST,
