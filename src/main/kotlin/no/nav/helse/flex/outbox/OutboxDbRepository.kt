@@ -1,16 +1,21 @@
 package no.nav.helse.flex.outbox
 
+import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
+import java.time.Instant
 
 @Repository
 interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
     /**
-     * Finner først alle usendte meldinger, gruppert på fnr, sortert med eldste først, og med id som tiebreak.
+     * Finner først alle fnr med usendte meldinger, sortert med eldste først, og med id som tiebreak.
      * Materialized sikrer at denne delen kjøres først, uten å inlines, så vi ikke låser alle fnr-ene.
-     * Så går vi gjennom den grupperte lista til vi finner en ulåst fnr, og låser kun den.
-     * Henter så alle usendte meldinger for det låste fnr-et sortert med eldste først, og med id som tiebreak.
+     * Så går vi gjennom lista til vi finner et ulåst fnr, og låser kun det.
+     *
+     * Radene må hentes med en egen spørring etter at låsen er tatt, se [finnUsendteForFnr]. Snapshotet til
+     * denne spørringen er tatt før låsen, og kan derfor vise rader som en annen instans har sendt og committet
+     * før den slapp låsen.
      */
     @Query(
         """
@@ -21,17 +26,32 @@ interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
         GROUP BY fnr
         ORDER BY MIN(opprettet_timestamp), MIN(id)
     )
+    SELECT fnr
+    FROM kandidater
+    WHERE pg_try_advisory_xact_lock(hashtext(fnr))
+    LIMIT 1
+    """,
+    )
+    fun lasEldsteLedigeFnr(): String?
+
+    @Query(
+        """
     SELECT *
     FROM outbox
-    WHERE sendt_timestamp IS NULL
-      AND fnr = (
-          SELECT fnr
-          FROM kandidater
-          WHERE pg_try_advisory_xact_lock(hashtext(fnr))
-          LIMIT 1
-      )
+    WHERE fnr = :fnr
+      AND sendt_timestamp IS NULL
     ORDER BY opprettet_timestamp, id
     """,
     )
-    fun finnOgLasUsendteForEldsteLedigeFnr(): List<OutboxDbRecord>
+    fun finnUsendteForFnr(fnr: String): List<OutboxDbRecord>
+
+    /**
+     * Markerer raden som sendt bare hvis ingen andre har gjort det. Returnerer antall oppdaterte rader.
+     */
+    @Modifying
+    @Query("UPDATE outbox SET sendt_timestamp = :sendtTimestamp WHERE id = :id AND sendt_timestamp IS NULL")
+    fun markerSomSendt(
+        id: Long,
+        sendtTimestamp: Instant,
+    ): Int
 }

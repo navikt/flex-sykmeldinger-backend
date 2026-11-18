@@ -1,5 +1,6 @@
 package no.nav.helse.flex.outbox
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldBeSingle
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -9,6 +10,7 @@ import no.nav.helse.flex.gateways.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.gateways.SYKMELDING_BRUKERNOTIFIKASJON_TOPIC
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
 import no.nav.helse.flex.testconfig.IntegrasjonTestOppsett
+import no.nav.helse.flex.testconfig.hentProduserteRecords
 import no.nav.helse.flex.testconfig.ventPåRecords
 import no.nav.helse.flex.testdata.lagOutboxDbRecord
 import no.nav.helse.flex.testdata.lagPasient
@@ -19,15 +21,18 @@ import no.nav.helse.flex.testdata.lagSykmeldingNotifikasjon
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.tilPsqlJson
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import tools.jackson.module.kotlin.readValue
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -152,7 +157,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         val eldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(60))
         val nestEldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(30))
 
-        val rader = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
+        val rader = lasEldsteLedigeFnrOgFinnUsendte()
 
         rader.map { it.fnr }.distinct() shouldBe listOf("fnr-eldst")
         rader.map { it.id } shouldBe listOf(eldste.id, nestEldste.id)
@@ -170,7 +175,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         val traad =
             thread {
                 transactionTemplate.execute {
-                    val rader = outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr()
+                    val rader = lasEldsteLedigeFnrOgFinnUsendte()
                     fnrLastAvTransaksjon1.addAll(rader.map { it.fnr })
                     transaksjon1HarLast.countDown()
                     // Holder transaksjonen (og dermed advisory-låsen) åpen til vi slipper den
@@ -182,7 +187,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val fnrLastAvTransaksjon2 =
             transactionTemplate.execute {
-                outboxDbRepository.finnOgLasUsendteForEldsteLedigeFnr().map { it.fnr }
+                lasEldsteLedigeFnrOgFinnUsendte().map { it.fnr }
             }
 
         slippTransaksjon1.countDown()
@@ -191,6 +196,56 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         fnrLastAvTransaksjon1.distinct() shouldBe listOf("fnr-eldst")
         fnrLastAvTransaksjon2.distinct() shouldBe listOf("fnr-nyest")
     }
+
+    @Test
+    fun `samme rad sendes ikke flere ganger når flere instanser sender samtidig`() {
+        sykmeldingStatusConsumer.subscribe(listOf(SYKMELDING_BRUKERNOTIFIKASJON_TOPIC))
+        val antallRader = 300
+        val antallInstanser = 4
+        repeat(antallRader) { i ->
+            outboxService.outboxSykmeldingBrukernotifikasjon(
+                lagSykmeldingNotifikasjon(sykmeldingId = "duplikat-test-$i", fnr = "fnr-$i"),
+            )
+        }
+
+        val start = CountDownLatch(1)
+        val feil = ConcurrentLinkedQueue<Throwable>()
+        val traader =
+            (1..antallInstanser).map {
+                thread {
+                    try {
+                        start.await()
+                        while (outboxService.sendUsendteForEldsteLedigeFnr()) {
+                            // Fortsetter til det ikke er flere ledige fnr
+                        }
+                    } catch (e: Throwable) {
+                        feil.add(e)
+                    }
+                }
+            }
+        start.countDown()
+        traader.forEach { it.join(TimeUnit.SECONDS.toMillis(60)) }
+
+        feil.shouldBeEmpty()
+        outboxDbRepository.findAll().filter { it.sendtTimestamp == null }.shouldBeEmpty()
+
+        val sendteSykmeldingIder = mutableListOf<String>()
+        await().atMost(Duration.ofSeconds(30)).during(Duration.ofSeconds(2)).until {
+            sendteSykmeldingIder.addAll(
+                sykmeldingStatusConsumer
+                    .hentProduserteRecords()
+                    .map { it.key() }
+                    .filter { it.startsWith("duplikat-test-") },
+            )
+            sendteSykmeldingIder.size >= antallRader
+        }
+
+        sendteSykmeldingIder.groupingBy { it }.eachCount().filterValues { it > 1 } shouldBe emptyMap()
+        sendteSykmeldingIder shouldHaveSize antallRader
+    }
+
+    private fun lasEldsteLedigeFnrOgFinnUsendte(): List<OutboxDbRecord> =
+        outboxDbRepository.lasEldsteLedigeFnr()?.let { outboxDbRepository.finnUsendteForFnr(it) } ?: emptyList()
 
     private fun lagreUsendtOutboxRad(
         fnr: String,
