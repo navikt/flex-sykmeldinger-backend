@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import no.nav.helse.flex.gateways.SYKMELDINGSTATUS_TOPIC
 import no.nav.helse.flex.gateways.SYKMELDING_BRUKERNOTIFIKASJON_TOPIC
 import no.nav.helse.flex.gateways.SykmeldingNotifikasjon
@@ -150,6 +151,70 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         val bleProsessert = outboxService.sendEldsteUsendte()
 
         bleProsessert shouldBe false
+    }
+
+    @Test
+    fun `burde utsette rad med backoff når sending feiler`() {
+        // Sykmeldingen finnes ikke, så sendingen feiler.
+        val rad = lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp)
+        val førForsøk = Instant.now()
+
+        outboxService.sendEldsteUsendte() shouldBe true
+
+        outboxDbRepository.findById(rad.id!!).get().also {
+            it.sendtTimestamp.shouldBeNull()
+            it.antallForsok shouldBe 1
+            it.sisteFeil shouldStartWith "${IllegalStateException::class.java.name}: Fant ikke sykmelding sykmelding-fnr-x"
+            it.nesteForsokTimestamp.shouldNotBeNull().isAfter(førForsøk) shouldBe true
+        }
+        outboxService.sendEldsteUsendte() shouldBe false
+    }
+
+    @Test
+    fun `burde øke antall forsøk når en rad feiler på nytt`() {
+        val nå = Instant.now()
+        val rad =
+            lagreUsendtOutboxRad(
+                fnr = "fnr-x",
+                opprettetTimestamp = timestamp,
+                nesteForsokTimestamp = nå.minusSeconds(1),
+                antallForsok = 3,
+            )
+
+        outboxService.sendEldsteUsendte() shouldBe true
+
+        outboxDbRepository.findById(rad.id!!).get().also {
+            it.antallForsok shouldBe 4
+            it.nesteForsokTimestamp.shouldNotBeNull().isAfter(nå.plusSeconds(7)) shouldBe true
+        }
+    }
+
+    @Test
+    fun `rad som venter på nytt forsøk burde bare blokkere sitt eget fnr`() {
+        lagreUsendtOutboxRad(
+            fnr = "fnr-x",
+            opprettetTimestamp = timestamp.minusSeconds(60),
+            nesteForsokTimestamp = Instant.now().plusSeconds(3600),
+        )
+        lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp.minusSeconds(50))
+        val y1 = lagreUsendtOutboxRad(fnr = "fnr-y", opprettetTimestamp = timestamp.minusSeconds(30))
+
+        transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() }?.id shouldBe y1.id
+
+        outboxDbRepository.deleteById(y1.id!!)
+        transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() }.shouldBeNull()
+    }
+
+    @Test
+    fun `burde plukke rad igjen når ventetiden er over`() {
+        val x1 =
+            lagreUsendtOutboxRad(
+                fnr = "fnr-x",
+                opprettetTimestamp = timestamp,
+                nesteForsokTimestamp = Instant.now().minusSeconds(1),
+            )
+
+        transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() }?.id shouldBe x1.id
     }
 
     @Test
@@ -298,6 +363,8 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     private fun lagreUsendtOutboxRad(
         fnr: String,
         opprettetTimestamp: Instant,
+        nesteForsokTimestamp: Instant? = null,
+        antallForsok: Int = 0,
     ): OutboxDbRecord =
         outboxDbRepository.save(
             lagOutboxDbRecord(
@@ -308,6 +375,6 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
                         sykmeldingHendelseId = "hendelse-$fnr",
                     ).tilPsqlJson(),
                 opprettetTimestamp = opprettetTimestamp,
-            ),
+            ).copy(nesteForsokTimestamp = nesteForsokTimestamp, antallForsok = antallForsok),
         )
 }
