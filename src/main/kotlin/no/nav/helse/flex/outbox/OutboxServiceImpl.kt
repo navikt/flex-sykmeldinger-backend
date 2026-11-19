@@ -55,9 +55,34 @@ class OutboxServiceImpl(
     @Transactional(rollbackFor = [Exception::class])
     override fun sendEldsteUsendte(): Boolean {
         val record = outboxDbRepository.finnEldsteLedigeRadOgLas() ?: return false
-        sendOutboxRecord(record)
+        try {
+            sendOutboxRecord(record)
+        } catch (e: Exception) {
+            registrerFeil(record, e)
+            return true
+        }
         outboxDbRepository.save(record.copy(sendtTimestamp = Instant.now()))
         return true
+    }
+
+    private fun registrerFeil(
+        record: OutboxDbRecord,
+        e: Exception,
+    ) {
+        val antallForsok = record.antallForsok + 1
+        val nesteForsok = Instant.now().plus(beregnNesteOutboxForsøk(antallForsok))
+        outboxDbRepository.save(
+            record.copy(
+                antallForsok = antallForsok,
+                nesteForsokTimestamp = nesteForsok,
+                sisteFeil = "${e.javaClass.name}: ${e.message}",
+            ),
+        )
+
+        logger.error(
+            "Sending av outbox-rad ${record.type} ${record.id} feilet for $antallForsok. gang. Prøver igjen $nesteForsok",
+            e,
+        )
     }
 
     private fun sendOutboxRecord(record: OutboxDbRecord) {
