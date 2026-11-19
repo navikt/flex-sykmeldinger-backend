@@ -153,15 +153,12 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `burde velge eldste ledige fnr og hente eldste usendte rad for fnr-et`() {
+    fun `burde låse eldste usendte rad`() {
         lagreUsendtOutboxRad(fnr = "fnr-nyest", opprettetTimestamp = timestamp.minusSeconds(10))
         val eldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(60))
         lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(30))
 
-        val rad =
-            transactionTemplate.execute {
-                outboxDbRepository.lasEldsteLedigeFnr()?.let { outboxDbRepository.finnEldsteUsendteForFnr(it) }
-            }
+        val rad = transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() }
 
         rad?.id shouldBe eldste.id
     }
@@ -187,33 +184,36 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `advisory lock hindrer at samme fnr plukkes av to samtidige transaksjoner`() {
-        lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(60))
-        lagreUsendtOutboxRad(fnr = "fnr-nyest", opprettetTimestamp = timestamp.minusSeconds(30))
+    fun `låst rad burde hindre at nyere rader for samme fnr plukkes av en annen transaksjon`() {
+        val x1 = lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp.minusSeconds(60))
+        lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp.minusSeconds(50))
+        val y1 = lagreUsendtOutboxRad(fnr = "fnr-y", opprettetTimestamp = timestamp.minusSeconds(30))
 
-        val transaksjon1HarLast = CountDownLatch(1)
-        val slippTransaksjon1 = CountDownLatch(1)
-        var fnrLastAvTransaksjon1: String? = null
+        var låstAvTransaksjon1: OutboxDbRecord? = null
+        val låstAvTransaksjon2 =
+            medÅpenTransaksjonIAnnenTråd(
+                iTråd = { låstAvTransaksjon1 = outboxDbRepository.finnEldsteLedigeRadOgLas() },
+                iMellomtiden = { transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() } },
+            )
 
-        val traad =
-            thread {
-                transactionTemplate.execute {
-                    fnrLastAvTransaksjon1 = outboxDbRepository.lasEldsteLedigeFnr()
-                    transaksjon1HarLast.countDown()
-                    // Holder transaksjonen (og dermed advisory-låsen) åpen til vi slipper den
-                    slippTransaksjon1.await(3, TimeUnit.SECONDS)
-                }
-            }
+        låstAvTransaksjon1?.id shouldBe x1.id
+        låstAvTransaksjon2?.id shouldBe y1.id
+    }
 
-        transaksjon1HarLast.await(3, TimeUnit.SECONDS) shouldBe true
+    @Test
+    fun `burde ikke returnere noen rad når eldste rad for eneste fnr er låst`() {
+        val x1 = lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp.minusSeconds(60))
+        lagreUsendtOutboxRad(fnr = "fnr-x", opprettetTimestamp = timestamp.minusSeconds(50))
 
-        val fnrLastAvTransaksjon2 = transactionTemplate.execute { outboxDbRepository.lasEldsteLedigeFnr() }
+        var låstAvTransaksjon1: OutboxDbRecord? = null
+        val låstAvTransaksjon2 =
+            medÅpenTransaksjonIAnnenTråd(
+                iTråd = { låstAvTransaksjon1 = outboxDbRepository.finnEldsteLedigeRadOgLas() },
+                iMellomtiden = { transactionTemplate.execute { outboxDbRepository.finnEldsteLedigeRadOgLas() } },
+            )
 
-        slippTransaksjon1.countDown()
-        traad.join()
-
-        fnrLastAvTransaksjon1 shouldBe "fnr-eldst"
-        fnrLastAvTransaksjon2 shouldBe "fnr-nyest"
+        låstAvTransaksjon1?.id shouldBe x1.id
+        låstAvTransaksjon2.shouldBeNull()
     }
 
     @Test
@@ -261,6 +261,31 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         sendteSykmeldingIder.groupingBy { it }.eachCount().filterValues { it > 1 } shouldBe emptyMap()
         sendteSykmeldingIder shouldHaveSize antallRader
+    }
+
+    private fun <T> medÅpenTransaksjonIAnnenTråd(
+        iTråd: () -> Unit,
+        iMellomtiden: () -> T,
+    ): T {
+        val harLås = CountDownLatch(1)
+        val slipp = CountDownLatch(1)
+        val tråd =
+            thread {
+                transactionTemplate.executeWithoutResult {
+                    iTråd()
+                    harLås.countDown()
+                    // Holder transaksjonen, og dermed radlåsen, åpen til testen slipper den.
+                    slipp.await(5, TimeUnit.SECONDS)
+                }
+            }
+
+        harLås.await(5, TimeUnit.SECONDS) shouldBe true
+        try {
+            return iMellomtiden()
+        } finally {
+            slipp.countDown()
+            tråd.join()
+        }
     }
 
     private fun sendteSykmeldingIder(): Set<String> =
