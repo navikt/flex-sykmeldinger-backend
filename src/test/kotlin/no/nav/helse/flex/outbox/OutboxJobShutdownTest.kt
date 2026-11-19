@@ -75,7 +75,7 @@ private class KontrollerbarOutboxService(
     val førsteKallStartet = CountDownLatch(1)
     val slippFørsteKall = CountDownLatch(1)
 
-    override fun sendUsendteForEldsteLedigeFnr(): Boolean {
+    override fun sendEldsteUsendte(): Boolean {
         val kallnummer = antallKall.incrementAndGet()
         if (blokkerFørsteKall && kallnummer == 1) {
             førsteKallStartet.countDown()
