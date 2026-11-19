@@ -11,7 +11,7 @@ interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
      * Materialized sikrer at denne delen kjøres først, uten å inlines, så vi ikke låser alle fnr-ene.
      * Så går vi gjennom lista til vi finner et ulåst fnr, og låser kun det.
      *
-     * Radene må hentes med en egen spørring etter at låsen er tatt, se [finnUsendteForFnr]. Snapshotet til
+     * Raden må hentes med en egen spørring etter at låsen er tatt, se [finnEldsteUsendteForFnr]. Snapshotet til
      * denne spørringen er tatt før låsen, og kan derfor vise rader som en annen instans har sendt og committet
      * før den slapp låsen.
      */
@@ -39,7 +39,8 @@ interface OutboxDbRepository : CrudRepository<OutboxDbRecord, Long> {
     WHERE fnr = :fnr
       AND sendt_timestamp IS NULL
     ORDER BY opprettet_timestamp, id
+    LIMIT 1
     """,
     )
-    fun finnUsendteForFnr(fnr: String): List<OutboxDbRecord>
+    fun finnEldsteUsendteForFnr(fnr: String): OutboxDbRecord?
 }

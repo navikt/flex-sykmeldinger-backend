@@ -18,6 +18,7 @@ import no.nav.helse.flex.testdata.lagSykmelding
 import no.nav.helse.flex.testdata.lagSykmeldingGrunnlag
 import no.nav.helse.flex.testdata.lagSykmeldingHendelsePayload
 import no.nav.helse.flex.testdata.lagSykmeldingNotifikasjon
+import no.nav.helse.flex.utils.fraPsqlJson
 import no.nav.helse.flex.utils.objectMapper
 import no.nav.helse.flex.utils.tilPsqlJson
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -82,7 +83,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
             usendte.first().sendtTimestamp.shouldBeNull()
         }
 
-        outboxService.sendUsendteForEldsteLedigeFnr()
+        outboxService.sendEldsteUsendte()
 
         outboxDbRepository.findAll().toList().also { sendte ->
             sendte shouldHaveSize 1
@@ -114,7 +115,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
             usendte.first().sendtTimestamp.shouldBeNull()
         }
 
-        outboxService.sendUsendteForEldsteLedigeFnr()
+        outboxService.sendEldsteUsendte()
 
         outboxDbRepository.findAll().toList().also { sendte ->
             sendte shouldHaveSize 1
@@ -131,36 +132,58 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
     }
 
     @Test
-    fun `sendUsendteForEldsteLedigeFnr returnerer true når noe ble prosessert`() {
+    fun `sendEldsteUsendte returnerer true når noe ble prosessert`() {
         sykmeldingStatusConsumer.subscribe(listOf(SYKMELDING_BRUKERNOTIFIKASJON_TOPIC))
 
         outboxService.outboxSykmeldingBrukernotifikasjon(
             lagSykmeldingNotifikasjon(sykmeldingId = "sykmelding-1", fnr = "fnr-1"),
         )
 
-        val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
+        val bleProsessert = outboxService.sendEldsteUsendte()
 
         bleProsessert shouldBe true
         sykmeldingStatusConsumer.ventPåRecords(antall = 1)
     }
 
     @Test
-    fun `sendUsendteForEldsteLedigeFnr returnerer false når det ikke er noe å sende`() {
-        val bleProsessert = outboxService.sendUsendteForEldsteLedigeFnr()
+    fun `sendEldsteUsendte returnerer false når det ikke er noe å sende`() {
+        val bleProsessert = outboxService.sendEldsteUsendte()
 
         bleProsessert shouldBe false
     }
 
     @Test
-    fun `burde velge eldste ledige fnr og returnere radene i opprettet-rekkefolge`() {
+    fun `burde velge eldste ledige fnr og hente eldste usendte rad for fnr-et`() {
         lagreUsendtOutboxRad(fnr = "fnr-nyest", opprettetTimestamp = timestamp.minusSeconds(10))
         val eldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(60))
-        val nestEldste = lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(30))
+        lagreUsendtOutboxRad(fnr = "fnr-eldst", opprettetTimestamp = timestamp.minusSeconds(30))
 
-        val rader = lasEldsteLedigeFnrOgFinnUsendte()
+        val rad =
+            transactionTemplate.execute {
+                outboxDbRepository.lasEldsteLedigeFnr()?.let { outboxDbRepository.finnEldsteUsendteForFnr(it) }
+            }
 
-        rader.map { it.fnr }.distinct() shouldBe listOf("fnr-eldst")
-        rader.map { it.id } shouldBe listOf(eldste.id, nestEldste.id)
+        rad?.id shouldBe eldste.id
+    }
+
+    @Test
+    fun `burde sende én rad per kall, eldste først på tvers av fnr`() {
+        sykmeldingStatusConsumer.subscribe(listOf(SYKMELDING_BRUKERNOTIFIKASJON_TOPIC))
+        listOf("a1" to "fnr-a", "b1" to "fnr-b", "a2" to "fnr-a").forEach { (sykmeldingId, fnr) ->
+            outboxService.outboxSykmeldingBrukernotifikasjon(lagSykmeldingNotifikasjon(sykmeldingId = sykmeldingId, fnr = fnr))
+        }
+
+        outboxService.sendEldsteUsendte() shouldBe true
+        sendteSykmeldingIder() shouldBe setOf("a1")
+
+        outboxService.sendEldsteUsendte() shouldBe true
+        sendteSykmeldingIder() shouldBe setOf("a1", "b1")
+
+        outboxService.sendEldsteUsendte() shouldBe true
+        sendteSykmeldingIder() shouldBe setOf("a1", "b1", "a2")
+
+        outboxService.sendEldsteUsendte() shouldBe false
+        sykmeldingStatusConsumer.ventPåRecords(antall = 3)
     }
 
     @Test
@@ -170,13 +193,12 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         val transaksjon1HarLast = CountDownLatch(1)
         val slippTransaksjon1 = CountDownLatch(1)
-        val fnrLastAvTransaksjon1 = mutableListOf<String>()
+        var fnrLastAvTransaksjon1: String? = null
 
         val traad =
             thread {
                 transactionTemplate.execute {
-                    val rader = lasEldsteLedigeFnrOgFinnUsendte()
-                    fnrLastAvTransaksjon1.addAll(rader.map { it.fnr })
+                    fnrLastAvTransaksjon1 = outboxDbRepository.lasEldsteLedigeFnr()
                     transaksjon1HarLast.countDown()
                     // Holder transaksjonen (og dermed advisory-låsen) åpen til vi slipper den
                     slippTransaksjon1.await(3, TimeUnit.SECONDS)
@@ -185,16 +207,13 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
 
         transaksjon1HarLast.await(3, TimeUnit.SECONDS) shouldBe true
 
-        val fnrLastAvTransaksjon2 =
-            transactionTemplate.execute {
-                lasEldsteLedigeFnrOgFinnUsendte().map { it.fnr }
-            }
+        val fnrLastAvTransaksjon2 = transactionTemplate.execute { outboxDbRepository.lasEldsteLedigeFnr() }
 
         slippTransaksjon1.countDown()
         traad.join()
 
-        fnrLastAvTransaksjon1.distinct() shouldBe listOf("fnr-eldst")
-        fnrLastAvTransaksjon2.distinct() shouldBe listOf("fnr-nyest")
+        fnrLastAvTransaksjon1 shouldBe "fnr-eldst"
+        fnrLastAvTransaksjon2 shouldBe "fnr-nyest"
     }
 
     @Test
@@ -215,7 +234,7 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
                 thread {
                     try {
                         start.await()
-                        while (outboxService.sendUsendteForEldsteLedigeFnr()) {
+                        while (outboxService.sendEldsteUsendte()) {
                             // Fortsetter til det ikke er flere ledige fnr
                         }
                     } catch (e: Throwable) {
@@ -244,8 +263,12 @@ class OutboxServiceIntegrasjonTest : IntegrasjonTestOppsett() {
         sendteSykmeldingIder shouldHaveSize antallRader
     }
 
-    private fun lasEldsteLedigeFnrOgFinnUsendte(): List<OutboxDbRecord> =
-        outboxDbRepository.lasEldsteLedigeFnr()?.let { outboxDbRepository.finnUsendteForFnr(it) } ?: emptyList()
+    private fun sendteSykmeldingIder(): Set<String> =
+        outboxDbRepository
+            .findAll()
+            .filter { it.sendtTimestamp != null }
+            .map { it.payload.fraPsqlJson<SykmeldingNotifikasjon>()!!.sykmeldingId }
+            .toSet()
 
     private fun lagreUsendtOutboxRad(
         fnr: String,

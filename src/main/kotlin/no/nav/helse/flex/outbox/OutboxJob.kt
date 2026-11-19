@@ -43,7 +43,7 @@ class OutboxJob(
         lock.readLock().withLock {
             try {
                 do {
-                    val prosesserteNoe = outboxService.sendUsendteForEldsteLedigeFnr()
+                    val prosesserteNoe = outboxService.sendEldsteUsendte()
                 } while (prosesserteNoe && !shutdown.get())
             } catch (e: Exception) {
                 log.error("Feil under kjøring av OutboxJob: ${e.message}", e)
