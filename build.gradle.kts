@@ -24,7 +24,7 @@ repositories {
 val testContainersVersion = "2.0.5"
 val tokenSupportVersion = "6.0.12"
 val logstashLogbackEncoderVersion = "9.0"
-val kotestVersion = "6.2.6"
+val kotestVersion = "6.2.7"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.68.0"
