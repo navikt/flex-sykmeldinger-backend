@@ -27,10 +27,11 @@ class TokenValideringService(
     fun validerGruppeOgHentNavIdent(
         token: String?,
         identityProvider: String,
+        gruppe: String = flexGruppe,
     ): String {
         val respons = validerTokenOgHentRespons(token, identityProvider)
-        if (!respons.groups.contains(flexGruppe)) {
-            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $flexGruppe")
+        if (!respons.groups.contains(gruppe)) {
+            throw IngenTilgang("Ingen av gruppene ${respons.groups} inneholder forventet gruppe $gruppe")
         }
         return respons.NAVident ?: throw Uautorisert("Fant ikke NAVident i token")
     }
