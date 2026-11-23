@@ -6,6 +6,7 @@ import no.nav.helse.flex.gateways.texas.TexasResponse
 
 class TexasClientFake(
     private val flexGroupId: String,
+    private val speilLesetilgangGruppe: String,
 ) : TexasClient {
     override fun introspect(
         identityProvider: String,
@@ -35,6 +36,14 @@ class TexasClientFake(
                 TexasResponse(
                     active = true,
                     groups = listOf(flexGroupId),
+                    NAVident = "A123456",
+                )
+            }
+
+            "gyldig-token-speil-lesetilgang-gruppe" -> {
+                TexasResponse(
+                    active = true,
+                    groups = listOf(speilLesetilgangGruppe),
                     NAVident = "A123456",
                 )
             }

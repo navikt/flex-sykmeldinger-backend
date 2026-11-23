@@ -2,6 +2,7 @@ package no.nav.helse.flex.api
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.helse.flex.api.dto.FlexInternalSykmeldingDto
+import no.nav.helse.flex.api.dto.SykmeldingDTO
 import no.nav.helse.flex.config.IdentService
 import no.nav.helse.flex.config.Roles
 import no.nav.helse.flex.config.TokenValideringService
@@ -11,6 +12,8 @@ import no.nav.helse.flex.domain.EventType
 import no.nav.helse.flex.gateways.AuditLogProducer
 import no.nav.helse.flex.sykmelding.SykmeldingKafkaMessage
 import no.nav.helse.flex.sykmelding.SykmeldingLeser
+import no.nav.helse.flex.sykmeldinghendelse.SykmeldingHendelse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -26,6 +29,8 @@ class SykmeldingTexasController(
     private val auditLogProducer: AuditLogProducer,
     private val sykmeldingKafkaMessageKonverterer: SykmeldingKafkaMessageKonverterer,
     private val sykmeldingOptInService: SykmeldingOptInService,
+    @param:Value($$"${speil.lesetilgang.group.id}")
+    private val speilLesetilgangGruppe: String,
 ) {
     @PostMapping(value = ["/api/v1/sykmeldinger/kafka"])
     @ResponseBody
@@ -137,6 +142,45 @@ class SykmeldingTexasController(
             ),
         )
     }
+
+    @GetMapping(value = ["/api/v1/flex/sykmeldinger/{sykmeldingId}/fullstendig"])
+    @ResponseBody
+    fun hentSykmeldingFullstendig(
+        @PathVariable("sykmeldingId") sykmeldingId: String,
+        request: HttpServletRequest,
+    ): ResponseEntity<FullstendigSykmeldingResponse> {
+        val navIdent =
+            tokenValideringService.validerGruppeOgHentNavIdent(
+                token = request.getToken(),
+                identityProvider = "entra_id",
+                gruppe = speilLesetilgangGruppe,
+            )
+
+        val sykmelding =
+            sykmeldingLeser.hentSykmelding(sykmeldingId)
+                ?: return ResponseEntity.notFound().build()
+
+        auditLogProducer.lagAuditLog(
+            AuditEntry(
+                appNavn = "flex-sykmeldinger-backend",
+                utførtAv = navIdent,
+                oppslagPå = sykmelding.pasientFnr,
+                eventType = EventType.READ,
+                forespørselTillatt = true,
+                oppslagUtførtTid = Instant.now(),
+                beskrivelse = "Henter en sykmelding",
+                requestUrl = URI.create(request.requestURL.toString()),
+                requestMethod = "GET",
+            ),
+        )
+
+        return ResponseEntity.ok(
+            FullstendigSykmeldingResponse(
+                sykmelding = sykmeldingDtoKonverterer.konverter(sykmelding),
+                hendelser = sykmelding.hendelser,
+            ),
+        )
+    }
 }
 
 data class SykmeldingKafkaMessageResponse(
@@ -154,4 +198,9 @@ data class FnrRequest(
 
 data class FlexInternalResponse(
     val sykmeldinger: List<FlexInternalSykmeldingDto>,
+)
+
+data class FullstendigSykmeldingResponse(
+    val sykmelding: SykmeldingDTO,
+    val hendelser: List<SykmeldingHendelse>,
 )
