@@ -8,6 +8,8 @@ class PdlClientFake : PdlClient {
     private val identerMedHistorikk: MutableMap<String, Result<List<PdlIdent>>> = mutableMapOf()
     private val formaterteNavn: MutableMap<String, Result<String>> = mutableMapOf()
     private val foedselsdato: MutableMap<String, Result<LocalDate>> = mutableMapOf()
+    var antallKallTilHentIdenterMedHistorikk = 0
+        private set
 
     companion object {
         val defaultIdenterMedHistorikk = listOf(PdlIdent(gruppe = "default-gruppe", ident = "default-ident"))
@@ -47,9 +49,11 @@ class PdlClientFake : PdlClient {
         identerMedHistorikk.clear()
         formaterteNavn.clear()
         foedselsdato.clear()
+        antallKallTilHentIdenterMedHistorikk = 0
     }
 
     override fun hentIdenterMedHistorikk(ident: String): List<PdlIdent> {
+        antallKallTilHentIdenterMedHistorikk++
         if (identerMedHistorikk.isEmpty()) {
             return defaultIdenterMedHistorikk
         }
