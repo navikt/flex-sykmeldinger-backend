@@ -45,6 +45,9 @@ spec:
     pool: {{kafkaPool}}
   tokenx:
     enabled: true
+  valkey:
+    - instance: sykmeldinger-identer
+      access: readwrite
   accessPolicy:
     outbound:
       rules:

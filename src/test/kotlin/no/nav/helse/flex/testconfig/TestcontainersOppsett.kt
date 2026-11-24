@@ -58,10 +58,10 @@ object TestcontainersOppsett {
             System.setProperty("KAFKA_BROKERS", bootstrapServers)
         }
         valkeyContainer.run {
-            System.setProperty("VALKEY_HOST_SESSIONS", host)
-            System.setProperty("VALKEY_PORT_SESSIONS", firstMappedPort.toString())
-            System.setProperty("VALKEY_USERNAME_SESSIONS", "default")
-            System.setProperty("VALKEY_PASSWORD_SESSIONS", "")
+            System.setProperty("VALKEY_HOST_SYKMELDINGER_IDENTER", host)
+            System.setProperty("VALKEY_PORT_SYKMELDINGER_IDENTER", firstMappedPort.toString())
+            System.setProperty("VALKEY_USERNAME_SYKMELDINGER_IDENTER", "default")
+            System.setProperty("VALKEY_PASSWORD_SYKMELDINGER_IDENTER", "")
         }
     }
 
