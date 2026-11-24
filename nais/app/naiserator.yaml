@@ -45,9 +45,6 @@ spec:
     pool: {{kafkaPool}}
   tokenx:
     enabled: true
-  valkey:
-    - instance: sessions
-      access: readwrite
   accessPolicy:
     outbound:
       rules:
