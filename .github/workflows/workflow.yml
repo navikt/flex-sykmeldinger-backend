@@ -4,16 +4,7 @@ on:
   push:
 
 jobs:
-  deploy-valkey:
-    if: github.ref_name == 'main' || startsWith(github.ref_name, 'dev-')
-    uses: ./.github/workflows/deploy-valkey.yaml
-    permissions:
-      contents: read
-      id-token: write
-
   felles-workflow:
-    needs: deploy-valkey
-    if: ${{ !cancelled() && (needs.deploy-valkey.result == 'success' || needs.deploy-valkey.result == 'skipped') }}
     uses: navikt/flex-github-actions-workflows/.github/workflows/spring-boot.yml@main
     permissions:
       packages: read
