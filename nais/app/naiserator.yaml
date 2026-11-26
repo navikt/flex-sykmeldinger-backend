@@ -46,7 +46,7 @@ spec:
   tokenx:
     enabled: true
   valkey:
-    - instance: sykmeldinger-identer
+    - instance: sykmeldinger-identer-v2
       access: readwrite
   accessPolicy:
     outbound:

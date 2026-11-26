@@ -20,10 +20,10 @@ spring:
   data:
     redis:
       ssl.enabled: false
-      username: ${VALKEY_USERNAME_SYKMELDINGER_IDENTER}
-      password: ${VALKEY_PASSWORD_SYKMELDINGER_IDENTER}
-      host: ${VALKEY_HOST_SYKMELDINGER_IDENTER}
-      port: ${VALKEY_PORT_SYKMELDINGER_IDENTER}
+      username: ${VALKEY_USERNAME_SYKMELDINGER_IDENTER_V2}
+      password: ${VALKEY_PASSWORD_SYKMELDINGER_IDENTER_V2}
+      host: ${VALKEY_HOST_SYKMELDINGER_IDENTER_V2}
+      port: ${VALKEY_PORT_SYKMELDINGER_IDENTER_V2}
   cache:
     redis:
       time-to-live: 1h

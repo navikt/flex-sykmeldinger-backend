@@ -1,6 +1,6 @@
 version: v1
 type: Valkey
-name: sykmeldinger-identer
+name: sykmeldinger-identer-v2
 spec:
   tier: SingleNode
   memory: 1GB
