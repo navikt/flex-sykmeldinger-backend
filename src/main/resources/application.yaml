@@ -23,6 +23,7 @@ spring:
       connect-timeout: 2s
   cache:
     redis:
+      enable-statistics: true
       time-to-live: 1h
 
 aiven-kafka:
