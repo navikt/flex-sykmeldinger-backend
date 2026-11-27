@@ -25,6 +25,9 @@ spring:
       host: ${VALKEY_HOST_SYKMELDINGER_IDENTER_V2}
       port: ${VALKEY_PORT_SYKMELDINGER_IDENTER_V2}
   cache:
+    cache-names:
+      - flex-folkeregister-identer-med-historikk
+      - flex-foedselsdato
     redis:
       enable-statistics: true
       time-to-live: 1h

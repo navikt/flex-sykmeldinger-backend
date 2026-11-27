@@ -22,6 +22,9 @@ spring:
       timeout: 1s
       connect-timeout: 2s
   cache:
+    cache-names:
+      - flex-folkeregister-identer-med-historikk
+      - flex-foedselsdato
     redis:
       enable-statistics: true
       time-to-live: 1h
