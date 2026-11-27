@@ -28,7 +28,7 @@ val kotestVersion = "6.2.7"
 val commonsTextVersion = "1.15.0"
 val mockitoKotlinVersion = "2.2.0"
 val opentelemetryApiVersion = "1.68.0"
-val opentelemetryInstrumentationVersion = "2.33.1"
+val opentelemetryInstrumentationVersion = "2.34.0"
 val unleashVersion = "12.3.2"
 val mockWebServerVersion = "5.5.1"
 
